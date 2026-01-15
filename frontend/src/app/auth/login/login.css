@@ -1,0 +1,103 @@
+/* Fondo general */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f4f8f5;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* Tarjeta */
+.login-card {
+  width: 380px;
+  padding: 36px 32px;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+/* Título */
+.login-card h1 {
+  text-align: center;
+  margin-bottom: 6px;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* Subtítulo */
+.subtitle {
+  text-align: center;
+  color: #6b6b6b;
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+
+/* Formularios */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 6px;
+  border: 1px solid #cfcfcf;
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #43a047;
+  box-shadow: 0 0 0 2px rgba(67, 160, 71, 0.12);
+}
+
+/* Password */
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper button {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #000000;
+}
+
+.password-wrapper button:hover {
+  color: #000;
+}
+
+/* Botón */
+.login-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: #43a047;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.login-btn:hover {
+  background: #388e3c;
+}
