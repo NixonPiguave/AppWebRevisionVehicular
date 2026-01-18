@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../models/login-request.model';
 
@@ -18,7 +20,10 @@ export class LoginComponent {
   hidePassword = true;
   error = '';
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   togglePassword() {
     this.hidePassword = !this.hidePassword;
@@ -34,8 +39,7 @@ export class LoginComponent {
 
     this.authService.login(request).subscribe({
       next: () => {
-        alert('Login correcto');
-        // aquí luego redirigimos a Inicio
+        this.router.navigate(['/inicio']);
       },
       error: (err) => {
         this.error = err.error;
