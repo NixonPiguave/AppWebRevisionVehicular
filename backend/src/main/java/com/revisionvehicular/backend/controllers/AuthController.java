@@ -23,7 +23,7 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         Optional<Usuario> usuarioOpt =
-                usuarioRepository.findByUsuarioBasedatos(request.getUsuario());
+                usuarioRepository.findByUsuario(request.getUsuario());
 
         if (usuarioOpt.isEmpty()) {
             return ResponseEntity.status(401).body("Usuario no existe");
