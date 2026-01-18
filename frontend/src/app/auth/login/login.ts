@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import {CommonModule} from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { AuthService } from '../../services/auth.service';
+import { LoginRequest } from '../../models/login-request.model';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +18,7 @@ export class LoginComponent {
   hidePassword = true;
   error = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private authService: AuthService) {}
 
   togglePassword() {
     this.hidePassword = !this.hidePassword;
@@ -26,16 +27,19 @@ export class LoginComponent {
   login() {
     this.error = '';
 
-    this.http.post(
-      'http://localhost:8080/auth/login',
-      {
-        usuario: this.usuario,
-        password: this.password
+    const request: LoginRequest = {
+      usuario: this.usuario,
+      password: this.password
+    };
+
+    this.authService.login(request).subscribe({
+      next: () => {
+        alert('Login correcto');
+        // aquí luego redirigimos a Inicio
       },
-      { responseType: 'text' }
-    ).subscribe({
-      next: () => alert('Login correcto'),
-      error: (err) => this.error = err.error
+      error: (err) => {
+        this.error = err.error;
+      }
     });
   }
 }
