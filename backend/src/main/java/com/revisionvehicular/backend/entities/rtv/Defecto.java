@@ -28,6 +28,9 @@ public class Defecto {
     @ManyToOne
     @JoinColumn(name = "subfamilia_id")
     private Subfamilia subfamilia;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private RTV_Categoria rtvCategoria;
 
     @Column(length = 50)
     private String estado;

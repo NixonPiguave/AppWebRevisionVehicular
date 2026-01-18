@@ -1,5 +1,4 @@
 package com.revisionvehicular.backend.entities.rtv;
-
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -24,4 +23,5 @@ public class Subfamilia {
 
     @Column(length = 50)
     private String estado;
+
 }

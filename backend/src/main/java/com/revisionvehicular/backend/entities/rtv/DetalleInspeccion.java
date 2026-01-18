@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.entities.rtv;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import com.revisionvehicular.backend.entities.rc.Umbral;
 
 @Entity
 @Table(name = "rtv_detalle_inspeccion")
@@ -25,4 +26,12 @@ public class DetalleInspeccion {
 
     @Column(nullable = false, length = 50)
     private String estado;
+
+    @ManyToOne
+    @JoinColumn(name = "umbral_id", nullable = false)
+    private Umbral umbral;
+
+    @ManyToOne
+    @JoinColumn(name = "metodo_inspeccion_id", nullable = false)
+    private MetodoInspeccion  metodoInspeccion;
 }

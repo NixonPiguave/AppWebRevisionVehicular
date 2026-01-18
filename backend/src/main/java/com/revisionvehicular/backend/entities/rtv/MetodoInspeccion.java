@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.rtv;
 
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -20,4 +21,5 @@ public class MetodoInspeccion {
 
     @Column(length = 50)
     private String estado;
+
 }

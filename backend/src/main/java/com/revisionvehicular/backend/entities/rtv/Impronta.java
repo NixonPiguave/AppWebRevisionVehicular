@@ -1,7 +1,11 @@
 package com.revisionvehicular.backend.entities.rtv;
 
+import com.revisionvehicular.backend.entities.cv.Vehiculo;
+import com.revisionvehicular.backend.entities.srtv.Empresa;
+import com.revisionvehicular.backend.entities.srtv.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -20,8 +24,15 @@ public class Impronta {
     private String descripcion;
 
     @ManyToOne
-    @JoinColumn(name = "inspeccion_id", nullable = false)
-    private Inspeccion inspeccion;
+    @JoinColumn(name = "vehiculo_id")
+    private Vehiculo vehiculo;
+
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     @Column(length = 50)
     private String estado;

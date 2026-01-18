@@ -1,0 +1,13 @@
+.ini{
+  display: flex;
+  flex-wrap: wrap;
+  text-align: center;
+  justify-content: center;
+  gap: 20px;
+}
+.inicio{
+  background-color: papayawhip;
+  border: 2px black solid;
+  padding: 10px;
+  border-radius: 10px;
+}

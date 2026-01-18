@@ -8,7 +8,7 @@ import { LoginRequest } from '../models/login-request.model';
 })
 export class AuthService {
 
-  private readonly API_URL = 'http://localhost:8080/auth';
+  private readonly API_URL = 'http://localhost:9393/auth';
 
   constructor(private http: HttpClient) {}
 

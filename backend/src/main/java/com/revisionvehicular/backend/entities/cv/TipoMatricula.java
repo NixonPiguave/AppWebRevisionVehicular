@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.cv;
 
+
 import jakarta.persistence.*;
 import lombok.Data;
 

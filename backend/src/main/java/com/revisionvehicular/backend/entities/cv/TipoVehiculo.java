@@ -23,6 +23,6 @@ public class TipoVehiculo {
 
     @ManyToOne
     @JoinColumn(name = "clase_id", nullable = false)
-    private Clase clase;
+    private Clase Clase;
 
 }

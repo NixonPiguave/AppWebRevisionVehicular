@@ -1,9 +1,9 @@
 package com.revisionvehicular.backend.entities.rtv;
 
-import jakarta.persistence.*;
-import lombok.Data;
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+import jakarta.persistence.*;
+import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +34,6 @@ public class Inspeccion {
     @JoinColumn(name = "metodo_inspeccion_id", nullable = false)
     private MetodoInspeccion metodoInspeccion;
 
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private RTV_Categoria categoria;
 
     @ManyToOne
     @JoinColumn(name = "linea_id")

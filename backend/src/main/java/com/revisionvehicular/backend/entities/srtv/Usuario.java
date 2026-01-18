@@ -1,44 +1,38 @@
 package com.revisionvehicular.backend.entities.srtv;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-@Getter
-@Setter
-@NoArgsConstructor
-
 @Entity
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "srtv_usuario")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long usuario_id;
-
     @Column(nullable = false, length = 100)
     private String nombre;
-
-    @Column(name = "usuario_basedatos", nullable = false, length = 100)
-    private String usuarioBasedatos;
-
-    @Column(name = "contrasena", nullable = true, length = 500)
-    private String contrasena;
-
-
     @Column(nullable = false, length = 100)
     private String apellido;
-
+    @Column(nullable = false, length = 100)
+    private String usuario;
+    @Column(nullable = true, length = 100)
+    private String usuario_bd;
+    @Column(nullable = true, length = 500)
+    private String contraseña_bd;
+    @Column(nullable = false, length = 500)
+    private String contraseña;
     @Column(nullable = true, length = 100)
     private String email;
-
     @Column(nullable = true, length = 150)
     private String direccion;
-
     @Column(nullable = false)
     private LocalDateTime fecharegistro;
 
@@ -55,6 +49,6 @@ public class Usuario {
     private Area area;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Auditoria> auditorias = new ArrayList<>();
-
 }

@@ -1,8 +1,8 @@
 package com.revisionvehicular.backend.entities.cv;
 
+import com.revisionvehicular.backend.entities.srtv.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
-import com.revisionvehicular.backend.entities.srtv.Usuario;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ public class Vehiculo {
     @Column(length = 50)
     private String color;
 
-    @Column(name = "fecha_alta_registro")
+    @Column(name = "fecha_registro")
     private LocalDate fechaAltaRegistro;
 
     @Column(length = 50)
@@ -77,10 +77,6 @@ public class Vehiculo {
     @ManyToOne
     @JoinColumn(name = "tipo_matricula_id")
     private TipoMatricula tipoMatricula;
-
-    @ManyToOne
-    @JoinColumn(name = "categoria_id")
-    private Categoria categoria;
 
     @ManyToOne
     @JoinColumn(name = "subcategoria_id")

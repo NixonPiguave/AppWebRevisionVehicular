@@ -23,4 +23,7 @@ public class RTV_Categoria {
 
     @Column(length = 50)
     private String estado;
+    @ManyToOne
+    @JoinColumn(name = "subfamilia_id", nullable = false)
+    private Subfamilia subfamilia;
 }
