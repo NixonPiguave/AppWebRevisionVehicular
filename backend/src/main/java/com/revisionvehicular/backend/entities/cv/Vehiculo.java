@@ -37,8 +37,11 @@ public class Vehiculo {
 
     @Column(name = "fecha_registro")
     private LocalDate fechaAltaRegistro;
-
-    @Column(length = 50)
+    @Column(name = "ultima_fecha_matricula")
+    private LocalDate fechaMatricula;
+    @Column(name= "estado_matricula",length = 50)
+    private String estadoMatricula;
+    @Column(name= "estado_vehiculo",length = 50)
     private String estado;
 
     @ManyToOne
