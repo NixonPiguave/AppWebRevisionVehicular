@@ -1,7 +1,168 @@
-<h1>Bienvenido al sistema</h1>
-<p>Inicio / Dashboard</p>
-<div class="ini">
-<div class="inicio">CREAR USUARIO</div>
-<div class="inicio">CREAR ROL</div>
-<div class="inicio">CREAR EMPRESA</div>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar"
+         [class.collapsed]="sidebarCollapsed"
+         [class.show]="sidebarOpen">
+
+    <!-- LOGO -->
+    <div class="sidebar-logo">
+
+      <!-- SVG LOGO RTV AQUÍ -->
+      <img
+        src="/logo-rtv.png"
+        alt="RTV"
+        class="logo"
+      />
+      <span *ngIf="!sidebarCollapsed">RTV</span>
+    </div>
+
+    <!-- MENU -->
+    <nav class="menu">
+
+      <div class="menu-item">
+        <!-- ICONO -->
+        <img
+          src="/dashboard.svg"
+          class="menu-icon"
+          alt="Dashboard"
+        />
+        <span class="text" *ngIf="!sidebarCollapsed">Dashboard</span>
+      </div>
+
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Gestión Vehicular
+        </span>
+
+        <div class="menu-item">
+          <img
+            src="/vehiculo.svg"
+            class="menu-icon"
+            alt="Vehiculo"
+          />
+          <span *ngIf="!sidebarCollapsed">Vehículos</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/revision.svg"
+            class="menu-icon"
+            alt="revision"
+          />
+          <span *ngIf="!sidebarCollapsed">Revisiones</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/resultadorev.svg"
+            class="menu-icon"
+            alt="resultadorevision"
+          />
+          <span *ngIf="!sidebarCollapsed">Resultados de Revisión</span>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Administración
+        </span>
+
+        <div class="menu-item">
+          <img
+            src="/equipos.svg"
+            class="menu-icon"
+            alt="equipos"
+          />
+          <span *ngIf="!sidebarCollapsed">Equipos</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/pagos.svg"
+            class="menu-icon"
+            alt="pagos"
+          />
+          <span *ngIf="!sidebarCollapsed">Pagos</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/certificados.svg"
+            class="menu-icon"
+            alt="certificados"
+          />
+          <span *ngIf="!sidebarCollapsed">Certificados</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/usuarios.svg"
+            class="menu-icon"
+            alt="usuarios"
+          />
+          <span *ngIf="!sidebarCollapsed">Usuarios</span>
+        </div>
+
+        <div class="menu-item">
+          <img
+            src="/configuracion.svg"
+            class="menu-icon"
+            alt="configuracion"
+          />
+          <span *ngIf="!sidebarCollapsed">Configuración</span>
+        </div>
+      </div>
+
+    </nav>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- HEADER -->
+    <header class="header">
+
+      <div class="left">
+        <button class="hamburger" (click)="toggleSidebar()">☰</button>
+
+        <!-- LOGO SUPERIOR -->
+        <!-- SVG LOGO AQUÍ -->
+        <img
+          src="/logo-rtv.png"
+          alt="RTV"
+          class="header-logo"
+        />
+        <span class="title">Revisión Técnica Vehicular</span>
+      </div>
+
+      <div class="right">
+        <!-- ICONO USUARIO -->
+        <img
+          src="/usuario.svg"
+          class="user-icon"
+          alt="Usuario"
+        />
+        <span class="user">Usuario</span>
+
+        <button class="logout">
+          <!-- ICONO SALIR AQUÍ -->
+          <img
+            src="/logout.svg"
+            class="logout-icon"
+            alt="Salir"
+          />
+          Salir
+        </button>
+      </div>
+
+    </header>
+
+    <!-- CONTENT -->
+    <main class="content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
 </div>

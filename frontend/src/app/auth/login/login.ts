@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,7 +22,8 @@ export class LoginComponent {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   togglePassword() {
@@ -39,10 +40,13 @@ export class LoginComponent {
 
     this.authService.login(request).subscribe({
       next: () => {
+        // Login correcto → redirigir
         this.router.navigate(['/inicio']);
       },
       error: (err) => {
+        // Mostrar error inmediatamente
         this.error = err.error;
+        this.cdr.detectChanges(); // fuerza actualización de la vista
       }
     });
   }
