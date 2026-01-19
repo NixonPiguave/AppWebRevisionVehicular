@@ -3,6 +3,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,16 @@ public class Empresa {
 
     @Column(nullable = false, unique = true)
     private String nombre;
-
+    @Column(nullable = false)
+    private String direccion;
+    @Column(nullable = false)
+    private String telefono;
+    @Column(nullable = false)
+    private String correo;
+    @Column(nullable = false)
+    private VarbinaryJdbcType logoempresa;
+    @Column(nullable = false)
+    private String ruc;
     @OneToMany(mappedBy = "empresa")
     private List<Usuario> usuarios = new ArrayList<>();
 }
