@@ -21,6 +21,8 @@ public class Rol {
 
     @Column(nullable = false, unique = true)
     private String nombre;
+    @Column(nullable = false)
+    private String estado;
 
     @OneToMany(mappedBy = "rol")
     private List<Usuario> usuarios = new ArrayList<>();

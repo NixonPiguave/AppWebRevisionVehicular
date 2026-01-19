@@ -28,6 +28,8 @@ public class Usuario {
     private String usuarioBaseDatos;
     @Column(nullable = true, length = 500)
     private String contrasena;
+    @Column(name="documento_identidad",nullable = false, length = 100)
+    private String documentoIdentidad;
     @Column(nullable = true, length = 100)
     private String email;
     @Column(nullable = true, length = 150)

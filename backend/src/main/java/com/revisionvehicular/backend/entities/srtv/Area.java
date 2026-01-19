@@ -21,6 +21,8 @@ public class Area {
 
     @Column(nullable = false)
     private String nombre;
+    @Column(nullable = false)
+    private String estado;
 
     @OneToMany(mappedBy = "area")
     private List<Usuario> usuarios = new ArrayList<>();

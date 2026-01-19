@@ -14,12 +14,8 @@ public class Lineas {
 
     @Column(nullable = false, length = 100)
     private String nombre;
-
-    @Column(length = 255)
+    @Column(nullable = false, length = 200)
     private String descripcion;
-
-    @Column(length = 50)
-    private String ubicacion;
 
     @Column(length = 50)
     private String estado;
