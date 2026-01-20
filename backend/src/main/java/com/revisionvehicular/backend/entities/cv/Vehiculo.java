@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.cv;
 
+import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -17,17 +18,22 @@ public class Vehiculo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehiculo_id;
 
+    @ManyToOne
+    @JoinColumn(name = "Id_Propietario")
+    private Propietario propietario;
+
     @Column(nullable = false, length = 50, unique = true)
     private String matricula;
 
     @Column(nullable = false, length = 50)
     private String chasis;
 
-    @Column(length = 50)
-    private String marca;
+    @Column(name = "VIN",nullable = false, length = 50)
+    private String vin;
 
-    @Column(length = 50)
-    private String modelo;
+    @ManyToOne
+    @JoinColumn(name = "id_modelo", nullable = false)
+    private ModeloVehiculo modeloVehiculo;
 
     @Column(name = "anio_fabricacion")
     private Integer anioFabricacion;
@@ -39,8 +45,7 @@ public class Vehiculo {
     private LocalDate fechaAltaRegistro;
     @Column(name = "ultima_fecha_matricula")
     private LocalDate fechaMatricula;
-    @Column(name= "estado_matricula",length = 50)
-    private String estadoMatricula;
+
     @Column(name= "estado_vehiculo",length = 50)
     private String estado;
 
@@ -69,11 +74,6 @@ public class Vehiculo {
     private Traccion traccion;
 
     @ManyToOne
-    @JoinColumn(name = "propietario_id", nullable = false)
-    private Usuario usuario;
-
-
-    @ManyToOne
     @JoinColumn(name = "tipo_combustible_id")
     private TipoCombustible tipoCombustible;
 
@@ -87,4 +87,9 @@ public class Vehiculo {
 
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
     private List<com.revisionvehicular.backend.entities.rtv.Inspeccion> inspecciones = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
+    private List<com.revisionvehicular.backend.entities.pv.HistorialPropietario> historialPropietarios = new ArrayList<>();
+
+
 }

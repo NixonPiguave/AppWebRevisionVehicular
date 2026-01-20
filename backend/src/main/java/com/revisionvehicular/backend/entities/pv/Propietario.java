@@ -1,10 +1,5 @@
 package com.revisionvehicular.backend.entities.pv;
 
-import com.revisionvehicular.backend.entities.cv.Vehiculo;
-import com.revisionvehicular.backend.entities.rc.Umbral;
-import com.revisionvehicular.backend.entities.rtv.Defecto;
-import com.revisionvehicular.backend.entities.rtv.Inspeccion;
-import com.revisionvehicular.backend.entities.rtv.MetodoInspeccion;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -38,7 +33,4 @@ public class Propietario {
     @Column(nullable = false)
     private LocalDateTime fecharegistro;
 
-    @ManyToOne
-    @JoinColumn(name = "vehiculo_id", nullable = false)
-    private Vehiculo vehiculo;
 }

@@ -1,7 +1,7 @@
 package com.revisionvehicular.backend.entities.rtv;
 
 import com.revisionvehicular.backend.entities.ant.Tarifario;
-import com.revisionvehicular.backend.entities.cv.Vehiculo;
+import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -9,9 +9,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "rtv_pago")
+@Table(name = "rtv_pago_inspeccion")
 @Data
-public class Pago {
+public class PagoInspeccion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_pago")
@@ -23,7 +23,7 @@ public class Pago {
     @Column(name="fecha_pago",nullable = false, length = 50)
     private LocalDateTime fechaPago;
 
-    @Column(name="estado",length = 50)
+    @Column(name="estado",length = 1)
     private String estado;
 
     @ManyToOne
@@ -32,7 +32,7 @@ public class Pago {
     @OneToOne
     @JoinColumn(name = "inspeccion_id", nullable = false)
     private Inspeccion inspeccion;
-    @OneToOne
-    @JoinColumn(name = "idusuario_recibe_pago", nullable = false)
-    private Usuario usuario;
+    @ManyToOne
+    @JoinColumn(name = "Id_Propietario", nullable = false)
+    private Propietario propietario;
 }
