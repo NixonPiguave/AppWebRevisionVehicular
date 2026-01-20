@@ -22,6 +22,7 @@ public class Tarifario {
     private BigDecimal valor;
     @Column(name = "estado", length = 50, nullable = false)
     private String estado;
+
     @ManyToOne
     @JoinColumn(name = "id_tipo_vehiculo", nullable = false)
     private TipoVehiculo tipoVehiculo;
