@@ -49,27 +49,27 @@ public class Vehiculo {
     @Column(name= "estado_vehiculo",length = 50)
     private String estado;
 
+    @Column(name="capacidad_pasajeros",nullable = false)
+    private Integer cantidad;
+
     @ManyToOne
     @JoinColumn(name = "tipo_vehiculo_id", nullable = false)
     private TipoVehiculo tipoVehiculo;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "cap_carga_id", nullable = false)
     private CapCarga capCarga;
 
-    @OneToOne
-    @JoinColumn(name = "cap_pasajeros_id", nullable = false)
-    private CapPasajeros capPasajeros;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "ambito_operacional_id", nullable = false)
     private AmbitoOperacional ambitoOperacional;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "ejes_id", nullable = false)
     private Ejes ejes;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "traccion_id", nullable = false)
     private Traccion traccion;
 

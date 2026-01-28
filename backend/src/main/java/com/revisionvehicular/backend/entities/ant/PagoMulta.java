@@ -16,7 +16,7 @@ public class PagoMulta {
     @Column(name = "id_pago_multa")
     private Long idPagoMulta;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_multa", nullable = false)
     private Multa multa;
 

@@ -9,21 +9,23 @@ import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "ant_estado_multa")
 @Data
 public class EstadoMulta {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_EstadoMulta")
+    @Column(name = "id_estado_multa")
     private Long estadoMulta;
 
-    @Column(name = "TipoMulta")
+    @Column(name = "tipo_multa")
     private String tipoMulta;
 
-    @Column(name="Descripcion")
+    @Column(name="descripcion")
     private String descripcion;
 
-    @Column(name="Estado")
+    @Column(name="estado")
     private String estado;
 }

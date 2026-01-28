@@ -4,6 +4,7 @@ import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,20 +15,18 @@ import java.util.List;
 public class HistorialPropietario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id_Historial")
+    @Column(name = "id_historial")
     private Long idHistorial ;
-
     @ManyToOne
     @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
+    @ManyToOne
+    @JoinColumn(name = "propietario_id", nullable = false)
+    private Propietario propietario;
+    @Column(name="fecha_inicio",nullable = false)
+    private LocalDate fechaInicio;
 
-    @OneToMany(mappedBy = "propietario", cascade = CascadeType.ALL)
-    private List<Propietario> propietario = new ArrayList<>();
-
-    @Column(nullable = false)
-    private LocalDateTime fechaInicio;
-
-    @Column(nullable = false)
-    private LocalDateTime fechaFin;
+    @Column(name="fecha_fin", nullable = false)
+    private LocalDate fechaFin;
 
 }

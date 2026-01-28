@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.entities.cv;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -25,14 +26,14 @@ public class MarcaVehiculo {
     @Column(name = "pais_origen", length = 50)
     private String paisOrigen;
 
-    @Column(name = "grupoAutomotriz", length = 100, nullable = false, unique = true)
+    @Column(name = "grupo_automotriz", length = 100, nullable = false, unique = true)
     private String grupoAutomotriz;
 
-    @Column(name = "fechaAlta", nullable = false, unique = true)
-    private LocalDateTime fechaAlta;
+    @Column(name = "fecha_alta", nullable = false, unique = true)
+    private LocalDate fechaAlta;
 
-    @Column(name = "fechaBaja", nullable = false, unique = true)
-    private LocalDateTime fechaBaja;
+    @Column(name = "fecha_baja", nullable = false, unique = true)
+    private LocalDate fechaBaja;
 
     @Column(name = "logo_url", length = 255)
     private String logoUrl;

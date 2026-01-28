@@ -41,10 +41,6 @@ public class Usuario {
     private Empresa empresa;
 
     @ManyToOne
-    @JoinColumn(name = "rol_id", nullable = false)
-    private Rol rol;
-
-    @ManyToOne
     @JoinColumn(name = "area_id", nullable = false)
     private Area area;
 

@@ -10,7 +10,8 @@ public class Clase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long clase_id;
+    @Column(name = "clase_id")
+    private Long claseId;
 
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;

@@ -10,7 +10,8 @@ public class Ejes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ejes_id;
+    @Column(name="ejes_id")
+    private Long ejesid;
 
     @Column(nullable = false)
     private Integer cantidad;

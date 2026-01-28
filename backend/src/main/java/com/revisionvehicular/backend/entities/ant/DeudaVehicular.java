@@ -17,11 +17,11 @@ public class DeudaVehicular {
     @Column(name = "id_deuda")
     private Long idDeuda;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_vehiculo", nullable = false)
     private Vehiculo vehiculo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_entidad", nullable = false)
     private EntidadesTransito entidadesTransito;
 

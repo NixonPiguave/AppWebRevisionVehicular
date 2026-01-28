@@ -19,17 +19,20 @@ public class Multa {
     @Column(name = "id_multa")
     private Long idMulta;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_entidad", nullable = false)
     private EntidadesTransito entidadTransito;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_propietario", nullable = false)
     private Propietario propietario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_vehiculo")
     private Vehiculo vehiculo;
+    @ManyToOne
+    @JoinColumn(name = "id_estado_multa")
+    private EstadoMulta estadoMulta;
 
     @Column(name = "numero_citacion", length = 50)
     private String numeroCitacion;

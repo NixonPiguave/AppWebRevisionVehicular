@@ -16,7 +16,7 @@ public class PagoDeudaVehicular {
     @Column(name = "id_pago_deuda")
     private Long idPagoDeuda;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "id_deuda_vehicular", nullable = false)
     private DeudaVehicular deudaVehicular;
 
