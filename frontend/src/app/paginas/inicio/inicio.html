@@ -1,35 +1,42 @@
 <div class="layout">
 
+  <!-- OVERLAY MÓVIL (para cerrar el sidebar tocando fuera) -->
+  <div
+    class="mobile-overlay"
+    [class.show]="sidebarOpen"
+    (click)="closeSidebar()">
+  </div>
+
   <!-- SIDEBAR -->
-  <aside class="sidebar"
-         [class.collapsed]="sidebarCollapsed"
-         [class.show]="sidebarOpen">
+  <aside
+    class="sidebar"
+    [class.collapsed]="sidebarCollapsed"
+    [class.show]="sidebarOpen">
 
     <!-- LOGO -->
     <div class="sidebar-logo">
-
-      <!-- SVG LOGO RTV AQUÍ -->
       <img
         src="/logo-rtv.png"
-        alt="RTV"
+        alt="Logo RTV"
         class="logo"
       />
       <span *ngIf="!sidebarCollapsed">RTV</span>
     </div>
 
-    <!-- MENU -->
+    <!-- MENÚ DE NAVEGACIÓN -->
     <nav class="menu">
 
+      <!-- Dashboard -->
       <div class="menu-item">
-        <!-- ICONO -->
         <img
           src="/dashboard.svg"
           class="menu-icon"
-          alt="Dashboard"
+          alt=""
         />
-        <span class="text" *ngIf="!sidebarCollapsed">Dashboard</span>
+        <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </div>
 
+      <!-- SECCIÓN: Gestión Vehicular -->
       <div class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
@@ -39,7 +46,7 @@
           <img
             src="/vehiculo.svg"
             class="menu-icon"
-            alt="Vehiculo"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Vehículos</span>
         </div>
@@ -48,7 +55,7 @@
           <img
             src="/revision.svg"
             class="menu-icon"
-            alt="revision"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Revisiones</span>
         </div>
@@ -57,12 +64,13 @@
           <img
             src="/resultadorev.svg"
             class="menu-icon"
-            alt="resultadorevision"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Resultados de Revisión</span>
         </div>
       </div>
 
+      <!-- SECCIÓN: Administración -->
       <div class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Administración
@@ -72,7 +80,7 @@
           <img
             src="/equipos.svg"
             class="menu-icon"
-            alt="equipos"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Equipos</span>
         </div>
@@ -81,7 +89,7 @@
           <img
             src="/pagos.svg"
             class="menu-icon"
-            alt="pagos"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Pagos</span>
         </div>
@@ -90,7 +98,7 @@
           <img
             src="/certificados.svg"
             class="menu-icon"
-            alt="certificados"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Certificados</span>
         </div>
@@ -99,16 +107,16 @@
           <img
             src="/usuarios.svg"
             class="menu-icon"
-            alt="usuarios"
+            alt=""
           />
-          <span *ngIf="!sidebarCollapsed">Usuarios</span>
+          <span *ngIf="!sidebarCollapsed">Administración</span>
         </div>
 
         <div class="menu-item">
           <img
             src="/configuracion.svg"
             class="menu-icon"
-            alt="configuracion"
+            alt=""
           />
           <span *ngIf="!sidebarCollapsed">Configuración</span>
         </div>
@@ -117,48 +125,50 @@
     </nav>
   </aside>
 
-  <!-- MAIN -->
+  <!-- CONTENIDO PRINCIPAL -->
   <div class="main">
 
     <!-- HEADER -->
     <header class="header">
 
       <div class="left">
-        <button class="hamburger" (click)="toggleSidebar()">☰</button>
+        <button
+          class="hamburger"
+          (click)="toggleSidebar()">
+          ☰
+        </button>
 
-        <!-- LOGO SUPERIOR -->
-        <!-- SVG LOGO AQUÍ -->
         <img
           src="/logo-rtv.png"
-          alt="RTV"
+          alt=""
           class="header-logo"
         />
         <span class="title">Revisión Técnica Vehicular</span>
       </div>
 
       <div class="right">
-        <!-- ICONO USUARIO -->
+        <!-- Información de usuario -->
         <img
           src="/usuario.svg"
           class="user-icon"
-          alt="Usuario"
+          alt=""
         />
-        <span class="user">Usuario</span>
+        <span class="user">{{nombreUsuario}}</span>
 
+        <!-- Botón de cerrar sesión (solo visual por ahora) -->
         <button class="logout">
-          <!-- ICONO SALIR AQUÍ -->
           <img
             src="/logout.svg"
             class="logout-icon"
-            alt="Salir"
+            alt=""
           />
-          Salir
+          <span>Salir</span>
         </button>
       </div>
 
     </header>
 
-    <!-- CONTENT -->
+    <!-- CONTENIDO DINÁMICO -->
     <main class="content">
       <router-outlet></router-outlet>
     </main>
