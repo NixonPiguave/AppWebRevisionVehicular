@@ -103,14 +103,44 @@
           <span *ngIf="!sidebarCollapsed">Certificados</span>
         </div>
 
-        <div class="menu-item">
-          <img
-            src="/usuarios.svg"
-            class="menu-icon"
-            alt=""
-          />
-          <span *ngIf="!sidebarCollapsed">Administración</span>
+
+
+
+
+        <!-- Item Administración con submenú -->
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleAdminMenu()"
+            [class.active]="adminMenuOpen">
+            <img
+              src="/usuarios.svg"
+              class="menu-icon"
+              alt=""
+            />
+            <span *ngIf="!sidebarCollapsed">Administración</span>
+            <span
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="adminMenuOpen">
+      &#9662;
+    </span>
+          </div>
+
+          <!-- Submenú -->
+          <div
+            class="submenu"
+            [class.open]="adminMenuOpen && !sidebarCollapsed">
+            <a routerLink="/inicio/administracion/usuarios" class="submenu-item">Usuarios</a>
+            <a routerLink="/inicio/administracion/roles" class="submenu-item">Roles</a>
+            <a routerLink="/inicio/administracion/areas" class="submenu-item">Áreas</a>
+            <a routerLink="/inicio/administracion/empresa" class="submenu-item">Empresa</a>
+          </div>
         </div>
+
+
+
+
 
         <div class="menu-item">
           <img
