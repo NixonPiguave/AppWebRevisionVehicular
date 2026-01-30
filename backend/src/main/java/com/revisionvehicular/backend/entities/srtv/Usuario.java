@@ -43,8 +43,4 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "area_id", nullable = false)
     private Area area;
-
-    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Auditoria> auditorias = new ArrayList<>();
 }
