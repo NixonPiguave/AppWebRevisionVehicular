@@ -1,6 +1,6 @@
 package com.revisionvehicular.backend.entities.srtv;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+        import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.type.descriptor.jdbc.VarbinaryJdbcType;
@@ -29,7 +29,7 @@ public class Empresa {
     @Column(nullable = false)
     private String correo;
     @Column(nullable = false)
-    private VarbinaryJdbcType logoempresa;
+    private String logoempresa;
     @Column(nullable = false)
     private String ruc;
     @OneToMany(mappedBy = "empresa")
