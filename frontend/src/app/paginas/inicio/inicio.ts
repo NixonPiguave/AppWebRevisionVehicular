@@ -70,13 +70,13 @@ export class InicioComponent implements OnInit {
    */
   private checkScreenSize() {
     if (!this.isMobile()) {
-      // Si cambiamos a desktop, cerrar el sidebar móvil y restaurar scroll
+      // Sí cambiamos a desktop, cerrar el sidebar móvil y restaurar scroll
       if (this.sidebarOpen) {
         this.sidebarOpen = false;
         document.body.style.overflow = '';
       }
     } else {
-      // Si cambiamos a móvil, resetear el estado colapsado
+      // Sí cambiamos a móvil, resetear el estado colapsado
       if (this.sidebarCollapsed) {
         this.sidebarCollapsed = false;
       }
@@ -91,5 +91,14 @@ export class InicioComponent implements OnInit {
     if (this.sidebarOpen) {
       this.closeSidebar();
     }
+  }
+
+
+  adminMenuOpen = false;  // Estado del submenú de Administración
+  /**
+   * Toggle del submenú de Administración
+   */
+  toggleAdminMenu() {
+    this.adminMenuOpen = !this.adminMenuOpen;
   }
 }
