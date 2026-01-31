@@ -23,13 +23,13 @@ public class Usuario {
     private String apellido;
     @Column(nullable = false, length = 50)
     private String usuario;
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 350)
     private String contrasena;
     @Column(nullable = false, length = 50)
     private String usuarioBaseDatos;
-    @Column(nullable = false, length = 50)
+    @Column(nullable = false, length = 350)
     private String contrasenaBaseDatos;
-    @Column(name="documento_identidad",nullable = false, length = 100)
+    @Column(name="documento_identidad",nullable = false, length = 20)
     private String documentoIdentidad;
     @Column(nullable = false, length = 100)
     private String email;

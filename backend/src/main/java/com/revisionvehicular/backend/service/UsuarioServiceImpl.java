@@ -8,7 +8,9 @@ import com.revisionvehicular.backend.repositories.srtv.IUsuarioRolesRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +19,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     private final IUsuarioRepository repository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UsuarioServiceImpl(IUsuarioRepository repository,
                               IUsuarioRolesRepository usuarioRolesRepository) {
@@ -95,15 +98,19 @@ public class UsuarioServiceImpl implements IUsuarioService {
     @Transactional
     public UsuarioDTO save(UsuarioDTO dto) {
         String rolesJson = construirRolesJson(dto.getRolesIds());
+        String contrasenaApp = passwordEncoder.encode(dto.getContrasena());
+        String contrasenaDB = passwordEncoder.encode(generarContrasenaDB(dto.getUsuario()));
+        String usuarioDB = "usr_" + dto.getUsuario().toLowerCase();
+
         repository.insertarUsuarioConRoles(
                 dto.getAreaId(),
                 dto.getEmpresaId(),
                 dto.getNombre(),
                 dto.getApellido(),
                 dto.getUsuario(),
-                dto.getContrasena(),
-                dto.getUsuarioBaseDatos(),
-                dto.getContrasenaBaseDatos(),
+                contrasenaApp,
+                usuarioDB,
+                contrasenaDB,
                 dto.getDocumentoIdentidad(),
                 dto.getEmail(),
                 dto.getEstado(),
@@ -142,5 +149,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
             repository.deleteById(id);
         else
             throw new RuntimeException("No existe el usuario con el id " + id);
+    }
+    public String generarContrasenaDB(String usuario) {
+        SecureRandom random = new SecureRandom();
+        String chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
+        StringBuilder sufijo = new StringBuilder();
+        for (int i = 0; i < 4; i++) {
+            sufijo.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return usuario.toLowerCase() + "_" + sufijo.toString();
     }
 }

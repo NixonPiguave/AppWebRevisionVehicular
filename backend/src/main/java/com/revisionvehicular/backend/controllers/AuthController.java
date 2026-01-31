@@ -1,40 +1,80 @@
 package com.revisionvehicular.backend.controllers;
 
-import com.revisionvehicular.backend.dtos.LoginRequest;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
+import com.revisionvehicular.backend.security.JwtUtil;
+import com.revisionvehicular.backend.security.UserDatabaseContext;
+import com.revisionvehicular.backend.service.AuditoriaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
-    private final IUsuarioRepository IUsuarioRepository;
+    private final IUsuarioRepository usuarioRepository;
+    private final JwtUtil jwtUtil;
+    private final AuditoriaService auditoriaService;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthController(IUsuarioRepository IUsuarioRepository) {
-        this.IUsuarioRepository = IUsuarioRepository;
+    public AuthController(IUsuarioRepository usuarioRepository, JwtUtil jwtUtil, AuditoriaService auditoriaService) {
+        this.usuarioRepository = usuarioRepository;
+        this.jwtUtil = jwtUtil;
+        this.auditoriaService = auditoriaService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
+        String usuario = credentials.get("usuario");
+        String contrasena = credentials.get("contrasena");
 
-        Optional<Usuario> usuarioOpt =
-                IUsuarioRepository.findByUsuario(request.getUsuario());
+        Optional<Usuario> optionalUser = usuarioRepository.findByUsuario(usuario);
 
-        if (usuarioOpt.isEmpty()) {
-            return ResponseEntity.status(401).body("Usuario no existe");
+        if (optionalUser.isEmpty() || !passwordEncoder.matches(contrasena, optionalUser.get().getContrasena())) {
+            return ResponseEntity.status(401).body("Credenciales inválidas");
         }
 
-        Usuario usuario = usuarioOpt.get();
+        Usuario user = optionalUser.get();
 
-        if (!usuario.getContrasena().equals(request.getPassword())) {
-            return ResponseEntity.status(401).body("Contraseña incorrecta");
+        // Establecer credenciales del usuario para la auditoría
+        UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
+
+        // Registrar auditoría con el usuario correcto
+        auditoriaService.registrarAccion(user, "INICIO_SESION");
+
+        String token = jwtUtil.generateToken(
+                user.getUsuario(),
+                user.getUsuarioBaseDatos(),
+                user.getContrasenaBaseDatos()
+        );
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
+        response.put("usuario", user.getUsuario());
+        response.put("nombre", user.getNombre() + " " + user.getApellido());
+        response.put("usuarioId", user.getUsuarioId());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestBody Map<String, Long> request) {
+        Long usuarioId = request.get("usuarioId");
+
+        if (usuarioId != null) {
+            Optional<Usuario> optionalUser = usuarioRepository.findById(usuarioId);
+            if (optionalUser.isPresent()) {
+                Usuario user = optionalUser.get();
+                UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
+                auditoriaService.registrarAccion(user, "CIERRE_SESION");
+            }
         }
 
-        return ResponseEntity.ok("Login correcto");
+        return ResponseEntity.ok("Sesión cerrada");
     }
 }

@@ -186,8 +186,8 @@
         <span class="user">{{nombreUsuario}}</span>
 
         <!-- Botón de cerrar sesión (solo visual por ahora) -->
-        <button class="logout">
-          <img
+        <button class="logout" (click)="cerrarSesion()">
+        <img
             src="/logout.svg"
             class="logout-icon"
             alt=""

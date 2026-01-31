@@ -28,7 +28,7 @@ public class Empresa {
     private String telefono;
     @Column(nullable = false)
     private String correo;
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String logoempresa;
     @Column(nullable = false)
     private String ruc;
