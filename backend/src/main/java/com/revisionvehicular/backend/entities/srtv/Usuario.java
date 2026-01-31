@@ -33,7 +33,7 @@ public class Usuario {
     private String documentoIdentidad;
     @Column(nullable = false, length = 100)
     private String email;
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 20)
     private String estado;
 
     @ManyToOne
