@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "srtv_usuario_roles")
+@Table(name = "srtv_usuario_roles", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"usuario_id", "rol_id"})
+})
 public class UsuarioRoles {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

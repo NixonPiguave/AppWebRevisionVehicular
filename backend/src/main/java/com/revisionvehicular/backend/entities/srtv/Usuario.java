@@ -39,7 +39,6 @@ public class Usuario {
     @ManyToOne
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
-
     @ManyToOne
     @JoinColumn(name = "area_id", nullable = false)
     private Area area;
