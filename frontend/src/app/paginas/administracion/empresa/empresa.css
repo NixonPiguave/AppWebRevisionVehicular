@@ -1,0 +1,710 @@
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+.empresas-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+.empresas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.empresas-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.btn-agregar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-agregar:hover {
+  background: #234a1e;
+}
+
+/* ============================================
+   CONTROLES (FILTRO Y PAGINACIÓN)
+   ============================================ */
+.empresas-controles {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.control-grupo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-grupo label {
+  font-size: 14px;
+  color: #4a4a4a;
+  font-weight: 500;
+}
+
+.input-filtro {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  width: 280px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-filtro:focus {
+  outline: none;
+  border-color: #2d5a27;
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.select-registros {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  background: white;
+}
+
+.select-registros:focus {
+  outline: none;
+  border-color: #2d5a27;
+}
+
+.registros-texto {
+  font-size: 14px;
+  color: #4a4a4a;
+}
+
+/* ============================================
+   TABLA
+   ============================================ */
+.tabla-contenedor {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: white;
+}
+
+.empresas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.empresas-tabla th,
+.empresas-tabla td {
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.empresas-tabla th {
+  background: #1a2e1a;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.empresas-tabla th:first-child {
+  border-top-left-radius: 7px;
+}
+
+.empresas-tabla th:last-child {
+  border-top-right-radius: 7px;
+}
+
+.empresas-tabla tbody tr {
+  border-bottom: 1px solid #e8e8e8;
+  transition: background 0.15s ease;
+}
+
+.empresas-tabla tbody tr:hover {
+  background: #f5f9f5;
+}
+
+.empresas-tabla tbody tr:last-child {
+  border-bottom: none;
+}
+
+.empresas-tabla td {
+  font-size: 14px;
+  color: #333;
+}
+
+.th-acciones,
+.td-acciones {
+  text-align: center;
+  width: 120px;
+}
+
+/* ============================================
+   BOTONES DE ACCIÓN
+   ============================================ */
+.td-acciones {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn-accion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ver {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.btn-ver:hover {
+  background: #bbdefb;
+}
+
+.btn-editar {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.btn-editar:hover {
+  background: #ffe0b2;
+}
+
+/* ============================================
+   PAGINACIÓN
+   ============================================ */
+.paginacion {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.btn-pagina {
+  padding: 8px 14px;
+  border: 1px solid #d0d0d0;
+  background: white;
+  color: #333;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-pagina:hover:not(:disabled) {
+  background: #f5f5f5;
+  border-color: #2d5a27;
+}
+
+.btn-pagina.activa {
+  background: #2d5a27;
+  color: white;
+  border-color: #2d5a27;
+}
+
+.btn-pagina:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.info-registros {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #666;
+}
+
+.sin-registros {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 40px 16px !important;
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-contenido {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.25s ease;
+}
+
+.modal-empresa {
+  max-width: 550px;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.btn-cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.btn-cerrar:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modal-body {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.form-grupo {
+  margin-bottom: 20px;
+}
+
+.form-grupo:last-child {
+  margin-bottom: 0;
+}
+
+.form-grupo label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #2d5a27;
+  box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.form-select {
+  background: white;
+  cursor: pointer;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn-cancelar {
+  padding: 10px 20px;
+  border: 1px solid #d0d0d0;
+  background: white;
+  color: #333;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancelar:hover {
+  background: #f5f5f5;
+}
+
+.btn-guardar {
+  padding: 10px 24px;
+  border: none;
+  background: #2d5a27;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-guardar:hover {
+  background: #234a1e;
+}
+
+.btn-guardar:disabled,
+.btn-cancelar:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   LOGO UPLOAD
+   ============================================ */
+.logo-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logo-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+}
+
+.logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.btn-remover-logo {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.btn-remover-logo:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.btn-remover-logo mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.logo-input-wrapper {
+  position: relative;
+}
+
+.logo-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.logo-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.logo-input-label:hover {
+  border-color: #2d5a27;
+  background: #f5f9f5;
+  color: #2d5a27;
+}
+
+.logo-input-label mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.logo-filename {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f0f0f0;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #555;
+}
+
+.logo-filename mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #2d5a27;
+}
+
+/* ============================================
+   MODAL DETALLE
+   ============================================ */
+.modal-detalle .modal-body {
+  padding: 24px;
+}
+
+.detalle-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.detalle-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 150px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.detalle-logo img {
+  max-width: 150px;
+  max-height: 150px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  object-fit: contain;
+}
+
+.detalle-logo-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 150px;
+  height: 150px;
+  margin: 0 auto 20px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  border: 2px dashed #d0d0d0;
+  color: #999;
+}
+
+.detalle-logo-placeholder mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 8px;
+}
+
+.detalle-logo-placeholder span {
+  font-size: 13px;
+}
+
+.detalle-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detalle-item:last-child {
+  border-bottom: none;
+}
+
+.detalle-label {
+  font-weight: 600;
+  color: #555;
+  width: 100px;
+  flex-shrink: 0;
+}
+
+.detalle-valor {
+  color: #1a2e1a;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+/* ============================================
+   ESTADOS DE CARGA Y ERROR
+   ============================================ */
+.mensaje-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-reintentar {
+  padding: 8px 16px;
+  background: #991b1b;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-reintentar:hover {
+  background: #7f1d1d;
+}
+
+.cargando {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+/* ============================================
+   MATERIAL ICON AJUSTES
+   ============================================ */
+.btn-agregar mat-icon {
+  font-size: 20px;
+}
+
+.btn-accion mat-icon {
+  font-size: 18px;
+}
+
+.btn-cerrar mat-icon {
+  font-size: 20px;
+}
+
+mat-icon {
+  vertical-align: middle;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+  .empresas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .empresas-controles {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .input-filtro {
+    width: 100%;
+  }
+
+  .modal-contenido {
+    margin: 16px;
+    max-width: calc(100% - 32px);
+  }
+
+  .detalle-item {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .detalle-label {
+    width: auto;
+  }
+}

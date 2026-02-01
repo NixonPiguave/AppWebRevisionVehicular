@@ -1,1 +1,454 @@
-<p>usuarios works!</p>
+<div class="usuarios-container">
+  <!-- Header -->
+  <div class="header">
+    <h1>Gestión de Usuarios</h1>
+    <p class="subtitle">Administra los usuarios del sistema</p>
+  </div>
+
+  <!-- Mensajes -->
+  <div class="mensaje exito" *ngIf="mensajeExito">
+    <mat-icon>check_circle</mat-icon>
+    {{ mensajeExito }}
+  </div>
+  <div class="mensaje error" *ngIf="mensajeError">
+    <mat-icon>error</mat-icon>
+    {{ mensajeError }}
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="search-box">
+      <mat-icon>search</mat-icon>
+      <input
+        type="text"
+        placeholder="Buscar por nombre, apellido, usuario, email o documento..."
+        [(ngModel)]="terminoBusqueda"
+        (input)="filtrarUsuarios()"
+      />
+    </div>
+    <button class="btn-primary" (click)="abrirModalCrear()">
+      <mat-icon>add</mat-icon>
+      Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-overlay" *ngIf="cargando">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <!-- Tabla -->
+  <div class="table-container" *ngIf="!cargando">
+    <table class="data-table">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nombre Completo</th>
+        <th>Usuario</th>
+        <th>Email</th>
+        <th>Documento</th>
+        <th>Área</th>
+        <th>Empresa</th>
+        <th>Roles</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let usuario of usuariosPaginados">
+        <td>{{ usuario.usuarioId }}</td>
+        <td>{{ usuario.nombre }} {{ usuario.apellido }}</td>
+        <td>{{ usuario.usuario }}</td>
+        <td>{{ usuario.email }}</td>
+        <td>{{ usuario.documentoIdentidad }}</td>
+        <td>{{ obtenerNombreArea(usuario.areaId) }}</td>
+        <td>{{ obtenerNombreEmpresa(usuario.empresaId) }}</td>
+        <td>
+          <div class="roles-badges">
+              <span class="role-badge" *ngFor="let rol of usuario.roles">
+                {{ rol.nombre }}
+              </span>
+            <span *ngIf="!usuario.roles || usuario.roles.length === 0" class="sin-roles">
+                Sin roles
+              </span>
+          </div>
+        </td>
+        <td>
+            <span class="estado-badge" [ngClass]="getEstadoClass(usuario.estado)">
+              {{ usuario.estado }}
+            </span>
+        </td>
+        <td>
+          <div class="acciones">
+            <button
+              class="btn-icon btn-ver"
+              matTooltip="Ver detalles"
+              (click)="abrirModalDetalle(usuario)"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button
+              class="btn-icon btn-editar"
+              matTooltip="Editar"
+              (click)="abrirModalEditar(usuario)"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              class="btn-icon btn-eliminar"
+              matTooltip="Eliminar"
+              (click)="abrirModalEliminar(usuario)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </td>
+      </tr>
+      <tr *ngIf="usuariosFiltrados.length === 0">
+        <td colspan="10" class="empty-row">
+          <mat-icon>person_off</mat-icon>
+          <span>No se encontraron usuarios</span>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Paginación -->
+  <div class="pagination" *ngIf="totalPaginas > 1">
+    <button
+      class="btn-page"
+      [disabled]="paginaActual === 1"
+      (click)="cambiarPagina(paginaActual - 1)"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <button
+      *ngFor="let pagina of paginasArray"
+      class="btn-page"
+      [class.active]="pagina === paginaActual"
+      (click)="cambiarPagina(pagina)"
+    >
+      {{ pagina }}
+    </button>
+
+    <button
+      class="btn-page"
+      [disabled]="paginaActual === totalPaginas"
+      (click)="cambiarPagina(paginaActual + 1)"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <div class="info-paginacion">
+    Mostrando {{ usuariosPaginados.length }} de {{ usuariosFiltrados.length }} usuarios
+  </div>
+</div>
+
+<!-- Modal Crear/Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal modal-form" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modoEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+      <button class="btn-close" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="guardarUsuario()">
+        <!-- Fila 1: Nombre y Apellido -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nombre">Nombre <span class="required">*</span></label>
+            <input
+              type="text"
+              id="nombre"
+              [(ngModel)]="usuarioEditando.nombre"
+              name="nombre"
+              [class.error]="erroresValidacion['nombre']"
+              placeholder="Ingrese el nombre"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['nombre']">
+              {{ erroresValidacion['nombre'] }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="apellido">Apellido <span class="required">*</span></label>
+            <input
+              type="text"
+              id="apellido"
+              [(ngModel)]="usuarioEditando.apellido"
+              name="apellido"
+              [class.error]="erroresValidacion['apellido']"
+              placeholder="Ingrese el apellido"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['apellido']">
+              {{ erroresValidacion['apellido'] }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Fila 2: Usuario y Documento -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="usuario">Usuario <span class="required">*</span></label>
+            <input
+              type="text"
+              id="usuario"
+              [(ngModel)]="usuarioEditando.usuario"
+              name="usuario"
+              [class.error]="erroresValidacion['usuario']"
+              placeholder="Ingrese el usuario"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['usuario']">
+              {{ erroresValidacion['usuario'] }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="documentoIdentidad">Documento de Identidad <span class="required">*</span></label>
+            <input
+              type="text"
+              id="documentoIdentidad"
+              [(ngModel)]="usuarioEditando.documentoIdentidad"
+              name="documentoIdentidad"
+              [class.error]="erroresValidacion['documentoIdentidad']"
+              placeholder="Ingrese el documento"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['documentoIdentidad']">
+              {{ erroresValidacion['documentoIdentidad'] }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Fila 3: Email y Contraseña -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email <span class="required">*</span></label>
+            <input
+              type="email"
+              id="email"
+              [(ngModel)]="usuarioEditando.email"
+              name="email"
+              [class.error]="erroresValidacion['email']"
+              placeholder="ejemplo@correo.com"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['email']">
+              {{ erroresValidacion['email'] }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="contrasena">
+              Contraseña
+              <span class="required" *ngIf="!modoEdicion">*</span>
+              <span class="hint" *ngIf="modoEdicion">(Dejar vacío para mantener)</span>
+            </label>
+            <input
+              type="password"
+              id="contrasena"
+              [(ngModel)]="usuarioEditando.contrasena"
+              name="contrasena"
+              [class.error]="erroresValidacion['contrasena']"
+              placeholder="Ingrese la contraseña"
+            />
+            <span class="error-text" *ngIf="erroresValidacion['contrasena']">
+              {{ erroresValidacion['contrasena'] }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Fila 4: Área y Empresa -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="areaId">Área <span class="required">*</span></label>
+            <select
+              id="areaId"
+              [(ngModel)]="usuarioEditando.areaId"
+              name="areaId"
+              [class.error]="erroresValidacion['areaId']"
+            >
+              <option [value]="0" disabled>Seleccione un área</option>
+              <option *ngFor="let area of areas" [value]="area.areaId">
+                {{ area.nombre }}
+              </option>
+            </select>
+            <span class="error-text" *ngIf="erroresValidacion['areaId']">
+              {{ erroresValidacion['areaId'] }}
+            </span>
+          </div>
+
+          <div class="form-group">
+            <label for="empresaId">Empresa <span class="required">*</span></label>
+            <select
+              id="empresaId"
+              [(ngModel)]="usuarioEditando.empresaId"
+              name="empresaId"
+              [class.error]="erroresValidacion['empresaId']"
+            >
+              <option [value]="0" disabled>Seleccione una empresa</option>
+              <option *ngFor="let empresa of empresas" [value]="empresa.empresaId">
+                {{ empresa.nombre }}
+              </option>
+            </select>
+            <span class="error-text" *ngIf="erroresValidacion['empresaId']">
+              {{ erroresValidacion['empresaId'] }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Fila 5: Estado -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="estado">Estado</label>
+            <select
+              id="estado"
+              [(ngModel)]="usuarioEditando.estado"
+              name="estado"
+            >
+              <option value="Activo">Activo</option>
+              <option value="Inactivo">Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Fila 6: Roles -->
+        <div class="form-group full-width">
+          <label>Roles <span class="required">*</span></label>
+          <div class="roles-checkbox-group" [class.error]="erroresValidacion['rolesIds']">
+            <div class="role-checkbox" *ngFor="let rol of roles">
+              <input
+                type="checkbox"
+                [id]="'rol_' + rol.rolId"
+                [checked]="tieneRol(rol.rolId)"
+                (change)="toggleRol(rol.rolId)"
+              />
+              <label [for]="'rol_' + rol.rolId">{{ rol.nombre }}</label>
+            </div>
+            <div *ngIf="roles.length === 0" class="no-roles">
+              No hay roles disponibles
+            </div>
+          </div>
+          <span class="error-text" *ngIf="erroresValidacion['rolesIds']">
+            {{ erroresValidacion['rolesIds'] }}
+          </span>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalForm()">Cancelar</button>
+      <button class="btn-primary" (click)="guardarUsuario()">
+        {{ modoEdicion ? 'Actualizar' : 'Crear' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Detalle del Usuario</h2>
+      <button class="btn-close" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="usuarioDetalle">
+      <!-- Avatar/Icono -->
+      <div class="detalle-avatar">
+        <mat-icon>account_circle</mat-icon>
+      </div>
+
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <span class="detalle-label">ID:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.usuarioId }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre Completo:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.nombre }} {{ usuarioDetalle.apellido }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Usuario:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.usuario }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Email:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.email }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Documento:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.documentoIdentidad }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Área:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.areaNombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Empresa:</span>
+          <span class="detalle-valor">{{ usuarioDetalle.empresaNombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span class="detalle-valor">
+            <span class="estado-badge" [ngClass]="getEstadoClass(usuarioDetalle.estado)">
+              {{ usuarioDetalle.estado }}
+            </span>
+          </span>
+        </div>
+        <div class="detalle-item full-width">
+          <span class="detalle-label">Roles:</span>
+          <span class="detalle-valor">
+            <div class="roles-badges">
+              <span class="role-badge" *ngFor="let rol of usuarioDetalle.roles">
+                {{ rol.nombre }}
+              </span>
+              <span *ngIf="!usuarioDetalle.roles || usuarioDetalle.roles.length === 0" class="sin-roles">
+                Sin roles asignados
+              </span>
+            </div>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Confirmación Eliminar -->
+<div class="modal-overlay" *ngIf="mostrarModalConfirmacion" (click)="cerrarModalConfirmacion()">
+  <div class="modal modal-confirmacion" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Confirmar Eliminación</h2>
+      <button class="btn-close" (click)="cerrarModalConfirmacion()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="confirmacion-icon">
+        <mat-icon>warning</mat-icon>
+      </div>
+      <p class="confirmacion-texto">
+        ¿Está seguro que desea eliminar al usuario
+        <strong>{{ usuarioAEliminar?.nombre }} {{ usuarioAEliminar?.apellido }}</strong>?
+      </p>
+      <p class="confirmacion-subtexto">Esta acción no se puede deshacer.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalConfirmacion()">Cancelar</button>
+      <button class="btn-danger" (click)="confirmarEliminar()">Eliminar</button>
+    </div>
+  </div>
+</div>
