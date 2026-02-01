@@ -28,13 +28,10 @@
 
       <!-- Dashboard -->
       <div class="menu-item">
-        <img
-          src="/dashboard.svg"
-          class="menu-icon"
-          alt=""
-        />
+        <mat-icon class="menu-icon">dashboard</mat-icon>
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </div>
+
 
       <!-- SECCIÓN: Gestión Vehicular -->
       <div class="menu-section">
@@ -43,31 +40,20 @@
         </span>
 
         <div class="menu-item">
-          <img
-            src="/vehiculo.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">directions_car</mat-icon>
           <span *ngIf="!sidebarCollapsed">Vehículos</span>
         </div>
 
         <div class="menu-item">
-          <img
-            src="/revision.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">assignment</mat-icon>
           <span *ngIf="!sidebarCollapsed">Revisiones</span>
         </div>
 
         <div class="menu-item">
-          <img
-            src="/resultadorev.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">fact_check</mat-icon>
           <span *ngIf="!sidebarCollapsed">Resultados de Revisión</span>
         </div>
+
       </div>
 
       <!-- SECCIÓN: Administración -->
@@ -77,31 +63,20 @@
         </span>
 
         <div class="menu-item">
-          <img
-            src="/equipos.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">build</mat-icon>
           <span *ngIf="!sidebarCollapsed">Equipos</span>
         </div>
 
         <div class="menu-item">
-          <img
-            src="/pagos.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">payments</mat-icon>
           <span *ngIf="!sidebarCollapsed">Pagos</span>
         </div>
 
         <div class="menu-item">
-          <img
-            src="/certificados.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">verified</mat-icon>
           <span *ngIf="!sidebarCollapsed">Certificados</span>
         </div>
+
 
 
 
@@ -113,19 +88,18 @@
             class="menu-item"
             (click)="toggleAdminMenu()"
             [class.active]="adminMenuOpen">
-            <img
-              src="/usuarios.svg"
-              class="menu-icon"
-              alt=""
-            />
+
+            <mat-icon class="menu-icon">group</mat-icon>
             <span *ngIf="!sidebarCollapsed">Administración</span>
-            <span
+
+            <mat-icon
               *ngIf="!sidebarCollapsed"
               class="menu-arrow"
               [class.rotated]="adminMenuOpen">
-      &#9662;
-    </span>
+              expand_more
+            </mat-icon>
           </div>
+
 
           <!-- Submenú -->
           <div
@@ -140,16 +114,11 @@
 
 
 
-
-
         <div class="menu-item">
-          <img
-            src="/configuracion.svg"
-            class="menu-icon"
-            alt=""
-          />
+          <mat-icon class="menu-icon">settings</mat-icon>
           <span *ngIf="!sidebarCollapsed">Configuración</span>
         </div>
+
       </div>
 
     </nav>
@@ -162,11 +131,10 @@
     <header class="header">
 
       <div class="left">
-        <button
-          class="hamburger"
-          (click)="toggleSidebar()">
-          ☰
+        <button class="hamburger" (click)="toggleSidebar()">
+          <mat-icon>menu</mat-icon>
         </button>
+
 
         <img
           src="/logo-rtv.png"
@@ -178,20 +146,13 @@
 
       <div class="right">
         <!-- Información de usuario -->
-        <img
-          src="/usuario.svg"
-          class="user-icon"
-          alt=""
-        />
-        <span class="user">{{nombreUsuario}}</span>
+        <mat-icon class="user-icon">person</mat-icon>
+        <span class="user">{{ nombreUsuario }}</span>
+
 
         <!-- Botón de cerrar sesión (solo visual por ahora) -->
         <button class="logout" (click)="cerrarSesion()">
-        <img
-            src="/logout.svg"
-            class="logout-icon"
-            alt=""
-          />
+          <mat-icon>logout</mat-icon>
           <span>Salir</span>
         </button>
       </div>

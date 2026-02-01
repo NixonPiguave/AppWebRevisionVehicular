@@ -29,24 +29,11 @@
           />
 
           <button type="button" (click)="togglePassword()">
-
-            @if (hidePassword) {
-              <img
-                src="/eye-off.svg"
-                width="20"
-                height="20"
-                alt="Mostrar contraseña"
-              >
-            } @else {
-              <img
-                src="/eye-on.svg"
-                width="20"
-                height="20"
-                alt="Ocultar contraseña"
-              >
-            }
-
+            <mat-icon>
+              {{ hidePassword ? 'visibility_off' : 'visibility' }}
+            </mat-icon>
           </button>
+
         </div>
       </div>
 

@@ -12,19 +12,16 @@
 
   <!-- Contenido principal -->
   <div *ngIf="!cargando || error">
-    <!-- Header con título y botón agregar -->
+    <!-- Header -->
     <div class="areas-header">
       <h2>Gestión de Áreas</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="12" y1="5" x2="12" y2="19"></line>
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-        </svg>
+        <mat-icon>add</mat-icon>
         Nueva Área
       </button>
     </div>
 
-    <!-- Controles de filtro y paginación -->
+    <!-- Controles -->
     <div class="areas-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
@@ -69,40 +66,37 @@
           <td>{{ area.areaId }}</td>
           <td>{{ area.nombre }}</td>
           <td>
-            <span
-              class="estado-badge"
-              [class.activo]="area.estado === 'A'"
-              [class.inactivo]="area.estado === 'I'"
-            >
-              {{ getEstadoTexto(area.estado) }}
-            </span>
+              <span
+                class="estado-badge"
+                [class.activo]="area.estado === 'A'"
+                [class.inactivo]="area.estado === 'I'"
+              >
+                {{ getEstadoTexto(area.estado) }}
+              </span>
           </td>
           <td class="td-acciones">
-            <!-- Botón Ver Detalle -->
             <button
               class="btn-accion btn-ver"
               (click)="verDetalle(area)"
               title="Ver detalle"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                <circle cx="12" cy="12" r="3"></circle>
-              </svg>
+              <mat-icon>visibility</mat-icon>
             </button>
-            <!-- Botón Editar -->
+
             <button
               class="btn-accion btn-editar"
               (click)="abrirModalEditar(area)"
               title="Editar"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-              </svg>
+              <mat-icon>edit</mat-icon>
             </button>
           </td>
         </tr>
+
         <tr *ngIf="areasPaginadas.length === 0 && !error && !cargando">
-          <td colspan="4" class="sin-registros">No se encontraron registros</td>
+          <td colspan="4" class="sin-registros">
+            No se encontraron registros
+          </td>
         </tr>
         </tbody>
       </table>
@@ -117,6 +111,7 @@
       >
         Anterior
       </button>
+
       <button
         *ngFor="let pagina of paginas"
         class="btn-pagina"
@@ -125,6 +120,7 @@
       >
         {{ pagina }}
       </button>
+
       <button
         class="btn-pagina"
         (click)="irAPagina(paginaActual + 1)"
@@ -134,27 +130,27 @@
       </button>
     </div>
 
-    <!-- Info de registros -->
+    <!-- Info -->
     <div class="info-registros" *ngIf="areasFiltradas.length > 0">
       Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
-      {{ paginaActual * registrosPorPagina > areasFiltradas.length ? areasFiltradas.length : paginaActual * registrosPorPagina }}
+      {{ paginaActual * registrosPorPagina > areasFiltradas.length
+      ? areasFiltradas.length
+      : paginaActual * registrosPorPagina }}
       de {{ areasFiltradas.length }} registros
     </div>
   </div>
 </div>
 
-<!-- Modal Crear/Editar -->
+<!-- Modal Crear / Editar -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>{{ modoEdicion ? 'Editar Área' : 'Nueva Área' }}</h3>
       <button class="btn-cerrar" (click)="cerrarModalForm()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <mat-icon>close</mat-icon>
       </button>
     </div>
+
     <div class="modal-body">
       <div class="form-grupo">
         <label for="nombre">Nombre del Área</label>
@@ -162,10 +158,11 @@
           type="text"
           id="nombre"
           [(ngModel)]="areaEditando.nombre"
-          placeholder="Ingrese el nombre del área"
           class="form-input"
+          placeholder="Ingrese el nombre del área"
         />
       </div>
+
       <div class="form-grupo">
         <label for="estado">Estado</label>
         <select id="estado" [(ngModel)]="areaEditando.estado" class="form-select">
@@ -174,8 +171,11 @@
         </select>
       </div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
       <button class="btn-guardar" (click)="guardarArea()" [disabled]="guardando">
         {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Área') }}
       </button>
@@ -189,12 +189,10 @@
     <div class="modal-header">
       <h3>Detalle del Área</h3>
       <button class="btn-cerrar" (click)="cerrarModalDetalle()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <mat-icon>close</mat-icon>
       </button>
     </div>
+
     <div class="modal-body" *ngIf="areaDetalle">
       <div class="detalle-item">
         <span class="detalle-label">ID:</span>
@@ -215,6 +213,7 @@
         </span>
       </div>
     </div>
+
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
     </div>

@@ -508,6 +508,29 @@
   font-size: 16px;
 }
 
+
+/* ============================================
+   MATERIAL ICON AJUSTES
+   ============================================ */
+.btn-agregar mat-icon {
+  font-size: 20px;
+}
+
+.btn-accion mat-icon {
+  font-size: 18px;
+}
+
+.btn-cerrar mat-icon {
+  font-size: 20px;
+}
+
+mat-icon {
+  vertical-align: middle;
+}
+
+
+
+
 /* ============================================
    RESPONSIVE
    ============================================ */
