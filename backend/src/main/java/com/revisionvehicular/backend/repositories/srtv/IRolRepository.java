@@ -16,4 +16,10 @@ public interface IRolRepository extends JpaRepository<Rol, Long> {
             @Param("p_nombre") String pnombre,
             @Param("p_estado") String pestado
     );
+    @Procedure(procedureName = "sp_rol_actualizar")
+    void spActualizarRol(
+            @Param("p_rol_id") Long rolId,
+            @Param("p_nombre") String pnombre,
+            @Param("p_estado") String pestado
+    );
 }

@@ -35,15 +35,30 @@ public class RolServiceImpl implements IRolService{
         return repository.findAll().stream().
                 map(this::toDTO).collect(Collectors.toList());
     }
+//    @Override
+//    public RolDTO update(Long id, RolDTO dto) {
+//        Rol rol = repository.findById(id).
+//                orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + id));
+//        rol.setNombre(dto.getNombre());
+//        rol.setEstado(dto.getEstado());
+//        Rol updated = repository.save(rol);
+//        return toDTO(updated);
+//    }
+
     @Override
     public RolDTO update(Long id, RolDTO dto) {
-        Rol rol = repository.findById(id).
-                orElseThrow(() -> new RuntimeException("Rol no encontrado con ID: " + id));
-        rol.setNombre(dto.getNombre());
-        rol.setEstado(dto.getEstado());
-        Rol updated = repository.save(rol);
-        return toDTO(updated);
+        // Verificar que el rol existe
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Rol no encontrado con ID: " + id);
+        }
+        // Llamar al stored procedure de actualización
+        repository.spActualizarRol(id, dto.getNombre(), dto.getEstado());
+        // Obtener el rol actualizado para retornarlo
+        Rol rolActualizado = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error al recuperar el rol actualizado"));
+        return toDTO(rolActualizado);
     }
+
     @Override
     public void delete(Long id) {
         if(repository.existsById(id)){

@@ -176,13 +176,11 @@ export class RolesComponent implements OnInit {
       });
     }
   }
-
   // Abrir modal detalle
   verDetalle(rol: Rol): void {
     this.rolDetalle = rol;
     this.mostrarModalDetalle = true;
   }
-
   // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
