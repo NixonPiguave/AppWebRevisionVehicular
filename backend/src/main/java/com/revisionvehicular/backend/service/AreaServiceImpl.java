@@ -1,7 +1,9 @@
 package com.revisionvehicular.backend.service;
 
 import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
+import com.revisionvehicular.backend.dtos.srtv.RolDTO;
 import com.revisionvehicular.backend.entities.srtv.Area;
+import com.revisionvehicular.backend.entities.srtv.Rol;
 import com.revisionvehicular.backend.repositories.srtv.IAreaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,7 +33,7 @@ public class AreaServiceImpl implements IAreaService {
                 .collect(Collectors.toList());
     }
 
-    @Override
+    /*@Override
     public AreaDTO update(Long id, AreaDTO dto) {
         Area area = repository.findById(id).
                 orElseThrow(()-> new RuntimeException("Area " + id + " no encontrada"));
@@ -39,8 +41,19 @@ public class AreaServiceImpl implements IAreaService {
         area.setEstado(dto.getEstado());
         Area updated= repository.save(area);
         return toDTO(updated);
-    }
+    }*/
+
     @Override
+    public AreaDTO update(Long id, AreaDTO dto) {
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Area no encontrado con ID: " + id);
+        }
+        repository.spActualizarArea(id, dto.getNombre(), dto.getEstado());
+        Area AreaActualizado = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error al recuperar el rol actualizado"));
+        return toDTO(AreaActualizado);
+    }
+
     public void delete(Long id) {
         if(repository.existsById(id)){
             repository.deleteById(id);

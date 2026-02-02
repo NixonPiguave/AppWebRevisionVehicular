@@ -17,5 +17,11 @@ public interface IAreaRepository extends JpaRepository<Area, Long>{
             @Param("p_nombre") String pnombre,
             @Param("p_estado") String pestado
     );
+    @Procedure(procedureName = "sp_area_actualizar")
+    void spActualizarArea(
+            @Param("p_area_id") Long AreaId,
+            @Param("p_nombre") String pnombre,
+            @Param("p_estado") String pestado
+    );
 
 }
