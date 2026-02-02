@@ -50,7 +50,7 @@ public class AreaServiceImpl implements IAreaService {
         }
         repository.spActualizarArea(id, dto.getNombre(), dto.getEstado());
         Area AreaActualizado = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Error al recuperar el rol actualizado"));
+                .orElseThrow(() -> new RuntimeException("Error al recuperar el Area actualizado"));
         return toDTO(AreaActualizado);
     }
 

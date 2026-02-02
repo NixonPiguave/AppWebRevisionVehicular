@@ -1,6 +1,8 @@
 package com.revisionvehicular.backend.service;
 
+import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
 import com.revisionvehicular.backend.dtos.srtv.EmpresaDTO;
+import com.revisionvehicular.backend.entities.srtv.Area;
 import com.revisionvehicular.backend.entities.srtv.Empresa;
 import com.revisionvehicular.backend.repositories.srtv.IEmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,17 +31,36 @@ public class EmpresaServiceImpl implements IEmpresaService {
                 collect(Collectors.toList());
     }
 
+//    @Override
+//    public EmpresaDTO update(Long id, EmpresaDTO dto) {
+//        Empresa empresa = repository.findById(id).orElseThrow(() -> new RuntimeException("Error al encontrar empresa"));
+//        empresa.setNombre(dto.getNombre());
+//        empresa.setRuc(dto.getRuc());
+//        empresa.setDireccion(dto.getDireccion());
+//        empresa.setTelefono(dto.getTelefono());
+//        empresa.setCorreo(dto.getCorreo());
+//        empresa.setLogoempresa(dto.getLogoempresa());
+//        Empresa updated=repository.save(empresa);
+//        return toDTO(updated);
+//    }
+
     @Override
     public EmpresaDTO update(Long id, EmpresaDTO dto) {
-        Empresa empresa = repository.findById(id).orElseThrow(() -> new RuntimeException("Error al encontrar empresa"));
-        empresa.setNombre(dto.getNombre());
-        empresa.setRuc(dto.getRuc());
-        empresa.setDireccion(dto.getDireccion());
-        empresa.setTelefono(dto.getTelefono());
-        empresa.setCorreo(dto.getCorreo());
-        empresa.setLogoempresa(dto.getLogoempresa());
-        Empresa updated=repository.save(empresa);
-        return toDTO(updated);
+        if (!repository.existsById(id)) {
+            throw new RuntimeException("Empresa no encontrada con ID: " + id);
+        }
+        repository.spActualizarEmpresa(
+                id,
+                dto.getNombre(),
+                dto.getRuc(),
+                dto.getDireccion(),
+                dto.getTelefono(),
+                dto.getCorreo(),
+                dto.getLogoempresa()
+        );
+        Empresa EmpresaActualizada = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Error al recuperar la empresa actualizada"));
+        return toDTO(EmpresaActualizada);
     }
 
     @Override

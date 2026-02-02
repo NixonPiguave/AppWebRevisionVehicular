@@ -22,4 +22,15 @@ public interface IEmpresaRepository extends JpaRepository<Empresa, Long>
             @Param("p_correo") String pcorreo,
             @Param("p_logoempresa") String plogoempresa
     );
+    @Procedure(procedureName = "sp_empresa_actualizar")
+    void spActualizarEmpresa(
+            @Param("p_empresa_id") Long EmpresaId,
+            @Param("p_nombre") String pnombre,
+            @Param("p_ruc") String pruc,
+            @Param("p_direccion") String pdireccion,
+            @Param("p_telefono") String ptelefono,
+            @Param("p_correo") String pcorreo,
+            @Param("p_logoempresa") String plogoempresa
+    );
+
 }
