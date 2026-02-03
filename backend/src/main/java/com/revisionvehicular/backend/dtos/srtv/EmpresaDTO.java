@@ -1,8 +1,5 @@
 package com.revisionvehicular.backend.dtos.srtv;
-
-import jakarta.persistence.Column;
 import lombok.Data;
-
 @Data
 public class EmpresaDTO {
     private Long empresaId;
