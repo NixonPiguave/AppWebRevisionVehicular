@@ -215,7 +215,7 @@ export class UsuariosComponent implements OnInit {
     this.usuarioEditando = {
       ...usuario,
       rolesIds: usuario.rolesIds ? [...usuario.rolesIds] : [],
-      // ✅ IMPORTANTE: Dejar vacío para NO actualizar la contraseña
+      //IMPORTANTE: Dejar vacío para NO actualizar la contraseña
       contrasena: ''
     };
     this.erroresValidacion = {};
@@ -271,7 +271,7 @@ export class UsuariosComponent implements OnInit {
       this.erroresValidacion['usuario'] = 'El usuario es requerido';
     }
 
-    // ✅ Solo requerir contraseña al CREAR
+    //Solo requerir contraseña al CREAR
     if (!this.modoEdicion && !this.usuarioEditando.contrasena.trim()) {
       this.erroresValidacion['contrasena'] = 'La contraseña es requerida';
     }
@@ -320,7 +320,7 @@ export class UsuariosComponent implements OnInit {
     return this.usuarioEditando.rolesIds.includes(rolId);
   }
 
-  // ✅ GUARDAR USUARIO - CORREGIDO
+  //GUARDAR USUARIO - CORREGIDO
   guardarUsuario(): void {
     if (!this.validarFormulario()) {
       return;
@@ -341,7 +341,7 @@ export class UsuariosComponent implements OnInit {
       rolesIds: this.usuarioEditando.rolesIds.map(id => Number(id))
     };
 
-    // ✅ CAMBIO CRÍTICO: Solo incluir contraseña SI tiene valor
+    //CAMBIO CRÍTICO: Solo incluir contraseña SI tiene valor
     if (this.usuarioEditando.contrasena && this.usuarioEditando.contrasena.trim() !== '') {
       usuarioParaEnviar.contrasena = this.usuarioEditando.contrasena;
     }
