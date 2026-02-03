@@ -18,31 +18,21 @@ export class AreasService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obtener todas las áreas
-   */
+
+  /**Obtener todas las áreas*/
+
   listarAreas(): Observable<Area[]> {
     return this.http.get<Area[]>(this.apiUrl);
   }
 
-  /**
-   * Crear una nueva área
-   */
+  /** Crear una nueva área*/
   crearArea(area: Area): Observable<Area> {
     return this.http.post<Area>(this.apiUrl, area);
   }
 
-  /**
-   * Actualizar un área
-   */
+  /**Actualizar un área*/
   actualizarArea(id: number, area: Area): Observable<Area> {
     return this.http.put<Area>(`${this.apiUrl}/${id}`, area);
   }
 
-  /**
-   * Eliminar un área (por si lo necesitas más adelante)
-   */
-  eliminarArea(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
 }

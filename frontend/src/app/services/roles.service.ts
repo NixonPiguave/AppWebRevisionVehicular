@@ -33,7 +33,7 @@ export class RolesService {
   }
 
   /**
-   * Actualizar un rol (para cuando tu compañero tenga el SP listo)
+   * Actualizar un rol
    */
   actualizarRol(id: number, rol: Rol): Observable<Rol> {
     return this.http.put<Rol>(`${this.apiUrl}/${id}`, rol);

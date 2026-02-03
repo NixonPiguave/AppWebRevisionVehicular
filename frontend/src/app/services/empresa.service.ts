@@ -42,10 +42,4 @@ export class EmpresaService {
     return this.http.put<Empresa>(`${this.apiUrl}/${id}`, empresa);
   }
 
-  /**
-   * Eliminar una empresa
-   */
-  eliminarEmpresa(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
 }
