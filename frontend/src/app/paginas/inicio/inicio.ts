@@ -2,12 +2,12 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule,MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css'
 })
@@ -17,7 +17,15 @@ export class InicioComponent implements OnInit {
   sidebarOpen = false;
   nombreUsuario: string = 'Usuario';
 
-  adminMenuOpen = false;
+  // Estado de expansión para cada sección principal
+  gestionVehicularOpen = false;
+  operacionesOpen = false;
+  catalogoVehiculosOpen = false;
+  inspeccionRtvOpen = false;
+  defectosInspeccionOpen = false;
+  antTramitesOpen = false;
+  configuracionUmbralOpen = false;
+  administracionOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -73,10 +81,58 @@ export class InicioComponent implements OnInit {
     }
   }
 
-  toggleAdminMenu() {
-    this.adminMenuOpen = !this.adminMenuOpen;
+  // Métodos para toggle de cada sección (comportamiento acordeón)
+  toggleGestionVehicular() {
+    this.closeAllExcept('gestionVehicular');
+    this.gestionVehicularOpen = !this.gestionVehicularOpen;
   }
 
+  toggleOperaciones() {
+    this.closeAllExcept('operaciones');
+    this.operacionesOpen = !this.operacionesOpen;
+  }
+
+  toggleCatalogoVehiculos() {
+    this.closeAllExcept('catalogoVehiculos');
+    this.catalogoVehiculosOpen = !this.catalogoVehiculosOpen;
+  }
+
+  toggleInspeccionRtv() {
+    this.closeAllExcept('inspeccionRtv');
+    this.inspeccionRtvOpen = !this.inspeccionRtvOpen;
+  }
+
+  toggleDefectosInspeccion() {
+    this.closeAllExcept('defectosInspeccion');
+    this.defectosInspeccionOpen = !this.defectosInspeccionOpen;
+  }
+
+  toggleAntTramites() {
+    this.closeAllExcept('antTramites');
+    this.antTramitesOpen = !this.antTramitesOpen;
+  }
+
+  toggleConfiguracionUmbral() {
+    this.closeAllExcept('configuracionUmbral');
+    this.configuracionUmbralOpen = !this.configuracionUmbralOpen;
+  }
+
+  toggleAdministracion() {
+    this.closeAllExcept('administracion');
+    this.administracionOpen = !this.administracionOpen;
+  }
+
+  // Cerrar todas las secciones excepto la que se está abriendo
+  private closeAllExcept(sectionName: string) {
+    if (sectionName !== 'gestionVehicular') this.gestionVehicularOpen = false;
+    if (sectionName !== 'operaciones') this.operacionesOpen = false;
+    if (sectionName !== 'catalogoVehiculos') this.catalogoVehiculosOpen = false;
+    if (sectionName !== 'inspeccionRtv') this.inspeccionRtvOpen = false;
+    if (sectionName !== 'defectosInspeccion') this.defectosInspeccionOpen = false;
+    if (sectionName !== 'antTramites') this.antTramitesOpen = false;
+    if (sectionName !== 'configuracionUmbral') this.configuracionUmbralOpen = false;
+    if (sectionName !== 'administracion') this.administracionOpen = false;
+  }
 
   cerrarSesion(): void {
     this.authService.logout().subscribe({
