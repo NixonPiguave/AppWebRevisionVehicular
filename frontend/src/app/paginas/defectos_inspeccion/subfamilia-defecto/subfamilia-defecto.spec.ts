@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EmpresaComponent } from './empresa';
+import { SubfamiliaDefecto } from './subfamilia-defecto';
 
-describe('Empresa', () => {
-  let component: EmpresaComponent;
-  let fixture: ComponentFixture<EmpresaComponent>;
+describe('SubfamiliaDefecto', () => {
+  let component: SubfamiliaDefecto;
+  let fixture: ComponentFixture<SubfamiliaDefecto>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [EmpresaComponent]
+      imports: [SubfamiliaDefecto]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(EmpresaComponent);
+    fixture = TestBed.createComponent(SubfamiliaDefecto);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
