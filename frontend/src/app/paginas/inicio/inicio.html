@@ -32,93 +32,269 @@
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </div>
 
-
-      <!-- SECCIÓN: Gestión Vehicular -->
+      <!-- ========================================
+           GESTIÓN VEHICULAR
+           ======================================== -->
       <div class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
         </span>
 
-        <div class="menu-item">
-          <mat-icon class="menu-icon">directions_car</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Vehículos</span>
-        </div>
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleGestionVehicular()"
+            [class.active]="gestionVehicularOpen">
+            <mat-icon class="menu-icon">directions_car</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Gestión Vehicular</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="gestionVehicularOpen">
+              expand_more
+            </mat-icon>
+          </div>
 
-        <div class="menu-item">
-          <mat-icon class="menu-icon">assignment</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Revisiones</span>
+          <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
+            <a class="submenu-item">Vehículos</a>
+            <a class="submenu-item">Propietario</a>
+            <a class="submenu-item">Revisiones</a>
+            <a class="submenu-item">Resultados de Revisión</a>
+          </div>
         </div>
-
-        <div class="menu-item">
-          <mat-icon class="menu-icon">fact_check</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Resultados de Revisión</span>
-        </div>
-
       </div>
 
-      <!-- SECCIÓN: Administración -->
+      <!-- ========================================
+           OPERACIONES
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Operaciones
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleOperaciones()"
+            [class.active]="operacionesOpen">
+            <mat-icon class="menu-icon">account_balance_wallet</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Operaciones</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="operacionesOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="operacionesOpen && !sidebarCollapsed">
+            <a class="submenu-item">Pagos</a>
+            <a class="submenu-item">Certificados</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           CATÁLOGO DE VEHÍCULOS
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Catálogo de Vehículos
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleCatalogoVehiculos()"
+            [class.active]="catalogoVehiculosOpen">
+            <mat-icon class="menu-icon">library_books</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Catálogo de Vehículos</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="catalogoVehiculosOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="catalogoVehiculosOpen && !sidebarCollapsed">
+            <a class="submenu-item">Marcas</a>
+            <a class="submenu-item">Modelos</a>
+            <a class="submenu-item">Tipos de Vehículo</a>
+            <a class="submenu-item">Clases</a>
+            <a class="submenu-item">Categorías</a>
+            <a class="submenu-item">Subcategorías</a>
+            <a class="submenu-item">Tipos de Combustible</a>
+            <a class="submenu-item">Tipos de Matrícula</a>
+            <a class="submenu-item">Tracción</a>
+            <a class="submenu-item">Ejes</a>
+            <a class="submenu-item">Capacidad de Carga</a>
+            <a class="submenu-item">Ámbito Operacional</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           INSPECCIÓN RTV
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Inspección RTV
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleInspeccionRtv()"
+            [class.active]="inspeccionRtvOpen">
+            <mat-icon class="menu-icon">fact_check</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Inspección RTV</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="inspeccionRtvOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="inspeccionRtvOpen && !sidebarCollapsed">
+            <a class="submenu-item">Líneas de Inspección</a>
+            <a class="submenu-item">Métodos de Inspección</a>
+            <a class="submenu-item">Equipos</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           DEFECTOS DE INSPECCIÓN
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Defectos de Inspección
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleDefectosInspeccion()"
+            [class.active]="defectosInspeccionOpen">
+            <mat-icon class="menu-icon">warning</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Defectos de Inspección</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="defectosInspeccionOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="defectosInspeccionOpen && !sidebarCollapsed">
+            <a class="submenu-item">Familias de Defectos</a>
+            <a class="submenu-item">Subfamilias de Defectos</a>
+            <a class="submenu-item">Categorías de Defectos</a>
+            <a class="submenu-item">Tipos de Defectos</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           ANT / TRÁMITES
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          ANT / Trámites
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleAntTramites()"
+            [class.active]="antTramitesOpen">
+            <mat-icon class="menu-icon">description</mat-icon>
+            <span *ngIf="!sidebarCollapsed">ANT / Trámites</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="antTramitesOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="antTramitesOpen && !sidebarCollapsed">
+            <a class="submenu-item">Tipos de Trámite</a>
+            <a class="submenu-item">Estados de Trámite</a>
+            <a class="submenu-item">Tipos de Excepción</a>
+            <a class="submenu-item">Estados de Excepción</a>
+            <a class="submenu-item">Estados de Multa</a>
+            <a class="submenu-item">Tarifario</a>
+            <a class="submenu-item">Documentos Requeridos</a>
+            <a class="submenu-item">Entidades de Tránsito</a>
+            <a class="submenu-item">Formas de Pago</a>
+            <a class="submenu-item">Tipos de Documento</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           CONFIGURACIÓN UMBRAL
+           ======================================== -->
+      <div class="menu-section">
+        <span *ngIf="!sidebarCollapsed" class="section-title">
+          Configuración Umbral
+        </span>
+
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleConfiguracionUmbral()"
+            [class.active]="configuracionUmbralOpen">
+            <mat-icon class="menu-icon">tune</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Configuración Umbral</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="configuracionUmbralOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="configuracionUmbralOpen && !sidebarCollapsed">
+            <a class="submenu-item">Unidades de Medida</a>
+            <a class="submenu-item">Descripción de Umbral</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================
+           ADMINISTRACIÓN
+           ======================================== -->
       <div class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Administración
         </span>
 
-        <div class="menu-item">
-          <mat-icon class="menu-icon">build</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Equipos</span>
-        </div>
-
-        <div class="menu-item">
-          <mat-icon class="menu-icon">payments</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Pagos</span>
-        </div>
-
-        <div class="menu-item">
-          <mat-icon class="menu-icon">verified</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Certificados</span>
-        </div>
-
-
-
-
-
-
-        <!-- Item Administración con submenú -->
         <div class="menu-item-expandable">
           <div
             class="menu-item"
-            (click)="toggleAdminMenu()"
-            [class.active]="adminMenuOpen">
-
+            (click)="toggleAdministracion()"
+            [class.active]="administracionOpen">
             <mat-icon class="menu-icon">group</mat-icon>
             <span *ngIf="!sidebarCollapsed">Administración</span>
-
             <mat-icon
               *ngIf="!sidebarCollapsed"
               class="menu-arrow"
-              [class.rotated]="adminMenuOpen">
+              [class.rotated]="administracionOpen">
               expand_more
             </mat-icon>
           </div>
 
-
-          <!-- Submenú -->
-          <div
-            class="submenu"
-            [class.open]="adminMenuOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/administracion/usuarios" class="submenu-item">Usuarios</a>
-            <a routerLink="/inicio/administracion/roles" class="submenu-item">Roles</a>
-            <a routerLink="/inicio/administracion/areas" class="submenu-item">Áreas</a>
-            <a routerLink="/inicio/administracion/empresa" class="submenu-item">Empresa</a>
+          <div class="submenu" [class.open]="administracionOpen && !sidebarCollapsed">
+            <a routerLink="/inicio/administracion/usuarios" routerLinkActive="active" class="submenu-item">Usuarios</a>
+            <a routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
+            <a routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
+            <a routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
           </div>
         </div>
-
-
-
-        <div class="menu-item">
-          <mat-icon class="menu-icon">settings</mat-icon>
-          <span *ngIf="!sidebarCollapsed">Configuración</span>
-        </div>
-
       </div>
 
     </nav>
@@ -135,7 +311,6 @@
           <mat-icon>menu</mat-icon>
         </button>
 
-
         <img
           src="/logo-rtv.png"
           alt=""
@@ -149,8 +324,7 @@
         <mat-icon class="user-icon">person</mat-icon>
         <span class="user">{{ nombreUsuario }}</span>
 
-
-        <!-- Botón de cerrar sesión (solo visual por ahora) -->
+        <!-- Botón de cerrar sesión -->
         <button class="logout" (click)="cerrarSesion()">
           <mat-icon>logout</mat-icon>
           <span>Salir</span>
