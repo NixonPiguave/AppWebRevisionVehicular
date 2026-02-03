@@ -25,19 +25,17 @@ export class UsuariosComponent implements OnInit {
   // Búsqueda y paginación
   terminoBusqueda: string = '';
   paginaActual: number = 1;
-  elementosPorPagina: number = 5;
+  elementosPorPagina: number = 10;
   totalPaginas: number = 1;
 
   // Modales
   mostrarModalForm: boolean = false;
   mostrarModalDetalle: boolean = false;
-  mostrarModalConfirmacion: boolean = false;
 
   // Edición
   modoEdicion: boolean = false;
   usuarioEditando: Usuario = this.crearUsuarioVacio();
   usuarioDetalle: Usuario | null = null;
-  usuarioAEliminar: Usuario | null = null;
 
   // Validación
   erroresValidacion: { [key: string]: string } = {};
@@ -56,7 +54,9 @@ export class UsuariosComponent implements OnInit {
     this.cargarDatos();
   }
 
-  // Crear usuario vacío
+  // ────────────────────────────────────────
+  // INICIALIZACIÓN
+  // ────────────────────────────────────────
   crearUsuarioVacio(): Usuario {
     return {
       usuarioId: undefined,
@@ -76,14 +76,11 @@ export class UsuariosComponent implements OnInit {
     };
   }
 
-  // Cargar todos los datos necesarios
   cargarDatos(): void {
     this.cargando = true;
 
-    // Cargar roles, áreas y empresas primero
     this.usuariosService.listarRoles().subscribe({
       next: (data) => {
-        console.log('[USUARIOS] Roles recibidos del backend:', data);
         this.roles = data;
         this.cdr.detectChanges();
       },
@@ -92,7 +89,6 @@ export class UsuariosComponent implements OnInit {
 
     this.usuariosService.listarAreas().subscribe({
       next: (data) => {
-        console.log('[USUARIOS] Áreas recibidas del backend:', data);
         this.areas = data;
         this.cdr.detectChanges();
       },
@@ -101,14 +97,12 @@ export class UsuariosComponent implements OnInit {
 
     this.usuariosService.listarEmpresas().subscribe({
       next: (data) => {
-        console.log('[USUARIOS] Empresas recibidas del backend:', data);
         this.empresas = data;
         this.cdr.detectChanges();
       },
       error: (err) => console.error('[USUARIOS] Error cargando empresas:', err)
     });
 
-    // Cargar usuarios
     this.cargarUsuarios();
   }
 
@@ -133,7 +127,9 @@ export class UsuariosComponent implements OnInit {
     });
   }
 
-  // Obtener nombres para mostrar en tabla
+  // ────────────────────────────────────────
+  // NOMBRES PARA TABLA
+  // ────────────────────────────────────────
   obtenerNombreArea(areaId: number): string {
     const area = this.areas.find(a => a.areaId === areaId);
     return area ? area.nombre : 'N/A';
@@ -144,12 +140,9 @@ export class UsuariosComponent implements OnInit {
     return empresa ? empresa.nombre : 'N/A';
   }
 
-  obtenerNombresRoles(roles: Rol[] | undefined): string {
-    if (!roles || roles.length === 0) return 'Sin roles';
-    return roles.map(r => r.nombre).join(', ');
-  }
-
-  // Filtrar usuarios
+  // ────────────────────────────────────────
+  // FILTRO Y PAGINACIÓN
+  // ────────────────────────────────────────
   filtrarUsuarios(): void {
     if (!this.terminoBusqueda.trim()) {
       this.usuariosFiltrados = [...this.usuarios];
@@ -163,10 +156,10 @@ export class UsuariosComponent implements OnInit {
         u.documentoIdentidad.toLowerCase().includes(termino)
       );
     }
+    this.paginaActual = 1;
     this.calcularPaginacion();
   }
 
-  // Paginación
   calcularPaginacion(): void {
     this.totalPaginas = Math.ceil(this.usuariosFiltrados.length / this.elementosPorPagina);
     if (this.paginaActual > this.totalPaginas) {
@@ -190,18 +183,18 @@ export class UsuariosComponent implements OnInit {
     const maxPaginasVisibles = 5;
     let inicio = Math.max(1, this.paginaActual - Math.floor(maxPaginasVisibles / 2));
     let fin = Math.min(this.totalPaginas, inicio + maxPaginasVisibles - 1);
-
     if (fin - inicio + 1 < maxPaginasVisibles) {
       inicio = Math.max(1, fin - maxPaginasVisibles + 1);
     }
-
     for (let i = inicio; i <= fin; i++) {
       paginas.push(i);
     }
     return paginas;
   }
 
-  // Modal crear
+  // ────────────────────────────────────────
+  // MODALES
+  // ────────────────────────────────────────
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.usuarioEditando = this.crearUsuarioVacio();
@@ -209,20 +202,17 @@ export class UsuariosComponent implements OnInit {
     this.mostrarModalForm = true;
   }
 
-  // Modal editar
   abrirModalEditar(usuario: Usuario): void {
     this.modoEdicion = true;
     this.usuarioEditando = {
       ...usuario,
       rolesIds: usuario.rolesIds ? [...usuario.rolesIds] : [],
-      //IMPORTANTE: Dejar vacío para NO actualizar la contraseña
-      contrasena: ''
+      contrasena: '' // Vacío → mantiene la actual al guardar
     };
     this.erroresValidacion = {};
     this.mostrarModalForm = true;
   }
 
-  // Modal detalle
   abrirModalDetalle(usuario: Usuario): void {
     this.usuarioDetalle = {
       ...usuario,
@@ -232,13 +222,6 @@ export class UsuariosComponent implements OnInit {
     this.mostrarModalDetalle = true;
   }
 
-  // Modal eliminar
-  abrirModalEliminar(usuario: Usuario): void {
-    this.usuarioAEliminar = usuario;
-    this.mostrarModalConfirmacion = true;
-  }
-
-  // Cerrar modales
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.usuarioEditando = this.crearUsuarioVacio();
@@ -250,50 +233,39 @@ export class UsuariosComponent implements OnInit {
     this.usuarioDetalle = null;
   }
 
-  cerrarModalConfirmacion(): void {
-    this.mostrarModalConfirmacion = false;
-    this.usuarioAEliminar = null;
-  }
-
-  // Validación
+  // ────────────────────────────────────────
+  // VALIDACIÓN
+  // ────────────────────────────────────────
   validarFormulario(): boolean {
     this.erroresValidacion = {};
 
     if (!this.usuarioEditando.nombre.trim()) {
       this.erroresValidacion['nombre'] = 'El nombre es requerido';
     }
-
     if (!this.usuarioEditando.apellido.trim()) {
       this.erroresValidacion['apellido'] = 'El apellido es requerido';
     }
-
     if (!this.usuarioEditando.usuario.trim()) {
       this.erroresValidacion['usuario'] = 'El usuario es requerido';
     }
-
-    //Solo requerir contraseña al CREAR
+    // Contraseña solo obligatoria al crear
     if (!this.modoEdicion && !this.usuarioEditando.contrasena.trim()) {
       this.erroresValidacion['contrasena'] = 'La contraseña es requerida';
     }
-
     if (!this.usuarioEditando.documentoIdentidad.trim()) {
       this.erroresValidacion['documentoIdentidad'] = 'El documento de identidad es requerido';
     }
-
     if (!this.usuarioEditando.email.trim()) {
       this.erroresValidacion['email'] = 'El email es requerido';
-    } else if (!this.validarEmail(this.usuarioEditando.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.usuarioEditando.email)) {
       this.erroresValidacion['email'] = 'El email no es válido';
     }
-
     if (!this.usuarioEditando.areaId || this.usuarioEditando.areaId === 0) {
       this.erroresValidacion['areaId'] = 'Debe seleccionar un área';
     }
-
     if (!this.usuarioEditando.empresaId || this.usuarioEditando.empresaId === 0) {
       this.erroresValidacion['empresaId'] = 'Debe seleccionar una empresa';
     }
-
     if (!this.usuarioEditando.rolesIds || this.usuarioEditando.rolesIds.length === 0) {
       this.erroresValidacion['rolesIds'] = 'Debe seleccionar al menos un rol';
     }
@@ -301,12 +273,9 @@ export class UsuariosComponent implements OnInit {
     return Object.keys(this.erroresValidacion).length === 0;
   }
 
-  validarEmail(email: string): boolean {
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return regex.test(email);
-  }
-
-  // Manejo de roles (checkbox)
+  // ────────────────────────────────────────
+  // ROLES (checkbox)
+  // ────────────────────────────────────────
   toggleRol(rolId: number): void {
     const index = this.usuarioEditando.rolesIds.indexOf(rolId);
     if (index === -1) {
@@ -320,15 +289,14 @@ export class UsuariosComponent implements OnInit {
     return this.usuarioEditando.rolesIds.includes(rolId);
   }
 
-  //GUARDAR USUARIO - CORREGIDO
+  // ────────────────────────────────────────
+  // GUARDAR (crear / editar)
+  // ────────────────────────────────────────
   guardarUsuario(): void {
-    if (!this.validarFormulario()) {
-      return;
-    }
+    if (!this.validarFormulario()) return;
 
     this.cargando = true;
 
-    // Preparar objeto base
     const usuarioParaEnviar: any = {
       nombre: this.usuarioEditando.nombre,
       apellido: this.usuarioEditando.apellido,
@@ -341,27 +309,21 @@ export class UsuariosComponent implements OnInit {
       rolesIds: this.usuarioEditando.rolesIds.map(id => Number(id))
     };
 
-    //CAMBIO CRÍTICO: Solo incluir contraseña SI tiene valor
+    // Solo incluir contraseña si tiene valor (editar sin cambiarla → no la envía)
     if (this.usuarioEditando.contrasena && this.usuarioEditando.contrasena.trim() !== '') {
       usuarioParaEnviar.contrasena = this.usuarioEditando.contrasena;
     }
-    // Si NO se incluye 'contrasena', el backend NO la actualizará (mantiene la actual)
 
-    // Solo para crear: incluir usuarioBaseDatos y contrasenaBaseDatos
     if (!this.modoEdicion) {
+      // Crear: campos de base datos
       usuarioParaEnviar.usuarioBaseDatos = this.usuarioEditando.usuarioBaseDatos || '';
       usuarioParaEnviar.contrasenaBaseDatos = this.usuarioEditando.contrasenaBaseDatos || '';
-    }
-
-    // Solo para editar: incluir el ID
-    if (this.modoEdicion) {
+    } else {
+      // Editar: incluir ID
       usuarioParaEnviar.usuarioId = this.usuarioEditando.usuarioId;
     }
 
-    console.log('[USUARIOS] Enviando al backend:', JSON.stringify(usuarioParaEnviar, null, 2));
-
     if (this.modoEdicion) {
-      // EDITAR
       this.usuariosService.actualizarUsuario(usuarioParaEnviar.usuarioId!, usuarioParaEnviar).subscribe({
         next: () => {
           this.mostrarExito('Usuario actualizado correctamente');
@@ -371,11 +333,10 @@ export class UsuariosComponent implements OnInit {
         error: (err) => {
           this.mostrarError('Error al actualizar usuario');
           this.cargando = false;
-          console.error('[USUARIOS] Error al actualizar:', err);
+          console.error('[USUARIOS] Error actualizar:', err);
         }
       });
     } else {
-      // CREAR
       this.usuariosService.crearUsuario(usuarioParaEnviar).subscribe({
         next: () => {
           this.mostrarExito('Usuario creado correctamente');
@@ -385,32 +346,15 @@ export class UsuariosComponent implements OnInit {
         error: (err) => {
           this.mostrarError('Error al crear usuario');
           this.cargando = false;
-          console.error('[USUARIOS] Error al crear:', err);
+          console.error('[USUARIOS] Error crear:', err);
         }
       });
     }
   }
 
-  // Eliminar usuario
-  confirmarEliminar(): void {
-    if (!this.usuarioAEliminar) return;
-
-    this.cargando = true;
-    this.usuariosService.eliminarUsuario(this.usuarioAEliminar.usuarioId!).subscribe({
-      next: () => {
-        this.mostrarExito('Usuario eliminado correctamente');
-        this.cerrarModalConfirmacion();
-        this.cargarUsuarios();
-      },
-      error: (err) => {
-        this.mostrarError('Error al eliminar usuario');
-        this.cargando = false;
-        console.error(err);
-      }
-    });
-  }
-
-  // Mensajes
+  // ────────────────────────────────────────
+  // MENSAJES
+  // ────────────────────────────────────────
   mostrarExito(mensaje: string): void {
     this.mensajeExito = mensaje;
     setTimeout(() => {
@@ -425,10 +369,5 @@ export class UsuariosComponent implements OnInit {
       this.mensajeError = '';
       this.cdr.detectChanges();
     }, 3000);
-  }
-
-  // Utilidades
-  getEstadoClass(estado: string): string {
-    return estado === 'Activo' ? 'estado-activo' : 'estado-inactivo';
   }
 }
