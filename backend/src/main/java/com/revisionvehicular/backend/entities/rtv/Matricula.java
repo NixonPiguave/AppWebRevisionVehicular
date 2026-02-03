@@ -45,4 +45,9 @@ public class Matricula {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
+
+    @ManyToOne
+    @JoinColumn(name = "id_excepcion", nullable = true)
+    private ExcepcionMatricula excepcionMatricula;
+
 }

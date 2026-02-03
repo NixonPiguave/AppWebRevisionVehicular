@@ -1,7 +1,8 @@
 package com.revisionvehicular.backend.entities.cv;
-
+import com.revisionvehicular.backend.entities.rtv.Inspeccion;
 import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+import com.revisionvehicular.backend.entities.pv.HistorialPropietario;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -86,10 +87,9 @@ public class Vehiculo {
     private Subcategoria subcategoria;
 
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
-    private List<com.revisionvehicular.backend.entities.rtv.Inspeccion> inspecciones = new ArrayList<>();
+    private List<Inspeccion> inspecciones = new ArrayList<>();
 
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
-    private List<com.revisionvehicular.backend.entities.pv.HistorialPropietario> historialPropietarios = new ArrayList<>();
-
+    private List<HistorialPropietario> historialPropietarios = new ArrayList<>();
 
 }
