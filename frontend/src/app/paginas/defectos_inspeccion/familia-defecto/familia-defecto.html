@@ -64,7 +64,7 @@
         </thead>
         <tbody>
         <tr *ngFor="let familia of familiasDefectosPaginadas">
-          <td>{{ familia.familiaId }}</td>
+          <td>{{ familia.id }}</td>
           <td>{{ familia.nombre }}</td>
           <td>{{ familia.descripcion }}</td>
           <td>
@@ -211,7 +211,7 @@
     <div class="modal-body" *ngIf="familiaDefectoDetalle">
       <div class="detalle-item">
         <span class="detalle-label">ID:</span>
-        <span class="detalle-valor">{{ familiaDefectoDetalle.familiaId }}</span>
+        <span class="detalle-valor">{{ familiaDefectoDetalle.id }}</span>
       </div>
       <div class="detalle-item">
         <span class="detalle-label">Nombre:</span>

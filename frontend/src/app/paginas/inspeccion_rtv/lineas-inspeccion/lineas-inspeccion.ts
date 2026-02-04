@@ -2,149 +2,188 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon'; // ← IMPORTAR Material Icons
 import { LineasService, Linea } from '../../../services/inspeccion_rtv/lineas.service';
 
 @Component({
-  selector: 'app-lineas',
-  imports: [CommonModule, RouterModule, FormsModule, MatIconModule],
-  templateUrl: './lineas.html',
-  styleUrl: './lineas.css',
+  selector: 'app-roles',
+  imports: [CommonModule, RouterModule, FormsModule,MatIconModule],
+  templateUrl: './lineas-inspeccion.html',
+  styleUrl: './lineas-inspeccion.css',
 })
-export class LineasComponent implements OnInit {
+export class LineasInspeccionComponent implements OnInit {
+  // Lista de roles (se carga desde el backend)
+  roles: Linea[] = [];
+  cargando: boolean = false;
+  error: string = '';
 
-  lineas: Linea[] = [];
-  cargando = false;
-  error = '';
+  // Filtros y paginación
+  filtro: string = '';
+  registrosPorPagina: number = 10;
+  paginaActual: number = 1;
 
-  filtro = '';
-  registrosPorPagina = 10;
-  paginaActual = 1;
+  // Modal crear/editar
+  mostrarModalForm: boolean = false;
+  modoEdicion: boolean = false;
+  rolEditando: Linea = { id: null, nombre: '', estado: 'A', descripcion:'' };
+  guardando: boolean = false;
 
-  mostrarModalForm = false;
-  modoEdicion = false;
-  lineaEditando: Linea = {
-    lineaId: null,
-    nombre: '',
-    descripcion: '',
-    estado: 'A'
-  };
-  guardando = false;
-
-  mostrarModalDetalle = false;
-  lineaDetalle: Linea | null = null;
+  // Modal detalle
+  mostrarModalDetalle: boolean = false;
+  rolDetalle: Linea | null = null;
 
   constructor(
-    private lineasService: LineasService,
+    private rolesService: LineasService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.cargarLineas();
+    this.cargarRoles();
   }
 
-  cargarLineas(): void {
+  /**
+   * Cargar roles desde el backend
+   */
+  cargarRoles(): void {
     this.cargando = true;
     this.error = '';
-    this.cdr.detectChanges();
+    this.cdr.detectChanges(); // ← Forzar actualización
 
-    this.lineasService.listarLineas().subscribe({
+    this.rolesService.listarRoles().subscribe({
       next: (data) => {
-        this.lineas = data;
+        console.log('Lineas cargadas:', data);
+        this.roles = data;
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // ← Forzar actualización
       },
-      error: () => {
-        this.error = 'Error al cargar las líneas';
+      error: (err) => {
+        console.error('Error al cargar Linea:', err);
+        this.error = 'Error al cargar las Lineas. Verifica que el backend esté corriendo.';
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.detectChanges(); // ← Forzar actualización
       }
     });
   }
 
-  get lineasFiltradas(): Linea[] {
-    if (!this.filtro.trim()) return this.lineas;
-    const f = this.filtro.toLowerCase();
-    return this.lineas.filter(l =>
-      l.nombre.toLowerCase().includes(f) ||
-      l.descripcion.toLowerCase().includes(f) ||
-      (l.lineaId?.toString() || '').includes(f)
+  // Getter para roles filtrados
+  get rolesFiltrados(): Linea[] {
+    if (!this.filtro.trim()) {
+      return this.roles;
+    }
+    const filtroLower = this.filtro.toLowerCase();
+    return this.roles.filter(
+      (rol) =>
+        rol.nombre.toLowerCase().includes(filtroLower) ||
+        (rol.id?.toString() || '').includes(filtroLower) ||
+        this.getEstadoTexto(rol.estado).toLowerCase().includes(filtroLower)
     );
   }
 
-  get lineasPaginadas(): Linea[] {
+  // Getter para roles paginados
+  get rolesPaginados(): Linea[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
-    return this.lineasFiltradas.slice(inicio, inicio + this.registrosPorPagina);
+    const fin = inicio + this.registrosPorPagina;
+    return this.rolesFiltrados.slice(inicio, fin);
   }
 
+  // Getter para total de páginas
   get totalPaginas(): number {
-    return Math.ceil(this.lineasFiltradas.length / this.registrosPorPagina);
+    return Math.ceil(this.rolesFiltrados.length / this.registrosPorPagina);
   }
 
+  // Getter para array de páginas
   get paginas(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+    const paginas: number[] = [];
+    for (let i = 1; i <= this.totalPaginas; i++) {
+      paginas.push(i);
+    }
+    return paginas;
   }
 
+  // Convertir estado a texto
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  irAPagina(p: number): void {
-    if (p >= 1 && p <= this.totalPaginas) this.paginaActual = p;
+  // Cambiar página
+  irAPagina(pagina: number): void {
+    if (pagina >= 1 && pagina <= this.totalPaginas) {
+      this.paginaActual = pagina;
+    }
   }
 
+  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
+  // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.lineaEditando = { lineaId: null, nombre: '', descripcion: '', estado: 'A' };
+    this.rolEditando = { id: null, nombre: '', estado: 'A', descripcion:''};
     this.mostrarModalForm = true;
   }
 
-  abrirModalEditar(linea: Linea): void {
+  // Abrir modal para editar
+  abrirModalEditar(rol: Linea): void {
     this.modoEdicion = true;
-    this.lineaEditando = { ...linea };
+    this.rolEditando = { ...rol };
     this.mostrarModalForm = true;
   }
 
+  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
+    this.rolEditando = { id: null, nombre: '', estado: 'A', descripcion:'' };
   }
 
-  guardarLinea(): void {
-    if (!this.lineaEditando.nombre.trim()) {
-      alert('El nombre es obligatorio');
+  // Guardar rol (crear o editar)
+  guardarRol(): void {
+    if (!this.rolEditando.nombre.trim()) {
+      alert('El nombre del Linea es requerido');
       return;
     }
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.lineaEditando.lineaId) {
-      this.lineasService.actualizarLinea(this.lineaEditando.lineaId, this.lineaEditando)
-        .subscribe(() => {
-          this.cargarLineas();
+    if (this.modoEdicion && this.rolEditando.id) {
+      // Editar existente
+      this.rolesService.actualizarRol(this.rolEditando.id, this.rolEditando).subscribe({
+        next: () => {
+          this.cargarRoles();
           this.cerrarModalForm();
           this.guardando = false;
-        });
+        },
+        error: (err) => {
+          console.error('Error al actualizar Linea:', err);
+          alert('Error al actualizar la Linea');
+          this.guardando = false;
+        }
+      });
     } else {
-      this.lineasService.crearLinea(this.lineaEditando)
-        .subscribe(() => {
-          this.cargarLineas();
+      // Crear nuevo
+      this.rolesService.crearRol(this.rolEditando).subscribe({
+        next: () => {
+          this.cargarRoles();
           this.cerrarModalForm();
           this.guardando = false;
-        });
+        },
+        error: (err) => {
+          console.error('Error al crear Linea:', err);
+          alert('Error al crear la Linea');
+          this.guardando = false;
+        }
+      });
     }
   }
-
-  verDetalle(linea: Linea): void {
-    this.lineaDetalle = linea;
+  // Abrir modal detalle
+  verDetalle(rol: Linea): void {
+    this.rolDetalle = rol;
     this.mostrarModalDetalle = true;
   }
-
+  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
-    this.lineaDetalle = null;
+    this.rolDetalle = null;
   }
 }

@@ -1,84 +1,85 @@
-<div class="marcas-container">
-
-  <!-- ERROR -->
+<div class="marca-container">
   <div class="mensaje-error" *ngIf="error">
-    <span>{{ error }}</span>
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
     <button class="btn-reintentar" (click)="cargarMarcas()">Reintentar</button>
   </div>
 
-  <!-- CARGANDO -->
   <div class="cargando" *ngIf="cargando && !error">
-    Cargando marcas...
+    <div class="spinner"></div>
+    <span>Cargando marcas de vehículos...</span>
   </div>
 
   <div *ngIf="!cargando || error">
-
-    <!-- HEADER -->
-    <div class="marcas-header">
-      <h2>Gestión de Marcas</h2>
+    <div class="marca-header">
+      <h2>Gestión de Marcas de Vehículos</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
         <mat-icon>add</mat-icon>
         Nueva Marca
       </button>
     </div>
 
-    <!-- CONTROLES -->
-    <div class="marcas-controles">
+    <div class="marca-controles">
       <div class="control-grupo">
-        <label>Buscar:</label>
-        <input
-          class="input-filtro"
-          type="text"
-          [(ngModel)]="filtro"
-          (ngModelChange)="onFiltroChange()"
-          placeholder="Buscar por ID, nombre, empresa o país"
-        />
+        <label for="filtro">Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por ID, nombre, empresa, país..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
       </div>
-
       <div class="control-grupo">
-        <label>Mostrar:</label>
+        <label for="registros">Mostrar:</label>
         <select
-          class="select-registros"
+          id="registros"
           [(ngModel)]="registrosPorPagina"
-          (change)="onFiltroChange()"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
         >
           <option [value]="10">10</option>
           <option [value]="25">25</option>
           <option [value]="50">50</option>
         </select>
+        <span class="registros-texto">registros</span>
       </div>
     </div>
 
-    <!-- TABLA -->
     <div class="tabla-contenedor">
-      <table class="marcas-tabla">
+      <table class="marca-tabla">
         <thead>
         <tr>
           <th>ID</th>
           <th>Nombre</th>
           <th>Empresa</th>
-          <th>Grupo</th>
-          <th>País</th>
+          <th>País de Origen</th>
+          <th>Grupo Automotriz</th>
           <th>Estado</th>
           <th class="th-acciones">Acciones</th>
         </tr>
         </thead>
-
         <tbody>
         <tr *ngFor="let marca of marcasPaginadas">
           <td>{{ marca.id }}</td>
           <td class="txt-resaltado">{{ marca.nombre }}</td>
           <td>{{ marca.empresa }}</td>
-          <td>{{ marca.grupoAutomotriz }}</td>
           <td>{{ marca.paisOrigen }}</td>
+          <td>{{ marca.grupoAutomotriz }}</td>
           <td>
-              <span
-                class="estado-badge"
-                [class.activo]="marca.estado === 'A'"
-                [class.inactivo]="marca.estado === 'I'"
-              >
-                {{ getEstadoTexto(marca.estado) }}
-              </span>
+            <span
+              class="estado-badge"
+              [class.activo]="marca.estado === 'A'"
+              [class.inactivo]="marca.estado === 'I'"
+            >
+              {{ getEstadoTexto(marca.estado) }}
+            </span>
           </td>
           <td class="td-acciones">
             <button
@@ -99,7 +100,7 @@
           </td>
         </tr>
 
-        <tr *ngIf="marcasPaginadas.length === 0 && !cargando">
+        <tr *ngIf="marcasPaginadas.length === 0 && !error && !cargando">
           <td colspan="7" class="sin-registros">
             No se encontraron registros
           </td>
@@ -108,74 +109,140 @@
       </table>
     </div>
 
-    <!-- PAGINACIÓN -->
-    <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button
-        class="btn-pagina"
-        *ngFor="let p of paginas"
-        (click)="irAPagina(p)"
-        [class.activa]="p === paginaActual"
-      >
-        {{ p }}
-      </button>
-    </div>
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="marcasFiltradas.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > marcasFiltradas.length
+        ? marcasFiltradas.length
+        : paginaActual * registrosPorPagina }}
+        de {{ marcasFiltradas.length }} registros
+      </div>
 
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- MODAL CREAR / EDITAR -->
-<div
-  class="modal-overlay"
-  *ngIf="mostrarModalForm"
-  (click)="cerrarModalForm()"
->
-  <div class="modal-contenido" (click)="$event.stopPropagation()">
-
+<!-- Modal Formulario Crear/Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-form" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>{{ modoEdicion ? 'Editar Marca' : 'Nueva Marca' }}</h3>
+      <h3>{{ modoEdicion ? 'Editar Marca de Vehículo' : 'Nueva Marca de Vehículo' }}</h3>
       <button class="btn-cerrar" (click)="cerrarModalForm()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="modal-body">
-      <div class="form-grupo">
-        <label>Nombre</label>
-        <input class="form-input" [(ngModel)]="marcaEditando.nombre" />
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="nombre">Nombre de la Marca *</label>
+          <input
+            type="text"
+            id="nombre"
+            [(ngModel)]="marcaEditando.nombre"
+            class="form-input"
+            placeholder="Ej: Toyota, Chevrolet, Ford"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label for="empresa">Empresa</label>
+          <input
+            type="text"
+            id="empresa"
+            [(ngModel)]="marcaEditando.empresa"
+            class="form-input"
+            placeholder="Nombre de la empresa"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="paisOrigen">País de Origen</label>
+          <input
+            type="text"
+            id="paisOrigen"
+            [(ngModel)]="marcaEditando.paisOrigen"
+            class="form-input"
+            placeholder="Ej: Japón, Estados Unidos"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label for="grupoAutomotriz">Grupo Automotriz</label>
+          <input
+            type="text"
+            id="grupoAutomotriz"
+            [(ngModel)]="marcaEditando.grupoAutomotriz"
+            class="form-input"
+            placeholder="Ej: Toyota Group, General Motors"
+          />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="fechaAlta">Fecha de Alta</label>
+          <input
+            type="date"
+            id="fechaAlta"
+            [(ngModel)]="marcaEditando.fechaAlta"
+            class="form-input"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label for="fechaBaja">Fecha de Baja</label>
+          <input
+            type="date"
+            id="fechaBaja"
+            [(ngModel)]="marcaEditando.fechaBaja"
+            class="form-input"
+          />
+        </div>
       </div>
 
       <div class="form-grupo">
-        <label>Empresa</label>
-        <input class="form-input" [(ngModel)]="marcaEditando.empresa" />
-      </div>
-
-      <div class="form-grupo">
-        <label>Grupo Automotriz</label>
+        <label for="logoUrl">URL del Logo</label>
         <input
-          class="form-input"
-          [(ngModel)]="marcaEditando.grupoAutomotriz"
-        />
-      </div>
-
-      <div class="form-grupo">
-        <label>País de Origen</label>
-        <input
-          class="form-input"
-          [(ngModel)]="marcaEditando.paisOrigen"
-        />
-      </div>
-
-      <div class="form-grupo">
-        <label>URL Logo</label>
-        <input
-          class="form-input"
+          type="url"
+          id="logoUrl"
           [(ngModel)]="marcaEditando.logoUrl"
+          class="form-input"
+          placeholder="https://ejemplo.com/logo.png"
         />
       </div>
 
       <div class="form-grupo">
-        <label>Estado</label>
-        <select class="form-select" [(ngModel)]="marcaEditando.estado">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="marcaEditando.estado" class="form-select">
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>
         </select>
@@ -183,82 +250,76 @@
     </div>
 
     <div class="modal-footer">
-      <button
-        class="btn-cancelar"
-        (click)="cerrarModalForm()"
-        [disabled]="guardando"
-      >
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
         Cancelar
       </button>
-      <button
-        class="btn-guardar"
-        (click)="guardarMarca()"
-        [disabled]="guardando"
-      >
-        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      <button class="btn-guardar" (click)="guardarMarca()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Marca') }}
       </button>
     </div>
-
   </div>
 </div>
 
-<!-- MODAL DETALLE -->
-<div
-  class="modal-overlay"
-  *ngIf="mostrarModalDetalle"
-  (click)="cerrarModalDetalle()"
->
-  <div
-    class="modal-contenido modal-detalle"
-    (click)="$event.stopPropagation()"
-  >
-
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Detalle de Marca</h3>
+      <h3>Detalle de la Marca de Vehículo</h3>
       <button class="btn-cerrar" (click)="cerrarModalDetalle()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
     <div class="modal-body" *ngIf="marcaDetalle">
-      <div class="detalle-item">
-        <span class="detalle-label">ID:</span>
-        <span class="detalle-valor">#{{ marcaDetalle.id }}</span>
-      </div>
-
-      <div class="detalle-item">
-        <span class="detalle-label">Nombre:</span>
-        <span class="detalle-valor">{{ marcaDetalle.nombre }}</span>
-      </div>
-
-      <div class="detalle-item">
-        <span class="detalle-label">Empresa:</span>
-        <span class="detalle-valor">{{ marcaDetalle.empresa }}</span>
-      </div>
-
-      <div class="detalle-item">
-        <span class="detalle-label">Grupo:</span>
-        <span class="detalle-valor">{{ marcaDetalle.grupoAutomotriz }}</span>
-      </div>
-
-      <div class="detalle-item">
-        <span class="detalle-label">País:</span>
-        <span class="detalle-valor">{{ marcaDetalle.paisOrigen }}</span>
-      </div>
-
-      <div class="detalle-item">
-        <span class="detalle-label">Estado:</span>
-        <span class="detalle-valor">
-          {{ getEstadoTexto(marcaDetalle.estado) }}
-        </span>
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ marcaDetalle.id }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre:</span>
+          <span class="detalle-valor resaltado">{{ marcaDetalle.nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Empresa:</span>
+          <span class="detalle-valor">{{ marcaDetalle.empresa || 'No especificada' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">País de Origen:</span>
+          <span class="detalle-valor">{{ marcaDetalle.paisOrigen || 'No especificado' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Grupo Automotriz:</span>
+          <span class="detalle-valor">{{ marcaDetalle.grupoAutomotriz || 'No especificado' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Fecha de Alta:</span>
+          <span class="detalle-valor">{{ formatearFecha(marcaDetalle.fechaAlta) }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Fecha de Baja:</span>
+          <span class="detalle-valor">{{ formatearFecha(marcaDetalle.fechaBaja) }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Logo URL:</span>
+          <span class="detalle-valor">{{ marcaDetalle.logoUrl || 'No especificado' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="marcaDetalle.estado === 'A'"
+            [class.inactivo]="marcaDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(marcaDetalle.estado) }}
+          </span>
+        </div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalDetalle()">
-        Cerrar
-      </button>
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
     </div>
-
   </div>
 </div>

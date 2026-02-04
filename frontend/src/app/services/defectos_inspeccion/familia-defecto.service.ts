@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface FamiliaDefecto {
-  familiaId: number | null;
+  id: number | null;
   nombre: string;
   descripcion: string;
   estado: string;
@@ -15,7 +15,7 @@ export interface FamiliaDefecto {
 export class FamiliaDefectoService {
 
   // URL del backend para familias de defectos
-  private apiUrl = 'http://localhost:8080/api/familias-defectos';
+  private apiUrl = 'http://localhost:8080/api/familias';
 
   constructor(private http: HttpClient) {}
 

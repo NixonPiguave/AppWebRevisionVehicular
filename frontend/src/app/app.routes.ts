@@ -25,9 +25,10 @@ import { FamiliaDefecto } from './paginas/defectos_inspeccion/familia-defecto/fa
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
+import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 
 export const routes: Routes = [
-  { path: '', component: InicioComponent },
+  { path: '', component: LoginComponent },
   {
     path: 'inicio',
     component: InicioComponent,
@@ -60,6 +61,7 @@ export const routes: Routes = [
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
+      { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
     ]
   },
   { path: '**', redirectTo: '' }

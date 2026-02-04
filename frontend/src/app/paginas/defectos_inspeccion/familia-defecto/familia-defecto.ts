@@ -27,7 +27,7 @@ export class FamiliaDefectoComponent implements OnInit {
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   familiaDefectoEditando: FamiliaDefecto = {
-    familiaId: null,
+    id: null,
     nombre: '',
     descripcion: '',
     estado: 'A'
@@ -81,7 +81,7 @@ export class FamiliaDefectoComponent implements OnInit {
       (familia) =>
         familia.nombre.toLowerCase().includes(filtroLower) ||
         familia.descripcion.toLowerCase().includes(filtroLower) ||
-        (familia.familiaId?.toString() || '').includes(filtroLower) ||
+        (familia.id?.toString() || '').includes(filtroLower) ||
         this.getEstadoTexto(familia.estado).toLowerCase().includes(filtroLower)
     );
   }
@@ -128,7 +128,7 @@ export class FamiliaDefectoComponent implements OnInit {
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.familiaDefectoEditando = {
-      familiaId: null,
+      id: null,
       nombre: '',
       descripcion: '',
       estado: 'A'
@@ -147,7 +147,7 @@ export class FamiliaDefectoComponent implements OnInit {
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.familiaDefectoEditando = {
-      familiaId: null,
+      id: null,
       nombre: '',
       descripcion: '',
       estado: 'A'
@@ -168,10 +168,10 @@ export class FamiliaDefectoComponent implements OnInit {
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.familiaDefectoEditando.familiaId) {
+    if (this.modoEdicion && this.familiaDefectoEditando.id) {
       // Editar existente
       this.familiaDefectoService.actualizarFamiliaDefecto(
-        this.familiaDefectoEditando.familiaId,
+        this.familiaDefectoEditando.id,
         this.familiaDefectoEditando
       ).subscribe({
         next: () => {
