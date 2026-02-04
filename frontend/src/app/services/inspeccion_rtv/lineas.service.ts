@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 export interface Linea {
   id: number | null;
   nombre: string;
-  descripcion: string;
   estado: string;
+  descripcion: string;
 }
 
 @Injectable({
@@ -14,19 +14,29 @@ export interface Linea {
 })
 export class LineasService {
 
+  // Cambia esto si tu backend está en otro puerto
   private apiUrl = 'http://localhost:8080/api/lineas';
 
   constructor(private http: HttpClient) {}
 
-  listarLineas(): Observable<Linea[]> {
+  /**
+   * Obtener todos los roles
+   */
+  listarRoles(): Observable<Linea[]> {
     return this.http.get<Linea[]>(this.apiUrl);
   }
 
-  crearLinea(linea: Linea): Observable<Linea> {
-    return this.http.post<Linea>(this.apiUrl, linea);
+  /**
+   * Crear un nuevo rol
+   */
+  crearRol(rol: Linea): Observable<Linea> {
+    return this.http.post<Linea>(this.apiUrl, rol);
   }
 
-  actualizarLinea(id: number, linea: Linea): Observable<Linea> {
-    return this.http.put<Linea>(`${this.apiUrl}/${id}`, linea);
+  /**
+   * Actualizar un rol
+   */
+  actualizarRol(id: number, rol: Linea): Observable<Linea> {
+    return this.http.put<Linea>(`${this.apiUrl}/${id}`, rol);
   }
 }

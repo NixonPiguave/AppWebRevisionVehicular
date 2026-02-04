@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { CategoriaDefectoService, CategoriaDefecto } from '../../../services/defectos_inspeccion/categoria-defecto.service';
+import { CategoriaDefectoService, CategoriaDefecto } from '../../../services/defectos_inspeccion/categoria_defecto.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './categoria-defecto.html',
   styleUrl: './categoria-defecto.css',
 })
-export class CategoriaDefecto implements OnInit {
+export class CategoriaDefectoComponent implements OnInit {
   // Lista de categorías de defecto (se carga desde el backend)
   categorias: CategoriaDefecto[] = [];
   cargando: boolean = false;

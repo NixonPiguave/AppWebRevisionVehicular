@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/tipo-defecto")
+@RequestMapping("/api/tipodefecto")
 public class TipoDefectoController {
 
     private final ITipoDefectoService tipoDefectoService;

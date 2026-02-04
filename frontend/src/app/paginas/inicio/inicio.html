@@ -158,9 +158,9 @@
           </div>
 
           <div class="submenu" [class.open]="inspeccionRtvOpen && !sidebarCollapsed">
-            <a class="submenu-item">Líneas de Inspección</a>
+            <a routerLink="/inicio/inspeccion-rtv/lineas-inspeccion" routerLinkActive="active" class="submenu-item">Líneas de Inspección</a>
             <a routerLink="/inicio/inspeccion-rtv/metodo-inspeccion" routerLinkActive="active" class="submenu-item">Métodos de Inspección</a>
-            <a class="submenu-item">Equipos</a>
+            <a routerLink="/inicio/inspeccion-rtv/equipos" routerLinkActive="active" class="submenu-item">Equipos</a>
           </div>
         </div>
       </div>
@@ -189,10 +189,10 @@
           </div>
 
           <div class="submenu" [class.open]="defectosInspeccionOpen && !sidebarCollapsed">
-            <a class="submenu-item">Familias de Defectos</a>
-            <a class="submenu-item">Subfamilias de Defectos</a>
-            <a class="submenu-item">Categorías de Defectos</a>
-            <a class="submenu-item">Tipos de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/familia-defecto" routerLinkActive="active" class="submenu-item">Familias de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/tipos-defecto" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
           </div>
         </div>
       </div>
