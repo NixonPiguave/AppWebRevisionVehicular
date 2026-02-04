@@ -19,7 +19,7 @@ import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion
 import { SubfamiliaDefectoComponent } from './paginas/defectos_inspeccion/subfamilia-defecto/subfamilia-defecto';
 import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
 import { CategoriaDefecto } from './paginas/defectos_inspeccion/categoria-defecto/categoria-defecto';
-import { FamiliaDefecto } from ./paginas/defectos_inspeccion/categoria-defecto/categoria-defecto'';
+import { FamiliaDefecto } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
 
 
 // Importaciones de Inspección RTV
@@ -55,6 +55,7 @@ export const routes: Routes = [
       { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
       { path: 'defectos-inspeccion/categoria-defecto', component: CategoriaDefecto },
+      { path: 'defectos-inspeccion/familia-defecto', component: FamiliaDefecto },
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
