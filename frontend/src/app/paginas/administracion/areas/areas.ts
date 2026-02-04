@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { AreasService, Area } from '../../../services/areas.service';
+import { AreasService, Area } from '../../../services/administracion/areas.service';
 import {MatIconModule} from '@angular/material/icon';
 
 @Component({

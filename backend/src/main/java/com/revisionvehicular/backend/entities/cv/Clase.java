@@ -14,7 +14,7 @@ public class Clase {
     private Long claseId;
 
     @Column(nullable = false, length = 50, unique = true)
-    private String codigo;
+    private String clase;
 
     @Column(nullable = false, length = 100)
     private String descripcion;

@@ -1,1 +1,177 @@
-<p>categorias works!</p>
+<div class="categorias-container">
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarCategorias()">
+      Reintentar
+    </button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    Cargando categorías...
+  </div>
+
+  <div *ngIf="!cargando || error">
+    <div class="categorias-header">
+      <h2>Gestión de Categorías</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Categoría
+      </button>
+    </div>
+
+    <div class="categorias-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <input
+          type="text"
+          id="filtro"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange()"
+          placeholder="Código, nombre o descripción..."
+          class="input-filtro"
+        />
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="categorias-tabla">
+        <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let cat of categoriasPaginadas">
+          <td class="txt-codigo">{{ cat.codigo }}</td>
+          <td>{{ cat.nombre }}</td>
+          <td class="txt-descripcion">{{ cat.descripcion }}</td>
+          <td>
+              <span class="estado-badge" [class.activo]="cat.estado === 'A'" [class.inactivo]="cat.estado === 'I'">
+                {{ getEstadoTexto(cat.estado) }}
+              </span>
+          </td>
+          <td class="td-acciones">
+            <button class="btn-accion btn-ver" (click)='verDetalle(cat)' title="Ver detalle">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(cat)" title="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="categoriasPaginadas.length === 0 && !error && !cargando">
+          <td colspan="5" class="sin-registros">No se encontraron categorías</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
+      <button *ngFor="let pagina of paginas" class="btn-pagina" [class.activa]="pagina === paginaActual" (click)="irAPagina(pagina)">
+        {{ pagina }}
+      </button>
+      <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Categoría' : 'Nueva Categoría' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grupo">
+        <label>Código</label>
+        <input type="text" [(ngModel)]="categoriaEditando.codigo" class="form-input" placeholder="Ej: L, M, N, etc.." />
+      </div>
+      <div class="form-grupo">
+        <label>Nombre</label>
+        <input type="text" [(ngModel)]="categoriaEditando.nombre" class="form-input" placeholder="Nombre de la categoría" />
+      </div>
+      <div class="form-grupo">
+        <label>Descripción</label>
+        <textarea [(ngModel)]="categoriaEditando.descripcion" class="form-input" rows="3" placeholder="Breve descripción..."></textarea>
+      </div>
+      <div class="form-grupo">
+        <label>Estado</label>
+        <select [(ngModel)]="categoriaEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarCategoria()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle de la Categoría</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="categoriaDetalle">
+      <div class="detalle-item">
+        <span class="detalle-label">ID:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.categoriaid }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Código:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.codigo }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Nombre:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.nombre }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Descripción:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.descripcion }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Estado:</span>
+        <span
+          class="estado-badge"
+          [class.activo]="categoriaDetalle.estado === 'A'"
+          [class.inactivo]="categoriaDetalle.estado === 'I'"
+        >
+          {{ getEstadoTexto(categoriaDetalle.estado) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

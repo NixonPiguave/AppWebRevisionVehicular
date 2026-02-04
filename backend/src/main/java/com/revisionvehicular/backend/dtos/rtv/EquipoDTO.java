@@ -1,6 +1,5 @@
 package com.revisionvehicular.backend.dtos.rtv;
 import lombok.Data;
-
 import java.time.LocalDateTime;
 @Data
 public class EquipoDTO {

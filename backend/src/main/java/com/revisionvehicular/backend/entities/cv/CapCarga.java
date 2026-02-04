@@ -11,7 +11,7 @@ public class CapCarga {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cap_carga_id;
+    private Long capcargaid;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal capacidad;

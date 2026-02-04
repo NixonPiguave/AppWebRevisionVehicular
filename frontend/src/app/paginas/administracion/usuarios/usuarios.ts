@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { UsuariosService, Usuario, Rol, Area, Empresa } from '../../../services/usuarios.service';
+import { UsuariosService, Usuario, Rol, Area, Empresa } from '../../../services/administracion/usuarios.service';
 
 @Component({
   selector: 'app-usuarios',

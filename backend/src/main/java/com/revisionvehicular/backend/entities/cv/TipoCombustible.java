@@ -10,7 +10,7 @@ public class TipoCombustible {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tipo_combustible_id;
+    private Long tipocombustibleid;
 
     @Column(nullable = false, length = 100)
     private String nombre;

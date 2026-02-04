@@ -10,7 +10,8 @@ public class AmbitoOperacional {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long ambito_operacional_id;
+    @Column(name="ambito_operacionalid")
+    private Long ambitoOperacionalId;
 
     @Column(nullable = false, length = 100)
     private String ambito;

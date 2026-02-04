@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AmbitoOperacional } from './ambito-operacional';
+import { AmbitoOperacionalComponent } from './ambito-operacional';
 
 describe('AmbitoOperacional', () => {
-  let component: AmbitoOperacional;
-  let fixture: ComponentFixture<AmbitoOperacional>;
+  let component: AmbitoOperacionalComponent;
+  let fixture: ComponentFixture<AmbitoOperacionalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AmbitoOperacional]
+      imports: [AmbitoOperacionalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(AmbitoOperacional);
+    fixture = TestBed.createComponent(AmbitoOperacionalComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

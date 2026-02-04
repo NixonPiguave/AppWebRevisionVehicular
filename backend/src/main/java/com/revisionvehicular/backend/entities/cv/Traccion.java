@@ -10,7 +10,7 @@ public class Traccion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long traccion_id;
+    private Long traccionid;
 
     @Column(nullable = false, length = 100)
     private String tipo;

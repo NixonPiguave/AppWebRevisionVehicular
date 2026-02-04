@@ -10,7 +10,7 @@ public class TipoVehiculo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tipo_vehiculo_id;
+    private Long tipovehiculoid;
 
     @Column(nullable = false, length = 100)
     private String nombre;

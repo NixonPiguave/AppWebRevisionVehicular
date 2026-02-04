@@ -10,7 +10,7 @@ public class Subcategoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long sub_categoria_id;
+    private Long subcategoriaid;
 
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;

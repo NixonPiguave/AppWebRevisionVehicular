@@ -11,7 +11,7 @@ public class TipoMatricula {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long tipo_matricula_id;
+    private Long tipomatriculaid;
 
     @Column(nullable = false, length = 100)
     private String nombre;

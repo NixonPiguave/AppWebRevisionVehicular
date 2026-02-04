@@ -18,7 +18,7 @@ public class Vehiculo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long vehiculo_id;
+    private Long vehiculoid;
 
     @ManyToOne
     @JoinColumn(name = "Id_Propietario")

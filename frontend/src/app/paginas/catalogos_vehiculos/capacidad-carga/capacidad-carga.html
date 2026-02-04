@@ -1,1 +1,129 @@
-<p>capacidad-carga works!</p>
+<div class="capacidad-container">
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+    <button class="btn-reintentar" (click)="cargarCapacidades()">Reintentar</button>
+  </div>
+  <div class="cargando" *ngIf="cargando && !error">Cargando capacidades de carga...</div>
+  <div *ngIf="!cargando || error">
+    <div class="capacidad-header">
+      <h2>Gestión de Capacidad de Carga</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Capacidad
+      </button>
+    </div>
+    <div class="capacidad-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <input type="text" id="filtro" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" placeholder="Buscar por ID, capacidad, unidad..." class="input-filtro"/>
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select id="registros" [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="capacidad-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Capacidad</th>
+          <th>Descripción</th>
+          <th>Unidad</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let capacidad of capacidadesPaginadas">
+          <td>{{ capacidad.capacidadCargaId }}</td>
+          <td>{{ capacidad.capacidad }}</td>
+          <td>{{ capacidad.descripcion }}</td>
+          <td>{{ capacidad.unidad }}</td>
+          <td>
+            <span class="estado-badge" [class.activo]="capacidad.estado === 'A'" [class.inactivo]="capacidad.estado === 'I'">
+              {{ getEstadoTexto(capacidad.estado) }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <button class="btn-accion btn-ver" (click)="verDetalle(capacidad)" title="Ver detalle"><mat-icon>visibility</mat-icon></button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(capacidad)" title="Editar"><mat-icon>edit</mat-icon></button>
+          </td>
+        </tr>
+        <tr *ngIf="capacidadesPaginadas.length === 0 && !error && !cargando">
+          <td colspan="6" class="sin-registros">No se encontraron registros</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
+      <button *ngFor="let pagina of paginas" class="btn-pagina" [class.activa]="pagina === paginaActual" (click)="irAPagina(pagina)">{{ pagina }}</button>
+      <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+    </div>
+    <div class="info-registros" *ngIf="capacidadesFiltradas.length > 0">
+      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a {{ paginaActual * registrosPorPagina > capacidadesFiltradas.length ? capacidadesFiltradas.length : paginaActual * registrosPorPagina }} de {{ capacidadesFiltradas.length }} registros
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Capacidad de Carga' : 'Nueva Capacidad de Carga' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grupo">
+        <label for="capacidad">Capacidad</label>
+        <input type="text" id="capacidad" [(ngModel)]="capacidadEditando.capacidad" class="form-input" placeholder="Ingrese la capacidad"/>
+      </div>
+      <div class="form-grupo">
+        <label for="descripcion">Descripción</label>
+        <input type="text" id="descripcion" [(ngModel)]="capacidadEditando.descripcion" class="form-input" placeholder="Ingrese la descripción"/>
+      </div>
+      <div class="form-grupo">
+        <label for="unidad">Unidad</label>
+        <input type="text" id="unidad" [(ngModel)]="capacidadEditando.unidad" class="form-input" placeholder="Ej: kg, ton, lb"/>
+      </div>
+      <div class="form-grupo">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="capacidadEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarCapacidad()" [disabled]="guardando">{{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Capacidad') }}</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle de Capacidad de Carga</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body" *ngIf="capacidadDetalle">
+      <div class="detalle-item"><span class="detalle-label">ID:</span><span class="detalle-valor">{{ capacidadDetalle.capacidadCargaId }}</span></div>
+      <div class="detalle-item"><span class="detalle-label">Capacidad:</span><span class="detalle-valor">{{ capacidadDetalle.capacidad }}</span></div>
+      <div class="detalle-item"><span class="detalle-label">Descripción:</span><span class="detalle-valor">{{ capacidadDetalle.descripcion }}</span></div>
+      <div class="detalle-item"><span class="detalle-label">Unidad:</span><span class="detalle-valor">{{ capacidadDetalle.unidad }}</span></div>
+      <div class="detalle-item">
+        <span class="detalle-label">Estado:</span>
+        <span class="estado-badge" [class.activo]="capacidadDetalle.estado === 'A'" [class.inactivo]="capacidadDetalle.estado === 'I'">{{ getEstadoTexto(capacidadDetalle.estado) }}</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

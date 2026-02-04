@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { EmpresaService, Empresa } from '../../../services/empresa.service';
+import { EmpresaService, Empresa } from '../../../services/administracion/empresa.service';
 
 @Component({
   selector: 'app-empresas',

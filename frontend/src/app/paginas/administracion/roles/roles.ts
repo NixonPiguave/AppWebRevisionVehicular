@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon'; // ← IMPORTAR Material Icons
-import { RolesService, Rol } from '../../../services/roles.service';
+import { RolesService, Rol } from '../../../services/administracion/roles.service';
 
 @Component({
   selector: 'app-roles',

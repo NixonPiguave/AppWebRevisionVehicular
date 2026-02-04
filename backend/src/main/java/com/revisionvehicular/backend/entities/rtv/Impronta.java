@@ -20,7 +20,10 @@ public class Impronta {
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
 
-    @Column(length = 500)
+    @Column(name = "CodigoImpronta")
+    private String codigoImpronta;
+
+    @Column(name = "Descripcion", length = 255)
     private String descripcion;
 
     @ManyToOne
