@@ -12,8 +12,8 @@ public class Equipos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long equipo_id;
-
+    @Column(name="equipo_id")
+    private Long equipoid;
     @Column(nullable = false, length = 100)
     private String equipo;
     @Column(nullable = false, length = 100)
