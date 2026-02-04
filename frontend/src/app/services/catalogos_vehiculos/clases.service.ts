@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Clase {
-  clase_id: number | null;
-  codigo: string;
+  id: number | null;
+  clase: string;
   descripcion: string;
   estado: string;
 }

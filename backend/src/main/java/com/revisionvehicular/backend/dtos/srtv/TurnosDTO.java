@@ -5,12 +5,9 @@ import lombok.Data;
 @Data
 public class TurnosDTO {
 
-    private Integer turnoId;
-
+    private Long id;
     private Long propietarioId;
     private Long vehiculoId;
-
     private String estado;
-
     private Long servicioId;
 }

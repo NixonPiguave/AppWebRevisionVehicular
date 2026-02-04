@@ -65,9 +65,7 @@ public class CapCargaServiceImpl implements ICapCargaService {
                 dto.getDescripcion(),
                 dto.getEstado()
         );
-
-        CapCarga updated = repository.findById(id)
-                .orElseThrow(() ->
+        CapCarga updated = repository.findById(id).orElseThrow(() ->
                         new RuntimeException("Error al actualizar la capacidad de carga")
                 );
 

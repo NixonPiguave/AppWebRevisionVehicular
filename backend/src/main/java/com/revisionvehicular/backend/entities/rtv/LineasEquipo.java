@@ -18,6 +18,4 @@ public class LineasEquipo {
     @ManyToOne
     @JoinColumn(name = "equipo_id")
     private Equipos equipo;
-
-
 }

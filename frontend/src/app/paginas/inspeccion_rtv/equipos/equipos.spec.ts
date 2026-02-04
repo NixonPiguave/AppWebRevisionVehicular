@@ -21,3 +21,4 @@ describe('Equipos', () => {
     expect(component).toBeTruthy();
   });
 });
+

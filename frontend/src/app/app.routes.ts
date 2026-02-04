@@ -15,10 +15,14 @@ import {ModelosComponent} from './paginas/catalogos_vehiculos/modelos/modelos';
 import {TipoCombustibleComponent} from './paginas/catalogos_vehiculos/tipo-combustible/tipo-combustible';
 import {TipoMatriculaComponent} from './paginas/catalogos_vehiculos/tipo-matricula/tipo-matricula';
 import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion';
+// Importaciones de Defectos Inspección
+import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
+
+
 
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
-
+import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -45,10 +49,12 @@ export const routes: Routes = [
       { path: 'catalogo-vehiculos/tipo-matricula', component: TipoMatriculaComponent},
       //tipo vehiculo falta, no es maestra
       { path: 'catalogo-vehiculos/traccion', component: TraccionComponent},
+      // DEFECTOS INSPECCIÓN
+      { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
-
+      { path: 'inspeccion-rtv/equipos', component: Equipos },
     ]
   },
   { path: '**', redirectTo: '' }

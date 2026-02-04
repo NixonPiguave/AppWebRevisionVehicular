@@ -7,11 +7,14 @@
     <button class="btn-reintentar" (click)="cargarClases()">Reintentar</button>
   </div>
 
-  <div class="cargando" *ngIf="cargando && !error">Cargando clases...</div>
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando clases de vehículos...</span>
+  </div>
 
   <div *ngIf="!cargando || error">
     <div class="clases-header">
-      <h2>Gestión de Clases </h2>
+      <h2>Gestión de Clases</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
         <mat-icon>add</mat-icon> Nueva Clase
       </button>
@@ -20,14 +23,26 @@
     <div class="clases-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
-        <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" placeholder="Código o descripción..." class="input-filtro" />
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="ID, clase o descripción..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
       </div>
+
       <div class="control-grupo">
         <label>Mostrar:</label>
         <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
           <option [value]="10">10</option>
           <option [value]="25">25</option>
         </select>
+        <span class="registros-texto">registros</span>
       </div>
     </div>
 
@@ -35,7 +50,8 @@
       <table class="clases-tabla">
         <thead>
         <tr>
-          <th>Clases</th>
+          <th>ID</th>
+          <th>Clase</th>
           <th>Descripción</th>
           <th>Estado</th>
           <th class="th-acciones">Acciones</th>
@@ -43,46 +59,107 @@
         </thead>
         <tbody>
         <tr *ngFor="let c of clasesPaginadas">
-          <td class="txt-codigo">{{ c.codigo }}</td>
+          <td class="txt-id">#{{ c.id }}</td>
+          <td class="txt-codigo">{{ c.clase }}</td>
           <td>{{ c.descripcion }}</td>
           <td>
-              <span class="estado-badge" [class.activo]="c.estado === 'A'" [class.inactivo]="c.estado === 'I'">
+              <span
+                class="estado-badge"
+                [class.activo]="c.estado === 'A'"
+                [class.inactivo]="c.estado === 'I'"
+              >
                 {{ getEstadoTexto(c.estado) }}
               </span>
           </td>
           <td class="td-acciones">
-            <button class="btn-accion btn-ver" (click)="verDetalle(c)" title="Ver detalle"><mat-icon>visibility</mat-icon></button>
-            <button class="btn-accion btn-editar" (click)="abrirModalEditar(c)" title="Editar"><mat-icon>edit</mat-icon></button>
+            <button class="btn-accion btn-ver" (click)="verDetalle(c)" title="Ver detalle">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(c)" title="Editar">
+              <mat-icon>edit</mat-icon>
+            </button>
           </td>
         </tr>
-        <tr *ngIf="clasesPaginadas.length === 0 && !cargando"><td colspan="4" class="sin-registros">No hay registros</td></tr>
+
+        <tr *ngIf="clasesPaginadas.length === 0 && !cargando">
+          <td colspan="5" class="sin-registros">
+            No se encontraron clases registradas.
+          </td>
+        </tr>
         </tbody>
       </table>
     </div>
 
-    <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
-      <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
-      <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="clasesFiltradas.length > 0">
+        Mostrando
+        {{ (paginaActual - 1) * registrosPorPagina + 1 }}
+        a
+        {{
+          paginaActual * registrosPorPagina > clasesFiltradas.length
+            ? clasesFiltradas.length
+            : paginaActual * registrosPorPagina
+        }}
+        de {{ clasesFiltradas.length }} registros
+      </div>
+
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button
+          *ngFor="let p of paginas"
+          class="btn-pagina"
+          [class.activa]="p === paginaActual"
+          (click)="irAPagina(p)"
+        >
+          {{ p }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
+<!-- MODAL CREAR / EDITAR -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>{{ modoEdicion ? 'Editar Clase' : 'Nueva Clase' }}</h3>
-      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+      <h3>{{ modoEdicion ? 'Actualizar Clase' : 'Registrar Nueva Clase' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+
     <div class="modal-body">
       <div class="form-grupo">
-        <label>Clase</label>
-        <input type="text" [(ngModel)]="claseEditando.codigo" class="form-input" placeholder="Publico,Particular,Comercial.." />
+        <label>Nombre de la Clase</label>
+        <input
+          type="text"
+          [(ngModel)]="claseEditando.clase"
+          class="form-input"
+          placeholder="Ej: Particular, Público, Pesado..."
+        />
       </div>
+
       <div class="form-grupo">
-        <label>Descripción</label>
-        <textarea [(ngModel)]="claseEditando.descripcion" class="form-input" rows="3" placeholder="Descripción de la clase..."></textarea>
+        <label>Descripción detallada</label>
+        <textarea
+          [(ngModel)]="claseEditando.descripcion"
+          class="form-input"
+          rows="3"
+          placeholder="Escriba aquí la descripción..."
+        ></textarea>
       </div>
+
       <div class="form-grupo">
         <label>Estado</label>
         <select [(ngModel)]="claseEditando.estado" class="form-select">
@@ -91,27 +168,56 @@
         </select>
       </div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarClase()" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarClase()" [disabled]="guardando">
+        {{ guardando ? 'Procesando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Clase') }}
+      </button>
     </div>
   </div>
 </div>
 
+<!-- MODAL DETALLE -->
 <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
   <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Detalle de Clase</h3>
-      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+      <h3>Detalle de la Clase</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+
     <div class="modal-body" *ngIf="claseDetalle">
-      <div class="detalle-item"><span class="detalle-label">ID:</span><span class="detalle-valor">{{ claseDetalle.clase_id }}</span></div>
-      <div class="detalle-item"><span class="detalle-label">Código:</span><span class="detalle-valor">{{ claseDetalle.codigo }}</span></div>
-      <div class="detalle-item"><span class="detalle-label">Descripción:</span><span class="detalle-valor">{{ claseDetalle.descripcion }}</span></div>
-      <div class="detalle-item"><span class="detalle-label">Estado:</span>
-        <span class="estado-badge" [class.activo]="claseDetalle.estado === 'A'" [class.inactivo]="claseDetalle.estado === 'I'">{{ getEstadoTexto(claseDetalle.estado) }}</span>
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID:</span>
+          <span class="detalle-valor">#{{ claseDetalle.id }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Clase:</span>
+          <span class="detalle-valor resaltado">{{ claseDetalle.clase }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor">{{ claseDetalle.descripcion }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span class="estado-badge" [class.activo]="claseDetalle.estado === 'A'">
+            {{ getEstadoTexto(claseDetalle.estado) }}
+          </span>
+        </div>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button></div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
+    </div>
   </div>
 </div>

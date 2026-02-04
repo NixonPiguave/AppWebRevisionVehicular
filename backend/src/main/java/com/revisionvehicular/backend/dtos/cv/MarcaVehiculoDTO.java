@@ -1,8 +1,10 @@
 package com.revisionvehicular.backend.dtos.cv;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.List;
-
+@Data
 public class MarcaVehiculoDTO {
     private Long id;
     private String nombre;

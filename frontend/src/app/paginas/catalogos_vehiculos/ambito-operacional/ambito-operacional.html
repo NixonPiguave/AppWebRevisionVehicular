@@ -1,18 +1,18 @@
 <div class="ambito-container">
-  <!-- Mensaje de error -->
   <div class="mensaje-error" *ngIf="error">
-    {{ error }}
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
     <button class="btn-reintentar" (click)="cargarAmbitos()">Reintentar</button>
   </div>
 
-  <!-- Loading -->
   <div class="cargando" *ngIf="cargando && !error">
-    Cargando ámbitos operacionales...
+    <div class="spinner"></div>
+    <span>Cargando ámbitos operacionales...</span>
   </div>
 
-  <!-- Contenido principal -->
   <div *ngIf="!cargando || error">
-    <!-- Header -->
     <div class="ambito-header">
       <h2>Gestión de Ámbito Operacional</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
@@ -21,18 +21,20 @@
       </button>
     </div>
 
-    <!-- Controles -->
     <div class="ambito-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
-        <input
-          type="text"
-          id="filtro"
-          [(ngModel)]="filtro"
-          (ngModelChange)="onFiltroChange()"
-          placeholder="Buscar por ID, ámbito, descripción o estado..."
-          class="input-filtro"
-        />
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por ID, ámbito o descripción..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
       </div>
       <div class="control-grupo">
         <label for="registros">Mostrar:</label>
@@ -50,7 +52,6 @@
       </div>
     </div>
 
-    <!-- Tabla -->
     <div class="tabla-contenedor">
       <table class="ambito-tabla">
         <thead>
@@ -64,8 +65,8 @@
         </thead>
         <tbody>
         <tr *ngFor="let ambito of ambitosPaginados">
-          <td>{{ ambito.ambitoOperacionalId }}</td>
-          <td>{{ ambito.ambito }}</td>
+          <td>{{ ambito.id }}</td>
+          <td class="txt-resaltado">{{ ambito.ambito }}</td>
           <td>{{ ambito.descripcion }}</td>
           <td>
               <span
@@ -104,46 +105,45 @@
       </table>
     </div>
 
-    <!-- Paginación -->
-    <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual - 1)"
-        [disabled]="paginaActual === 1"
-      >
-        Anterior
-      </button>
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="ambitosFiltrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > ambitosFiltrados.length
+        ? ambitosFiltrados.length
+        : paginaActual * registrosPorPagina }}
+        de {{ ambitosFiltrados.length }} registros
+      </div>
 
-      <button
-        *ngFor="let pagina of paginas"
-        class="btn-pagina"
-        [class.activa]="pagina === paginaActual"
-        (click)="irAPagina(pagina)"
-      >
-        {{ pagina }}
-      </button>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
 
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual + 1)"
-        [disabled]="paginaActual === totalPaginas"
-      >
-        Siguiente
-      </button>
-    </div>
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
 
-    <!-- Info -->
-    <div class="info-registros" *ngIf="ambitosFiltrados.length > 0">
-      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
-      {{ paginaActual * registrosPorPagina > ambitosFiltrados.length
-      ? ambitosFiltrados.length
-      : paginaActual * registrosPorPagina }}
-      de {{ ambitosFiltrados.length }} registros
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Modal Crear / Editar -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -161,19 +161,19 @@
           id="ambito"
           [(ngModel)]="ambitoEditando.ambito"
           class="form-input"
-          placeholder="Ingrese el nombre del ámbito"
+          placeholder="Ingrese el nombre del ámbito (Ej: Urbano, Interprovincial)"
         />
       </div>
 
       <div class="form-grupo">
         <label for="descripcion">Descripción</label>
-        <input
-          type="text"
+        <textarea
           id="descripcion"
           [(ngModel)]="ambitoEditando.descripcion"
           class="form-input"
-          placeholder="Ingrese la descripción"
-        />
+          rows="3"
+          placeholder="Ingrese una descripción breve"
+        ></textarea>
       </div>
 
       <div class="form-grupo">
@@ -190,13 +190,13 @@
         Cancelar
       </button>
       <button class="btn-guardar" (click)="guardarAmbito()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
         {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Ámbito') }}
       </button>
     </div>
   </div>
 </div>
 
-<!-- Modal Detalle -->
 <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
   <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -207,32 +207,34 @@
     </div>
 
     <div class="modal-body" *ngIf="ambitoDetalle">
-      <div class="detalle-item">
-        <span class="detalle-label">ID:</span>
-        <span class="detalle-valor">{{ ambitoDetalle.ambitoOperacionalId }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Ámbito:</span>
-        <span class="detalle-valor">{{ ambitoDetalle.ambito }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Descripción:</span>
-        <span class="detalle-valor">{{ ambitoDetalle.descripcion }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Estado:</span>
-        <span
-          class="estado-badge"
-          [class.activo]="ambitoDetalle.estado === 'A'"
-          [class.inactivo]="ambitoDetalle.estado === 'I'"
-        >
-          {{ getEstadoTexto(ambitoDetalle.estado) }}
-        </span>
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ ambitoDetalle.id }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Ámbito:</span>
+          <span class="detalle-valor resaltado">{{ ambitoDetalle.ambito }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor">{{ ambitoDetalle.descripcion || 'Sin descripción disponible' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="ambitoDetalle.estado === 'A'"
+            [class.inactivo]="ambitoDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(ambitoDetalle.estado) }}
+          </span>
+        </div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
     </div>
   </div>
 </div>

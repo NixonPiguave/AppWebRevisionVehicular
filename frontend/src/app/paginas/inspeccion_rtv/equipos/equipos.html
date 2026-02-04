@@ -1,1 +1,340 @@
-<p>equipos works!</p>
+<div class="equipos-container">
+  <!-- Mensaje de error -->
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+    <button class="btn-reintentar" (click)="cargarEquipos()">Reintentar</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando && !error">
+    Cargando equipos...
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!cargando || error">
+    <!-- Header -->
+    <div class="equipos-header">
+      <h2>Gestión de Equipos</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nuevo Equipo
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="equipos-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <input
+          type="text"
+          id="filtro"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange()"
+          placeholder="Buscar por nombre, modelo, serial, código..."
+          class="input-filtro"
+        />
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="equipos-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Equipo</th>
+          <th>Modelo</th>
+          <th>Serial</th>
+          <th>Código Interno</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let equipo of equiposPaginados">
+          <td>{{ equipo.equipoId }}</td>
+          <td>{{ equipo.equipo }}</td>
+          <td>{{ equipo.modelo }}</td>
+          <td>{{ equipo.serialEquipo }}</td>
+          <td>{{ equipo.codigoInterno }}</td>
+          <td>
+            <span
+              class="estado-badge"
+              [class.activo]="equipo.estado === 'A'"
+              [class.inactivo]="equipo.estado === 'I'"
+            >
+              {{ getEstadoTexto(equipo.estado) }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <button
+              class="btn-accion btn-ver"
+              (click)="verDetalle(equipo)"
+              title="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button
+              class="btn-accion btn-editar"
+              (click)="abrirModalEditar(equipo)"
+              title="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="equiposPaginados.length === 0 && !error && !cargando">
+          <td colspan="7" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 1"
+      >
+        Anterior
+      </button>
+
+      <button
+        *ngFor="let pagina of paginas"
+        class="btn-pagina"
+        [class.activa]="pagina === paginaActual"
+        (click)="irAPagina(pagina)"
+      >
+        {{ pagina }}
+      </button>
+
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual + 1)"
+        [disabled]="paginaActual === totalPaginas"
+      >
+        Siguiente
+      </button>
+    </div>
+
+    <!-- Info -->
+    <div class="info-registros" *ngIf="equiposFiltrados.length > 0">
+      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+      {{ paginaActual * registrosPorPagina > equiposFiltrados.length
+      ? equiposFiltrados.length
+      : paginaActual * registrosPorPagina }}
+      de {{ equiposFiltrados.length }} registros
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-form-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Equipo' : 'Nuevo Equipo' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <!-- Columna 1 -->
+        <div class="form-columna">
+          <div class="form-grupo">
+            <label for="equipo">Nombre del Equipo *</label>
+            <input
+              type="text"
+              id="equipo"
+              [(ngModel)]="equipoEditando.equipo"
+              class="form-input"
+              placeholder="Ingrese el nombre del equipo"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="modelo">Modelo *</label>
+            <input
+              type="text"
+              id="modelo"
+              [(ngModel)]="equipoEditando.modelo"
+              class="form-input"
+              placeholder="Ingrese el modelo"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="serialEquipo">Número de Serie *</label>
+            <input
+              type="text"
+              id="serialEquipo"
+              [(ngModel)]="equipoEditando.serialEquipo"
+              class="form-input"
+              placeholder="Ingrese el número de serie"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="codigoInterno">Código Interno *</label>
+            <input
+              type="text"
+              id="codigoInterno"
+              [(ngModel)]="equipoEditando.codigoInterno"
+              class="form-input"
+              placeholder="Ingrese el código interno"
+            />
+          </div>
+        </div>
+
+        <!-- Columna 2 -->
+        <div class="form-columna">
+          <div class="form-grupo">
+            <label for="equipoId_fk">ID Equipo FK</label>
+            <input
+              type="text"
+              id="equipoId_fk"
+              [(ngModel)]="equipoEditando.equipoId_fk"
+              class="form-input"
+              placeholder="ID de equipo relacionado"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="influencia">Influencia</label>
+            <input
+              type="number"
+              id="influencia"
+              [(ngModel)]="equipoEditando.influencia"
+              class="form-input"
+              placeholder="0"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="fechaUltimaCalibracion">Última Calibración</label>
+            <input
+              type="date"
+              id="fechaUltimaCalibracion"
+              [(ngModel)]="equipoEditando.fechaUltimaCalibracion"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="fechaUltimoMantenimiento">Último Mantenimiento</label>
+            <input
+              type="date"
+              id="fechaUltimoMantenimiento"
+              [(ngModel)]="equipoEditando.fechaUltimoMantenimiento"
+              class="form-input"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="estado">Estado *</label>
+            <select id="estado" [(ngModel)]="equipoEditando.estado" class="form-select">
+              <option value="A">Activo</option>
+              <option value="I">Inactivo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarEquipo()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Equipo') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle del Equipo</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="equipoDetalle">
+      <div class="detalle-grid">
+        <div class="detalle-item">
+          <span class="detalle-label">ID:</span>
+          <span class="detalle-valor">{{ equipoDetalle.equipoId }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Equipo:</span>
+          <span class="detalle-valor">{{ equipoDetalle.equipo }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Modelo:</span>
+          <span class="detalle-valor">{{ equipoDetalle.modelo }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Serial:</span>
+          <span class="detalle-valor">{{ equipoDetalle.serialEquipo }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Código Interno:</span>
+          <span class="detalle-valor">{{ equipoDetalle.codigoInterno }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Equipo ID FK:</span>
+          <span class="detalle-valor">{{ equipoDetalle.equipoId_fk || 'N/A' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Influencia:</span>
+          <span class="detalle-valor">{{ equipoDetalle.influencia }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Última Calibración:</span>
+          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.fechaUltimaCalibracion) }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Último Mantenimiento:</span>
+          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.fechaUltimoMantenimiento) }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="equipoDetalle.estado === 'A'"
+            [class.inactivo]="equipoDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(equipoDetalle.estado) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

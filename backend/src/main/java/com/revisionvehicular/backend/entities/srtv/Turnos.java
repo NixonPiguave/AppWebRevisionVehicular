@@ -4,14 +4,15 @@ import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
+@Entity
 @Table(name = "rtv_turnos")
 @Data
 public class Turnos {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer turno_id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long turnoId;
 
     @ManyToOne
     @JoinColumn(name = "propietario_id")
@@ -21,8 +22,7 @@ public class Turnos {
     @JoinColumn(name = "vehiculo_id")
     private Vehiculo vehiculo;
 
-
-    @Column(name = "Estado", length = 35)
+    @Column(name = "estado", length = 35)
     private String estado;
 
     @ManyToOne
