@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Eje {
-  ejes_id: number | null;
+  id: number | null;
   cantidad: number | null;
   descripcion: string;
   estado: string;

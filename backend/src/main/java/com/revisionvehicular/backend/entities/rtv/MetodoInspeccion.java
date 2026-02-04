@@ -11,7 +11,7 @@ public class MetodoInspeccion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long metodo_inspeccion_id;
+    private Long metodoinspeccionid;
 
     @Column(nullable = false, length = 100)
     private String nombre;

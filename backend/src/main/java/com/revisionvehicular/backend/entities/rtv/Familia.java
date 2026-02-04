@@ -10,7 +10,7 @@ public class Familia {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long familia_id;
+    private Long familiaid;
 
     @Column(nullable = false, length = 100)
     private String nombre;

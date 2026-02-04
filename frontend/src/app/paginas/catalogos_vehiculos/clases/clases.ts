@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -36,7 +36,10 @@ export class ClasesComponent implements OnInit {
   mostrarModalDetalle = false;
   claseDetalle: Clase | null = null;
 
-  constructor(private clasesService: ClasesService) {}
+  constructor(
+    private clasesService: ClasesService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.cargarClases();
@@ -45,15 +48,18 @@ export class ClasesComponent implements OnInit {
   cargarClases(): void {
     this.cargando = true;
     this.error = '';
+    this.cdr.detectChanges();
 
     this.clasesService.listarClases().subscribe({
       next: data => {
         this.clases = data;
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.error = 'Error al cargar las clases.';
         this.cargando = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -82,10 +88,12 @@ export class ClasesComponent implements OnInit {
 
   irAPagina(p: number): void {
     this.paginaActual = p;
+    this.cdr.detectChanges();
   }
 
   onFiltroChange(): void {
     this.paginaActual = 1;
+    this.cdr.detectChanges();
   }
 
   getEstadoTexto(estado: string): string {
@@ -101,22 +109,27 @@ export class ClasesComponent implements OnInit {
       estado: 'A'
     };
     this.mostrarModalForm = true;
+    this.cdr.detectChanges();
   }
 
   abrirModalEditar(clase: Clase): void {
     this.modoEdicion = true;
     this.claseEditando = { ...clase };
     this.mostrarModalForm = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
+    this.cdr.detectChanges();
   }
 
   guardarClase(): void {
     if (!this.claseEditando.clase.trim()) return;
 
     this.guardando = true;
+    this.cdr.detectChanges();
+
     const id = this.claseEditando.id;
 
     if (this.modoEdicion && id) {
@@ -125,10 +138,12 @@ export class ClasesComponent implements OnInit {
           this.cargarClases();
           this.cerrarModalForm();
           this.guardando = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           alert('Error al actualizar la clase');
           this.guardando = false;
+          this.cdr.detectChanges();
         }
       });
     } else {
@@ -137,10 +152,12 @@ export class ClasesComponent implements OnInit {
           this.cargarClases();
           this.cerrarModalForm();
           this.guardando = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           alert('Error al crear la clase');
           this.guardando = false;
+          this.cdr.detectChanges();
         }
       });
     }
@@ -149,9 +166,11 @@ export class ClasesComponent implements OnInit {
   verDetalle(clase: Clase): void {
     this.claseDetalle = clase;
     this.mostrarModalDetalle = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
+    this.cdr.detectChanges();
   }
 }

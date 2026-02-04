@@ -1,0 +1,284 @@
+.marcas-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* HEADER */
+.marcas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.marcas-header h2 {
+  margin: 0;
+  color: #1a2e1a;
+  font-weight: 600;
+}
+
+/* BOTÓN AGREGAR */
+.btn-agregar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* CONTROLES */
+.marcas-controles {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.input-filtro {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  width: 300px;
+}
+
+/* TABLA */
+.tabla-contenedor {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: white;
+}
+
+.marcas-tabla {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.marcas-tabla th {
+  background: #1a2e1a;
+  color: white;
+  padding: 14px;
+  text-align: left;
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+.marcas-tabla td {
+  padding: 14px;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 14px;
+}
+
+.txt-resaltado {
+  font-weight: 600;
+  color: #2d5a27;
+}
+
+/* ESTADO */
+.estado-badge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.estado-badge.activo {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-badge.inactivo {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+/* ACCIONES */
+.td-acciones {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-accion {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-ver {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.btn-editar {
+  background: #fff3e0;
+  color: #e65100;
+}
+
+.btn-eliminar {
+  background: #fdecea;
+  color: #c62828;
+}
+
+/* MODALES */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+}
+
+.modal-header {
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+.form-grupo {
+  margin-bottom: 16px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.modal-footer {
+  padding: 16px;
+  background: #f9f9f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn-cancelar {
+  padding: 10px 20px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-guardar {
+  padding: 10px 20px;
+  background: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* =========================
+   MENSAJE DE ERROR
+========================= */
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fee2e2;
+  color: #7f1d1d;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+  max-width: fit-content;
+}
+
+/* TEXTO */
+.mensaje-error span {
+  font-weight: 500;
+}
+
+/* BOTÓN REINTENTAR */
+.btn-reintentar {
+  background: #b91c1c;
+  color: #ffffff;
+  border: none;
+  padding: 0.3rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-reintentar:hover {
+  background: #991b1b;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 480px) {
+  .mensaje-error {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .btn-reintentar {
+    align-self: flex-end;
+  }
+}
+
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+
+  .marcas-header,
+  .marcas-controles {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input-filtro {
+    width: 100%;
+  }
+
+  .modal-contenido {
+    margin: 15px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .btn-guardar,
+  .btn-cancelar {
+    width: 100%;
+  }
+}

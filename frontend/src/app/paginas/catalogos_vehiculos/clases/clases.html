@@ -59,7 +59,7 @@
         </thead>
         <tbody>
         <tr *ngFor="let c of clasesPaginadas">
-          <td class="txt-id">#{{ c.id }}</td>
+          <td class="txt-id">{{ c.id }}</td>
           <td class="txt-codigo">{{ c.clase }}</td>
           <td>{{ c.descripcion }}</td>
           <td>
@@ -194,7 +194,7 @@
       <div class="detalle-card">
         <div class="detalle-item">
           <span class="detalle-label">ID:</span>
-          <span class="detalle-valor">#{{ claseDetalle.id }}</span>
+          <span class="detalle-valor"> {{ claseDetalle.id }}</span>
         </div>
 
         <div class="detalle-item">

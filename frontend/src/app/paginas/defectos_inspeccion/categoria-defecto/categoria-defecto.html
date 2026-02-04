@@ -1,1 +1,276 @@
-<p>categoria-defecto works!</p>
+<div class="categorias-container">
+  <!-- Mensaje de error -->
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+    <button class="btn-reintentar" (click)="cargarCategorias()">Reintentar</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando && !error">
+    Cargando categorías de defecto...
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!cargando || error">
+    <!-- Header -->
+    <div class="categorias-header">
+      <h2>Gestión de Categorías de Defecto</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Categoría
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="categorias-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <input
+          type="text"
+          id="filtro"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange()"
+          placeholder="Buscar por ID, código, nombre, descripción o estado..."
+          class="input-filtro"
+        />
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="categorias-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Subfamilia ID</th>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let categoria of categoriasPaginadas">
+          <td>{{ categoria.rtvcategoriaId }}</td>
+          <td>{{ categoria.subfamiliaId }}</td>
+          <td>{{ categoria.codigo }}</td>
+          <td>{{ categoria.nombre }}</td>
+          <td class="td-descripcion">{{ categoria.descripcion }}</td>
+          <td>
+              <span
+                class="estado-badge"
+                [class.activo]="categoria.estado === 'A'"
+                [class.inactivo]="categoria.estado === 'I'"
+              >
+                {{ getEstadoTexto(categoria.estado) }}
+              </span>
+          </td>
+          <td class="td-acciones">
+            <button
+              class="btn-accion btn-ver"
+              (click)="verDetalle(categoria)"
+              title="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button
+              class="btn-accion btn-editar"
+              (click)="abrirModalEditar(categoria)"
+              title="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="categoriasPaginadas.length === 0 && !error && !cargando">
+          <td colspan="7" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 1"
+      >
+        Anterior
+      </button>
+
+      <button
+        *ngFor="let pagina of paginas"
+        class="btn-pagina"
+        [class.activa]="pagina === paginaActual"
+        (click)="irAPagina(pagina)"
+      >
+        {{ pagina }}
+      </button>
+
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual + 1)"
+        [disabled]="paginaActual === totalPaginas"
+      >
+        Siguiente
+      </button>
+    </div>
+
+    <!-- Info -->
+    <div class="info-registros" *ngIf="categoriasFiltradas.length > 0">
+      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+      {{ paginaActual * registrosPorPagina > categoriasFiltradas.length
+      ? categoriasFiltradas.length
+      : paginaActual * registrosPorPagina }}
+      de {{ categoriasFiltradas.length }} registros
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Categoría de Defecto' : 'Nueva Categoría de Defecto' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grupo">
+        <label for="subfamiliaId">ID Subfamilia <span class="requerido">*</span></label>
+        <input
+          type="number"
+          id="subfamiliaId"
+          [(ngModel)]="categoriaEditando.subfamiliaId"
+          class="form-input"
+          placeholder="Ingrese el ID de la subfamilia"
+          min="1"
+        />
+      </div>
+
+      <div class="form-grupo">
+        <label for="codigo">Código <span class="requerido">*</span></label>
+        <input
+          type="text"
+          id="codigo"
+          [(ngModel)]="categoriaEditando.codigo"
+          class="form-input"
+          placeholder="Ingrese el código"
+          maxlength="50"
+        />
+      </div>
+
+      <div class="form-grupo">
+        <label for="nombre">Nombre <span class="requerido">*</span></label>
+        <input
+          type="text"
+          id="nombre"
+          [(ngModel)]="categoriaEditando.nombre"
+          class="form-input"
+          placeholder="Ingrese el nombre de la categoría"
+          maxlength="100"
+        />
+      </div>
+
+      <div class="form-grupo">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          [(ngModel)]="categoriaEditando.descripcion"
+          class="form-textarea"
+          placeholder="Ingrese la descripción"
+          rows="4"
+          maxlength="255"
+        ></textarea>
+      </div>
+
+      <div class="form-grupo">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="categoriaEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarCategoria()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Categoría') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle de Categoría de Defecto</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="categoriaDetalle">
+      <div class="detalle-item">
+        <span class="detalle-label">ID:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.rtvcategoriaId }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Subfamilia ID:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.subfamiliaId }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Código:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.codigo }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Nombre:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.nombre }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Descripción:</span>
+        <span class="detalle-valor">{{ categoriaDetalle.descripcion }}</span>
+      </div>
+      <div class="detalle-item">
+        <span class="detalle-label">Estado:</span>
+        <span
+          class="estado-badge"
+          [class.activo]="categoriaDetalle.estado === 'A'"
+          [class.inactivo]="categoriaDetalle.estado === 'I'"
+        >
+          {{ getEstadoTexto(categoriaDetalle.estado) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

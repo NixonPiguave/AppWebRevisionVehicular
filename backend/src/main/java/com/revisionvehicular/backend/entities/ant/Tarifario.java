@@ -24,12 +24,6 @@ public class Tarifario {
     private String estado;
 
     @ManyToOne
-    @JoinColumn(name = "id_tipo_vehiculo", nullable = false)
-    private TipoVehiculo tipoVehiculo;
-    @ManyToOne
     @JoinColumn(name = "id_categoria", nullable = false)
     private Categoria categoria;
-    @ManyToOne
-    @JoinColumn(name = "id_tipo_matricula", nullable = false)
-    private TipoMatricula tipoMatricula;
 }

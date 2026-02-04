@@ -1,4 +1,6 @@
 <div class="ejes-container">
+
+  <!-- MENSAJE DE ERROR -->
   <div class="mensaje-error" *ngIf="error">
     <div class="error-contenido">
       <mat-icon>error_outline</mat-icon>
@@ -7,34 +9,55 @@
     <button class="btn-reintentar" (click)="cargarEjes()">Reintentar</button>
   </div>
 
-  <div class="cargando" *ngIf="cargando && !error">Cargando configuración de ejes...</div>
+  <!-- CARGANDO -->
+  <div class="cargando" *ngIf="cargando && !error">
+    Cargando configuración de ejes...
+  </div>
 
+  <!-- CONTENIDO -->
   <div *ngIf="!cargando || error">
+
+    <!-- HEADER -->
     <div class="ejes-header">
       <h2>Gestión de Ejes</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
-        <mat-icon>add</mat-icon> Nuevo Registro
+        <mat-icon>add</mat-icon>
+        Nuevo Registro
       </button>
     </div>
 
+    <!-- CONTROLES -->
     <div class="ejes-controles">
       <div class="control-grupo">
         <label>Buscar:</label>
-        <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" placeholder="Cantidad o descripción..." class="input-filtro" />
+        <input
+          type="text"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange()"
+          placeholder="Cantidad o descripción..."
+          class="input-filtro"
+        />
       </div>
+
       <div class="control-grupo">
         <label>Mostrar:</label>
-        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+        <select
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
           <option [value]="10">10</option>
           <option [value]="25">25</option>
         </select>
       </div>
     </div>
 
+    <!-- TABLA -->
     <div class="tabla-contenedor">
       <table class="ejes-tabla">
         <thead>
         <tr>
+          <th>ID</th>
           <th>Cantidad</th>
           <th>Descripción</th>
           <th>Estado</th>
@@ -43,45 +66,94 @@
         </thead>
         <tbody>
         <tr *ngFor="let eje of ejesPaginados">
-          <td class="txt-resaltado">{{ eje.cantidad }} ejes</td>
+          <td class="txt-id">{{ eje.id }}</td>
+          <td class="txt-resaltado">{{ eje.cantidad }}</td>
           <td>{{ eje.descripcion }}</td>
           <td>
-              <span class="estado-badge" [class.activo]="eje.estado === 'A'" [class.inactivo]="eje.estado === 'I'">
+              <span
+                class="estado-badge"
+                [class.activo]="eje.estado === 'A'"
+                [class.inactivo]="eje.estado === 'I'"
+              >
                 {{ getEstadoTexto(eje.estado) }}
               </span>
           </td>
           <td class="td-acciones">
-            <button class="btn-accion btn-ver" (click)="verDetalle(eje)"><mat-icon>visibility</mat-icon></button>
-            <button class="btn-accion btn-editar" (click)="abrirModalEditar(eje)"><mat-icon>edit</mat-icon></button>
+            <button class="btn-accion btn-ver" (click)="verDetalle(eje)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(eje)">
+              <mat-icon>edit</mat-icon>
+            </button>
           </td>
         </tr>
         </tbody>
       </table>
     </div>
 
+    <!-- PAGINACIÓN -->
     <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">Anterior</button>
-      <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
-      <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">Siguiente</button>
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual - 1)"
+        [disabled]="paginaActual === 1"
+      >
+        Anterior
+      </button>
+
+      <button
+        *ngFor="let p of paginas"
+        class="btn-pagina"
+        [class.activa]="p === paginaActual"
+        (click)="irAPagina(p)"
+      >
+        {{ p }}
+      </button>
+
+      <button
+        class="btn-pagina"
+        (click)="irAPagina(paginaActual + 1)"
+        [disabled]="paginaActual === totalPaginas"
+      >
+        Siguiente
+      </button>
     </div>
+
   </div>
 </div>
 
+<!-- MODAL FORM -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
+
     <div class="modal-header">
       <h3>{{ modoEdicion ? 'Editar Registro' : 'Nuevo Registro de Ejes' }}</h3>
-      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+
     <div class="modal-body">
       <div class="form-grupo">
         <label>Cantidad de Ejes</label>
-        <input type="number" [(ngModel)]="ejeEditando.cantidad" class="form-input" placeholder="Ej: 2" />
+        <input
+          type="number"
+          [(ngModel)]="ejeEditando.cantidad"
+          class="form-input"
+          placeholder="Ej: 2"
+        />
       </div>
+
       <div class="form-grupo">
         <label>Descripción</label>
-        <textarea [(ngModel)]="ejeEditando.descripcion" class="form-input" rows="3" placeholder="Descripción técnica..."></textarea>
+        <textarea
+          [(ngModel)]="ejeEditando.descripcion"
+          class="form-input"
+          rows="3"
+          placeholder="Descripción técnica..."
+        ></textarea>
       </div>
+
       <div class="form-grupo">
         <label>Estado</label>
         <select [(ngModel)]="ejeEditando.estado" class="form-select">
@@ -90,28 +162,63 @@
         </select>
       </div>
     </div>
+
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarEje()" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Guardar' }}</button>
+      <button
+        class="btn-guardar"
+        (click)="guardarEje()"
+        [disabled]="guardando"
+      >
+        {{ guardando ? 'Guardando...' : 'Guardar' }}
+      </button>
     </div>
+
   </div>
 </div>
 
+<!-- MODAL DETALLE -->
 <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
   <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+
     <div class="modal-header">
       <h3>Detalle del Eje</h3>
-      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
     </div>
+
     <div class="modal-body" *ngIf="ejeDetalle">
-      <div class="detalle-item"><span class="detalle-label">ID:</span><span class="detalle-valor">{{ ejeDetalle.ejes_id }}</span></div>
-      <div class="detalle-item"><span class="detalle-label">Cantidad:</span><span class="detalle-valor">{{ ejeDetalle.cantidad }}</span></div>
-      <div class="detalle-item"><span class="detalle-label">Descripción:</span><span class="detalle-valor">{{ ejeDetalle.descripcion }}</span></div>
+      <div class="detalle-item">
+        <span class="detalle-label">ID:</span>
+        <span class="detalle-valor">{{ ejeDetalle.id }}</span>
+      </div>
+
+      <div class="detalle-item">
+        <span class="detalle-label">Cantidad:</span>
+        <span class="detalle-valor">{{ ejeDetalle.cantidad }}</span>
+      </div>
+
+      <div class="detalle-item">
+        <span class="detalle-label">Descripción:</span>
+        <span class="detalle-valor">{{ ejeDetalle.descripcion }}</span>
+      </div>
+
       <div class="detalle-item">
         <span class="detalle-label">Estado:</span>
-        <span class="estado-badge" [class.activo]="ejeDetalle.estado === 'A'" [class.inactivo]="ejeDetalle.estado === 'I'">{{ getEstadoTexto(ejeDetalle.estado) }}</span>
+        <span
+          class="estado-badge"
+          [class.activo]="ejeDetalle.estado === 'A'"
+          [class.inactivo]="ejeDetalle.estado === 'I'"
+        >
+          {{ getEstadoTexto(ejeDetalle.estado) }}
+        </span>
       </div>
     </div>
-    <div class="modal-footer"><button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button></div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+
   </div>
 </div>

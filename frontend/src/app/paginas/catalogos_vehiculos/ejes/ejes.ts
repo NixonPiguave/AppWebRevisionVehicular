@@ -13,24 +13,22 @@ import { EjesService, Eje } from '../../../services/catalogos_vehiculos/ejes.ser
   styleUrl: './ejes.css',
 })
 export class EjesComponent implements OnInit {
-  // Datos principales
+
   ejes: Eje[] = [];
-  cargando: boolean = false;
-  error: string = '';
+  cargando = false;
+  error = '';
 
-  // Filtros y Paginación
-  filtro: string = '';
-  registrosPorPagina: number = 10;
-  paginaActual: number = 1;
+  filtro = '';
+  registrosPorPagina = 10;
+  paginaActual = 1;
 
-  // Modales y Formulario
-  mostrarModalForm: boolean = false;
-  modoEdicion: boolean = false;
-  guardando: boolean = false;
+  mostrarModalForm = false;
+  modoEdicion = false;
+  guardando = false;
+
   ejeEditando: Eje = this.inicializarEje();
 
-  // Detalle
-  mostrarModalDetalle: boolean = false;
+  mostrarModalDetalle = false;
   ejeDetalle: Eje | null = null;
 
   constructor(
@@ -43,19 +41,21 @@ export class EjesComponent implements OnInit {
   }
 
   private inicializarEje(): Eje {
-    return { ejes_id: null, cantidad: null, descripcion: '', estado: 'A' };
+    return { id: null, cantidad: null, descripcion: '', estado: 'A' };
   }
 
   cargarEjes(): void {
     this.cargando = true;
     this.error = '';
+    this.cdr.detectChanges();
+
     this.ejesService.listarEjes().subscribe({
-      next: (data) => {
+      next: data => {
         this.ejes = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
+      error: err => {
         console.error(err);
         this.error = 'Error al conectar con el servidor de ejes.';
         this.cargando = false;
@@ -64,9 +64,7 @@ export class EjesComponent implements OnInit {
     });
   }
 
-  // --- Lógica de Tabla ---
   get ejesFiltradas(): Eje[] {
-    if (!this.filtro.trim()) return this.ejes;
     const f = this.filtro.toLowerCase();
     return this.ejes.filter(e =>
       e.descripcion.toLowerCase().includes(f) ||
@@ -91,36 +89,48 @@ export class EjesComponent implements OnInit {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // --- Navegación ---
-  irAPagina(p: number): void { this.paginaActual = p; }
-  onFiltroChange(): void { this.paginaActual = 1; }
+  irAPagina(p: number): void {
+    this.paginaActual = p;
+    this.cdr.detectChanges();
+  }
 
-  // --- Acciones Formulario ---
+  onFiltroChange(): void {
+    this.paginaActual = 1;
+    this.cdr.detectChanges();
+  }
+
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.ejeEditando = this.inicializarEje();
     this.mostrarModalForm = true;
+    this.cdr.detectChanges();
   }
 
   abrirModalEditar(eje: Eje): void {
     this.modoEdicion = true;
     this.ejeEditando = { ...eje };
     this.mostrarModalForm = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
+    this.cdr.detectChanges();
   }
 
   guardarEje(): void {
     if (!this.ejeEditando.cantidad || this.ejeEditando.cantidad <= 0) {
-      alert('La cantidad de ejes debe ser mayor a 0');
+      alert('La cantidad debe ser mayor a 0');
       return;
     }
 
     this.guardando = true;
-    const peticion = (this.modoEdicion && this.ejeEditando.ejes_id)
-      ? this.ejesService.actualizarEje(this.ejeEditando.ejes_id, this.ejeEditando)
+    this.cdr.detectChanges();
+
+    const id = this.ejeEditando.id;
+
+    const peticion = (this.modoEdicion && id)
+      ? this.ejesService.actualizarEje(id, this.ejeEditando)
       : this.ejesService.crearEje(this.ejeEditando);
 
     peticion.subscribe({
@@ -128,22 +138,25 @@ export class EjesComponent implements OnInit {
         this.cargarEjes();
         this.cerrarModalForm();
         this.guardando = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         alert('Error al procesar la solicitud');
         this.guardando = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
-  // --- Acciones Detalle ---
   verDetalle(eje: Eje): void {
     this.ejeDetalle = eje;
     this.mostrarModalDetalle = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.ejeDetalle = null;
+    this.cdr.detectChanges();
   }
 }

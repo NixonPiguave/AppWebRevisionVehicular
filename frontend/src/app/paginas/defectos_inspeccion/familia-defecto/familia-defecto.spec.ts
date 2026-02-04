@@ -1,18 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { FamiliaDefectoComponent } from './familia-defecto';
 
-import { FamiliaDefecto } from './familia-defecto';
-
-describe('FamiliaDefecto', () => {
-  let component: FamiliaDefecto;
-  let fixture: ComponentFixture<FamiliaDefecto>;
+describe('FamiliaDefectoComponent', () => {
+  let component: FamiliaDefectoComponent;
+  let fixture: ComponentFixture<FamiliaDefectoComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FamiliaDefecto]
-    })
-    .compileComponents();
+      imports: [FamiliaDefectoComponent]
+    }).compileComponents();
 
-    fixture = TestBed.createComponent(FamiliaDefecto);
+    fixture = TestBed.createComponent(FamiliaDefectoComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

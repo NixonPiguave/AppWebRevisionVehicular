@@ -10,7 +10,7 @@ public class Lineas {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long linea_id;
+    private Long lineaid;
 
     @Column(nullable = false, length = 100)
     private String nombre;
