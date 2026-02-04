@@ -1,8 +1,9 @@
-package com.revisionvehicular.backend.entities.ant;
+package com.revisionvehicular.backend.entities.rtv;
 
+import com.revisionvehicular.backend.entities.ant.ExcepcionMatricula;
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
-import com.revisionvehicular.backend.entities.rtv.Inspeccion;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -41,10 +42,6 @@ public class Matricula {
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_usuario", nullable = false)
-    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_excepcion", nullable = true)

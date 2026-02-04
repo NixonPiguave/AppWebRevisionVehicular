@@ -4,6 +4,7 @@ import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.entities.pv.HistorialPropietario;
 import jakarta.persistence.*;
+import com.revisionvehicular.backend.entities.rtv.Matricula;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -23,9 +24,6 @@ public class Vehiculo {
     @JoinColumn(name = "Id_Propietario")
     private Propietario propietario;
 
-    @Column(nullable = false, length = 50, unique = true)
-    private String matricula;
-
     @Column(nullable = false, length = 50)
     private String chasis;
 
@@ -41,11 +39,6 @@ public class Vehiculo {
 
     @Column(length = 50)
     private String color;
-
-    @Column(name = "fecha_registro")
-    private LocalDate fechaAltaRegistro;
-    @Column(name = "ultima_fecha_matricula")
-    private LocalDate fechaMatricula;
 
     @Column(name= "estado_vehiculo",length = 50)
     private String estado;
@@ -91,5 +84,8 @@ public class Vehiculo {
 
     @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
     private List<HistorialPropietario> historialPropietarios = new ArrayList<>();
+
+    @OneToMany(mappedBy = "vehiculo", cascade = CascadeType.ALL)
+    private List<Matricula> matriculas = new ArrayList<>();
 
 }

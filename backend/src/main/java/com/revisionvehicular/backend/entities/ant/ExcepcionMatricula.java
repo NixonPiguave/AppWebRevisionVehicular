@@ -16,10 +16,6 @@ public class ExcepcionMatricula{
     @Column(name = "id_excepcion")
     private Long idExcepcion;
 
-    @ManyToOne
-    @JoinColumn(name = "id_vehiculo", nullable = false)
-    private Vehiculo vehiculo;
-
     // Tipo de excepción (robo, daño, concesionaria, fuerza mayor, proceso legal, etc.)
     @ManyToOne
     @JoinColumn(name = "id_estado_excepcion", nullable = false)
