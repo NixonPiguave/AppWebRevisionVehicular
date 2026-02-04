@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Linea {
-  lineaId: number | null;
+  id: number | null;
   nombre: string;
   descripcion: string;
   estado: string;
