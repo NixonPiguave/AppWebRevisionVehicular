@@ -28,7 +28,7 @@ import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 
 export const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: InicioComponent },
   {
     path: 'inicio',
     component: InicioComponent,
