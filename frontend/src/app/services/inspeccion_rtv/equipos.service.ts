@@ -3,11 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Equipo {
-  equipoId: number | null;
+  equipoid: number | null;
   influencia: number;
-  equipoId_fk: string;
-  fechaUltimaCalibracion: Date | null;
-  fechaUltimoMantenimiento: Date | null;
+  ultimaCalibracion: Date | null;
+  ultimoMantenimiento: Date | null;
   estado: string;
   codigoInterno: string;
   equipo: string;

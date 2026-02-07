@@ -26,11 +26,10 @@ export class Equipos implements OnInit {
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   equipoEditando: Equipo = {
-    equipoId: null,
+    equipoid: null,
     influencia: 0,
-    equipoId_fk: '',
-    fechaUltimaCalibracion: null,
-    fechaUltimoMantenimiento: null,
+    ultimaCalibracion: null,
+    ultimoMantenimiento: null,
     estado: 'A',
     codigoInterno: '',
     equipo: '',
@@ -87,8 +86,7 @@ export class Equipos implements OnInit {
         equipo.equipo.toLowerCase().includes(filtroLower) ||
         equipo.modelo.toLowerCase().includes(filtroLower) ||
         equipo.serialEquipo.toLowerCase().includes(filtroLower) ||
-        equipo.codigoInterno.toLowerCase().includes(filtroLower) ||
-        (equipo.equipoId?.toString() || '').includes(filtroLower) ||
+        equipo.codigoInterno.toLowerCase().includes(filtroLower)  ||
         this.getEstadoTexto(equipo.estado).toLowerCase().includes(filtroLower)
     );
   }
@@ -142,11 +140,10 @@ export class Equipos implements OnInit {
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.equipoEditando = {
-      equipoId: null,
+      equipoid: null,
       influencia: 0,
-      equipoId_fk: '',
-      fechaUltimaCalibracion: null,
-      fechaUltimoMantenimiento: null,
+      ultimaCalibracion: null,
+      ultimoMantenimiento: null,
       estado: 'A',
       codigoInterno: '',
       equipo: '',
@@ -167,11 +164,10 @@ export class Equipos implements OnInit {
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.equipoEditando = {
-      equipoId: null,
+      equipoid: null,
       influencia: 0,
-      equipoId_fk: '',
-      fechaUltimaCalibracion: null,
-      fechaUltimoMantenimiento: null,
+      ultimaCalibracion: null,
+      ultimoMantenimiento: null,
       estado: 'A',
       codigoInterno: '',
       equipo: '',
@@ -202,9 +198,9 @@ export class Equipos implements OnInit {
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.equipoEditando.equipoId) {
+    if (this.modoEdicion && this.equipoEditando.equipoid) {
       // Editar existente
-      this.equiposService.actualizarEquipo(this.equipoEditando.equipoId, this.equipoEditando).subscribe({
+      this.equiposService.actualizarEquipo(this.equipoEditando.equipoid, this.equipoEditando).subscribe({
         next: () => {
           this.cargarEquipos();
           this.cerrarModalForm();

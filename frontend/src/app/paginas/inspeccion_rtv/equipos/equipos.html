@@ -66,7 +66,7 @@
         </thead>
         <tbody>
         <tr *ngFor="let equipo of equiposPaginados">
-          <td>{{ equipo.equipoId }}</td>
+          <td>{{ equipo.equipoid }}</td>
           <td>{{ equipo.equipo }}</td>
           <td>{{ equipo.modelo }}</td>
           <td>{{ equipo.serialEquipo }}</td>
@@ -207,18 +207,7 @@
         </div>
 
         <!-- Columna 2 -->
-        <div class="form-columna">
-          <div class="form-grupo">
-            <label for="equipoId_fk">ID Equipo FK</label>
-            <input
-              type="text"
-              id="equipoId_fk"
-              [(ngModel)]="equipoEditando.equipoId_fk"
-              class="form-input"
-              placeholder="ID de equipo relacionado"
-            />
-          </div>
-
+        <div>
           <div class="form-grupo">
             <label for="influencia">Influencia</label>
             <input
@@ -235,7 +224,7 @@
             <input
               type="date"
               id="fechaUltimaCalibracion"
-              [(ngModel)]="equipoEditando.fechaUltimaCalibracion"
+              [(ngModel)]="equipoEditando.ultimaCalibracion"
               class="form-input"
             />
           </div>
@@ -245,7 +234,7 @@
             <input
               type="date"
               id="fechaUltimoMantenimiento"
-              [(ngModel)]="equipoEditando.fechaUltimoMantenimiento"
+              [(ngModel)]="equipoEditando.ultimoMantenimiento"
               class="form-input"
             />
           </div>
@@ -286,7 +275,7 @@
       <div class="detalle-grid">
         <div class="detalle-item">
           <span class="detalle-label">ID:</span>
-          <span class="detalle-valor">{{ equipoDetalle.equipoId }}</span>
+          <span class="detalle-valor">{{ equipoDetalle.equipoid }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Equipo:</span>
@@ -305,20 +294,16 @@
           <span class="detalle-valor">{{ equipoDetalle.codigoInterno }}</span>
         </div>
         <div class="detalle-item">
-          <span class="detalle-label">Equipo ID FK:</span>
-          <span class="detalle-valor">{{ equipoDetalle.equipoId_fk || 'N/A' }}</span>
-        </div>
-        <div class="detalle-item">
           <span class="detalle-label">Influencia:</span>
           <span class="detalle-valor">{{ equipoDetalle.influencia }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Última Calibración:</span>
-          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.fechaUltimaCalibracion) }}</span>
+          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.ultimaCalibracion) }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Último Mantenimiento:</span>
-          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.fechaUltimoMantenimiento) }}</span>
+          <span class="detalle-valor">{{ formatearFecha(equipoDetalle.ultimoMantenimiento) }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Estado:</span>

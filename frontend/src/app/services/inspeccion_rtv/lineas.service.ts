@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
 export interface Linea {
   id: number | null;
   nombre: string;
-  estado: string;
   descripcion: string;
+  estado: string;
 }
 
 @Injectable({

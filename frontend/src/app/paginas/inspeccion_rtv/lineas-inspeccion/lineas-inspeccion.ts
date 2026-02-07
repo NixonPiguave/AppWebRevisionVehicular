@@ -25,7 +25,7 @@ export class LineasInspeccionComponent implements OnInit {
   // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
-  rolEditando: Linea = { id: null, nombre: '', estado: 'A', descripcion:'' };
+  rolEditando: Linea = { id: null, nombre: '',  descripcion:'', estado: 'A' };
   guardando: boolean = false;
 
   // Modal detalle
@@ -120,7 +120,7 @@ export class LineasInspeccionComponent implements OnInit {
   // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.rolEditando = { id: null, nombre: '', estado: 'A', descripcion:''};
+    this.rolEditando = { id: null, nombre: '', descripcion:'',estado: 'A'};
     this.mostrarModalForm = true;
   }
 
@@ -134,7 +134,7 @@ export class LineasInspeccionComponent implements OnInit {
   // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
-    this.rolEditando = { id: null, nombre: '', estado: 'A', descripcion:'' };
+    this.rolEditando = { id: null, nombre: '',  descripcion:'',estado: 'A' };
   }
 
   // Guardar rol (crear o editar)

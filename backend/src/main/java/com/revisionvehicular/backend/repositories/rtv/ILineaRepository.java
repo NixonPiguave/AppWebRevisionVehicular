@@ -9,14 +9,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ILineaRepository extends JpaRepository<Lineas, Long> {
 
-    @Procedure(name = "sp_insertar_linea")
+    @Procedure(procedureName = "sp_insertar_lineas")
     void insertarLinea(
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_linea")
+    @Procedure(procedureName = "sp_actualizar_linea")
     void actualizarLinea(
             @Param("p_linea_id") Long lineaId,
             @Param("p_nombre") String nombre,

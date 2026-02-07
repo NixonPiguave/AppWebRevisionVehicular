@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Repository
 public interface IMatriculaRepository extends JpaRepository<Matricula, Long> {
 
-    @Procedure(name = "sp_insertar_matricula")
+    @Procedure(procedureName = "sp_insertar_matricula")
     void insertarMatricula(
             @Param("p_id_vehiculo") Long idVehiculo,
             @Param("p_id_inspeccion") Long idInspeccion,
@@ -24,7 +24,7 @@ public interface IMatriculaRepository extends JpaRepository<Matricula, Long> {
             @Param("p_id_excepcion") Long idExcepcion
     );
 
-    @Procedure(name = "sp_actualizar_matricula")
+    @Procedure(procedureName = "sp_actualizar_matricula")
     void actualizarMatricula(
             @Param("p_id_matricula") Long idMatricula,
             @Param("p_id_vehiculo") Long idVehiculo,

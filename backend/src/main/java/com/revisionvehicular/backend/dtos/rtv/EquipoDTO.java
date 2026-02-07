@@ -1,5 +1,7 @@
 package com.revisionvehicular.backend.dtos.rtv;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 @Data
 public class EquipoDTO {
@@ -8,8 +10,8 @@ public class EquipoDTO {
     private String modelo;
     private String serialEquipo;
     private String codigoInterno;
-    private LocalDateTime ultimoMantenimiento;
-    private LocalDateTime ultimaCalibracion;
+    private LocalDate ultimoMantenimiento;
+    private LocalDate ultimaCalibracion;
     private Integer influencia;
     private String estado;
 }

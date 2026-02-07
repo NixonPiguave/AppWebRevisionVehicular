@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ILineasEquiposRepository extends JpaRepository<LineasEquipo, Long> {
 
-    @Procedure(name = "sp_insertar_linea_equipo")
+    @Procedure(procedureName = "sp_insertar_linea_equipo")
     void insertarLineaEquipo(
             @Param("p_linea_id") Long lineaId,
             @Param("p_equipo_id") Long equipoId
