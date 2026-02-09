@@ -1,4 +1,4 @@
-package com.revisionvehicular.backend.services.rtv;
+package com.revisionvehicular.backend.service.rtv;
 
 import com.revisionvehicular.backend.entities.rtv.TipoDefecto;
 

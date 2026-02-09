@@ -2,7 +2,6 @@ package com.revisionvehicular.backend.service.rtv;
 
 import com.revisionvehicular.backend.entities.rtv.TipoDefecto;
 import com.revisionvehicular.backend.repositories.rtv.ITipoDefectoRepository;
-import com.revisionvehicular.backend.services.rtv.ITipoDefectoService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

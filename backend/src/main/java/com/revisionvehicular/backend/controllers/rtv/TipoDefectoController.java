@@ -1,7 +1,7 @@
 package com.revisionvehicular.backend.controllers.rtv;
 
 import com.revisionvehicular.backend.entities.rtv.TipoDefecto;
-import com.revisionvehicular.backend.services.rtv.ITipoDefectoService;
+import com.revisionvehicular.backend.service.rtv.ITipoDefectoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
