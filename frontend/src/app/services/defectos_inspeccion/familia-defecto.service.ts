@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface FamiliaDefecto {
+export interface Familia {
   id: number | null;
   nombre: string;
   descripcion: string;
@@ -12,38 +12,28 @@ export interface FamiliaDefecto {
 @Injectable({
   providedIn: 'root'
 })
-export class FamiliaDefectoService {
-
-  // URL del backend para familias de defectos
+export class FamiliaService {
   private apiUrl = 'http://localhost:8080/api/familias';
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obtener todas las familias de defectos
-   */
-  listarFamiliasDefectos(): Observable<FamiliaDefecto[]> {
-    return this.http.get<FamiliaDefecto[]>(this.apiUrl);
+  listarFamilias(): Observable<Familia[]> {
+    return this.http.get<Familia[]>(this.apiUrl);
   }
 
-  /**
-   * Crear una nueva familia de defecto
-   */
-  crearFamiliaDefecto(familiaDefecto: FamiliaDefecto): Observable<FamiliaDefecto> {
-    return this.http.post<FamiliaDefecto>(this.apiUrl, familiaDefecto);
+  crearFamilia(familia: Familia): Observable<Familia> {
+    return this.http.post<Familia>(this.apiUrl, familia);
   }
 
-  /**
-   * Actualizar una familia de defecto
-   */
-  actualizarFamiliaDefecto(id: number, familiaDefecto: FamiliaDefecto): Observable<FamiliaDefecto> {
-    return this.http.put<FamiliaDefecto>(`${this.apiUrl}/${id}`, familiaDefecto);
+  actualizarFamilia(id: number, familia: Familia): Observable<Familia> {
+    return this.http.put<Familia>(`${this.apiUrl}/${id}`, familia);
   }
 
-  /**
-   * Obtener una familia de defecto por ID
-   */
-  obtenerFamiliaDefecto(id: number): Observable<FamiliaDefecto> {
-    return this.http.get<FamiliaDefecto>(`${this.apiUrl}/${id}`);
+  obtenerFamiliaPorId(id: number): Observable<Familia> {
+    return this.http.get<Familia>(`${this.apiUrl}/${id}`);
+  }
+
+  eliminarFamilia(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

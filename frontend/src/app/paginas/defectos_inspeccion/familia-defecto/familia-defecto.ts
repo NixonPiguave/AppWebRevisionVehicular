@@ -2,215 +2,146 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { FamiliaDefectoService, FamiliaDefecto } from "../../../services/defectos_inspeccion/familia-defecto.service";
+import { FamiliaService, Familia } from '../../../services/defectos_inspeccion/familia-defecto.service';
 import { MatIconModule } from '@angular/material/icon';
+
 @Component({
+  selector: 'app-familia',
   standalone: true,
-  selector: 'app-familia-defecto',
   imports: [CommonModule, RouterModule, FormsModule, MatIconModule],
   templateUrl: './familia-defecto.html',
-  styleUrls: ['./familia-defecto.css'],
+  styleUrl: './familia-defecto.css',
 })
-export class FamiliaDefectoComponent implements OnInit {
-
-  // Lista de familias de defectos (se carga desde el backend)
-  familiasDefectos: FamiliaDefecto[] = [];
+export class FamiliaComponent implements OnInit {
+  familias: Familia[] = [];
   cargando: boolean = false;
   error: string = '';
-
-  // Filtros y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
-  familiaDefectoEditando: FamiliaDefecto = {
-    id: null,
-    nombre: '',
-    descripcion: '',
-    estado: 'A'
-  };
+  familiaEditando: Familia = { id: null, nombre: '', descripcion: '', estado: 'A' };
   guardando: boolean = false;
 
-  // Modal detalle
   mostrarModalDetalle: boolean = false;
-  familiaDefectoDetalle: FamiliaDefecto | null = null;
+  familiaDetalle: Familia | null = null;
 
-  constructor(
-    private familiaDefectoService: FamiliaDefectoService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(private familiaService: FamiliaService, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.cargarFamiliasDefectos();
+    this.cargarFamilias();
   }
 
-  /**
-   * Cargar familias de defectos desde el backend
-   */
-  cargarFamiliasDefectos(): void {
+  cargarFamilias(): void {
     this.cargando = true;
-    this.error = '';
-    this.cdr.detectChanges();
-
-    this.familiaDefectoService.listarFamiliasDefectos().subscribe({
+    this.familiaService.listarFamilias().subscribe({
       next: (data) => {
-        console.log('Familias de defectos cargadas:', data);
-        this.familiasDefectos = data;
+        this.familias = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: (err) => {
-        console.error('Error al cargar familias de defectos:', err);
-        this.error = 'Error al cargar las familias de defectos. Verifica que el backend esté corriendo.';
+      error: () => {
+        this.error = 'Error al cargar datos.';
         this.cargando = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  // Getter para familias de defectos filtradas
-  get familiasDefectosFiltradas(): FamiliaDefecto[] {
-    if (!this.filtro.trim()) {
-      return this.familiasDefectos;
-    }
-    const filtroLower = this.filtro.toLowerCase();
-    return this.familiasDefectos.filter(
-      (familia) =>
-        familia.nombre.toLowerCase().includes(filtroLower) ||
-        familia.descripcion.toLowerCase().includes(filtroLower) ||
-        (familia.id?.toString() || '').includes(filtroLower) ||
-        this.getEstadoTexto(familia.estado).toLowerCase().includes(filtroLower)
+  get familiasFiltradas(): Familia[] {
+    const f = this.filtro.toLowerCase();
+    return this.familias.filter(fam =>
+      fam.nombre.toLowerCase().includes(f) ||
+      fam.descripcion.toLowerCase().includes(f) ||
+      (fam.id?.toString() || '').includes(f)
     );
   }
 
-  // Getter para familias de defectos paginadas
-  get familiasDefectosPaginadas(): FamiliaDefecto[] {
+  get familiasPaginadas(): Familia[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
-    const fin = inicio + this.registrosPorPagina;
-    return this.familiasDefectosFiltradas.slice(inicio, fin);
+    return this.familiasFiltradas.slice(inicio, inicio + this.registrosPorPagina);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
-    return Math.ceil(this.familiasDefectosFiltradas.length / this.registrosPorPagina);
+    return Math.ceil(this.familiasFiltradas.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
-    const paginas: number[] = [];
-    for (let i = 1; i <= this.totalPaginas; i++) {
-      paginas.push(i);
-    }
-    return paginas;
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
   }
 
-  // Convertir estado a texto
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // Cambiar página
-  irAPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaActual = pagina;
-    }
+  irAPagina(p: number): void {
+    this.paginaActual = p;
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.familiaDefectoEditando = {
-      id: null,
-      nombre: '',
-      descripcion: '',
-      estado: 'A'
-    };
+    this.familiaEditando = { id: null, nombre: '', descripcion: '', estado: 'A' };
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
-  abrirModalEditar(familiaDefecto: FamiliaDefecto): void {
+  abrirModalEditar(familia: Familia): void {
     this.modoEdicion = true;
-    this.familiaDefectoEditando = { ...familiaDefecto };
+    this.familiaEditando = { ...familia };
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
-    this.familiaDefectoEditando = {
-      id: null,
-      nombre: '',
-      descripcion: '',
-      estado: 'A'
-    };
   }
 
-  // Guardar familia de defecto (crear o editar)
-  guardarFamiliaDefecto(): void {
-    // Validaciones
-    if (!this.familiaDefectoEditando.nombre.trim()) {
-      alert('El nombre es requerido');
-      return;
-    }
-    if (!this.familiaDefectoEditando.descripcion.trim()) {
-      alert('La descripción es requerida');
+  guardarFamilia(): void {
+    if (!this.familiaEditando.nombre.trim()) {
+      alert('El nombre de la familia es obligatorio');
       return;
     }
 
     this.guardando = true;
+    const idValue = this.familiaEditando.id;
 
-    if (this.modoEdicion && this.familiaDefectoEditando.id) {
-      // Editar existente
-      this.familiaDefectoService.actualizarFamiliaDefecto(
-        this.familiaDefectoEditando.id,
-        this.familiaDefectoEditando
-      ).subscribe({
+    if (this.modoEdicion && idValue) {
+      this.familiaService.actualizarFamilia(idValue, this.familiaEditando).subscribe({
         next: () => {
-          this.cargarFamiliasDefectos();
+          this.cargarFamilias();
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: (err) => {
-          console.error('Error al actualizar familia de defecto:', err);
-          alert('Error al actualizar la familia de defecto');
+        error: () => {
           this.guardando = false;
+          alert('Error al actualizar');
         }
       });
     } else {
-      // Crear nueva
-      this.familiaDefectoService.crearFamiliaDefecto(this.familiaDefectoEditando).subscribe({
+      this.familiaService.crearFamilia(this.familiaEditando).subscribe({
         next: () => {
-          this.cargarFamiliasDefectos();
+          this.cargarFamilias();
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: (err) => {
-          console.error('Error al crear familia de defecto:', err);
-          alert('Error al crear la familia de defecto');
+        error: () => {
           this.guardando = false;
+          alert('Error al crear');
         }
       });
     }
   }
 
-  // Abrir modal detalle
-  verDetalle(familiaDefecto: FamiliaDefecto): void {
-    this.familiaDefectoDetalle = familiaDefecto;
+  verDetalle(familia: Familia): void {
+    this.familiaDetalle = familia;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
-    this.familiaDefectoDetalle = null;
   }
 }

@@ -19,13 +19,14 @@ import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion
 import { SubfamiliaDefectoComponent } from './paginas/defectos_inspeccion/subfamilia-defecto/subfamilia-defecto';
 import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
 import { CategoriaDefectoComponent } from './paginas/defectos_inspeccion/categoria-defecto/categoria-defecto';
-import { FamiliaDefectoComponent } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
+import { FamiliaComponent } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
 
 
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
+import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -56,12 +57,15 @@ export const routes: Routes = [
       { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
       { path: 'defectos-inspeccion/categoria-defecto', component: CategoriaDefectoComponent },
-      { path: 'defectos-inspeccion/familia-defecto', component: FamiliaDefectoComponent },
+      { path: 'defectos-inspeccion/familia-defecto', component: FamiliaComponent },
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
       { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
+
+      //Configuracion de Unidades de Medida
+      { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
     ]
   },
   { path: '**', redirectTo: '' }

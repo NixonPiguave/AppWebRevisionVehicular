@@ -7,26 +7,23 @@ import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-tipos-defectos',
+  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, MatIconModule],
   templateUrl: './tipos-defectos.html',
   styleUrl: './tipos-defectos.css',
 })
 export class TiposDefectosComponent implements OnInit {
-  // Lista de tipos de defectos (se carga desde el backend)
   tiposDefectos: TipoDefecto[] = [];
   cargando: boolean = false;
   error: string = '';
-
-  // Filtros y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   tipoDefectoEditando: TipoDefecto = {
-    tipoDefectoId: null,
+    id: null,
     codigo: '',
     nombre: '',
     descripcion: '',
@@ -34,7 +31,6 @@ export class TiposDefectosComponent implements OnInit {
   };
   guardando: boolean = false;
 
-  // Modal detalle
   mostrarModalDetalle: boolean = false;
   tipoDefectoDetalle: TipoDefecto | null = null;
 
@@ -47,15 +43,13 @@ export class TiposDefectosComponent implements OnInit {
     this.cargarTiposDefectos();
   }
 
-  /**
-   * Cargar tipos de defectos desde el backend
-   */
+  /** Cargar tipos de defectos desde el backend */
   cargarTiposDefectos(): void {
     this.cargando = true;
     this.error = '';
     this.cdr.detectChanges();
 
-    this.tiposDefectosService.listarTiposDefectos().subscribe({
+    this.tiposDefectosService.listar().subscribe({
       next: (data) => {
         console.log('Tipos de defectos cargados:', data);
         this.tiposDefectos = data;
@@ -82,7 +76,7 @@ export class TiposDefectosComponent implements OnInit {
         tipo.codigo.toLowerCase().includes(filtroLower) ||
         tipo.nombre.toLowerCase().includes(filtroLower) ||
         tipo.descripcion.toLowerCase().includes(filtroLower) ||
-        (tipo.tipoDefectoId?.toString() || '').includes(filtroLower) ||
+        (tipo.id?.toString() || '').includes(filtroLower) ||
         this.getEstadoTexto(tipo.estado).toLowerCase().includes(filtroLower)
     );
   }
@@ -129,7 +123,7 @@ export class TiposDefectosComponent implements OnInit {
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.tipoDefectoEditando = {
-      tipoDefectoId: null,
+      id: null,
       codigo: '',
       nombre: '',
       descripcion: '',
@@ -149,7 +143,7 @@ export class TiposDefectosComponent implements OnInit {
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.tipoDefectoEditando = {
-      tipoDefectoId: null,
+      id: null,
       codigo: '',
       nombre: '',
       descripcion: '',
@@ -168,17 +162,13 @@ export class TiposDefectosComponent implements OnInit {
       alert('El nombre es requerido');
       return;
     }
-    if (!this.tipoDefectoEditando.descripcion.trim()) {
-      alert('La descripción es requerida');
-      return;
-    }
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.tipoDefectoEditando.tipoDefectoId) {
+    if (this.modoEdicion && this.tipoDefectoEditando.id) {
       // Editar existente
-      this.tiposDefectosService.actualizarTipoDefecto(
-        this.tipoDefectoEditando.tipoDefectoId,
+      this.tiposDefectosService.actualizar(
+        this.tipoDefectoEditando.id,
         this.tipoDefectoEditando
       ).subscribe({
         next: () => {
@@ -194,7 +184,7 @@ export class TiposDefectosComponent implements OnInit {
       });
     } else {
       // Crear nuevo
-      this.tiposDefectosService.crearTipoDefecto(this.tipoDefectoEditando).subscribe({
+      this.tiposDefectosService.crear(this.tipoDefectoEditando).subscribe({
         next: () => {
           this.cargarTiposDefectos();
           this.cerrarModalForm();

@@ -1,38 +1,45 @@
-<div class="tipos-defectos-container">
+<div class="crud-container">
   <!-- Mensaje de error -->
   <div class="mensaje-error" *ngIf="error">
-    {{ error }}
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
     <button class="btn-reintentar" (click)="cargarTiposDefectos()">Reintentar</button>
   </div>
 
   <!-- Loading -->
   <div class="cargando" *ngIf="cargando && !error">
-    Cargando tipos de defectos...
+    <div class="spinner"></div>
+    <span>Cargando tipos de defectos...</span>
   </div>
 
   <!-- Contenido principal -->
   <div *ngIf="!cargando || error">
     <!-- Header -->
-    <div class="tipos-defectos-header">
+    <div class="crud-header">
       <h2>Gestión de Tipos de Defectos</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
         <mat-icon>add</mat-icon>
-        Nuevo Tipo de Defecto
+        <span>Nuevo Tipo de Defecto</span>
       </button>
     </div>
 
     <!-- Controles -->
-    <div class="tipos-defectos-controles">
+    <div class="crud-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
-        <input
-          type="text"
-          id="filtro"
-          [(ngModel)]="filtro"
-          (ngModelChange)="onFiltroChange()"
-          placeholder="Buscar por código, nombre, descripción..."
-          class="input-filtro"
-        />
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por código, nombre o descripción..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
       </div>
       <div class="control-grupo">
         <label for="registros">Mostrar:</label>
@@ -52,7 +59,7 @@
 
     <!-- Tabla -->
     <div class="tabla-contenedor">
-      <table class="tipos-defectos-tabla">
+      <table class="crud-tabla">
         <thead>
         <tr>
           <th>ID</th>
@@ -65,9 +72,11 @@
         </thead>
         <tbody>
         <tr *ngFor="let tipoDefecto of tiposDefectosPaginados">
-          <td>{{ tipoDefecto.tipoDefectoId }}</td>
-          <td>{{ tipoDefecto.codigo }}</td>
-          <td>{{ tipoDefecto.nombre }}</td>
+          <td>{{ tipoDefecto.id }}</td>
+          <td>
+            <span class="badge-codigo">{{ tipoDefecto.codigo }}</span>
+          </td>
+          <td class="txt-resaltado">{{ tipoDefecto.nombre }}</td>
           <td>{{ tipoDefecto.descripcion }}</td>
           <td>
             <span
@@ -106,41 +115,42 @@
       </table>
     </div>
 
-    <!-- Paginación -->
-    <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual - 1)"
-        [disabled]="paginaActual === 1"
-      >
-        Anterior
-      </button>
+    <!-- Footer con paginación e info -->
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="tiposDefectosFiltrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > tiposDefectosFiltrados.length
+        ? tiposDefectosFiltrados.length
+        : paginaActual * registrosPorPagina }}
+        de {{ tiposDefectosFiltrados.length }} registros
+      </div>
 
-      <button
-        *ngFor="let pagina of paginas"
-        class="btn-pagina"
-        [class.activa]="pagina === paginaActual"
-        (click)="irAPagina(pagina)"
-      >
-        {{ pagina }}
-      </button>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
 
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual + 1)"
-        [disabled]="paginaActual === totalPaginas"
-      >
-        Siguiente
-      </button>
-    </div>
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
 
-    <!-- Info -->
-    <div class="info-registros" *ngIf="tiposDefectosFiltrados.length > 0">
-      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
-      {{ paginaActual * registrosPorPagina > tiposDefectosFiltrados.length
-      ? tiposDefectosFiltrados.length
-      : paginaActual * registrosPorPagina }}
-      de {{ tiposDefectosFiltrados.length }} registros
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -157,43 +167,44 @@
 
     <div class="modal-body">
       <div class="form-grupo">
-        <label for="codigo">Código *</label>
+        <label for="codigo">Código <span class="campo-requerido">*</span></label>
         <input
           type="text"
           id="codigo"
           [(ngModel)]="tipoDefectoEditando.codigo"
           class="form-input"
-          placeholder="Ingrese el código"
-          maxlength="50"
+          placeholder="Ej: 1,2,3"
+          [disabled]="modoEdicion"
         />
+        <small class="help-text" *ngIf="!modoEdicion">
+          El código no se puede modificar después de crear el registro
+        </small>
       </div>
 
       <div class="form-grupo">
-        <label for="nombre">Nombre *</label>
+        <label for="nombre">Nombre del Tipo de Defecto <span class="campo-requerido">*</span></label>
         <input
           type="text"
           id="nombre"
           [(ngModel)]="tipoDefectoEditando.nombre"
           class="form-input"
-          placeholder="Ingrese el nombre"
-          maxlength="100"
+          placeholder="Ej: Defecto crítico de seguridad"
         />
       </div>
 
       <div class="form-grupo">
-        <label for="descripcion">Descripción *</label>
+        <label for="descripcion">Descripción</label>
         <textarea
           id="descripcion"
           [(ngModel)]="tipoDefectoEditando.descripcion"
-          class="form-textarea"
-          placeholder="Ingrese la descripción"
-          rows="4"
-          maxlength="255"
+          class="form-input"
+          rows="3"
+          placeholder="Ingrese una descripción breve del tipo de defecto"
         ></textarea>
       </div>
 
       <div class="form-grupo">
-        <label for="estado">Estado *</label>
+        <label for="estado">Estado</label>
         <select id="estado" [(ngModel)]="tipoDefectoEditando.estado" class="form-select">
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>
@@ -206,6 +217,7 @@
         Cancelar
       </button>
       <button class="btn-guardar" (click)="guardarTipoDefecto()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
         {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Tipo de Defecto') }}
       </button>
     </div>
@@ -223,36 +235,38 @@
     </div>
 
     <div class="modal-body" *ngIf="tipoDefectoDetalle">
-      <div class="detalle-item">
-        <span class="detalle-label">ID:</span>
-        <span class="detalle-valor">{{ tipoDefectoDetalle.tipoDefectoId }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Código:</span>
-        <span class="detalle-valor">{{ tipoDefectoDetalle.codigo }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Nombre:</span>
-        <span class="detalle-valor">{{ tipoDefectoDetalle.nombre }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Descripción:</span>
-        <span class="detalle-valor">{{ tipoDefectoDetalle.descripcion }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Estado:</span>
-        <span
-          class="estado-badge"
-          [class.activo]="tipoDefectoDetalle.estado === 'A'"
-          [class.inactivo]="tipoDefectoDetalle.estado === 'I'"
-        >
-          {{ getEstadoTexto(tipoDefectoDetalle.estado) }}
-        </span>
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ tipoDefectoDetalle.id }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Código:</span>
+          <span class="badge-codigo">{{ tipoDefectoDetalle.codigo }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre:</span>
+          <span class="detalle-valor resaltado">{{ tipoDefectoDetalle.nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor">{{ tipoDefectoDetalle.descripcion || 'Sin descripción disponible' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="tipoDefectoDetalle.estado === 'A'"
+            [class.inactivo]="tipoDefectoDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(tipoDefectoDetalle.estado) }}
+          </span>
+        </div>
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
     </div>
   </div>
 </div>
