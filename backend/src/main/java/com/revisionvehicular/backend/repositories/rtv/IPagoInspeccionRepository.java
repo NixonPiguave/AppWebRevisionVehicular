@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface IPagoInspeccionRepository extends JpaRepository<PagoInspeccion, Long> {
 
-    @Procedure(name = "sp_insertar_pago_inspeccion")
+    @Procedure(procedureName = "sp_insertar_pago_inspeccion")
     void insertarPagoInspeccion(
             @Param("p_valor") String valor,
             @Param("p_fecha_pago") LocalDateTime fechaPago,
@@ -21,7 +21,7 @@ public interface IPagoInspeccionRepository extends JpaRepository<PagoInspeccion,
             @Param("p_id_propietario") Long idPropietario
     );
 
-    @Procedure(name = "sp_actualizar_pago_inspeccion")
+    @Procedure(procedureName = "sp_actualizar_pago_inspeccion")
     void actualizarPagoInspeccion(
             @Param("p_id_pago") Long idPago,
             @Param("p_valor") String valor,

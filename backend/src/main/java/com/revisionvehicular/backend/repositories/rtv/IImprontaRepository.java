@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface IImprontaRepository extends JpaRepository<Impronta, Long> {
 
-    @Procedure(name = "sp_insertar_impronta")
+    @Procedure(procedureName = "sp_insertar_impronta")
     void insertarImpronta(
             @Param("p_fecha_registro") LocalDateTime fechaRegistro,
             @Param("p_codigo_impronta") String codigoImpronta,
@@ -22,7 +22,7 @@ public interface IImprontaRepository extends JpaRepository<Impronta, Long> {
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_impronta")
+    @Procedure(procedureName = "sp_actualizar_impronta")
     void actualizarImpronta(
             @Param("p_impronta_id") Long improntaId,
             @Param("p_fecha_registro") LocalDateTime fechaRegistro,

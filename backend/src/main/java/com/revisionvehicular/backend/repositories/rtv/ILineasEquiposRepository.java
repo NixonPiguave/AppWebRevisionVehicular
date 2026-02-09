@@ -15,7 +15,7 @@ public interface ILineasEquiposRepository extends JpaRepository<LineasEquipo, Lo
             @Param("p_equipo_id") Long equipoId
     );
 
-    @Procedure(name = "sp_actualizar_linea_equipo")
+    @Procedure(procedureName = "sp_actualizar_linea_equipo")
     void actualizarLineaEquipo(
             @Param("p_linea_equipo_id") Long lineaEquipoId,
             @Param("p_linea_id") Long lineaId,
