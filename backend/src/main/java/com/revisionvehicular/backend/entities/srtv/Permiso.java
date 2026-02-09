@@ -16,9 +16,6 @@ public class Permiso {
     @Column(name = "permiso_id")
     private Long permisoId;
 
-    @Column(nullable = false, unique = true, length = 100)
-    private String codigo;
-
     @Column(nullable = false, length = 100)
     private String nombre;
 
