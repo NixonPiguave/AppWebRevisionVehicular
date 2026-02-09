@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.service.ant;
 
+import com.revisionvehicular.backend.repositories.ant.IDeudaVehicularRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -8,9 +9,9 @@ import java.time.LocalDate;
 @Service
 public class DeudaVehicularServiceImpl implements IDeudaVehicularService {
 
-    private final IDeudaVehicularService repository;
+    private final IDeudaVehicularRepository repository;
 
-    public DeudaVehicularServiceImpl(IDeudaVehicularService repository) {
+    public DeudaVehicularServiceImpl(IDeudaVehicularRepository repository) {
         this.repository = repository;
     }
 
