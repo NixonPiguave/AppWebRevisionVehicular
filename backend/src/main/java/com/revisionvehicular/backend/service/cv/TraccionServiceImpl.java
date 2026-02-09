@@ -29,13 +29,13 @@ public class TraccionServiceImpl implements ITraccionService {
     @Override
     public TraccionDTO save(TraccionDTO dto) {
 
-        Long id = repository.insertarTraccion(
+               repository.insertarTraccion(
                 dto.getTipo(),
                 dto.getDescripcion(),
                 dto.getEstado()
         );
 
-        Traccion traccion = repository.findById(id)
+        Traccion traccion = repository.getByTipo(dto.getTipo())
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar tracción")
                 );

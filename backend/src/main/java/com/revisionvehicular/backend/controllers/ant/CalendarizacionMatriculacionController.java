@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/calendarizacion-matriculacion")
+@RequestMapping("/api/calendarizacionmatriculacion")
 public class CalendarizacionMatriculacionController {
 
     private final ICalendarizacionService service;

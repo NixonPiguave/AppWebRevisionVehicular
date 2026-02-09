@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface TipoCombustible {
-  id: number | null;
+  Id: number | null;
   nombre: string;
   descripcion: string;
   estado: string;

@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { TipoCombustibleService, TipoCombustible } from "../../../services/catalogos_vehiculos/tipo_vehiculo.service";
+import { TipoCombustibleService, TipoCombustible } from "../../../services/catalogos_vehiculos/tipo_combustible.service";
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -22,7 +22,7 @@ export class TipoCombustibleComponent implements OnInit {
 
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
-  tipoEditando: TipoCombustible = { id: null, nombre: '', descripcion: '', estado: 'A' };
+  tipoEditando: TipoCombustible = { Id: null, nombre: '', descripcion: '', estado: 'A' };
   guardando: boolean = false;
 
   mostrarModalDetalle: boolean = false;
@@ -55,7 +55,7 @@ export class TipoCombustibleComponent implements OnInit {
     return this.tipos.filter(t =>
       t.nombre.toLowerCase().includes(f) ||
       t.descripcion.toLowerCase().includes(f) ||
-      (t.id?.toString() || '').includes(f)
+      (t.Id?.toString() || '').includes(f)
     );
   }
 
@@ -86,7 +86,7 @@ export class TipoCombustibleComponent implements OnInit {
 
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.tipoEditando = { id: null, nombre: '', descripcion: '', estado: 'A' };
+    this.tipoEditando = { Id: null, nombre: '', descripcion: '', estado: 'A' };
     this.mostrarModalForm = true;
   }
 
@@ -107,7 +107,7 @@ export class TipoCombustibleComponent implements OnInit {
     }
 
     this.guardando = true;
-    const idValue = this.tipoEditando.id;
+    const idValue = this.tipoEditando.Id;
 
     if (this.modoEdicion && idValue) {
       this.tipoService.actualizarTipoCombustible(idValue, this.tipoEditando).subscribe({
