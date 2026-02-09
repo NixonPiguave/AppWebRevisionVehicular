@@ -9,14 +9,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IEstadoMultaRepository extends JpaRepository<EstadoMulta, Long> {
 
-    @Procedure(name = "sp_insertar_estado_multa")
+    @Procedure(procedureName = "sp_insertar_estado_multa")
     void insertarEstadoMulta(
             @Param("p_tipo_multa") String tipoMulta,
             @Param("p_descripcion") String descripcion,
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_estado_multa")
+    @Procedure(procedureName = "sp_actualizar_estado_multa")
     void actualizarEstadoMulta(
             @Param("p_id_estado_multa") Long idEstadoMulta,
             @Param("p_tipo_multa") String tipoMulta,

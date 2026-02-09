@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IExcepcionesRepository extends JpaRepository<Excepciones, Long> {
 
-    @Procedure(name = "sp_insertar_excepcion")
+    @Procedure(procedureName = "sp_insertar_excepcion")
     void insertarExcepcion(
             @Param("p_codigo") String codigo,
             @Param("p_descripcion") String descripcion,
@@ -17,7 +17,7 @@ public interface IExcepcionesRepository extends JpaRepository<Excepciones, Long>
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_excepcion")
+    @Procedure(procedureName = "sp_actualizar_excepcion")
     void actualizarExcepcion(
             @Param("p_id_estado_excepcion") Long idEstadoExcepcion,
             @Param("p_codigo") String codigo,

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IEntidadesTransitoRepository extends JpaRepository<EntidadesTransito, Long> {
 
-    @Procedure(name = "sp_insertar_entidad_transito")
+    @Procedure(procedureName = "sp_insertar_entidad_transito")
     void insertarEntidadTransito(
             @Param("p_codigo") String codigo,
             @Param("p_nombre") String nombre,
@@ -18,7 +18,7 @@ public interface IEntidadesTransitoRepository extends JpaRepository<EntidadesTra
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_entidad_transito")
+    @Procedure(procedureName = "sp_actualizar_entidad_transito")
     void actualizarEntidadTransito(
             @Param("p_id_entidad") Long idEntidad,
             @Param("p_codigo") String codigo,

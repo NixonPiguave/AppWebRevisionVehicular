@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ICalendarizacionRepository extends JpaRepository<CalendarizacionMatriculacion, Long> {
 
-    @Procedure(name = "sp_insertar_calendarizacion_matriculacion")
+    @Procedure(procedureName = "sp_insertar_calendarizacion_matriculacion")
     void insertarCalendarizacionMatriculacion(
             @Param("p_ultimo_digito_placa") Integer ultimoDigitoPlaca,
             @Param("p_mes") Integer mes,
@@ -17,7 +17,7 @@ public interface ICalendarizacionRepository extends JpaRepository<Calendarizacio
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_calendarizacion_matriculacion")
+    @Procedure(procedureName = "sp_actualizar_calendarizacion_matriculacion")
     void actualizarCalendarizacionMatriculacion(
             @Param("p_id_calendarizacion") Long idCalendarizacion,
             @Param("p_ultimo_digito_placa") Integer ultimoDigitoPlaca,
