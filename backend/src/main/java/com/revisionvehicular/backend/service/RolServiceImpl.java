@@ -18,10 +18,15 @@ public class RolServiceImpl implements IRolService{
     }
     @Override
     public RolDTO save(RolDTO dto) {
-        repository.spInsertarRol(dto.getNombre(), dto.getEstado());
-        Rol rol = repository
-                .getRolByNombre(dto.getNombre())
+        repository.spInsertarRol(
+                dto.getNombre(),
+                dto.getEstado(),
+                dto.getPermisosJson()
+        );
+
+        Rol rol = repository.getRolByNombre(dto.getNombre())
                 .orElseThrow(() -> new RuntimeException("Error al crear rol"));
+
         return toDTO(rol);
     }
     @Override
@@ -31,7 +36,7 @@ public class RolServiceImpl implements IRolService{
         return toDTO(rol);
     }
     @Override
-   public List<RolDTO> findAll() {
+    public List<RolDTO> findAll() {
         return repository.findAll().stream().
                 map(this::toDTO).collect(Collectors.toList());
     }

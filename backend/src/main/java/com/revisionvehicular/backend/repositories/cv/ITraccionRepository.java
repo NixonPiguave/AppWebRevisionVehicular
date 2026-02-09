@@ -14,17 +14,17 @@ public interface ITraccionRepository extends JpaRepository<Traccion, Long> {
 
     @Procedure(procedureName = "sp_insertar_traccion")
     void insertarTraccion(
-            @Param("tipo") String tipo,
-            @Param("descripcion") String descripcion,
-            @Param("estado") String estado
+            @Param("p_tipo") String tipo,
+            @Param("p_descripcion") String descripcion,
+            @Param("p_estado") String estado
     );
 
     @Procedure(procedureName = "sp_actualizar_traccion")
     void actualizarTraccion(
-            @Param("traccionid") Long traccionid,
-            @Param("tipo") String tipo,
-            @Param("descripcion") String descripcion,
-            @Param("estado") String estado
+            @Param("p_traccionid") Long traccionid,
+            @Param("p_tipo") String tipo,
+            @Param("p_descripcion") String descripcion,
+            @Param("p_estado") String estado
     );
 
     Optional<Traccion> getByTipo(String tipo);
