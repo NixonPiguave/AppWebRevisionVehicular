@@ -166,23 +166,20 @@
     </div>
 
     <div class="modal-body">
+      <!-- CAMPO CÓDIGO - SIEMPRE EDITABLE -->
       <div class="form-grupo">
-        <label for="codigo">Código <span class="campo-requerido">*</span></label>
+        <label for="codigo">Código</label>
         <input
           type="text"
           id="codigo"
           [(ngModel)]="tipoDefectoEditando.codigo"
           class="form-input"
-          placeholder="Ej: 1,2,3"
-          [disabled]="modoEdicion"
+          placeholder="Ej: TD001, DEF-001"
         />
-        <small class="help-text" *ngIf="!modoEdicion">
-          El código no se puede modificar después de crear el registro
-        </small>
       </div>
 
       <div class="form-grupo">
-        <label for="nombre">Nombre del Tipo de Defecto <span class="campo-requerido">*</span></label>
+        <label for="nombre">Nombre del Tipo de Defecto</label>
         <input
           type="text"
           id="nombre"

@@ -43,7 +43,6 @@ export class TiposDefectosComponent implements OnInit {
     this.cargarTiposDefectos();
   }
 
-  /** Cargar tipos de defectos desde el backend */
   cargarTiposDefectos(): void {
     this.cargando = true;
     this.error = '';
@@ -65,7 +64,6 @@ export class TiposDefectosComponent implements OnInit {
     });
   }
 
-  // Getter para tipos de defectos filtrados
   get tiposDefectosFiltrados(): TipoDefecto[] {
     if (!this.filtro.trim()) {
       return this.tiposDefectos;
@@ -81,19 +79,16 @@ export class TiposDefectosComponent implements OnInit {
     );
   }
 
-  // Getter para tipos de defectos paginados
   get tiposDefectosPaginados(): TipoDefecto[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
     return this.tiposDefectosFiltrados.slice(inicio, fin);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
     return Math.ceil(this.tiposDefectosFiltrados.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -102,24 +97,20 @@ export class TiposDefectosComponent implements OnInit {
     return paginas;
   }
 
-  // Convertir estado a texto
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // Cambiar página
   irAPagina(pagina: number): void {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaActual = pagina;
     }
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.tipoDefectoEditando = {
@@ -132,14 +123,12 @@ export class TiposDefectosComponent implements OnInit {
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
   abrirModalEditar(tipoDefecto: TipoDefecto): void {
     this.modoEdicion = true;
     this.tipoDefectoEditando = { ...tipoDefecto };
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.tipoDefectoEditando = {
@@ -151,15 +140,10 @@ export class TiposDefectosComponent implements OnInit {
     };
   }
 
-  // Guardar tipo de defecto (crear o editar)
   guardarTipoDefecto(): void {
-    // Validaciones
-    if (!this.tipoDefectoEditando.codigo.trim()) {
-      alert('El código es requerido');
-      return;
-    }
+    // Validación simple: solo nombre es requerido
     if (!this.tipoDefectoEditando.nombre.trim()) {
-      alert('El nombre es requerido');
+      alert('El nombre del tipo de defecto es requerido');
       return;
     }
 
@@ -183,12 +167,21 @@ export class TiposDefectosComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo
-      this.tiposDefectosService.crear(this.tipoDefectoEditando).subscribe({
-        next: () => {
-          this.cargarTiposDefectos();
+      // Crear nuevo - NO ENVIAR EL ID
+      const nuevoTipoDefecto = {
+        codigo: this.tipoDefectoEditando.codigo,
+        nombre: this.tipoDefectoEditando.nombre,
+        descripcion: this.tipoDefectoEditando.descripcion,
+        estado: this.tipoDefectoEditando.estado
+      };
+
+      this.tiposDefectosService.crear(nuevoTipoDefecto as TipoDefecto).subscribe({
+        next: (response) => {
+          console.log('Tipo de defecto creado:', response);
+          // Forzar recarga completa
           this.cerrarModalForm();
           this.guardando = false;
+          this.cargarTiposDefectos();
         },
         error: (err) => {
           console.error('Error al crear tipo de defecto:', err);
@@ -199,13 +192,11 @@ export class TiposDefectosComponent implements OnInit {
     }
   }
 
-  // Abrir modal detalle
   verDetalle(tipoDefecto: TipoDefecto): void {
     this.tipoDefectoDetalle = tipoDefecto;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.tipoDefectoDetalle = null;
