@@ -1,19 +1,21 @@
 package com.revisionvehicular.backend.service.rtv;
 
-import com.revisionvehicular.backend.entities.rtv.TipoDefecto;
+import com.revisionvehicular.backend.dtos.rtv.TipoDefectoDTO;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface ITipoDefectoService {
 
-    void crearTipoDefecto(TipoDefecto tipoDefecto);
+    // Retorna el DTO creado con ID
+    TipoDefectoDTO crearTipoDefecto(TipoDefectoDTO tipoDefectoDTO);
 
-    void modificarTipoDefecto(Long id, TipoDefecto tipoDefecto);
+    // Retorna el DTO modificado
+    TipoDefectoDTO modificarTipoDefecto(Long id, TipoDefectoDTO tipoDefectoDTO);
 
-    List<TipoDefecto> listarTodos();
+    List<TipoDefectoDTO> listarTodos();
 
-    Optional<TipoDefecto> buscarPorId(Long id);
+    Optional<TipoDefectoDTO> buscarPorId(Long id);
 
-    Optional<TipoDefecto> buscarPorCodigo(String codigo);
+    Optional<TipoDefectoDTO> buscarPorCodigo(String codigo);
 }

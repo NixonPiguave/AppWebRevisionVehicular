@@ -167,7 +167,7 @@ export class TiposDefectosComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo - NO ENVIAR EL ID
+      // Crear nuevo
       const nuevoTipoDefecto = {
         codigo: this.tipoDefectoEditando.codigo,
         nombre: this.tipoDefectoEditando.nombre,
