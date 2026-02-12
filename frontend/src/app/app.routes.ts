@@ -15,6 +15,7 @@ import {ModelosComponent} from './paginas/catalogos_vehiculos/modelos/modelos';
 import {TipoCombustibleComponent} from './paginas/catalogos_vehiculos/tipo-combustible/tipo-combustible';
 import {TipoMatriculaComponent} from './paginas/catalogos_vehiculos/tipo-matricula/tipo-matricula';
 import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion';
+import {SubcategoriasComponent} from './paginas/catalogos_vehiculos/subcategorias/subcategorias';
 // Importaciones de Defectos Inspección
 import { SubfamiliaDefectoComponent } from './paginas/defectos_inspeccion/subfamilia-defecto/subfamilia-defecto';
 import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
@@ -28,8 +29,9 @@ import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
 
+
 export const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: InicioComponent },
   {
     path: 'inicio',
     component: InicioComponent,
@@ -48,7 +50,7 @@ export const routes: Routes = [
       { path: 'catalogo-vehiculos/ejes', component: EjesComponent},
       { path: 'catalogo-vehiculos/marcas', component: MarcaVehiculoComponent},
       { path: 'catalogo-vehiculos/modelos', component: ModelosComponent},
-      //falta subcategorias
+      { path: 'catalogo-vehiculos/subcategorias', component: SubcategoriasComponent},
       { path: 'catalogo-vehiculos/tipo-combustible', component: TipoCombustibleComponent},
       { path: 'catalogo-vehiculos/tipo-matricula', component: TipoMatriculaComponent},
       //tipo vehiculo falta, no es maestra

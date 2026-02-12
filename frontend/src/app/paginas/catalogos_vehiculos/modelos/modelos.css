@@ -686,3 +686,72 @@ mat-icon {
     padding: 10px 12px;
   }
 }
+/* ============================================
+   ESTILOS ESPECÍFICOS PARA MODELOS
+   ============================================ */
+
+/* Badge para la marca */
+.badge-marca {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #e1f5fe;
+  color: #01579b;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #b3e5fc;
+}
+
+/* Variación en modal de detalle */
+.detalle-item .badge-marca {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffe0b2;
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+/* Hover effect en tabla */
+.crud-tabla tbody tr:hover .badge-marca {
+  background: #b3e5fc;
+  border-color: #81d4fa;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+/* Modal más ancho para formularios de dos columnas */
+.modal-wide {
+  max-width: 550px;
+}
+
+/* Layout de dos columnas para los años */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Campos requeridos */
+.required {
+  color: #d32f2f;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Input number sin flechas (opcional, más limpio) */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+}
+
+/* Responsive: en móvil, los años van en una columna */
+@media (max-width: 480px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-wide {
+    max-width: calc(100% - 32px);
+  }
+}

@@ -1,1 +1,296 @@
-<p>modelos works!</p>
+<div class="crud-container">
+  <!-- Mensaje de error -->
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarDatos()">Reintentar</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando modelos de vehículos...</span>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!cargando || error">
+    <!-- Header -->
+    <div class="crud-header">
+      <h2>Gestión de Modelos de Vehículos</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        <span>Nuevo Modelo</span>
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="crud-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por nombre, marca o año..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="crud-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Marca</th>
+          <th>Modelo</th>
+          <th>Año Desde</th>
+          <th>Año Hasta</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let modelo of modelosPaginados">
+          <td>{{ modelo.id }}</td>
+          <td>
+            <span class="badge-marca">{{ modelo.marcaNombre }}</span>
+          </td>
+          <td class="txt-resaltado">{{ modelo.nombre }}</td>
+          <td>{{ modelo.anioDesde }}</td>
+          <td>{{ modelo.anioHasta }}</td>
+          <td>
+            <span
+              class="estado-badge"
+              [class.activo]="modelo.estado === 'A'"
+              [class.inactivo]="modelo.estado === 'I'"
+            >
+              {{ getEstadoTexto(modelo.estado) }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <button
+              class="btn-accion btn-ver"
+              (click)="verDetalle(modelo)"
+              title="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button
+              class="btn-accion btn-editar"
+              (click)="abrirModalEditar(modelo)"
+              title="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="modelosPaginados.length === 0 && !error && !cargando">
+          <td colspan="7" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer con paginación e info -->
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="modelosFiltrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > modelosFiltrados.length
+        ? modelosFiltrados.length
+        : paginaActual * registrosPorPagina }}
+        de {{ modelosFiltrados.length }} registros
+      </div>
+
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-wide" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Modelo' : 'Nuevo Modelo' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Selector de Marca -->
+      <div class="form-grupo">
+        <label for="marca">Marca <span class="required">*</span></label>
+        <select
+          id="marca"
+          [(ngModel)]="modeloEditando.marcaId"
+          class="form-select"
+        >
+          <option [value]="0" disabled>-- Seleccione una marca --</option>
+          <option *ngFor="let marca of marcas" [value]="marca.id">
+            {{ marca.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Nombre del Modelo -->
+      <div class="form-grupo">
+        <label for="nombre">Nombre del Modelo <span class="required">*</span></label>
+        <input
+          type="text"
+          id="nombre"
+          [(ngModel)]="modeloEditando.nombre"
+          class="form-input"
+          placeholder="Ej: Corolla, Civic, Mustang"
+        />
+      </div>
+
+      <!-- Años (en dos columnas) -->
+      <div class="form-row">
+        <div class="form-grupo">
+          <label for="anioDesde">Año Desde <span class="required">*</span></label>
+          <input
+            type="number"
+            id="anioDesde"
+            [(ngModel)]="modeloEditando.anioDesde"
+            class="form-input"
+            min="1900"
+            [max]="modeloEditando.anioHasta"
+            placeholder="Ej: 2015"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label for="anioHasta">Año Hasta <span class="required">*</span></label>
+          <input
+            type="number"
+            id="anioHasta"
+            [(ngModel)]="modeloEditando.anioHasta"
+            class="form-input"
+            [min]="modeloEditando.anioDesde"
+            max="2100"
+            placeholder="Ej: 2024"
+          />
+        </div>
+      </div>
+
+      <!-- Estado -->
+      <div class="form-grupo">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="modeloEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarModelo()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Modelo') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle del Modelo</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="modeloDetalle">
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ modeloDetalle.id }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Marca:</span>
+          <span class="badge-marca">{{ modeloDetalle.marcaNombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre del Modelo:</span>
+          <span class="detalle-valor resaltado">{{ modeloDetalle.nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Rango de Años:</span>
+          <span class="detalle-valor">
+            {{ modeloDetalle.anioDesde }} - {{ modeloDetalle.anioHasta }}
+          </span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="modeloDetalle.estado === 'A'"
+            [class.inactivo]="modeloDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(modeloDetalle.estado) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
+    </div>
+  </div>
+</div>

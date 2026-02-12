@@ -1,7 +1,6 @@
-package com.revisionvehicular.backend.service;
+package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
-import com.revisionvehicular.backend.entities.srtv.Rol;
 
 import java.util.List;
 

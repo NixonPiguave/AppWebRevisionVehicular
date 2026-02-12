@@ -1,8 +1,7 @@
-package com.revisionvehicular.backend.controllers;
+package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.UsuarioDTO;
-import com.revisionvehicular.backend.entities.srtv.Usuario;
-import com.revisionvehicular.backend.service.IUsuarioService;
+import com.revisionvehicular.backend.service.srtv.IUsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

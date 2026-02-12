@@ -1,4 +1,4 @@
-package com.revisionvehicular.backend.service;
+package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.entities.srtv.Auditoria;
 import com.revisionvehicular.backend.entities.srtv.Usuario;

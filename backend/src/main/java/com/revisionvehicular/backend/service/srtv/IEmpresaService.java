@@ -1,4 +1,4 @@
-package com.revisionvehicular.backend.service;
+package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.EmpresaDTO;
 

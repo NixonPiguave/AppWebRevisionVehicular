@@ -1,8 +1,6 @@
-package com.revisionvehicular.backend.service;
+package com.revisionvehicular.backend.service.srtv;
 
-import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
 import com.revisionvehicular.backend.dtos.srtv.EmpresaDTO;
-import com.revisionvehicular.backend.entities.srtv.Area;
 import com.revisionvehicular.backend.entities.srtv.Empresa;
 import com.revisionvehicular.backend.repositories.srtv.IEmpresaRepository;
 import org.springframework.beans.factory.annotation.Autowired;

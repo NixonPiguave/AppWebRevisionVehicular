@@ -1,14 +1,11 @@
-package com.revisionvehicular.backend.service;
+package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
-import com.revisionvehicular.backend.dtos.srtv.RolDTO;
 import com.revisionvehicular.backend.entities.srtv.Area;
-import com.revisionvehicular.backend.entities.srtv.Rol;
 import com.revisionvehicular.backend.repositories.srtv.IAreaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 @Service

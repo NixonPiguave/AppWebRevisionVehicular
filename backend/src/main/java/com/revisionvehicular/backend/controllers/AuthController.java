@@ -4,7 +4,7 @@ import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 import com.revisionvehicular.backend.security.JwtUtil;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
-import com.revisionvehicular.backend.service.AuditoriaService;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;

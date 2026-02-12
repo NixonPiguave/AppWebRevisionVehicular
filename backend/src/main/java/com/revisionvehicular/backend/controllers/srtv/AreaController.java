@@ -1,7 +1,7 @@
-package com.revisionvehicular.backend.controllers;
+package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.AreaDTO;
-import com.revisionvehicular.backend.service.IAreaService;
+import com.revisionvehicular.backend.service.srtv.IAreaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
