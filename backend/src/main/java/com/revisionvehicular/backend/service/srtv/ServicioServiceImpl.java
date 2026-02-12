@@ -29,7 +29,6 @@ public class ServicioServiceImpl implements IServicioService {
                 dto.getNombre(),
                 dto.getDescripcion(),
                 dto.getRequiereRevision(),
-                dto.getGeneraMulta(),
                 dto.getEstado()
         );
         Servicio servicio = repository.findAll().stream()
@@ -52,7 +51,6 @@ public class ServicioServiceImpl implements IServicioService {
                 dto.getNombre(),
                 dto.getDescripcion(),
                 dto.getRequiereRevision(),
-                dto.getGeneraMulta(),
                 dto.getEstado()
         );
 
@@ -91,7 +89,6 @@ public class ServicioServiceImpl implements IServicioService {
         dto.setNombre(servicio.getNombre());
         dto.setDescripcion(servicio.getDescripcion());
         dto.setRequiereRevision(servicio.getRequiereRevision());
-        dto.setGeneraMulta(servicio.getGeneraMulta());
         dto.setEstado(servicio.getEstado());
         return dto;
     }

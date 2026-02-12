@@ -91,6 +91,7 @@ public class SubcategoriaServiceImpl implements ISubcategoriaService {
         dto.setNombre(subcategoria.getNombre());
         dto.setDescripcion(subcategoria.getDescripcion());
         dto.setEstado(subcategoria.getEstado());
+        dto.setId(subcategoria.getSubcategoriaid());
 
         if (subcategoria.getCategoria() != null) {
             dto.setCategoriaId(subcategoria.getCategoria().getCategoriaid());

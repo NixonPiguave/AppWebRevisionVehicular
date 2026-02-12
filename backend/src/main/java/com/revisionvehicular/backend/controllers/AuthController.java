@@ -41,10 +41,9 @@ public class AuthController {
 
         Usuario user = optionalUser.get();
 
-        // Establecer credenciales del usuario para la auditoría
+
         UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
 
-        // Registrar auditoría con el usuario correcto
         auditoriaService.registrarAccion(user, "INICIO_SESION");
 
         String token = jwtUtil.generateToken(

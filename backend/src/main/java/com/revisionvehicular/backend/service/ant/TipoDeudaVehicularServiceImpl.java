@@ -3,7 +3,6 @@ package com.revisionvehicular.backend.service.ant;
 import com.revisionvehicular.backend.dtos.ant.TipoDeudaVehicularDTO;
 import com.revisionvehicular.backend.entities.ant.TipoDeudaVehicular;
 import com.revisionvehicular.backend.repositories.ant.ITipoDeudaVehicularRepository;
-import com.revisionvehicular.backend.service.ant.ITipoDeudaVehicularService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,9 +30,13 @@ public class TipoDeudaVehicularServiceImpl implements ITipoDeudaVehicularService
 
     @Override
     public void eliminar(Long id) {
-        repository.spEliminarTipoDeudaVehicular(id);
+        if(repository.existsById(id)){
+            repository.deleteById(id);
+        }
+        else{
+            throw new RuntimeException("El tipo de deuda vehicular no existe");
+        }
     }
-
     @Override
     public List<TipoDeudaVehicularDTO> listar() {
         return repository.findAll().stream().map(this::convertirDTO).collect(Collectors.toList());
