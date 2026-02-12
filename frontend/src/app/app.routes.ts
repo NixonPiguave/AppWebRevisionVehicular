@@ -29,6 +29,9 @@ import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
 import {TipoVehiculoComponent} from './paginas/catalogos_vehiculos/tipo-vehiculo/tipo-vehiculo';
+import {
+  CalendarizacionMatriculacionComponent
+} from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
 
 
 export const routes: Routes = [
@@ -69,6 +72,9 @@ export const routes: Routes = [
 
       //Configuracion de Unidades de Medida
       { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
+
+      //ANT
+      { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
     ]
   },
   { path: '**', redirectTo: '' }
