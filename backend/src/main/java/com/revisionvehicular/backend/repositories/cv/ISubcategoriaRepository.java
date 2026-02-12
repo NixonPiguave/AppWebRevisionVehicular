@@ -33,5 +33,4 @@ public interface ISubcategoriaRepository extends JpaRepository<Subcategoria, Lon
 
     Optional<Subcategoria> findByCodigo(String codigo);
 
-    //List<Subcategoria> findByCategoriaCategoriaId(Long categoriaId);
 }

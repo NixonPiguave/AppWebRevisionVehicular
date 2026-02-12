@@ -19,10 +19,10 @@ public class Servicio {
     private String descripcion;
 
     @Column(name = "requiere_revision", nullable = false)
-    private String requiereRevision;
+    private Boolean requiereRevision;
 
     @Column(name = "genera_multa", nullable = false)
-    private String generaMulta;
+    private Boolean generaMulta;
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;

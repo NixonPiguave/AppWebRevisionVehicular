@@ -1,4 +1,4 @@
-package com.revisionvehicular.backend.dto.srtv;
+package com.revisionvehicular.backend.dtos.srtv;
 
 import lombok.Data;
 
