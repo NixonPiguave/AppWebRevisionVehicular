@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.srtv;
 
+import com.revisionvehicular.backend.service.rtv.MetodoInspeccionServiceImpl;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -23,13 +24,10 @@ public class Servicio {
     @Column(name = "requiere_revision", nullable = false)
     private Boolean requiereRevision;
 
-    @Column(name = "genera_multa", nullable = false)
-    private Boolean generaMulta;
-
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
-    @OneToMany(mappedBy = "servicio")
-    private List<ServicioMetodoPago> servicioMetodoPagos;
-
+    @ManyToOne
+    @JoinColumn(name = "metodo_pago_id")
+    private MetodosPago metodosPago;
 }

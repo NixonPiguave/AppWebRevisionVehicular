@@ -28,7 +28,4 @@ public class MetodosPago {
     @Column(nullable = false)
     private String estado;
 
-    @OneToMany(mappedBy = "metodoPago")
-    private List<ServicioMetodoPago> servicioMetodoPagos;
-
 }

@@ -8,7 +8,6 @@ public class ServicioDTO {
     private Long idTipoTramite;
     private String nombre;
     private String descripcion;
-
     private Boolean requiereRevision;
     private Boolean generaMulta;
 
