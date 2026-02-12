@@ -1,11 +1,8 @@
 package com.revisionvehicular.backend.entities.ant;
 
 import com.revisionvehicular.backend.entities.cv.Categoria;
-import com.revisionvehicular.backend.entities.cv.TipoMatricula;
-import com.revisionvehicular.backend.entities.cv.TipoVehiculo;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.boot.model.naming.Identifier;
 
 import java.math.BigDecimal;
 

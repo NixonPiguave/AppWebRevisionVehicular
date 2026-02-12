@@ -3,6 +3,8 @@ package com.revisionvehicular.backend.entities.srtv;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.List;
+
 @Entity
 @Table(name = "srtv_tipo_servicio")
 @Data
@@ -26,5 +28,8 @@ public class Servicio {
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
+
+    @OneToMany(mappedBy = "servicio")
+    private List<ServicioMetodoPago> servicioMetodoPagos;
 
 }

@@ -2,7 +2,6 @@ package com.revisionvehicular.backend.entities.rtv;
 
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
-import com.revisionvehicular.backend.entities.ant.CalendarizacionMatriculacion;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -32,11 +31,6 @@ public class Inspeccion {
     private Vehiculo vehiculo;
 
     @ManyToOne
-    @JoinColumn(name = "metodo_inspeccion_id", nullable = false)
-    private MetodoInspeccion metodoInspeccion;
-
-
-    @ManyToOne
     @JoinColumn(name = "linea_id")
     private Lineas linea;
 
@@ -50,7 +44,4 @@ public class Inspeccion {
     @Column(length = 50)
     private String estado;
 
-    @ManyToOne
-    @JoinColumn(name = "id_calendarizacion", nullable = false)
-    private CalendarizacionMatriculacion calendarizacionMatriculacion;
 }

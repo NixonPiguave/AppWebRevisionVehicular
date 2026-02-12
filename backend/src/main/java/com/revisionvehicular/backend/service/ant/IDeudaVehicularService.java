@@ -1,11 +1,16 @@
 package com.revisionvehicular.backend.service.ant;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import com.revisionvehicular.backend.dtos.ant.DeudaVehicularDTO;
+import java.util.List;
+import java.util.Optional;
 
 public interface IDeudaVehicularService {
 
-    void insertar(Long idVehiculo,Long idEntidad,String tipoDeuda,Integer periodo,LocalDate fechaVencimiento,BigDecimal montoOriginal,BigDecimal montoRecargo,BigDecimal montoTotal,BigDecimal montoPendiente,String estado,LocalDate fechaGeneracion);
+    void crear(DeudaVehicularDTO dto);
 
-    void modificar(Long idDeuda,Long idVehiculo,Long idEntidad,String tipoDeuda,Integer periodo,LocalDate fechaVencimiento,BigDecimal montoOriginal,BigDecimal montoRecargo,BigDecimal montoTotal,BigDecimal montoPendiente,String estado,LocalDate fechaGeneracion);
+    void actualizar(Long id, DeudaVehicularDTO dto);
+
+    List<DeudaVehicularDTO> listar();
+
+    Optional<DeudaVehicularDTO> buscarPorId(Long id);
 }
