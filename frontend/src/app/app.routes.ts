@@ -28,10 +28,11 @@ import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspe
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
+import {TipoVehiculoComponent} from './paginas/catalogos_vehiculos/tipo-vehiculo/tipo-vehiculo';
 
 
 export const routes: Routes = [
-  { path: '', component: InicioComponent },
+  { path: '', component: LoginComponent },
   {
     path: 'inicio',
     component: InicioComponent,
@@ -53,7 +54,7 @@ export const routes: Routes = [
       { path: 'catalogo-vehiculos/subcategorias', component: SubcategoriasComponent},
       { path: 'catalogo-vehiculos/tipo-combustible', component: TipoCombustibleComponent},
       { path: 'catalogo-vehiculos/tipo-matricula', component: TipoMatriculaComponent},
-      //tipo vehiculo falta, no es maestra
+      { path: 'catalogo-vehiculos/tipo-vehiculo', component: TipoVehiculoComponent},
       { path: 'catalogo-vehiculos/traccion', component: TraccionComponent},
       // DEFECTOS INSPECCIÓN
       { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },

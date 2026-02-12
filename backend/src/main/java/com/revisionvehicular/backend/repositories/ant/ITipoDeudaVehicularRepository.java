@@ -29,4 +29,5 @@ public interface ITipoDeudaVehicularRepository extends JpaRepository<TipoDeudaVe
     );
 
     Optional<TipoDeudaVehicular> findByCodigo(String codigo);
+
 }

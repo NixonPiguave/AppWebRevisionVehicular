@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './capacidad-carga.css',
 })
 export class CapacidadCargaComponent implements OnInit {
+
   capacidades: CapacidadCarga[] = [];
   cargando: boolean = false;
   error: string = '';
@@ -24,13 +25,25 @@ export class CapacidadCargaComponent implements OnInit {
   modoEdicion: boolean = false;
   guardando: boolean = false;
 
-  // Inicializamos usando 'id'
-  capacidadEditando: CapacidadCarga = { id: null, capacidad: '', descripcion: '', estado: 'A', unidad: '' };
+  // 🔹 Opciones fijas de unidad
+  unidadesDisponibles: string[] = ['KG', 'T', 'L'];
+
+  // Inicializa con kg por defecto
+  capacidadEditando: CapacidadCarga = {
+    id: null,
+    capacidad: '',
+    descripcion: '',
+    estado: 'A',
+    unidad: 'KG'
+  };
 
   mostrarModalDetalle: boolean = false;
   capacidadDetalle: CapacidadCarga | null = null;
 
-  constructor(private capacidadService: CapacidadCargaService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private capacidadService: CapacidadCargaService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.cargarCapacidades();
@@ -66,52 +79,88 @@ export class CapacidadCargaComponent implements OnInit {
     return this.capacidadesFiltradas.slice(inicio, inicio + this.registrosPorPagina);
   }
 
-  get totalPaginas(): number { return Math.ceil(this.capacidadesFiltradas.length / this.registrosPorPagina); }
-  get paginas(): number[] { return Array.from({ length: this.totalPaginas }, (_, i) => i + 1); }
+  get totalPaginas(): number {
+    return Math.ceil(this.capacidadesFiltradas.length / this.registrosPorPagina);
+  }
 
-  getEstadoTexto(estado: string): string { return estado === 'A' ? 'Activo' : 'Inactivo'; }
-  irAPagina(p: number): void { this.paginaActual = p; }
-  onFiltroChange(): void { this.paginaActual = 1; }
+  get paginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  getEstadoTexto(estado: string): string {
+    return estado === 'A' ? 'Activo' : 'Inactivo';
+  }
+
+  irAPagina(p: number): void {
+    this.paginaActual = p;
+  }
+
+  onFiltroChange(): void {
+    this.paginaActual = 1;
+  }
 
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.capacidadEditando = { id: null, capacidad: '', descripcion: '', estado: 'A', unidad: '' };
+    this.capacidadEditando = {
+      id: null,
+      capacidad: '',
+      descripcion: '',
+      estado: 'A',
+      unidad: 'KG'
+    };
     this.mostrarModalForm = true;
   }
 
   abrirModalEditar(capacidad: CapacidadCarga): void {
     this.modoEdicion = true;
-    this.capacidadEditando = { ...capacidad }; // Aquí se copia el 'id' del backend
+    this.capacidadEditando = { ...capacidad };
     this.mostrarModalForm = true;
   }
 
-  cerrarModalForm(): void { this.mostrarModalForm = false; }
+  cerrarModalForm(): void {
+    this.mostrarModalForm = false;
+  }
 
   guardarCapacidad(): void {
-    if (!this.capacidadEditando.capacidad) return;
+
+    // 🔹 Validación básica
+    if (!this.capacidadEditando.capacidad || !this.capacidadEditando.unidad) {
+      alert('Debe ingresar la capacidad y seleccionar una unidad.');
+      return;
+    }
+
     this.guardando = true;
 
-    // USAMOS 'id'
     const idValue = this.capacidadEditando.id;
 
     if (this.modoEdicion && idValue !== null) {
+
       this.capacidadService.actualizarCapacidadCarga(idValue, this.capacidadEditando).subscribe({
         next: () => {
           this.cargarCapacidades();
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: () => { this.guardando = false; alert('Error al actualizar'); }
+        error: () => {
+          this.guardando = false;
+          alert('Error al actualizar');
+        }
       });
+
     } else {
+
       this.capacidadService.crearCapacidadCarga(this.capacidadEditando).subscribe({
         next: () => {
           this.cargarCapacidades();
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: () => { this.guardando = false; alert('Error al crear'); }
+        error: () => {
+          this.guardando = false;
+          alert('Error al crear');
+        }
       });
+
     }
   }
 
@@ -120,5 +169,8 @@ export class CapacidadCargaComponent implements OnInit {
     this.mostrarModalDetalle = true;
   }
 
-  cerrarModalDetalle(): void { this.mostrarModalDetalle = false; }
+  cerrarModalDetalle(): void {
+    this.mostrarModalDetalle = false;
+  }
+
 }
