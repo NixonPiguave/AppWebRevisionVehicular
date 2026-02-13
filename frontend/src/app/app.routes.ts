@@ -32,6 +32,7 @@ import {TipoVehiculoComponent} from './paginas/catalogos_vehiculos/tipo-vehiculo
 import {
   CalendarizacionMatriculacionComponent
 } from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
+import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 
 
 export const routes: Routes = [
@@ -72,6 +73,9 @@ export const routes: Routes = [
 
       //Configuracion de Unidades de Medida
       { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
+
+      //Gestion vehicular
+      { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
 
       //ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },

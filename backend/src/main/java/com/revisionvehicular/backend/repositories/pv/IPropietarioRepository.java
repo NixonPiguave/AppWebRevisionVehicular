@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Repository
 public interface IPropietarioRepository extends JpaRepository<Propietario, Long> {
 
-    @Procedure(name = "sp_insertar_propietario")
+    @Procedure(procedureName =  "sp_insertar_propietario")
     void insertarPropietario(
             @Param("p_documento_identidad") String documentoIdentidad,
             @Param("p_nombre") String nombre,
@@ -21,7 +21,7 @@ public interface IPropietarioRepository extends JpaRepository<Propietario, Long>
             @Param("p_fecharegistro") LocalDate fecharegistro
     );
 
-    @Procedure(name = "sp_actualizar_propietario")
+    @Procedure(procedureName = "sp_actualizar_propietario")
     void actualizarPropietario(
             @Param("p_propietario_id") Long propietarioId,
             @Param("p_documento_identidad") String documentoIdentidad,
