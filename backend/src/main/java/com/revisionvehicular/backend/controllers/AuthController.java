@@ -38,6 +38,10 @@ public class AuthController {
         if (optionalUser.isEmpty() || !passwordEncoder.matches(contrasena, optionalUser.get().getContrasena())) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
+        if(optionalUser.get().getEstado().equals("Inactivo")){
+            return ResponseEntity.status(401).body("Usuario no se encuentra activo");
+        }
+
 
         Usuario user = optionalUser.get();
 
