@@ -15,17 +15,25 @@ import {ModelosComponent} from './paginas/catalogos_vehiculos/modelos/modelos';
 import {TipoCombustibleComponent} from './paginas/catalogos_vehiculos/tipo-combustible/tipo-combustible';
 import {TipoMatriculaComponent} from './paginas/catalogos_vehiculos/tipo-matricula/tipo-matricula';
 import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion';
+import {SubcategoriasComponent} from './paginas/catalogos_vehiculos/subcategorias/subcategorias';
 // Importaciones de Defectos Inspección
 import { SubfamiliaDefectoComponent } from './paginas/defectos_inspeccion/subfamilia-defecto/subfamilia-defecto';
 import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
 import { CategoriaDefectoComponent } from './paginas/defectos_inspeccion/categoria-defecto/categoria-defecto';
-import { FamiliaDefectoComponent } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
+import { FamiliaComponent } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
 
 
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
+import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
+import {TipoVehiculoComponent} from './paginas/catalogos_vehiculos/tipo-vehiculo/tipo-vehiculo';
+import {
+  CalendarizacionMatriculacionComponent
+} from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
+import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
+
 
 export const routes: Routes = [
   { path: '', component: InicioComponent },
@@ -47,21 +55,30 @@ export const routes: Routes = [
       { path: 'catalogo-vehiculos/ejes', component: EjesComponent},
       { path: 'catalogo-vehiculos/marcas', component: MarcaVehiculoComponent},
       { path: 'catalogo-vehiculos/modelos', component: ModelosComponent},
-      //falta subcategorias
+      { path: 'catalogo-vehiculos/subcategorias', component: SubcategoriasComponent},
       { path: 'catalogo-vehiculos/tipo-combustible', component: TipoCombustibleComponent},
       { path: 'catalogo-vehiculos/tipo-matricula', component: TipoMatriculaComponent},
-      //tipo vehiculo falta, no es maestra
+      { path: 'catalogo-vehiculos/tipo-vehiculo', component: TipoVehiculoComponent},
       { path: 'catalogo-vehiculos/traccion', component: TraccionComponent},
       // DEFECTOS INSPECCIÓN
       { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
       { path: 'defectos-inspeccion/categoria-defecto', component: CategoriaDefectoComponent },
-      { path: 'defectos-inspeccion/familia-defecto', component: FamiliaDefectoComponent },
+      { path: 'defectos-inspeccion/familia-defecto', component: FamiliaComponent },
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
       { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
+
+      //Configuracion de Unidades de Medida
+      { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
+
+      //Gestion vehicular
+      { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
+
+      //ANT
+      { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
     ]
   },
   { path: '**', redirectTo: '' }

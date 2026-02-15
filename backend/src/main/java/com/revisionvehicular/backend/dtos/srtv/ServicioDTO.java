@@ -1,4 +1,4 @@
-package com.revisionvehicular.backend.dto.srtv;
+package com.revisionvehicular.backend.dtos.srtv;
 
 import lombok.Data;
 
@@ -8,7 +8,6 @@ public class ServicioDTO {
     private Long idTipoTramite;
     private String nombre;
     private String descripcion;
-
     private Boolean requiereRevision;
     private Boolean generaMulta;
 

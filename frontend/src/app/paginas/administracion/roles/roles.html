@@ -138,18 +138,20 @@
 </div>
 
 <!-- Modal Crear/Editar -->
+<!-- Modal Crear/Editar -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h3>{{ modoEdicion ? 'Editar Rol' : 'Nuevo Rol' }}</h3>
       <button class="btn-cerrar" (click)="cerrarModalForm()">
-        <!-- MATERIAL ICON para cerrar -->
         <mat-icon>close</mat-icon>
       </button>
     </div>
+
     <div class="modal-body">
+      <!-- Nombre del Rol -->
       <div class="form-grupo">
-        <label for="nombre">Nombre del Rol</label>
+        <label for="nombre">Nombre del Rol *</label>
         <input
           type="text"
           id="nombre"
@@ -158,16 +160,47 @@
           class="form-input"
         />
       </div>
+
+      <!-- Estado -->
       <div class="form-grupo">
-        <label for="estado">Estado</label>
+        <label for="estado">Estado *</label>
         <select id="estado" [(ngModel)]="rolEditando.estado" class="form-select">
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>
         </select>
       </div>
+
+      <!-- ⭐ NUEVA SECCIÓN: Permisos -->
+      <div class="form-grupo permisos-grupo">
+        <label class="permisos-label">
+          Permisos del Rol *
+          <span class="permisos-ayuda">(Seleccione al menos uno)</span>
+        </label>
+
+        <div class="permisos-lista">
+          <div
+            *ngFor="let permiso of permisosFormulario"
+            class="permiso-item"
+            [class.seleccionado]="permiso.seleccionado"
+            (click)="togglePermiso(permiso)"
+          >
+            <div class="permiso-checkbox">
+              <mat-icon *ngIf="permiso.seleccionado">check_box</mat-icon>
+              <mat-icon *ngIf="!permiso.seleccionado">check_box_outline_blank</mat-icon>
+            </div>
+            <div class="permiso-info">
+              <div class="permiso-modulo">{{ permiso.modulo }}</div>
+              <div class="permiso-descripcion">{{ permiso.descripcion }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
+
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
       <button class="btn-guardar" (click)="guardarRol()" [disabled]="guardando">
         {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Rol') }}
       </button>

@@ -9,14 +9,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IMetodoInspeccionRepository extends JpaRepository<MetodoInspeccion, Long> {
 
-    @Procedure(name = "sp_insertar_metodo_inspeccion")
+    @Procedure(procedureName = "sp_insertar_metodo_inspeccion")
     void insertarMetodoInspeccion(
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_metodo_inspeccion")
+    @Procedure(procedureName = "sp_actualizar_metodo_inspeccion")
     void actualizarMetodoInspeccion(
             @Param("p_metodo_inspeccion_id") Long metodoInspeccionId,
             @Param("p_nombre") String nombre,

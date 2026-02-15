@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IDetalleInspeccionRepository extends JpaRepository<DetalleInspeccion, Long> {
 
-    @Procedure(name = "sp_insertar_detalle_inspeccion")
+    @Procedure(procedureName = "sp_insertar_detalle_inspeccion")
     void insertarDetalleInspeccion(
             @Param("p_inspeccion_id") Long inspeccionId,
             @Param("p_defecto_id") Long defectoId,
@@ -19,7 +19,7 @@ public interface IDetalleInspeccionRepository extends JpaRepository<DetalleInspe
             @Param("p_metodo_inspeccion_id") Long metodoInspeccionId
     );
 
-    @Procedure(name = "sp_actualizar_detalle_inspeccion")
+    @Procedure(procedureName = "sp_actualizar_detalle_inspeccion")
     void actualizarDetalleInspeccion(
             @Param("p_detalle_inspeccion_id") Long detalleInspeccionId,
             @Param("p_inspeccion_id") Long inspeccionId,

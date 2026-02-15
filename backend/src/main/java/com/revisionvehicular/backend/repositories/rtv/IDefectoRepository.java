@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface IDefectoRepository extends JpaRepository<Defecto, Long> {
 
-    @Procedure(name = "sp_insertar_defecto")
+    @Procedure(procedureName = "sp_insertar_defecto")
     void insertarDefecto(
             @Param("p_codigo") String codigo,
             @Param("p_descripcion") String descripcion,
@@ -20,7 +20,7 @@ public interface IDefectoRepository extends JpaRepository<Defecto, Long> {
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_defecto")
+    @Procedure(procedureName = "sp_actualizar_defecto")
     void actualizarDefecto(
             @Param("p_defecto_id") Long defectoId,
             @Param("p_codigo") String codigo,

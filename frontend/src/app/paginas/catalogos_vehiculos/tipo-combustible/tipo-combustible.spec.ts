@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TipoCombustible } from './tipo-combustible';
+import { TipoCombustibleComponent } from './tipo-combustible';
 
 describe('TipoCombustible', () => {
-  let component: TipoCombustible;
-  let fixture: ComponentFixture<TipoCombustible>;
+  let component: TipoCombustibleComponent;
+  let fixture: ComponentFixture<TipoCombustibleComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TipoCombustible]
+      imports: [TipoCombustibleComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TipoCombustible);
+    fixture = TestBed.createComponent(TipoCombustibleComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

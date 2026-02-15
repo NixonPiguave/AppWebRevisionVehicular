@@ -1,7 +1,10 @@
 package com.revisionvehicular.backend.entities.srtv;
 
+import com.revisionvehicular.backend.service.rtv.MetodoInspeccionServiceImpl;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Table(name = "srtv_tipo_servicio")
@@ -19,12 +22,12 @@ public class Servicio {
     private String descripcion;
 
     @Column(name = "requiere_revision", nullable = false)
-    private String requiereRevision;
-
-    @Column(name = "genera_multa", nullable = false)
-    private String generaMulta;
+    private Boolean requiereRevision;
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
+    @ManyToOne
+    @JoinColumn(name = "metodo_pago_id")
+    private MetodosPago metodosPago;
 }

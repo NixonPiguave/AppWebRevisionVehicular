@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Repository
 public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
 
-    @Procedure(name = "sp_insertar_inspeccion")
+    @Procedure(procedureName = "sp_insertar_inspeccion")
     void insertarInspeccion(
             @Param("p_fecha_inspeccion") LocalDateTime fechaInspeccion,
             @Param("p_resultado") String resultado,
@@ -24,7 +24,7 @@ public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
             @Param("p_id_calendarizacion") Long idCalendarizacion
     );
 
-    @Procedure(name = "sp_actualizar_inspeccion")
+    @Procedure(procedureName = "sp_actualizar_inspeccion")
     void actualizarInspeccion(
             @Param("p_inspeccion_id") Long inspeccionId,
             @Param("p_fecha_inspeccion") LocalDateTime fechaInspeccion,

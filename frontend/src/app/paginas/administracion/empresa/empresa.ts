@@ -173,7 +173,7 @@ export class EmpresaComponent implements OnInit {
         const base64Image = e.target?.result as string;
         this.logoPreview = base64Image;
         // Guardar el base64 completo para que se persista en la BD
-        this.empresaEditando.logoempresa = base64Image;
+        this.empresaEditando.logoempresa = file.name;
         this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);

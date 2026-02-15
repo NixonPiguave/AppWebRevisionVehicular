@@ -2,7 +2,7 @@ package com.revisionvehicular.backend.dtos.rtv;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 @Data
 public class EquipoDTO {
     private Long equipoid;

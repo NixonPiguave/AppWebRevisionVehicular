@@ -4,7 +4,7 @@ import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 import com.revisionvehicular.backend.security.JwtUtil;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
-import com.revisionvehicular.backend.service.AuditoriaService;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -38,13 +38,16 @@ public class AuthController {
         if (optionalUser.isEmpty() || !passwordEncoder.matches(contrasena, optionalUser.get().getContrasena())) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
+        if(optionalUser.get().getEstado().equals("Inactivo")){
+            return ResponseEntity.status(401).body("Usuario no se encuentra activo");
+        }
+
 
         Usuario user = optionalUser.get();
 
-        // Establecer credenciales del usuario para la auditoría
+
         UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
 
-        // Registrar auditoría con el usuario correcto
         auditoriaService.registrarAccion(user, "INICIO_SESION");
 
         String token = jwtUtil.generateToken(

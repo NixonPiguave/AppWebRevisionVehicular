@@ -57,7 +57,7 @@
 
           <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
             <a class="submenu-item">Vehículos</a>
-            <a class="submenu-item">Propietario</a>
+            <a routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
             <a class="submenu-item">Revisiones</a>
             <a class="submenu-item">Resultados de Revisión</a>
           </div>
@@ -120,10 +120,10 @@
           <div class="submenu" [class.open]="catalogoVehiculosOpen && !sidebarCollapsed">
             <a routerLink="/inicio/catalogo-vehiculos/marcas" routerLinkActive="active" class="submenu-item">Marcas</a>
             <a routerLink="/inicio/catalogo-vehiculos/modelos" routerLinkActive="active" class="submenu-item">Modelos</a>
-            <a class="submenu-item">Tipos de Vehículo</a>
+            <a routerLink="/inicio/catalogo-vehiculos/tipo-vehiculo" routerLinkActive="active" class="submenu-item">Tipos de Vehículo</a>
             <a routerLink="/inicio/catalogo-vehiculos/clases" routerLinkActive="active" class="submenu-item">Clases</a>
             <a routerLink="/inicio/catalogo-vehiculos/categorias" routerLinkActive="active" class="submenu-item">Categorías</a>
-            <a class="submenu-item">Subcategorías</a>
+            <a  routerLink="/inicio/catalogo-vehiculos/subcategorias" routerLinkActive="active" class="submenu-item">Subcategorías</a>
             <a routerLink="/inicio/catalogo-vehiculos/tipo-combustible" routerLinkActive="active" class="submenu-item">Tipos de Combustible</a>
             <a routerLink="/inicio/catalogo-vehiculos/tipo-matricula" routerLinkActive="active" class="submenu-item">Tipos de Matrícula</a>
             <a routerLink="/inicio/catalogo-vehiculos/traccion" routerLinkActive="active" class="submenu-item">Tracción</a>
@@ -192,7 +192,7 @@
             <a routerLink="/inicio/defectos-inspeccion/familia-defecto" routerLinkActive="active" class="submenu-item">Familias de Defectos</a>
             <a routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
             <a routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
-            <a routerLink="/inicio/defectos-inspeccion/tipos-defecto" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/tipos-defectos" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
           </div>
         </div>
       </div>
@@ -221,8 +221,8 @@
           </div>
 
           <div class="submenu" [class.open]="antTramitesOpen && !sidebarCollapsed">
-            <a class="submenu-item">Tipos de Trámite</a>
-            <a class="submenu-item">Estados de Trámite</a>
+            <a routerLink="/inicio/ant/Calendarizacion-Matriculacion" routerLinkActive="active" class="submenu-item">Calendarización Matriculación</a>
+            <a class="submenu-item">Tipo de Trámite</a>
             <a class="submenu-item">Tipos de Excepción</a>
             <a class="submenu-item">Estados de Excepción</a>
             <a class="submenu-item">Estados de Multa</a>
@@ -259,7 +259,7 @@
           </div>
 
           <div class="submenu" [class.open]="configuracionUmbralOpen && !sidebarCollapsed">
-            <a class="submenu-item">Unidades de Medida</a>
+            <a routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
             <a class="submenu-item">Descripción de Umbral</a>
           </div>
         </div>

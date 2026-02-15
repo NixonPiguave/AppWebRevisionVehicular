@@ -43,9 +43,6 @@ public class Multa {
     @Column(name = "fecha_Notificacion", nullable = false)
     private LocalDateTime fechaNotificacion;
 
-    @Column(name = "origen_Multa", nullable = false)
-    private String origenMulta;
-
     @Column(name = "pais",length = 255, nullable = false)
     private String pais;
 

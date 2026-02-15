@@ -7,26 +7,23 @@ import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-tipos-defectos',
+  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, MatIconModule],
   templateUrl: './tipos-defectos.html',
   styleUrl: './tipos-defectos.css',
 })
 export class TiposDefectosComponent implements OnInit {
-  // Lista de tipos de defectos (se carga desde el backend)
   tiposDefectos: TipoDefecto[] = [];
   cargando: boolean = false;
   error: string = '';
-
-  // Filtros y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   tipoDefectoEditando: TipoDefecto = {
-    tipoDefectoId: null,
+    id: null,
     codigo: '',
     nombre: '',
     descripcion: '',
@@ -34,7 +31,6 @@ export class TiposDefectosComponent implements OnInit {
   };
   guardando: boolean = false;
 
-  // Modal detalle
   mostrarModalDetalle: boolean = false;
   tipoDefectoDetalle: TipoDefecto | null = null;
 
@@ -47,15 +43,12 @@ export class TiposDefectosComponent implements OnInit {
     this.cargarTiposDefectos();
   }
 
-  /**
-   * Cargar tipos de defectos desde el backend
-   */
   cargarTiposDefectos(): void {
     this.cargando = true;
     this.error = '';
     this.cdr.detectChanges();
 
-    this.tiposDefectosService.listarTiposDefectos().subscribe({
+    this.tiposDefectosService.listar().subscribe({
       next: (data) => {
         console.log('Tipos de defectos cargados:', data);
         this.tiposDefectos = data;
@@ -71,7 +64,6 @@ export class TiposDefectosComponent implements OnInit {
     });
   }
 
-  // Getter para tipos de defectos filtrados
   get tiposDefectosFiltrados(): TipoDefecto[] {
     if (!this.filtro.trim()) {
       return this.tiposDefectos;
@@ -82,24 +74,21 @@ export class TiposDefectosComponent implements OnInit {
         tipo.codigo.toLowerCase().includes(filtroLower) ||
         tipo.nombre.toLowerCase().includes(filtroLower) ||
         tipo.descripcion.toLowerCase().includes(filtroLower) ||
-        (tipo.tipoDefectoId?.toString() || '').includes(filtroLower) ||
+        (tipo.id?.toString() || '').includes(filtroLower) ||
         this.getEstadoTexto(tipo.estado).toLowerCase().includes(filtroLower)
     );
   }
 
-  // Getter para tipos de defectos paginados
   get tiposDefectosPaginados(): TipoDefecto[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
     return this.tiposDefectosFiltrados.slice(inicio, fin);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
     return Math.ceil(this.tiposDefectosFiltrados.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -108,28 +97,24 @@ export class TiposDefectosComponent implements OnInit {
     return paginas;
   }
 
-  // Convertir estado a texto
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // Cambiar página
   irAPagina(pagina: number): void {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaActual = pagina;
     }
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.tipoDefectoEditando = {
-      tipoDefectoId: null,
+      id: null,
       codigo: '',
       nombre: '',
       descripcion: '',
@@ -138,18 +123,16 @@ export class TiposDefectosComponent implements OnInit {
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
   abrirModalEditar(tipoDefecto: TipoDefecto): void {
     this.modoEdicion = true;
     this.tipoDefectoEditando = { ...tipoDefecto };
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.tipoDefectoEditando = {
-      tipoDefectoId: null,
+      id: null,
       codigo: '',
       nombre: '',
       descripcion: '',
@@ -157,28 +140,19 @@ export class TiposDefectosComponent implements OnInit {
     };
   }
 
-  // Guardar tipo de defecto (crear o editar)
   guardarTipoDefecto(): void {
-    // Validaciones
-    if (!this.tipoDefectoEditando.codigo.trim()) {
-      alert('El código es requerido');
-      return;
-    }
+    // Validación simple: solo nombre es requerido
     if (!this.tipoDefectoEditando.nombre.trim()) {
-      alert('El nombre es requerido');
-      return;
-    }
-    if (!this.tipoDefectoEditando.descripcion.trim()) {
-      alert('La descripción es requerida');
+      alert('El nombre del tipo de defecto es requerido');
       return;
     }
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.tipoDefectoEditando.tipoDefectoId) {
+    if (this.modoEdicion && this.tipoDefectoEditando.id) {
       // Editar existente
-      this.tiposDefectosService.actualizarTipoDefecto(
-        this.tipoDefectoEditando.tipoDefectoId,
+      this.tiposDefectosService.actualizar(
+        this.tipoDefectoEditando.id,
         this.tipoDefectoEditando
       ).subscribe({
         next: () => {
@@ -194,11 +168,20 @@ export class TiposDefectosComponent implements OnInit {
       });
     } else {
       // Crear nuevo
-      this.tiposDefectosService.crearTipoDefecto(this.tipoDefectoEditando).subscribe({
-        next: () => {
-          this.cargarTiposDefectos();
+      const nuevoTipoDefecto = {
+        codigo: this.tipoDefectoEditando.codigo,
+        nombre: this.tipoDefectoEditando.nombre,
+        descripcion: this.tipoDefectoEditando.descripcion,
+        estado: this.tipoDefectoEditando.estado
+      };
+
+      this.tiposDefectosService.crear(nuevoTipoDefecto as TipoDefecto).subscribe({
+        next: (response) => {
+          console.log('Tipo de defecto creado:', response);
+          // Forzar recarga completa
           this.cerrarModalForm();
           this.guardando = false;
+          this.cargarTiposDefectos();
         },
         error: (err) => {
           console.error('Error al crear tipo de defecto:', err);
@@ -209,13 +192,11 @@ export class TiposDefectosComponent implements OnInit {
     }
   }
 
-  // Abrir modal detalle
   verDetalle(tipoDefecto: TipoDefecto): void {
     this.tipoDefectoDetalle = tipoDefecto;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.tipoDefectoDetalle = null;

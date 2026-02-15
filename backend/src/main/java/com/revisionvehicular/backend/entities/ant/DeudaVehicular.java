@@ -25,8 +25,9 @@ public class DeudaVehicular {
     @JoinColumn(name = "id_entidad", nullable = false)
     private EntidadesTransito entidadesTransito;
 
-    @Column(name = "tipo_deuda", length = 30, nullable = false)
-    private String tipoDeuda;
+    @ManyToOne
+    @JoinColumn(name = "id_tipo_deuda", nullable = false)
+    private TipoDeudaVehicular tipoDeuda;
 
     @Column(name = "periodo", nullable = false)
     private Integer periodo;

@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.rtv;
 
+import com.revisionvehicular.backend.entities.ant.CalendarizacionMatriculacion;
 import com.revisionvehicular.backend.entities.ant.ExcepcionMatricula;
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
@@ -47,4 +48,7 @@ public class Matricula {
     @JoinColumn(name = "id_excepcion", nullable = true)
     private ExcepcionMatricula excepcionMatricula;
 
+    @ManyToOne
+    @JoinColumn(name = "id_calendarizacion", nullable = false)
+    private CalendarizacionMatriculacion calendarizacionMatriculacion;
 }

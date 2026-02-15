@@ -10,6 +10,7 @@ public class TipoVehiculo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="tipo_vehiculo_id")
     private Long tipovehiculoid;
 
     @Column(nullable = false, length = 100)

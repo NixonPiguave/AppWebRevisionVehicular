@@ -3,7 +3,7 @@ package com.revisionvehicular.backend.entities.rtv;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "rtv_equipos")
@@ -23,9 +23,9 @@ public class Equipos {
     @Column(name="codigo_interno",nullable = false, length = 100)
     private String codigoInterno;
     @Column(name="fecha_ultimo_mantenimiento",nullable = false)
-    private LocalDateTime ultimoMantenimiento;
+    private LocalDate ultimoMantenimiento;
     @Column(name="fecha_ultima_calibracion",nullable = false)
-    private LocalDateTime ultimaCalibracion;
+    private LocalDate ultimaCalibracion;
     @Column(name="influencia",nullable = false, length = 100)
     private Integer influencia;
     @Column(length = 50)
