@@ -8,34 +8,38 @@ export interface Rol {
   estado: string;
 }
 
+export interface Permiso {
+  permisoId: number;
+  nombre: string;
+  modulo: string;
+  estado: string;
+  descripcion: string;
+  seleccionado?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class RolesService {
 
-  // Cambia esto si tu backend está en otro puerto
   private apiUrl = 'http://localhost:8080/api/roles';
+  private permisosUrl = 'http://localhost:8080/api/permisos';
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obtener todos los roles
-   */
   listarRoles(): Observable<Rol[]> {
     return this.http.get<Rol[]>(this.apiUrl);
   }
 
-  /**
-   * Crear un nuevo rol
-   */
-  crearRol(rol: Rol): Observable<Rol> {
+  crearRol(rol: any): Observable<Rol> {
     return this.http.post<Rol>(this.apiUrl, rol);
   }
 
-  /**
-   * Actualizar un rol
-   */
-  actualizarRol(id: number, rol: Rol): Observable<Rol> {
+  actualizarRol(id: number, rol: any): Observable<Rol> {
     return this.http.put<Rol>(`${this.apiUrl}/${id}`, rol);
+  }
+
+  listarPermisos(): Observable<Permiso[]> {
+    return this.http.get<Permiso[]>(this.permisosUrl);
   }
 }

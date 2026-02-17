@@ -16,7 +16,7 @@ public class Permiso {
     @Column(name = "permiso_id")
     private Long permisoId;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String nombre;
 
     @Column(length = 100)
