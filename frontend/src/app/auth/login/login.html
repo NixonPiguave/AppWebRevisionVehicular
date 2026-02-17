@@ -1,128 +1,35 @@
-<div class="login-root">
+<div class="login-container">
 
-  <!-- Panel izquierdo: identidad visual -->
-  <div class="login-brand">
-    <div class="brand-bg-pattern"></div>
-    <div class="brand-content">
+  <!-- Panel izquierdo: Formulario minimalista -->
+  <div class="login-form-panel">
+    <div class="form-wrapper">
 
-      <div class="brand-icon-box">
-        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Clipboard -->
-          <rect x="7" y="11" width="36" height="44" rx="4"
-                fill="rgba(255,255,255,0.12)" stroke="white" stroke-width="2.2"/>
-          <rect x="17" y="7" width="16" height="9" rx="4.5"
-                fill="white" opacity="0.9"/>
-          <!-- Ventanilla del auto -->
-          <path d="M13 32 L17 26 L33 26 L37 32"
-                fill="rgba(255,255,255,0.2)"
-                stroke="rgba(255,255,255,0.65)" stroke-width="1.3" stroke-linejoin="round"/>
-          <!-- Cuerpo del auto -->
-          <rect x="11" y="31" width="28" height="9" rx="3"
-                fill="white" opacity="0.9"/>
-          <!-- Ruedas -->
-          <circle cx="17" cy="41" r="4" fill="rgba(255,255,255,0)" stroke="white" stroke-width="2"/>
-          <circle cx="33" cy="41" r="4" fill="rgba(255,255,255,0)" stroke="white" stroke-width="2"/>
-          <circle cx="17" cy="41" r="1.5" fill="rgba(255,255,255,0.5)"/>
-          <circle cx="33" cy="41" r="1.5" fill="rgba(255,255,255,0.5)"/>
-          <!-- Líneas checklist -->
-          <line x1="13" y1="50" x2="34" y2="50" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
-          <line x1="13" y1="54" x2="25" y2="54" stroke="rgba(255,255,255,0.3)" stroke-width="1.5" stroke-linecap="round"/>
-          <!-- Badge check verde -->
-          <circle cx="51" cy="51" r="12" fill="#52b788"/>
-          <circle cx="51" cy="51" r="12" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-          <path d="M46.5 51 L50 54.5 L56.5 47"
-                stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+      <!-- Header minimalista -->
+      <div class="form-header-minimal">
+        <h1>Bienvenido</h1>
+        <p>Ingresa tus credenciales</p>
       </div>
 
-      <h1 class="brand-title">Centro de Revisión<br>Técnica Vehicular</h1>
-      <p class="brand-subtitle">Sistema Integral de Control<br>y Gestión Automotriz</p>
-      <div class="brand-divider"></div>
-      <div class="brand-features">
-        <div class="feature-item">
-          <span class="feature-dot"></span>
-          <span>Gestión de propietarios y vehículos</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-dot"></span>
-          <span>Control de revisiones técnicas</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-dot"></span>
-          <span>Reportes y estadísticas en tiempo real</span>
-        </div>
-      </div>
-    </div>
-    <div class="brand-footer">
-      <span>© 2026 Centro de Revisión Técnica Vehicular</span>
-    </div>
-  </div>
+      <form (ngSubmit)="login()" class="form-minimal" autocomplete="off">
 
-  <!-- Panel derecho: formulario -->
-  <div class="login-panel">
-    <div class="login-form-wrapper">
-
-      <!-- Mini logo en el panel del formulario -->
-<!--      <div class="form-mini-logo">-->
-<!--        <div class="form-mini-logo-icon">-->
-<!--          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">-->
-<!--            <rect x="7" y="11" width="36" height="44" rx="4"-->
-<!--                  fill="#d8f3dc" stroke="#2d6a4f" stroke-width="2.2"/>-->
-<!--            <rect x="17" y="7" width="16" height="9" rx="4.5" fill="#2d6a4f"/>-->
-<!--            <path d="M13 32 L17 26 L33 26 L37 32"-->
-<!--                  fill="rgba(45,106,79,0.15)"-->
-<!--                  stroke="#2d6a4f" stroke-width="1.3" stroke-linejoin="round" opacity="0.7"/>-->
-<!--            <rect x="11" y="31" width="28" height="9" rx="3" fill="#2d6a4f" opacity="0.9"/>-->
-<!--            <circle cx="17" cy="41" r="4" fill="#d8f3dc" stroke="#2d6a4f" stroke-width="2"/>-->
-<!--            <circle cx="33" cy="41" r="4" fill="#d8f3dc" stroke="#2d6a4f" stroke-width="2"/>-->
-<!--            <circle cx="17" cy="41" r="1.5" fill="#2d6a4f" opacity="0.5"/>-->
-<!--            <circle cx="33" cy="41" r="1.5" fill="#2d6a4f" opacity="0.5"/>-->
-<!--            <line x1="13" y1="50" x2="34" y2="50" stroke="#40916c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>-->
-<!--            <line x1="13" y1="54" x2="25" y2="54" stroke="#40916c" stroke-width="1.5" stroke-linecap="round" opacity="0.4"/>-->
-<!--            <circle cx="51" cy="51" r="12" fill="#40916c"/>-->
-<!--            <circle cx="51" cy="51" r="12" stroke="white" stroke-width="1.5"/>-->
-<!--            <path d="M46.5 51 L50 54.5 L56.5 47"-->
-<!--                  stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>-->
-<!--          </svg>-->
-<!--        </div>-->
-<!--        <div class="form-mini-logo-texts">-->
-<!--          <span class="form-mini-logo-name">RTV</span>-->
-<!--          <span class="form-mini-logo-tag">Rev. Técnica Vehicular</span>-->
-<!--        </div>-->
-<!--      </div>-->
-
-      <div class="form-header">
-        <div class="form-badge">ACCESO SEGURO</div>
-        <h2>Bienvenido</h2>
-        <p>Ingresa tus credenciales para continuar</p>
-      </div>
-
-      <form (ngSubmit)="login()" class="login-form" autocomplete="off">
-
-        <div class="field-group">
+        <!-- Campo Usuario -->
+        <div class="input-group-minimal">
           <label for="usuario">Usuario</label>
-          <div class="field-wrapper">
-            <span class="field-icon">
-              <mat-icon>person_outline</mat-icon>
-            </span>
-            <input
-              id="usuario"
-              type="text"
-              placeholder="Ingrese su usuario"
-              [(ngModel)]="usuario"
-              name="usuario"
-              required
-              autocomplete="off"
-            />
-          </div>
+          <input
+            id="usuario"
+            type="text"
+            placeholder="Ingrese su usuario"
+            [(ngModel)]="usuario"
+            name="usuario"
+            required
+            autocomplete="off"
+          />
         </div>
 
-        <div class="field-group">
+        <!-- Campo Contraseña -->
+        <div class="input-group-minimal">
           <label for="password">Contraseña</label>
-          <div class="field-wrapper">
-            <span class="field-icon">
-              <mat-icon>lock_outline</mat-icon>
-            </span>
+          <div class="input-with-icon">
             <input
               id="password"
               [type]="hidePassword ? 'password' : 'text'"
@@ -132,31 +39,50 @@
               required
               autocomplete="off"
             />
-            <button type="button" class="toggle-pass" (click)="togglePassword()" tabindex="-1">
+            <button
+              type="button"
+              class="toggle-visibility"
+              (click)="togglePassword()"
+              tabindex="-1"
+            >
               <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
           </div>
         </div>
 
+        <!-- Error message -->
         @if (error) {
-          <div class="error-banner">
+          <div class="error-minimal">
             <mat-icon>error_outline</mat-icon>
             <span>{{ error }}</span>
           </div>
         }
 
-        <button class="btn-submit" type="submit">
-          <span>Iniciar sesión</span>
-          <mat-icon>arrow_forward</mat-icon>
+        <!-- Submit button -->
+        <button class="btn-login-minimal" type="submit">
+          Iniciar sesión
         </button>
 
       </form>
 
-      <div class="form-footer">
-        <mat-icon>shield</mat-icon>
-        <span>Conexión protegida y cifrada</span>
+      <!-- Footer minimalista -->
+      <div class="form-footer-minimal">
+        <mat-icon>lock</mat-icon>
+        <span>Conexión segura</span>
       </div>
 
+    </div>
+  </div>
+
+  <!-- Panel derecho: Logo grande centrado -->
+  <div class="login-brand-panel">
+    <div class="brand-content-centered">
+      <img
+        src="/rtv_logo_sistema.png"
+        alt="RTV - Revisión Técnica Vehicular"
+        class="logo-main"
+      />
+      <p class="tagline-minimal">Sistema de Revisión Técnica Vehicular</p>
     </div>
   </div>
 
