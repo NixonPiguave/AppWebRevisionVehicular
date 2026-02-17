@@ -25,10 +25,8 @@ export class CapacidadCargaComponent implements OnInit {
   modoEdicion: boolean = false;
   guardando: boolean = false;
 
-  // 🔹 Opciones fijas de unidad
   unidadesDisponibles: string[] = ['KG', 'T', 'L'];
 
-  // Inicializa con kg por defecto
   capacidadEditando: CapacidadCarga = {
     id: null,
     capacidad: '',
@@ -123,18 +121,25 @@ export class CapacidadCargaComponent implements OnInit {
 
   guardarCapacidad(): void {
 
-    // 🔹 Validación básica
+    // ✅ Validar que se ingresó capacidad
     if (!this.capacidadEditando.capacidad || !this.capacidadEditando.unidad) {
+      console.warn('Debe ingresar la capacidad y seleccionar una unidad.');
       alert('Debe ingresar la capacidad y seleccionar una unidad.');
       return;
     }
 
-    this.guardando = true;
+    // ✅ Validar que no sea negativo ni cero
+    const valorCapacidad = Number(this.capacidadEditando.capacidad);
+    if (isNaN(valorCapacidad) || valorCapacidad <= 0) {
+      console.warn('La capacidad debe ser un número mayor a cero. Valor ingresado:', this.capacidadEditando.capacidad);
+      alert('La capacidad debe ser un número mayor a cero. No se permiten valores negativos ni cero.');
+      return;
+    }
 
+    this.guardando = true;
     const idValue = this.capacidadEditando.id;
 
     if (this.modoEdicion && idValue !== null) {
-
       this.capacidadService.actualizarCapacidadCarga(idValue, this.capacidadEditando).subscribe({
         next: () => {
           this.cargarCapacidades();
@@ -146,9 +151,7 @@ export class CapacidadCargaComponent implements OnInit {
           alert('Error al actualizar');
         }
       });
-
     } else {
-
       this.capacidadService.crearCapacidadCarga(this.capacidadEditando).subscribe({
         next: () => {
           this.cargarCapacidades();
@@ -160,7 +163,6 @@ export class CapacidadCargaComponent implements OnInit {
           alert('Error al crear');
         }
       });
-
     }
   }
 
@@ -172,5 +174,4 @@ export class CapacidadCargaComponent implements OnInit {
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
   }
-
 }

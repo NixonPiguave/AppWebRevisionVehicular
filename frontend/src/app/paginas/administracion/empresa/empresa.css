@@ -708,3 +708,37 @@ mat-icon {
     width: auto;
   }
 }
+
+
+/* Agregar al final de empresa.css */
+
+/* Botón deshabilitado cuando ya existe empresa */
+.btn-agregar.btn-disabled,
+.btn-agregar:disabled {
+  background: #9e9e9e !important;
+  cursor: not-allowed !important;
+  opacity: 0.6;
+}
+
+.btn-agregar.btn-disabled:hover {
+  background: #9e9e9e !important;
+}
+
+/* Aviso informativo */
+.aviso-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.aviso-info mat-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
