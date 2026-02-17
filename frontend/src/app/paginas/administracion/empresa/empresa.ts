@@ -12,27 +12,22 @@ import { EmpresaService, Empresa } from '../../../services/administracion/empres
   styleUrl: './empresa.css',
 })
 export class EmpresaComponent implements OnInit {
-  // Lista de empresas (se carga desde el backend)
   empresas: Empresa[] = [];
   cargando: boolean = false;
   error: string = '';
 
-  // Filtros y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   empresaEditando: Empresa = this.getEmpresaVacia();
   guardando: boolean = false;
 
-  // Modal detalle
   mostrarModalDetalle: boolean = false;
   empresaDetalle: Empresa | null = null;
 
-  // Para subida de logo
   logoPreview: string | null = null;
   logoFile: File | null = null;
 
@@ -45,9 +40,6 @@ export class EmpresaComponent implements OnInit {
     this.cargarEmpresas();
   }
 
-  /**
-   * Retorna un objeto empresa vacío
-   */
   getEmpresaVacia(): Empresa {
     return {
       empresaId: null,
@@ -60,9 +52,6 @@ export class EmpresaComponent implements OnInit {
     };
   }
 
-  /**
-   * Cargar empresas desde el backend
-   */
   cargarEmpresas(): void {
     this.cargando = true;
     this.error = '';
@@ -84,57 +73,51 @@ export class EmpresaComponent implements OnInit {
     });
   }
 
-  // Getter para empresas filtradas
   get empresasFiltradas(): Empresa[] {
-    if (!this.filtro.trim()) {
-      return this.empresas;
-    }
+    if (!this.filtro.trim()) return this.empresas;
     const filtroLower = this.filtro.toLowerCase();
-    return this.empresas.filter(
-      (empresa) =>
-        empresa.nombre.toLowerCase().includes(filtroLower) ||
-        empresa.ruc.toLowerCase().includes(filtroLower) ||
-        empresa.correo.toLowerCase().includes(filtroLower) ||
-        empresa.direccion.toLowerCase().includes(filtroLower) ||
-        (empresa.empresaId?.toString() || '').includes(filtroLower)
+    return this.empresas.filter(e =>
+      e.nombre.toLowerCase().includes(filtroLower) ||
+      e.ruc.toLowerCase().includes(filtroLower) ||
+      e.correo.toLowerCase().includes(filtroLower) ||
+      e.direccion.toLowerCase().includes(filtroLower) ||
+      (e.empresaId?.toString() || '').includes(filtroLower)
     );
   }
 
-  // Getter para empresas paginadas
   get empresasPaginadas(): Empresa[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
-    const fin = inicio + this.registrosPorPagina;
-    return this.empresasFiltradas.slice(inicio, fin);
+    return this.empresasFiltradas.slice(inicio, inicio + this.registrosPorPagina);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
     return Math.ceil(this.empresasFiltradas.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
-    for (let i = 1; i <= this.totalPaginas; i++) {
-      paginas.push(i);
-    }
+    for (let i = 1; i <= this.totalPaginas; i++) paginas.push(i);
     return paginas;
   }
 
-  // Cambiar página
   irAPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaActual = pagina;
-    }
+    if (pagina >= 1 && pagina <= this.totalPaginas) this.paginaActual = pagina;
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
   abrirModalCrear(): void {
+    // ✅ Validar que no exista ya una empresa registrada
+    if (this.empresas.length >= 1) {
+      console.warn('[VALIDACIÓN] Ya existe una empresa registrada en el sistema. No se puede crear otra.', {
+        empresaExistente: this.empresas[0]
+      });
+      alert('Ya existe una empresa registrada en el sistema. Solo se permite un registro de empresa.\n\nSi necesitas modificarla, usa el botón Editar.');
+      return;
+    }
+
     this.modoEdicion = false;
     this.empresaEditando = this.getEmpresaVacia();
     this.logoPreview = null;
@@ -142,17 +125,14 @@ export class EmpresaComponent implements OnInit {
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
   abrirModalEditar(empresa: Empresa): void {
     this.modoEdicion = true;
     this.empresaEditando = { ...empresa };
-    // Si logoempresa contiene datos (base64 o URL), usarlo como preview
     this.logoPreview = empresa.logoempresa && empresa.logoempresa.length > 0 ? empresa.logoempresa : null;
     this.logoFile = null;
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.empresaEditando = this.getEmpresaVacia();
@@ -160,19 +140,15 @@ export class EmpresaComponent implements OnInit {
     this.logoFile = null;
   }
 
-  // Manejar selección de archivo de logo
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
       const file = input.files[0];
       this.logoFile = file;
-
-      // Crear preview de la imagen y guardar el base64 en logoempresa
       const reader = new FileReader();
       reader.onload = (e) => {
         const base64Image = e.target?.result as string;
         this.logoPreview = base64Image;
-        // Guardar el base64 completo para que se persista en la BD
         this.empresaEditando.logoempresa = file.name;
         this.cdr.detectChanges();
       };
@@ -180,14 +156,12 @@ export class EmpresaComponent implements OnInit {
     }
   }
 
-  // Remover logo seleccionado
   removerLogo(): void {
     this.logoPreview = null;
     this.logoFile = null;
     this.empresaEditando.logoempresa = '';
   }
 
-  // Validar formulario
   validarFormulario(): boolean {
     if (!this.empresaEditando.nombre.trim()) {
       alert('El nombre de la empresa es requerido');
@@ -201,7 +175,6 @@ export class EmpresaComponent implements OnInit {
       alert('El correo es requerido');
       return false;
     }
-    // Validación simple de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.empresaEditando.correo)) {
       alert('El correo no tiene un formato válido');
@@ -210,18 +183,25 @@ export class EmpresaComponent implements OnInit {
     return true;
   }
 
-  // Guardar empresa (crear o editar)
   guardarEmpresa(): void {
-    if (!this.validarFormulario()) {
+    if (!this.validarFormulario()) return;
+
+    // Doble check: al guardar también validar que no sea creación duplicada
+    if (!this.modoEdicion && this.empresas.length >= 1) {
+      console.warn('Intento de crear segunda empresa bloqueado al guardar.', {
+        empresaExistente: this.empresas[0]
+      });
+      alert('Ya existe una empresa registrada. No se puede crear otra.');
+      this.cerrarModalForm();
       return;
     }
 
     this.guardando = true;
 
     if (this.modoEdicion && this.empresaEditando.empresaId) {
-      // Editar existente
       this.empresaService.actualizarEmpresa(this.empresaEditando.empresaId, this.empresaEditando).subscribe({
         next: () => {
+          console.log('Empresa actualizada correctamente.');
           this.cargarEmpresas();
           this.cerrarModalForm();
           this.guardando = false;
@@ -233,9 +213,9 @@ export class EmpresaComponent implements OnInit {
         }
       });
     } else {
-      // Crear nueva
       this.empresaService.crearEmpresa(this.empresaEditando).subscribe({
         next: () => {
+          console.log('Empresa creada correctamente.');
           this.cargarEmpresas();
           this.cerrarModalForm();
           this.guardando = false;
@@ -249,13 +229,11 @@ export class EmpresaComponent implements OnInit {
     }
   }
 
-  // Abrir modal detalle
   verDetalle(empresa: Empresa): void {
     this.empresaDetalle = empresa;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.empresaDetalle = null;

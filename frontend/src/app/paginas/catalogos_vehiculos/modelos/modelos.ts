@@ -45,22 +45,17 @@ export class ModelosComponent implements OnInit {
     this.cargarDatos();
   }
 
-  /** Cargar modelos y marcas */
   cargarDatos(): void {
     this.cargando = true;
     this.error = '';
     this.cdr.detectChanges();
 
-    // Cargar marcas primero
     this.modeloService.listarMarcas().subscribe({
       next: (marcas) => {
-        this.marcas = marcas.filter(m => m.estado === 'A'); // Solo activas
+        this.marcas = marcas.filter(m => m.estado === 'A');
 
-        // Luego cargar modelos
         this.modeloService.listar().subscribe({
           next: (modelos) => {
-            console.log('Modelos cargados:', modelos);
-            // Enriquecer modelos con nombre de marca
             this.modelos = modelos.map(modelo => ({
               ...modelo,
               marcaNombre: this.obtenerNombreMarca(modelo.marcaId)
@@ -70,7 +65,7 @@ export class ModelosComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error al cargar modelos:', err);
-            this.error = 'Error al cargar los modelos. Verifica que el backend esté corriendo.';
+            this.error = 'Error al cargar los modelos.';
             this.cargando = false;
             this.cdr.detectChanges();
           }
@@ -78,40 +73,33 @@ export class ModelosComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar marcas:', err);
-        this.error = 'Error al cargar las marcas. Verifica que el backend esté corriendo.';
+        this.error = 'Error al cargar las marcas.';
         this.cargando = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  /** Obtener nombre de marca por ID */
   obtenerNombreMarca(marcaId: number): string {
     const marca = this.marcas.find(m => m.id === marcaId);
     return marca ? marca.nombre : 'Sin marca';
   }
 
-  /** Filtrar modelos */
   get modelosFiltrados(): Modelo[] {
-    if (!this.filtro.trim()) {
-      return this.modelos;
-    }
+    if (!this.filtro.trim()) return this.modelos;
     const filtroLower = this.filtro.toLowerCase();
-    return this.modelos.filter(
-      (modelo) =>
-        modelo.nombre.toLowerCase().includes(filtroLower) ||
-        (modelo.marcaNombre || '').toLowerCase().includes(filtroLower) ||
-        modelo.anioDesde.toString().includes(filtroLower) ||
-        modelo.anioHasta.toString().includes(filtroLower) ||
-        this.getEstadoTexto(modelo.estado).toLowerCase().includes(filtroLower)
+    return this.modelos.filter(m =>
+      m.nombre.toLowerCase().includes(filtroLower) ||
+      (m.marcaNombre || '').toLowerCase().includes(filtroLower) ||
+      m.anioDesde.toString().includes(filtroLower) ||
+      m.anioHasta.toString().includes(filtroLower) ||
+      this.getEstadoTexto(m.estado).toLowerCase().includes(filtroLower)
     );
   }
 
-  /** Modelos paginados */
   get modelosPaginados(): Modelo[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
-    const fin = inicio + this.registrosPorPagina;
-    return this.modelosFiltrados.slice(inicio, fin);
+    return this.modelosFiltrados.slice(inicio, inicio + this.registrosPorPagina);
   }
 
   get totalPaginas(): number {
@@ -120,9 +108,7 @@ export class ModelosComponent implements OnInit {
 
   get paginas(): number[] {
     const paginas: number[] = [];
-    for (let i = 1; i <= this.totalPaginas; i++) {
-      paginas.push(i);
-    }
+    for (let i = 1; i <= this.totalPaginas; i++) paginas.push(i);
     return paginas;
   }
 
@@ -131,16 +117,13 @@ export class ModelosComponent implements OnInit {
   }
 
   irAPagina(pagina: number): void {
-    if (pagina >= 1 && pagina <= this.totalPaginas) {
-      this.paginaActual = pagina;
-    }
+    if (pagina >= 1 && pagina <= this.totalPaginas) this.paginaActual = pagina;
   }
 
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  /** Abrir modal crear */
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.modeloEditando = {
@@ -154,7 +137,6 @@ export class ModelosComponent implements OnInit {
     this.mostrarModalForm = true;
   }
 
-  /** Abrir modal editar */
   abrirModalEditar(modelo: Modelo): void {
     this.modoEdicion = true;
     this.modeloEditando = { ...modelo };
@@ -165,26 +147,53 @@ export class ModelosComponent implements OnInit {
     this.mostrarModalForm = false;
   }
 
-  /** Guardar modelo */
+  /** Validar que un año sea positivo y exactamente 4 dígitos */
+  private validarAnio(anio: number, campo: string): boolean {
+    if (anio <= 0) {
+      console.warn(`El campo "${campo}" no puede ser negativo ni cero. Valor: ${anio}`);
+      alert(`El ${campo} no puede ser negativo ni cero.`);
+      return false;
+    }
+    const anioStr = anio.toString();
+    if (anioStr.length !== 4) {
+      console.warn(`[VALIDACIÓN] El campo "${campo}" debe tener exactamente 4 dígitos. Valor: ${anio}`);
+      alert(`El ${campo} debe tener exactamente 4 dígitos (Ej: 2015). Ingresaste: ${anio}`);
+      return false;
+    }
+    return true;
+  }
+
   guardarModelo(): void {
-    // Validaciones
+    // Validar nombre
     if (!this.modeloEditando.nombre.trim()) {
+      console.warn('[VALIDACIÓN] El nombre del modelo es requerido.');
       alert('El nombre del modelo es requerido');
       return;
     }
+
+    // Validar marca
     if (!this.modeloEditando.marcaId || this.modeloEditando.marcaId === 0) {
+      console.warn('[VALIDACIÓN] Debe seleccionar una marca.');
       alert('Debe seleccionar una marca');
       return;
     }
+
+    //  Validar año desde: no negativo y 4 dígitos
+    if (!this.validarAnio(this.modeloEditando.anioDesde, 'Año Desde')) return;
+
+    //  Validar año hasta: no negativo y 4 dígitos
+    if (!this.validarAnio(this.modeloEditando.anioHasta, 'Año Hasta')) return;
+
+    // Validar que desde <= hasta
     if (this.modeloEditando.anioDesde > this.modeloEditando.anioHasta) {
-      alert('El año desde no puede ser mayor que el año hasta');
+      console.warn(`Año Desde (${this.modeloEditando.anioDesde}) no puede ser mayor que Año Hasta (${this.modeloEditando.anioHasta}).`);
+      alert('El Año Desde no puede ser mayor que el Año Hasta');
       return;
     }
 
     this.guardando = true;
 
     if (this.modoEdicion && this.modeloEditando.id) {
-      // Editar
       this.modeloService.actualizar(this.modeloEditando.id, this.modeloEditando).subscribe({
         next: (response) => {
           console.log('Modelo actualizado:', response);
@@ -199,7 +208,6 @@ export class ModelosComponent implements OnInit {
         }
       });
     } else {
-      // Crear (sin enviar ID)
       const nuevoModelo = {
         nombre: this.modeloEditando.nombre,
         anioDesde: this.modeloEditando.anioDesde,
@@ -224,7 +232,6 @@ export class ModelosComponent implements OnInit {
     }
   }
 
-  /** Ver detalle */
   verDetalle(modelo: Modelo): void {
     this.modeloDetalle = modelo;
     this.mostrarModalDetalle = true;
