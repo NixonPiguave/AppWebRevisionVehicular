@@ -15,7 +15,7 @@ public interface IPropietarioRepository extends JpaRepository<Propietario, Long>
     void insertarPropietario(
             @Param("p_documento_identidad") String documentoIdentidad,
             @Param("p_nombre") String nombre,
-            @Param("p_telefono") Integer telefono,
+            @Param("p_telefono") String telefono,
             @Param("p_correo") String correo,
             @Param("p_direccion") String direccion,
             @Param("p_fecharegistro") LocalDate fecharegistro
@@ -26,7 +26,7 @@ public interface IPropietarioRepository extends JpaRepository<Propietario, Long>
             @Param("p_propietario_id") Long propietarioId,
             @Param("p_documento_identidad") String documentoIdentidad,
             @Param("p_nombre") String nombre,
-            @Param("p_telefono") Integer telefono,
+            @Param("p_telefono") String telefono,
             @Param("p_correo") String correo,
             @Param("p_direccion") String direccion,
             @Param("p_fecharegistro") LocalDate fecharegistro

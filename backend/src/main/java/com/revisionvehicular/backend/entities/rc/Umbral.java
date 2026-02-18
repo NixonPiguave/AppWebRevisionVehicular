@@ -11,7 +11,8 @@ public class Umbral {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long umbral_id;
+    @Column(name = "umbral_id")
+    private Long umbralid;
 
     @Column(name = "valor_min", precision = 10, scale = 2)
     private BigDecimal valorMin;

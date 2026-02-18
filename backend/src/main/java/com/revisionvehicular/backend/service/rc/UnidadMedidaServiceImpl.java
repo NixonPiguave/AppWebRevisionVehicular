@@ -18,7 +18,7 @@ public class UnidadMedidaServiceImpl implements IUnidadMedidaService {
 
     private UnidadesMedidaDTO toDTO(UnidadMedida entity) {
         UnidadesMedidaDTO dto = new UnidadesMedidaDTO();
-        dto.setIdUnidadMedida(entity.getUmedida_id());
+        dto.setIdUnidadMedida(entity.getUmedidaid());
         dto.setNombre(entity.getNombre());
         dto.setSimbolo(entity.getSimbolo());
         dto.setDescripcion(entity.getDescripcion());

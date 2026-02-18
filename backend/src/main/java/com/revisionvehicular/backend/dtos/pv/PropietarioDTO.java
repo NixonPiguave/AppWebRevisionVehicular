@@ -10,7 +10,7 @@ public class PropietarioDTO {
 
     private String documentoIdentidad;
     private String nombre;
-    private Integer telefono;
+    private String telefono;
     private String correo;
     private String direccion;
 
