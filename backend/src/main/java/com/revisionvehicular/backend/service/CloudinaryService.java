@@ -17,9 +17,9 @@ public class CloudinaryService {
 
 
      // Subir imagen a Cloudinary
-     // @param file Archivo MultipartFile
-     // @param folder Carpeta en Cloudinary (ej: "empresas", "vehiculos")
-     // @return Map con url, public_id, etc.
+     // El parametro file Archivo MultipartFile
+     // El parametro folder Carpeta en Cloudinary (ej: "empresas", "vehiculos")
+     // y retorna Map con url, public_id, etc.
 
     public Map<String, Object> uploadImage(MultipartFile file, String folder) throws IOException {
 
@@ -57,7 +57,7 @@ public class CloudinaryService {
         );
     }
      // Eliminar archivo de Cloudinary
-     // @param publicId El public_id retornado al subir (ej: "rtv/empresas/abc123")
+     // El parametro de publicId es El public_id retornado al subir (ej: "rtv/empresas/abc123")
 
     public Map<String, Object> delete(String publicId) throws IOException {
         return cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
