@@ -131,7 +131,21 @@
       </div>
       <div class="form-grupo">
         <label for="ruc">RUC *</label>
-        <input type="text" id="ruc" [(ngModel)]="empresaEditando.ruc" placeholder="Ingrese el RUC" class="form-input" maxlength="20" />
+        <input
+          type="text"
+          id="ruc"
+          [(ngModel)]="empresaEditando.ruc"
+          placeholder="Ingrese el RUC (13 dígitos)"
+          class="form-input"
+          maxlength="13"
+          [readonly]="modoEdicion"
+          [class.input-readonly]="modoEdicion"
+          title="{{ modoEdicion ? 'El RUC no se puede modificar' : '' }}"
+        />
+        <small class="input-hint" *ngIf="modoEdicion">
+          <mat-icon>lock</mat-icon>
+          El RUC no se puede modificar una vez creada la empresa
+        </small>
       </div>
       <div class="form-grupo">
         <label for="direccion">Dirección</label>
@@ -148,23 +162,37 @@
       <div class="form-grupo">
         <label>Logo de la Empresa</label>
         <div class="logo-upload-container">
+
+          <!-- Preview del logo -->
           <div class="logo-preview" *ngIf="logoPreview">
             <img [src]="logoPreview" alt="Preview del logo" />
-            <button type="button" class="btn-remover-logo" (click)="removerLogo()">
+            <button type="button" class="btn-remover-logo" (click)="removerLogo()" [disabled]="uploadingLogo">
               <mat-icon>close</mat-icon>
             </button>
           </div>
-          <div class="logo-input-wrapper" *ngIf="!logoPreview">
-            <input type="file" id="logo" (change)="onLogoSelected($event)" accept="image/*" class="logo-input" />
+
+          <!-- Input para seleccionar -->
+          <div class="logo-input-wrapper" *ngIf="!logoPreview && !uploadingLogo">
+            <input
+              type="file"
+              id="logo"
+              (change)="onLogoSelected($event)"
+              accept="image/*"
+              class="logo-input"
+            />
             <label for="logo" class="logo-input-label">
               <mat-icon>cloud_upload</mat-icon>
               <span>Seleccionar imagen</span>
+              <small>(JPG, PNG, GIF, WebP - Máx 2MB)</small>
             </label>
           </div>
-          <div class="logo-filename" *ngIf="empresaEditando.logoempresa">
-            <mat-icon>image</mat-icon>
-            <span>{{ empresaEditando.logoempresa }}</span>
+
+          <!-- Indicador de subida -->
+          <div class="upload-progress" *ngIf="uploadingLogo">
+            <div class="spinner-upload"></div>
+            <span>Subiendo imagen a Cloudinary...</span>
           </div>
+
         </div>
       </div>
     </div>
@@ -188,10 +216,10 @@
     </div>
     <div class="modal-body" *ngIf="empresaDetalle">
       <div class="detalle-logo-container">
-        <div class="detalle-logo" *ngIf="empresaDetalle.logoempresa && empresaDetalle.logoempresa.length > 50">
+        <div class="detalle-logo" *ngIf="empresaDetalle.logoempresa && empresaDetalle.logoempresa.startsWith('http')">
           <img [src]="empresaDetalle.logoempresa" alt="Logo de {{ empresaDetalle.nombre }}" />
         </div>
-        <div class="detalle-logo-placeholder" *ngIf="!empresaDetalle.logoempresa || empresaDetalle.logoempresa.length <= 50">
+        <div class="detalle-logo-placeholder" *ngIf="!empresaDetalle.logoempresa || !empresaDetalle.logoempresa.startsWith('http')">
           <mat-icon>business</mat-icon>
           <span>Sin logo</span>
         </div>

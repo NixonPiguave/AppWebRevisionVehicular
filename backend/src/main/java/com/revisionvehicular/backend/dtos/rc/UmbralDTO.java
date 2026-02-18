@@ -10,8 +10,6 @@ public class UmbralDTO {
 
     private BigDecimal valorMin;
     private BigDecimal valorMax;
-
     private Long idUnidadMedida;
-
     private String estado;
 }

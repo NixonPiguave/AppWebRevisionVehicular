@@ -1,7 +1,12 @@
 /* ============================================
+   CRUD-TABLE.CSS - ESTILOS GENÉRICOS REUTILIZABLES
+   Usar este archivo en cualquier componente CRUD xd
+   ============================================ */
+
+/* ============================================
    CONTENEDOR PRINCIPAL
    ============================================ */
-.empresas-container {
+.crud-container {
   padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
@@ -10,14 +15,14 @@
 /* ============================================
    HEADER
    ============================================ */
-.empresas-header {
+.crud-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.empresas-header h2 {
+.crud-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
@@ -43,10 +48,14 @@
   background: #234a1e;
 }
 
+.btn-agregar mat-icon {
+  font-size: 20px;
+}
+
 /* ============================================
    CONTROLES (FILTRO Y PAGINACIÓN)
    ============================================ */
-.empresas-controles {
+.crud-controles {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,8 +76,13 @@
   font-weight: 500;
 }
 
+.input-busqueda-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .input-filtro {
-  padding: 8px 12px;
+  padding: 8px 40px 8px 12px;
   border: 1px solid #d0d0d0;
   border-radius: 6px;
   font-size: 14px;
@@ -80,6 +94,16 @@
   outline: none;
   border-color: #2d5a27;
   box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.icon-search {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9e9e9e;
+  font-size: 20px;
+  pointer-events: none;
 }
 
 .select-registros {
@@ -111,18 +135,18 @@
   background: white;
 }
 
-.empresas-tabla {
+.crud-tabla {
   width: 100%;
   border-collapse: collapse;
 }
 
-.empresas-tabla th,
-.empresas-tabla td {
+.crud-tabla th,
+.crud-tabla td {
   padding: 14px 16px;
   text-align: left;
 }
 
-.empresas-tabla th {
+.crud-tabla th {
   background: #1a2e1a;
   color: white;
   font-weight: 600;
@@ -131,36 +155,64 @@
   letter-spacing: 0.5px;
 }
 
-.empresas-tabla th:first-child {
+.crud-tabla th:first-child {
   border-top-left-radius: 7px;
 }
 
-.empresas-tabla th:last-child {
+.crud-tabla th:last-child {
   border-top-right-radius: 7px;
 }
 
-.empresas-tabla tbody tr {
+.crud-tabla tbody tr {
   border-bottom: 1px solid #e8e8e8;
   transition: background 0.15s ease;
 }
 
-.empresas-tabla tbody tr:hover {
+.crud-tabla tbody tr:hover {
   background: #f5f9f5;
 }
 
-.empresas-tabla tbody tr:last-child {
+.crud-tabla tbody tr:last-child {
   border-bottom: none;
 }
 
-.empresas-tabla td {
+.crud-tabla td {
   font-size: 14px;
   color: #333;
+}
+
+.txt-resaltado {
+  font-weight: 600;
+  color: #1a2e1a;
 }
 
 .th-acciones,
 .td-acciones {
   text-align: center;
   width: 120px;
+}
+
+/* ============================================
+   BADGE ESTADO
+   ============================================ */
+.estado-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.estado-badge.activo {
+  background: #d4edda;
+  color: #155724;
+}
+
+.estado-badge.inactivo {
+  background: #f8d7da;
+  color: #721c24;
 }
 
 /* ============================================
@@ -184,6 +236,10 @@
   transition: all 0.2s ease;
 }
 
+.btn-accion mat-icon {
+  font-size: 18px;
+}
+
 .btn-ver {
   background: #e3f2fd;
   color: #1565c0;
@@ -203,18 +259,31 @@
 }
 
 /* ============================================
-   PAGINACIÓN
+   FOOTER DE TABLA (PAGINACIÓN E INFO)
    ============================================ */
+.footer-tabla {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
 .paginacion {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 8px;
-  margin-top: 20px;
 }
 
 .btn-pagina {
-  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
   border: 1px solid #d0d0d0;
   background: white;
   color: #333;
@@ -222,6 +291,10 @@
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.btn-pagina mat-icon {
+  font-size: 20px;
 }
 
 .btn-pagina:hover:not(:disabled) {
@@ -241,8 +314,6 @@
 }
 
 .info-registros {
-  text-align: center;
-  margin-top: 12px;
   font-size: 13px;
   color: #666;
 }
@@ -287,10 +358,6 @@
   max-width: 450px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideIn 0.25s ease;
-}
-
-.modal-empresa {
-  max-width: 550px;
 }
 
 @keyframes slideIn {
@@ -338,10 +405,12 @@
   color: #333;
 }
 
+.btn-cerrar mat-icon {
+  font-size: 20px;
+}
+
 .modal-body {
   padding: 24px;
-  max-height: 60vh;
-  overflow-y: auto;
 }
 
 .form-grupo {
@@ -369,6 +438,7 @@
   font-size: 14px;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 .form-input:focus,
@@ -381,6 +451,11 @@
 .form-select {
   background: white;
   cursor: pointer;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
 }
 
 .modal-footer {
@@ -410,6 +485,9 @@
 }
 
 .btn-guardar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding: 10px 24px;
   border: none;
   background: #2d5a27;
@@ -425,117 +503,8 @@
   background: #234a1e;
 }
 
-.btn-guardar:disabled,
-.btn-cancelar:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* ============================================
-   LOGO UPLOAD
-   ============================================ */
-.logo-upload-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.logo-preview {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #e0e0e0;
-}
-
-.logo-preview img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.btn-remover-logo {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
-}
-
-.btn-remover-logo:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.btn-remover-logo mat-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-.logo-input-wrapper {
-  position: relative;
-}
-
-.logo-input {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.logo-input-label {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 24px;
-  border: 2px dashed #d0d0d0;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #666;
-}
-
-.logo-input-label:hover {
-  border-color: #2d5a27;
-  background: #f5f9f5;
-  color: #2d5a27;
-}
-
-.logo-input-label mat-icon {
-  font-size: 32px;
-  width: 32px;
-  height: 32px;
-}
-
-.logo-filename {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
-  background: #f0f0f0;
-  border-radius: 6px;
-  font-size: 13px;
-  color: #555;
-}
-
-.logo-filename mat-icon {
+.btn-guardar mat-icon {
   font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: #2d5a27;
 }
 
 /* ============================================
@@ -545,62 +514,17 @@
   padding: 24px;
 }
 
-.detalle-logo-container {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
-.detalle-logo {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 150px;
-  height: 150px;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 2px solid #e0e0e0;
-  background: #fafafa;
-}
-
-.detalle-logo img {
-  max-width: 150px;
-  max-height: 150px;
+.detalle-card {
+  background: #f9fafb;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
-  object-fit: contain;
-}
-
-.detalle-logo-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 20px;
-  background: #f5f5f5;
-  border-radius: 8px;
-  border: 2px dashed #d0d0d0;
-  color: #999;
-}
-
-.detalle-logo-placeholder mat-icon {
-  font-size: 48px;
-  width: 48px;
-  height: 48px;
-  margin-bottom: 8px;
-}
-
-.detalle-logo-placeholder span {
-  font-size: 13px;
+  padding: 16px;
 }
 
 .detalle-item {
   display: flex;
   align-items: flex-start;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #e8e8e8;
 }
 
 .detalle-item:last-child {
@@ -610,14 +534,19 @@
 .detalle-label {
   font-weight: 600;
   color: #555;
-  width: 100px;
+  min-width: 140px;
   flex-shrink: 0;
 }
 
 .detalle-valor {
   color: #1a2e1a;
   font-weight: 500;
-  word-break: break-word;
+  flex: 1;
+}
+
+.detalle-valor.resaltado {
+  color: #2d5a27;
+  font-weight: 600;
 }
 
 /* ============================================
@@ -635,6 +564,16 @@
   align-items: center;
 }
 
+.error-contenido {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.error-contenido mat-icon {
+  font-size: 24px;
+}
+
 .btn-reintentar {
   padding: 8px 16px;
   background: #991b1b;
@@ -643,6 +582,8 @@
   border-radius: 6px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s ease;
 }
 
 .btn-reintentar:hover {
@@ -650,27 +591,37 @@
 }
 
 .cargando {
-  text-align: center;
-  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 16px;
+}
+
+.cargando span {
   color: #666;
   font-size: 16px;
 }
 
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e8e8e8;
+  border-top-color: #2d5a27;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ============================================
-   MATERIAL ICON AJUSTES
+   UTILIDADES GENERALES
    ============================================ */
-.btn-agregar mat-icon {
-  font-size: 20px;
-}
-
-.btn-accion mat-icon {
-  font-size: 18px;
-}
-
-.btn-cerrar mat-icon {
-  font-size: 20px;
-}
-
 mat-icon {
   vertical-align: middle;
 }
@@ -679,13 +630,13 @@ mat-icon {
    RESPONSIVE
    ============================================ */
 @media (max-width: 768px) {
-  .empresas-header {
+  .crud-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .empresas-controles {
+  .crud-controles {
     flex-direction: column;
     align-items: flex-start;
   }
@@ -694,141 +645,139 @@ mat-icon {
     width: 100%;
   }
 
+  .footer-tabla {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .info-registros {
+    order: 2;
+  }
+
+  .paginacion {
+    order: 1;
+  }
+
   .modal-contenido {
     margin: 16px;
     max-width: calc(100% - 32px);
   }
 
-  .detalle-item {
-    flex-direction: column;
-    gap: 4px;
+  .crud-tabla {
+    font-size: 13px;
   }
 
-  .detalle-label {
-    width: auto;
+  .crud-tabla th,
+  .crud-tabla td {
+    padding: 10px 12px;
   }
 }
 
+@media (max-width: 480px) {
+  .crud-container {
+    padding: 16px;
+  }
 
-/* Agregar al final de empresa.css */
+  .btn-agregar span {
+    display: none;
+  }
 
-/* Botón deshabilitado cuando ya existe empresa */
-.btn-agregar.btn-disabled,
-.btn-agregar:disabled {
-  background: #9e9e9e !important;
-  cursor: not-allowed !important;
-  opacity: 0.6;
+  .btn-agregar {
+    padding: 10px 12px;
+  }
 }
-
-.btn-agregar.btn-disabled:hover {
-  background: #9e9e9e !important;
-}
-
-/* Aviso informativo */
-.aviso-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #e3f2fd;
-  border: 1px solid #90caf9;
-  color: #1565c0;
-  padding: 10px 16px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-  font-size: 14px;
-}
-
-.aviso-info mat-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-}
-
 /* ============================================
-   CAMPO RUC BLOQUEADO EN EDICIÓN
+   ESTILOS ESPECÍFICOS PARA SUBCATEGORÍAS
    ============================================ */
-.input-readonly {
-  background: #f5f5f5 !important;
-  color: #666 !important;
-  cursor: not-allowed !important;
-  border-color: #d0d0d0 !important;
-}
 
-.input-readonly:focus {
-  box-shadow: none !important;
-  border-color: #d0d0d0 !important;
-}
-
-.input-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-top: 6px;
-  font-size: 12px;
-  color: #888;
-  font-style: italic;
-}
-
-.input-hint mat-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-  color: #999;
-}
-
-/* ============================================
-   INDICADOR DE SUBIDA CLOUDINARY
-   ============================================ */
-.upload-progress {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
+/* Badge para el código de CATEGORÍA (verde) */
+.badge-categoria {
+  display: inline-block;
+  padding: 4px 12px;
   background: #e8f5e9;
-  border: 1px solid #a5d6a7;
-  border-radius: 8px;
   color: #2e7d32;
-  font-size: 14px;
-}
-
-.spinner-upload {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #c8e6c9;
-  border-top-color: #2e7d32;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* Actualizar logo-input-label para hint */
-.logo-input-label small {
-  font-size: 11px;
-  color: #999;
-  margin-top: 4px;
-  font-weight: 400;
-}
-
-/* ============================================
-   MEJORAR LOGO FILENAME (opcional)
-   ============================================ */
-.logo-filename {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  background: #f8f8f8;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 13px;
-  color: #555;
+  font-weight: 600;
+  border: 1px solid #c8e6c9;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
 }
 
-.logo-filename mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-  color: #2d5a27;
+/* Badge para el código de SUBCATEGORÍA (morado/violeta) */
+.badge-codigo {
+  display: inline-block;
+  padding: 4px 12px;
+  background: #f3e5f5;
+  color: #6a1b9a;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid #e1bee7;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Variación en modal de detalle para categoría */
+.detalle-item .badge-categoria {
+  background: #fff3e0;
+  color: #e65100;
+  border-color: #ffe0b2;
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+/* Variación en modal de detalle para código */
+.detalle-item .badge-codigo {
+  background: #fce4ec;
+  color: #c2185b;
+  border-color: #f8bbd0;
+  font-size: 14px;
+  padding: 5px 12px;
+}
+
+/* Hover effect en tabla para categoría */
+.crud-tabla tbody tr:hover .badge-categoria {
+  background: #c8e6c9;
+  border-color: #a5d6a7;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+/* Hover effect en tabla para código */
+.crud-tabla tbody tr:hover .badge-codigo {
+  background: #e1bee7;
+  border-color: #ce93d8;
+  transform: scale(1.05);
+  transition: all 0.2s ease;
+}
+
+/* Modal más ancho para formularios */
+.modal-wide {
+  max-width: 550px;
+}
+
+/* Campos requeridos */
+.required {
+  color: #d32f2f;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Tooltip en hover del badge de categoría */
+.badge-categoria[title] {
+  cursor: help;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .modal-wide {
+    max-width: calc(100% - 32px);
+  }
+
+  .badge-categoria,
+  .badge-codigo {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
 }

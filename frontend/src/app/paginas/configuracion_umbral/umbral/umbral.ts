@@ -1,0 +1,207 @@
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
+import { UmbralService, Umbral, UnidadMedida } from '../../../services/configuracion_umbral/umbral.service';
+
+@Component({
+  selector: 'app-umbral',
+  standalone: true,
+  imports: [CommonModule, FormsModule, RouterModule, MatIconModule],
+  templateUrl: './umbral.html',
+  styleUrl: './umbral.css'
+})
+export class UmbralComponent implements OnInit {
+
+  umbrales: Umbral[] = [];
+  unidades: UnidadMedida[] = [];
+
+  cargando = false;
+  error = '';
+  filtro = '';
+
+  registrosPorPagina = 10;
+  paginaActual = 1;
+
+  mostrarModalForm = false;
+  modoEdicion = false;
+  guardando = false;
+
+  umbralEditando: Umbral = {
+    idUmbral: null,
+    valorMin: 0,
+    valorMax: 0,
+    idUnidadMedida: 0,
+    estado: 'A'
+  };
+
+  mostrarModalDetalle = false;
+  umbralDetalle: Umbral | null = null;
+
+  constructor(
+    private umbralService: UmbralService,
+    private cdr: ChangeDetectorRef
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
+
+  cargarDatos(): void {
+    this.cargando = true;
+    this.error = '';
+    this.cdr.detectChanges();
+    this.umbralService.listarUnidades().subscribe({
+      next: (unidades) => {
+        this.unidades = unidades.filter(u => u.estado === 'A');
+        this.cdr.detectChanges();
+        this.umbralService.listar().subscribe({
+          next: (umbrales) => {
+            this.umbrales = umbrales.map(u => ({
+              ...u,
+              nombreUnidad: this.obtenerNombreUnidad(u.idUnidadMedida)
+            }));
+            this.cargando = false;
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.error = 'Error al cargar los umbrales';
+            this.cargando = false;
+            this.cdr.detectChanges();
+          }
+        });
+      },
+      error: () => {
+        this.error = 'Error al cargar las unidades de medida';
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  obtenerNombreUnidad(id: number): string {
+    const unidad = this.unidades.find(u => u.idUnidadMedida === id);
+    return unidad ? unidad.nombre : 'Sin unidad';
+  }
+
+  get umbralesFiltrados(): Umbral[] {
+    if (!this.filtro.trim()) return this.umbrales;
+
+    const f = this.filtro.toLowerCase();
+    return this.umbrales.filter(u =>
+      u.valorMin.toString().includes(f) ||
+      u.valorMax.toString().includes(f) ||
+      (u.nombreUnidad || '').toLowerCase().includes(f) ||
+      this.getEstadoTexto(u.estado).toLowerCase().includes(f)
+    );
+  }
+
+  get umbralesPaginados(): Umbral[] {
+    const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
+    return this.umbralesFiltrados.slice(inicio, inicio + this.registrosPorPagina);
+  }
+
+  get totalPaginas(): number {
+    return Math.ceil(this.umbralesFiltrados.length / this.registrosPorPagina);
+  }
+
+  getEstadoTexto(estado: string): string {
+    return estado === 'A' ? 'Activo' : 'Inactivo';
+  }
+
+  abrirModalCrear(): void {
+    this.modoEdicion = false;
+    this.umbralEditando = {
+      idUmbral: null,
+      valorMin: 0,
+      valorMax: 0,
+      idUnidadMedida: this.unidades.length ? this.unidades[0].idUnidadMedida : 0,
+      estado: 'A'
+    };
+    this.mostrarModalForm = true;
+  }
+
+  abrirModalEditar(umbral: Umbral): void {
+    this.modoEdicion = true;
+    this.umbralEditando = { ...umbral };
+    this.mostrarModalForm = true;
+  }
+
+  cerrarModalForm(): void {
+    this.mostrarModalForm = false;
+  }
+
+  guardar(): void {
+
+    if (this.umbralEditando.valorMin >= this.umbralEditando.valorMax) {
+      alert('El valor mínimo debe ser menor al valor máximo');
+      return;
+    }
+
+    if (!this.umbralEditando.idUnidadMedida) {
+      alert('Debe seleccionar una unidad de medida');
+      return;
+    }
+
+    this.guardando = true;
+
+    if (this.modoEdicion && this.umbralEditando.idUmbral) {
+
+      this.umbralService.actualizar(
+        this.umbralEditando.idUmbral,
+        this.umbralEditando
+      ).subscribe({
+        next: () => {
+          this.cerrarModalForm();
+          this.guardando = false;
+          this.cargarDatos();
+        },
+        error: () => {
+          alert('Error al actualizar');
+          this.guardando = false;
+        }
+      });
+
+    } else {
+
+      const nuevo = {
+        valorMin: this.umbralEditando.valorMin,
+        valorMax: this.umbralEditando.valorMax,
+        idUnidadMedida: this.umbralEditando.idUnidadMedida,
+        estado: this.umbralEditando.estado
+      };
+
+      this.umbralService.crear(nuevo as Umbral).subscribe({
+        next: () => {
+          this.cerrarModalForm();
+          this.guardando = false;
+          this.cargarDatos();
+        },
+        error: () => {
+          alert('Error al crear');
+          this.guardando = false;
+        }
+      });
+    }
+  }
+
+  eliminar(id: number): void {
+    if (!confirm('¿Seguro que deseas eliminar este umbral?')) return;
+
+    this.umbralService.eliminar(id).subscribe({
+      next: () => this.cargarDatos(),
+      error: () => alert('Error al eliminar')
+    });
+  }
+
+  verDetalle(umbral: Umbral): void {
+    this.umbralDetalle = umbral;
+    this.mostrarModalDetalle = true;
+  }
+
+  cerrarModalDetalle(): void {
+    this.mostrarModalDetalle = false;
+    this.umbralDetalle = null;
+  }
+}
