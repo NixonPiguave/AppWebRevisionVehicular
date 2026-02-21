@@ -12,7 +12,11 @@ import java.util.Optional;
 @Repository
 public interface IUmbralRepository extends JpaRepository<Umbral, Long> {
 
-
+    Optional<Umbral> findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxOrderByUmbralidDesc(
+            Long unidadId,
+            BigDecimal valorMin,
+            BigDecimal valorMax
+    );
     @Procedure(procedureName = "sp_umbral_insertar")
     void spInsertarUmbral(
             @Param("p_valor_min") BigDecimal valorMin,

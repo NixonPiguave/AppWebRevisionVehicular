@@ -37,7 +37,7 @@ import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 
 
 export const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: InicioComponent },
   {
     path: 'inicio',
     component: InicioComponent,

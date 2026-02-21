@@ -1,7 +1,9 @@
 package com.revisionvehicular.backend.service.rc;
 
 import com.revisionvehicular.backend.dtos.rc.UmbralDTO;
+import com.revisionvehicular.backend.dtos.rc.UnidadesMedidaDTO;
 import com.revisionvehicular.backend.entities.rc.Umbral;
+import com.revisionvehicular.backend.entities.rc.UnidadMedida;
 import com.revisionvehicular.backend.repositories.rc.IUmbralRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -29,19 +31,13 @@ public class UmbralServiceImpl implements IUmbralService {
                 dto.getIdUnidadMedida(),
                 dto.getEstado()
         );
-
-        // Recuperamos el último insertado por combinación lógica
-        List<Umbral> lista = repository.findAll();
-
-        Umbral umbral = lista.stream()
-                .filter(u ->
-                        u.getValorMin().equals(dto.getValorMin()) &&
-                                u.getValorMax().equals(dto.getValorMax()) &&
-                                u.getEstado().equals(dto.getEstado())
+        Umbral umbral = repository
+                .findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxOrderByUmbralidDesc(
+                        dto.getIdUnidadMedida(),
+                        dto.getValorMin(),
+                        dto.getValorMax()
                 )
-                .reduce((first, second) -> second)
-                .orElseThrow(() -> new EntityNotFoundException("Error al crear umbral"));
-
+                .orElseThrow(() -> new RuntimeException("Error al insertar umbral"));
         return toDTO(umbral);
     }
 
