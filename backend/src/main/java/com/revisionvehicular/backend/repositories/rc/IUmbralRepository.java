@@ -12,16 +12,22 @@ import java.util.Optional;
 @Repository
 public interface IUmbralRepository extends JpaRepository<Umbral, Long> {
 
-    Optional<Umbral> findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxOrderByUmbralidDesc(
+    Optional<Umbral> findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxAndCalificacionOrderByUmbralidDesc(
             Long unidadId,
             BigDecimal valorMin,
-            BigDecimal valorMax
+            BigDecimal valorMax,
+            Integer calificacion
     );
+
     @Procedure(procedureName = "sp_umbral_insertar")
     void spInsertarUmbral(
             @Param("p_valor_min") BigDecimal valorMin,
             @Param("p_valor_max") BigDecimal valorMax,
+            @Param("p_calificacion") Integer calificacion,
+            @Param("p_inc_valor_min") Integer incValorMin,
+            @Param("p_inc_valor_max") Integer incValorMax,
             @Param("p_unidad_medida_id") Long unidadMedidaId,
+            @Param("p_descrip_umbral_id") Long descripcionUmbralId,
             @Param("p_estado") String estado
     );
 
@@ -30,7 +36,11 @@ public interface IUmbralRepository extends JpaRepository<Umbral, Long> {
             @Param("p_umbral_id") Long id,
             @Param("p_valor_min") BigDecimal valorMin,
             @Param("p_valor_max") BigDecimal valorMax,
+            @Param("p_calificacion") Integer calificacion,
+            @Param("p_inc_valor_min") Integer incValorMin,
+            @Param("p_inc_valor_max") Integer incValorMax,
             @Param("p_unidad_medida_id") Long unidadMedidaId,
+            @Param("p_descrip_umbral_id") Long descripcionUmbralId,
             @Param("p_estado") String estado
     );
 }

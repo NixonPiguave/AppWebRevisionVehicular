@@ -6,16 +6,27 @@ export interface Umbral {
   idUmbral: number | null;
   valorMin: number;
   valorMax: number;
+  calificacion: number;
+  incValorMin: number;
+  incValorMax: number;
   idUnidadMedida: number;
+  idDescripcionUmbral: number;
   estado: string;
 
-  // Campo enriquecido opcional
+  // Campos enriquecidos opcionales
   nombreUnidad?: string;
+  nombreDescripcion?: string;
 }
 
 export interface UnidadMedida {
   idUnidadMedida: number;
   nombre: string;
+  estado: string;
+}
+
+export interface DescripcionUmbral {
+  idDescripcionUmbral: number;
+  descripcion: string;
   estado: string;
 }
 
@@ -26,6 +37,7 @@ export class UmbralService {
 
   private apiUrl = 'http://localhost:8080/api/umbral';
   private unidadUrl = 'http://localhost:8080/api/unidadesmedida';
+  private descripcionUrl = 'http://localhost:8080/api/descripcionumbral';
 
   constructor(private http: HttpClient) {}
 
@@ -47,5 +59,8 @@ export class UmbralService {
 
   listarUnidades(): Observable<UnidadMedida[]> {
     return this.http.get<UnidadMedida[]>(this.unidadUrl);
+  }
+  listarDescripciones(): Observable<DescripcionUmbral[]> {
+    return this.http.get<DescripcionUmbral[]>(this.descripcionUrl);
   }
 }

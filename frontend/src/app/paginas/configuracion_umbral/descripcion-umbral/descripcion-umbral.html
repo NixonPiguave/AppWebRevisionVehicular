@@ -1,1 +1,236 @@
-<p>descripcion-umbral works!</p>
+<div class="unidad-container">
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarDescripciones()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando descripciones...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+    <div class="unidad-header">
+      <h2>Gestión de Descripciones de Umbral</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Descripción
+      </button>
+    </div>
+
+    <div class="unidad-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por ID o descripción..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="unidad-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripción</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let descripcion of descripcionesPaginadas">
+          <td>{{ descripcion.idDescripcionUmbral }}</td>
+          <td class="txt-resaltado">{{ descripcion.descripcion }}</td>
+          <td>
+            <span
+              class="estado-badge"
+              [class.activo]="descripcion.estado === 'A'"
+              [class.inactivo]="descripcion.estado === 'I'"
+            >
+              {{ getEstadoTexto(descripcion.estado) }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <button
+              class="btn-accion btn-ver"
+              (click)="verDetalle(descripcion)"
+              title="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button
+              class="btn-accion btn-editar"
+              (click)="abrirModalEditar(descripcion)"
+              title="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="descripcionesPaginadas.length === 0 && !error && !cargando">
+          <td colspan="4" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="descripcionesFiltradas.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > descripcionesFiltradas.length
+        ? descripcionesFiltradas.length
+        : paginaActual * registrosPorPagina }}
+        de {{ descripcionesFiltradas.length }} registros
+      </div>
+
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Descripción' : 'Nueva Descripción' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-grupo">
+        <label for="descripcion">Descripción *</label>
+        <textarea
+          id="descripcion"
+          [(ngModel)]="descripcionEditando.descripcion"
+          class="form-input"
+          rows="3"
+          placeholder="Ingrese la descripción del umbral..."
+        ></textarea>
+      </div>
+
+      <div class="form-grupo">
+        <label for="estado">Estado</label>
+        <select id="estado" [(ngModel)]="descripcionEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarDescripcion()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">
+          {{ modoEdicion ? 'save' : 'add_circle' }}
+        </mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Descripción') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle de la Descripción</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="descripcionDetalle">
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID:</span>
+          <span class="detalle-valor">#{{ descripcionDetalle.idDescripcionUmbral }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor resaltado">
+            {{ descripcionDetalle.descripcion }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="descripcionDetalle.estado === 'A'"
+            [class.inactivo]="descripcionDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(descripcionDetalle.estado) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">
+        Cerrar Vista
+      </button>
+    </div>
+  </div>
+</div>

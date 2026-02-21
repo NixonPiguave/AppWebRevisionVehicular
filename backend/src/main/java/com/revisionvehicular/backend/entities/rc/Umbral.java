@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Table(name = "rc_umbral")
 @Data
 public class Umbral {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "umbral_id")
@@ -20,9 +19,22 @@ public class Umbral {
     @Column(name = "valor_max", precision = 10, scale = 2)
     private BigDecimal valorMax;
 
+    @Column(name = "calificacion")
+    private Integer calificacion;
+
+    @Column(name = "inc_valor_min")
+    private Integer incValorMin;
+
+    @Column(name = "inc_valor_max")
+    private Integer incValorMax;
+
     @ManyToOne
     @JoinColumn(name = "unidad_medida_id")
     private UnidadMedida unidadMedida;
+
+    @ManyToOne
+    @JoinColumn(name = "descrip_umbral_id")
+    private DescripcionUmbral descripcionUmbral;
 
     @Column(length = 50)
     private String estado;
