@@ -2,7 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { SubfamiliaDefectoService, SubfamiliaDefecto } from "../../../services/defectos_inspeccion//subfamilia_defecto.service";
+import { SubfamiliaDefectoService, SubfamiliaDefecto, Familia } from '../../../services/defectos_inspeccion/subfamilia_defecto.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -13,12 +13,12 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrls: ['./subfamilia-defecto.css'],
 })
 export class SubfamiliaDefectoComponent implements OnInit {
-  // Lista de subfamilias de defectos (se carga desde el backend)
-  subfamiliasDefectos: SubfamiliaDefecto[] = [];
+  subfamilias: SubfamiliaDefecto[] = [];
+  familias: Familia[] = []; // ✅ Lista de familias para el selector
   cargando: boolean = false;
   error: string = '';
 
-  // Filtros y paginación
+  // Filtro y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
@@ -26,81 +26,108 @@ export class SubfamiliaDefectoComponent implements OnInit {
   // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
-  subfamiliaDefectoEditando: SubfamiliaDefecto = {
-    subfamiliaId: null,
-    familiaId: 0,
-    nombre: '',
-    descripcion: '',
-    estado: 'A'
-  };
+  subfamiliaEditando: SubfamiliaDefecto = this.getSubfamiliaVacia();
   guardando: boolean = false;
 
   // Modal detalle
   mostrarModalDetalle: boolean = false;
-  subfamiliaDefectoDetalle: SubfamiliaDefecto | null = null;
+  subfamiliaDetalle: SubfamiliaDefecto | null = null;
 
   constructor(
-    private subfamiliaDefectoService: SubfamiliaDefectoService,
+    private subfamiliaService: SubfamiliaDefectoService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.cargarSubfamiliasDefectos();
+    this.cargarDatos();
+  }
+
+  getSubfamiliaVacia(): SubfamiliaDefecto {
+    return {
+      id: null,
+      familiaId: 0,
+      nombre: '',
+      descripcion: '',
+      estado: 'A'
+    };
   }
 
   /**
-   * Cargar subfamilias de defectos desde el backend
+   * ✅ Cargar subfamilias y familias al inicio
    */
-  cargarSubfamiliasDefectos(): void {
+  cargarDatos(): void {
     this.cargando = true;
     this.error = '';
-    this.cdr.detectChanges();
 
-    this.subfamiliaDefectoService.listarSubfamiliasDefectos().subscribe({
-      next: (data) => {
-        console.log('Subfamilias de defectos cargadas:', data);
-        this.subfamiliasDefectos = data;
-        this.cargando = false;
-        this.cdr.detectChanges();
+    // Cargar familias primero
+    this.subfamiliaService.listarFamilias().subscribe({
+      next: (familias) => {
+        this.familias = familias;
+        console.log('Familias cargadas:', familias);
+
+        // Luego cargar subfamilias
+        this.cargarSubfamilias();
       },
       error: (err) => {
-        console.error('Error al cargar subfamilias de defectos:', err);
-        this.error = 'Error al cargar las subfamilias de defectos. Verifica que el backend esté corriendo.';
+        console.error('Error al cargar familias:', err);
+        this.error = 'Error al cargar las familias';
         this.cargando = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  // Getter para subfamilias de defectos filtradas
-  get subfamiliasDefectosFiltradas(): SubfamiliaDefecto[] {
-    if (!this.filtro.trim()) {
-      return this.subfamiliasDefectos;
-    }
+  cargarSubfamilias(): void {
+    this.subfamiliaService.listar().subscribe({
+      next: (data) => {
+        this.subfamilias = data;
+        console.log('Subfamilias cargadas:', data);
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al cargar subfamilias:', err);
+        this.error = 'Error al cargar las subfamilias';
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
+   // Obtener nombre de familia por ID
+  getNombreFamilia(familiaId: number): string {
+    const familia = this.familias.find(f => f.id === familiaId);
+    return familia ? familia.nombre : `ID: ${familiaId}`;
+  }
+
+   // Filtrado
+  get subfamiliasFiltradas(): SubfamiliaDefecto[] {
+    if (!this.filtro.trim()) return this.subfamilias;
+
     const filtroLower = this.filtro.toLowerCase();
-    return this.subfamiliasDefectos.filter(
-      (subfamilia) =>
-        subfamilia.nombre.toLowerCase().includes(filtroLower) ||
-        subfamilia.descripcion.toLowerCase().includes(filtroLower) ||
-        (subfamilia.subfamiliaId?.toString() || '').includes(filtroLower) ||
-        (subfamilia.familiaId?.toString() || '').includes(filtroLower) ||
-        this.getEstadoTexto(subfamilia.estado).toLowerCase().includes(filtroLower)
-    );
+    return this.subfamilias.filter(s => {
+      const nombreFamilia = this.getNombreFamilia(s.familiaId).toLowerCase();
+      return (
+        s.nombre.toLowerCase().includes(filtroLower) ||
+        s.descripcion.toLowerCase().includes(filtroLower) ||
+        nombreFamilia.includes(filtroLower) ||
+        (s.id?.toString() || '').includes(filtroLower)
+      );
+    });
   }
 
-  // Getter para subfamilias de defectos paginadas
-  get subfamiliasDefectosPaginadas(): SubfamiliaDefecto[] {
+
+   // Paginación
+  get subfamiliasPaginadas(): SubfamiliaDefecto[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
-    const fin = inicio + this.registrosPorPagina;
-    return this.subfamiliasDefectosFiltradas.slice(inicio, fin);
+    return this.subfamiliasFiltradas.slice(inicio, inicio + this.registrosPorPagina);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
-    return Math.ceil(this.subfamiliasDefectosFiltradas.length / this.registrosPorPagina);
+    return Math.ceil(this.subfamiliasFiltradas.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -109,116 +136,116 @@ export class SubfamiliaDefectoComponent implements OnInit {
     return paginas;
   }
 
-  // Convertir estado a texto
-  getEstadoTexto(estado: string): string {
-    return estado === 'A' ? 'Activo' : 'Inactivo';
-  }
-
-  // Cambiar página
   irAPagina(pagina: number): void {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaActual = pagina;
     }
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
+
+   // Obtener texto de estado
+  getEstadoTexto(estado: string): string {
+    return estado === 'A' ? 'Activo' : 'Inactivo';
+  }
+
+
+   // Abrir modal crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.subfamiliaDefectoEditando = {
-      subfamiliaId: null,
-      familiaId: 0,
-      nombre: '',
-      descripcion: '',
-      estado: 'A'
-    };
+    this.subfamiliaEditando = this.getSubfamiliaVacia();
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
-  abrirModalEditar(subfamiliaDefecto: SubfamiliaDefecto): void {
+   //Abrir modal editar
+  abrirModalEditar(subfamilia: SubfamiliaDefecto): void {
     this.modoEdicion = true;
-    this.subfamiliaDefectoEditando = { ...subfamiliaDefecto };
+    this.subfamiliaEditando = { ...subfamilia };
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
+
+   // Cerrar modal form
+
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
-    this.subfamiliaDefectoEditando = {
-      subfamiliaId: null,
-      familiaId: 0,
-      nombre: '',
-      descripcion: '',
-      estado: 'A'
-    };
+    this.subfamiliaEditando = this.getSubfamiliaVacia();
   }
 
-  // Guardar subfamilia de defecto (crear o editar)
-  guardarSubfamiliaDefecto(): void {
-    // Validaciones
-    if (this.subfamiliaDefectoEditando.familiaId <= 0) {
-      alert('El ID de familia es requerido y debe ser mayor a 0');
-      return;
-    }
-    if (!this.subfamiliaDefectoEditando.nombre.trim()) {
-      alert('El nombre es requerido');
-      return;
-    }
-    if (!this.subfamiliaDefectoEditando.descripcion.trim()) {
-      alert('La descripción es requerida');
-      return;
+
+   //Validar formulario
+  validarFormulario(): boolean {
+    if (!this.subfamiliaEditando.nombre.trim()) {
+      alert('El nombre de la subfamilia es obligatorio');
+      return false;
     }
 
+    if (!this.subfamiliaEditando.familiaId || this.subfamiliaEditando.familiaId === 0) {
+      alert('Debe seleccionar una familia');
+      return false;
+    }
+
+    return true;
+  }
+
+
+   //Guardar subfamilia
+  guardarSubfamilia(): void {
+    if (!this.validarFormulario()) return;
+
+    console.log('[SUBFAMILIA] Guardando:', this.subfamiliaEditando);
     this.guardando = true;
 
-    if (this.modoEdicion && this.subfamiliaDefectoEditando.subfamiliaId) {
-      // Editar existente
-      this.subfamiliaDefectoService.actualizarSubfamiliaDefecto(
-        this.subfamiliaDefectoEditando.subfamiliaId,
-        this.subfamiliaDefectoEditando
+    if (this.modoEdicion && this.subfamiliaEditando.id) {
+      // Actualizar
+      this.subfamiliaService.actualizar(
+        this.subfamiliaEditando.id,
+        this.subfamiliaEditando
       ).subscribe({
         next: () => {
-          this.cargarSubfamiliasDefectos();
+          console.log('[SUBFAMILIA] Actualizada OK');
+          this.cargarSubfamilias();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al actualizar subfamilia de defecto:', err);
-          alert('Error al actualizar la subfamilia de defecto');
+          console.error('[SUBFAMILIA] Error al actualizar:', err);
+          alert('Error al actualizar la subfamilia');
           this.guardando = false;
         }
       });
     } else {
-      // Crear nueva
-      this.subfamiliaDefectoService.crearSubfamiliaDefecto(this.subfamiliaDefectoEditando).subscribe({
+      // Crear
+      this.subfamiliaService.crear(this.subfamiliaEditando).subscribe({
         next: () => {
-          this.cargarSubfamiliasDefectos();
+          console.log('[SUBFAMILIA] Creada OK');
+          this.cargarSubfamilias();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al crear subfamilia de defecto:', err);
-          alert('Error al crear la subfamilia de defecto');
+          console.error('[SUBFAMILIA] Error al crear:', err);
+          alert('Error al crear la subfamilia');
           this.guardando = false;
         }
       });
     }
   }
 
-  // Abrir modal detalle
-  verDetalle(subfamiliaDefecto: SubfamiliaDefecto): void {
-    this.subfamiliaDefectoDetalle = subfamiliaDefecto;
+
+   // Ver detalle
+  verDetalle(subfamilia: SubfamiliaDefecto): void {
+    this.subfamiliaDetalle = subfamilia;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
+
+   //Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
-    this.subfamiliaDefectoDetalle = null;
+    this.subfamiliaDetalle = null;
   }
 }

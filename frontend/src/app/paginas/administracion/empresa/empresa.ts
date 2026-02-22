@@ -240,13 +240,31 @@ export class EmpresaComponent implements OnInit {
 
     // Si hay logo nuevo, subirlo a Cloudinary primero
     if (this.logoFile) {
-      console.log('[CLOUDINARY] Subiendo logo...');
+      console.log('[CLOUDINARY] Subiendo nuevo logo...');
       this.uploadingLogo = true;
+
+      // ✅ NUEVO: Si está en modo edición y tenía logo antiguo, eliminarlo
+      const logoAntiguo = this.modoEdicion && this.empresaEditando.logoempresa
+        ? this.empresaEditando.logoempresa
+        : null;
 
       this.cloudinaryService.uploadImage(this.logoFile, 'empresas').subscribe({
         next: (response) => {
-          console.log('[CLOUDINARY] Logo subido:', response.url);
+          console.log('[CLOUDINARY] Nuevo logo subido:', response.url);
           this.empresaEditando.logoempresa = response.url;
+
+          // ✅ NUEVO: Eliminar logo antiguo de Cloudinary
+          if (logoAntiguo && logoAntiguo.startsWith('http')) {
+            const publicId = this.cloudinaryService.extractPublicId(logoAntiguo);
+            if (publicId) {
+              console.log('[CLOUDINARY] Eliminando logo antiguo:', publicId);
+              this.cloudinaryService.deleteFile(publicId).subscribe({
+                next: () => console.log('[CLOUDINARY] Logo antiguo eliminado'),
+                error: (err) => console.warn('[CLOUDINARY] No se pudo eliminar logo antiguo:', err)
+              });
+            }
+          }
+
           this.guardarEmpresaEnBackend();
         },
         error: (err) => {

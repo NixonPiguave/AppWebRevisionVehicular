@@ -38,7 +38,7 @@ import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descrip
 
 
 export const routes: Routes = [
-  { path: '', component: InicioComponent },
+  { path: '', component: LoginComponent },
   {
     path: 'inicio',
     component: InicioComponent,

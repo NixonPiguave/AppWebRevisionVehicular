@@ -74,15 +74,32 @@
     </div>
   </div>
 
-  <!-- Panel derecho: Logo grande centrado -->
+  <!-- Panel derecho: Logo dinámico de empresa -->
   <div class="login-brand-panel">
     <div class="brand-content-centered">
+
+      <!--  Spinner mientras carga el logo -->
+      <div class="logo-loading" *ngIf="cargandoLogo">
+        <div class="spinner-logo"></div>
+      </div>
+
+      <!--  Logo de empresa desde Cloudinary (si existe) -->
       <img
+        *ngIf="!cargandoLogo && empresaLogo"
+        [src]="empresaLogo"
+        [alt]="empresaNombre"
+        class="logo-main"
+      />
+
+      <!--  Logo por defecto (si no hay logo en BD) -->
+      <img
+        *ngIf="!cargandoLogo && !empresaLogo"
         src="/rtv_logo_sistema.png"
         alt="RTV - Revisión Técnica Vehicular"
         class="logo-main"
       />
-      <p class="tagline-minimal">Sistema de Revisión Técnica Vehicular</p>
+
+      <p class="tagline-minimal">{{ empresaNombre }}</p>
     </div>
   </div>
 

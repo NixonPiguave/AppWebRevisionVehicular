@@ -16,10 +16,9 @@ public class UploadController {
     @Autowired
     private CloudinaryService cloudinaryService;
 
-    /**
-     * Subir imagen
-     * POST /api/upload/image?folder=empresas
-     */
+
+     //Subir imagen
+     //POST /api/upload/image?folder=empresas
     @PostMapping("/image")
     public ResponseEntity<?> uploadImage(
             @RequestParam("file") MultipartFile file,
@@ -41,9 +40,8 @@ public class UploadController {
         }
     }
 
-    /**
-     * Subir PDF
-     */
+
+     // Subir PDF
     @PostMapping("/pdf")
     public ResponseEntity<?> uploadPdf(
             @RequestParam("file") MultipartFile file,
@@ -64,10 +62,9 @@ public class UploadController {
         }
     }
 
-    /**
-     * Eliminar archivo
-     * DELETE /api/upload?publicId=rtv/empresas/abc123
-     */
+
+     // Eliminar archivo
+     //  /api/upload?publicId=rtv/empresas/abc123
     @DeleteMapping
     public ResponseEntity<?> deleteFile(@RequestParam("publicId") String publicId) {
         try {

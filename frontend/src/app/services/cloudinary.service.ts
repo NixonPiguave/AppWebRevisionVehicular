@@ -18,7 +18,7 @@ export class CloudinaryService {
 
    //Subir imagen a Cloudinary
    //El parametro file es el Archivo de imagen
-   // folder es la Carpeta en Cloudinary (ej: 'empresas', 'vehiculos', 'propietarios')
+   // folder es la Carpeta en Cloudinary ('empresas', 'vehiculos', 'propietarios', 'marcas')
   uploadImage(file: File, folder: string = 'general'): Observable<CloudinaryResponse> {
     const formData = new FormData();
     formData.append('file', file);
