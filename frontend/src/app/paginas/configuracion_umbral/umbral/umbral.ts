@@ -3,7 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { UmbralService, Umbral, UnidadMedida } from '../../../services/configuracion_umbral/umbral.service';
+
+import {
+  UmbralService,
+  Umbral,
+  UnidadMedida,
+  DescripcionUmbral
+} from '../../../services/configuracion_umbral/umbral.service';
 
 @Component({
   selector: 'app-umbral',
@@ -16,6 +22,7 @@ export class UmbralComponent implements OnInit {
 
   umbrales: Umbral[] = [];
   unidades: UnidadMedida[] = [];
+  descripciones: DescripcionUmbral[] = [];
 
   cargando = false;
   error = '';
@@ -32,7 +39,11 @@ export class UmbralComponent implements OnInit {
     idUmbral: null,
     valorMin: 0,
     valorMax: 0,
+    calificacion: 0,
+    incValorMin: 0,
+    incValorMax: 0,
     idUnidadMedida: 0,
+    idDescripcionUmbral: 0,
     estado: 'A'
   };
 
@@ -52,30 +63,42 @@ export class UmbralComponent implements OnInit {
     this.cargando = true;
     this.error = '';
     this.cdr.detectChanges();
+
     this.umbralService.listarUnidades().subscribe({
       next: (unidades) => {
         this.unidades = unidades.filter(u => u.estado === 'A');
-        this.cdr.detectChanges();
-        this.umbralService.listar().subscribe({
-          next: (umbrales) => {
-            this.umbrales = umbrales.map(u => ({
-              ...u,
-              nombreUnidad: this.obtenerNombreUnidad(u.idUnidadMedida)
-            }));
-            this.cargando = false;
-            this.cdr.detectChanges();
+
+        this.umbralService.listarDescripciones().subscribe({
+          next: (descripciones) => {
+            this.descripciones = descripciones.filter(d => d.estado === 'A');
+
+            this.umbralService.listar().subscribe({
+              next: (umbrales) => {
+                this.umbrales = umbrales.map(u => ({
+                  ...u,
+                  nombreUnidad: this.obtenerNombreUnidad(u.idUnidadMedida),
+                  nombreDescripcion: this.obtenerNombreDescripcion(u.idDescripcionUmbral)
+                }));
+                this.cargando = false;
+                this.cdr.detectChanges();
+              },
+              error: () => {
+                this.error = 'Error al cargar los umbrales';
+                this.cargando = false;
+              }
+            });
+
           },
           error: () => {
-            this.error = 'Error al cargar los umbrales';
+            this.error = 'Error al cargar las descripciones';
             this.cargando = false;
-            this.cdr.detectChanges();
           }
         });
+
       },
       error: () => {
-        this.error = 'Error al cargar las unidades de medida';
+        this.error = 'Error al cargar las unidades';
         this.cargando = false;
-        this.cdr.detectChanges();
       }
     });
   }
@@ -85,6 +108,11 @@ export class UmbralComponent implements OnInit {
     return unidad ? unidad.nombre : 'Sin unidad';
   }
 
+  obtenerNombreDescripcion(id: number): string {
+    const desc = this.descripciones.find(d => d.idDescripcionUmbral === id);
+    return desc ? desc.descripcion : 'Sin descripción';
+  }
+
   get umbralesFiltrados(): Umbral[] {
     if (!this.filtro.trim()) return this.umbrales;
 
@@ -92,7 +120,9 @@ export class UmbralComponent implements OnInit {
     return this.umbrales.filter(u =>
       u.valorMin.toString().includes(f) ||
       u.valorMax.toString().includes(f) ||
+      u.calificacion.toString().includes(f) ||
       (u.nombreUnidad || '').toLowerCase().includes(f) ||
+      (u.nombreDescripcion || '').toLowerCase().includes(f) ||
       this.getEstadoTexto(u.estado).toLowerCase().includes(f)
     );
   }
@@ -116,7 +146,11 @@ export class UmbralComponent implements OnInit {
       idUmbral: null,
       valorMin: 0,
       valorMax: 0,
+      calificacion: 0,
+      incValorMin: 0,
+      incValorMax: 0,
       idUnidadMedida: this.unidades.length ? this.unidades[0].idUnidadMedida : 0,
+      idDescripcionUmbral: this.descripciones.length ? this.descripciones[0].idDescripcionUmbral : 0,
       estado: 'A'
     };
     this.mostrarModalForm = true;
@@ -144,6 +178,15 @@ export class UmbralComponent implements OnInit {
       return;
     }
 
+    if (!this.umbralEditando.idDescripcionUmbral) {
+      alert('Debe seleccionar una descripción');
+      return;
+    }
+    if (this.umbralEditando.valorMin < 0 || this.umbralEditando.valorMax < 0) {
+      alert('Los valores MIN y MAX no pueden ser negativos');
+      return;
+    }
+
     this.guardando = true;
 
     if (this.modoEdicion && this.umbralEditando.idUmbral) {
@@ -165,14 +208,19 @@ export class UmbralComponent implements OnInit {
 
     } else {
 
-      const nuevo = {
+      const nuevo: Umbral = {
+        idUmbral: null,
         valorMin: this.umbralEditando.valorMin,
         valorMax: this.umbralEditando.valorMax,
+        calificacion: this.umbralEditando.calificacion,
+        incValorMin: this.umbralEditando.incValorMin,
+        incValorMax: this.umbralEditando.incValorMax,
         idUnidadMedida: this.umbralEditando.idUnidadMedida,
+        idDescripcionUmbral: this.umbralEditando.idDescripcionUmbral,
         estado: this.umbralEditando.estado
       };
 
-      this.umbralService.crear(nuevo as Umbral).subscribe({
+      this.umbralService.crear(nuevo).subscribe({
         next: () => {
           this.cerrarModalForm();
           this.guardando = false;

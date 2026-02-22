@@ -7,6 +7,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,29 +19,45 @@ public class UmbralServiceImpl implements IUmbralService {
     public UmbralServiceImpl(IUmbralRepository repository) {
         this.repository = repository;
     }
+    private void validarUmbral(UmbralDTO dto) {
 
+        if (dto.getValorMin() == null || dto.getValorMax() == null) {
+            throw new IllegalArgumentException("Los valores MIN y MAX son obligatorios");
+        }
+        BigDecimal cero = BigDecimal.ZERO;
+
+        if (dto.getValorMin().compareTo(cero) < 0 ||
+                dto.getValorMax().compareTo(cero) < 0) {
+
+            throw new IllegalArgumentException("Los valores MIN y MAX no pueden ser negativos");
+        }
+        if (dto.getValorMin().compareTo(dto.getValorMax()) >= 0) {
+            throw new IllegalArgumentException("El valor MIN debe ser menor que MAX");
+        }
+    }
     @Transactional
     @Override
     public UmbralDTO save(UmbralDTO dto) {
-
+        validarUmbral(dto);
         repository.spInsertarUmbral(
                 dto.getValorMin(),
                 dto.getValorMax(),
+                dto.getCalificacion(),
+                dto.getIncValorMin(),
+                dto.getIncValorMax(),
                 dto.getIdUnidadMedida(),
+                dto.getIdDescripcionUmbral(),
                 dto.getEstado()
         );
 
-        // Recuperamos el último insertado por combinación lógica
-        List<Umbral> lista = repository.findAll();
-
-        Umbral umbral = lista.stream()
-                .filter(u ->
-                        u.getValorMin().equals(dto.getValorMin()) &&
-                                u.getValorMax().equals(dto.getValorMax()) &&
-                                u.getEstado().equals(dto.getEstado())
+        Umbral umbral = repository
+                .findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxAndCalificacionOrderByUmbralidDesc(
+                        dto.getIdUnidadMedida(),
+                        dto.getValorMin(),
+                        dto.getValorMax(),
+                        dto.getCalificacion()
                 )
-                .reduce((first, second) -> second)
-                .orElseThrow(() -> new EntityNotFoundException("Error al crear umbral"));
+                .orElseThrow(() -> new RuntimeException("Error al insertar umbral"));
 
         return toDTO(umbral);
     }
@@ -52,12 +69,16 @@ public class UmbralServiceImpl implements IUmbralService {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Umbral no encontrado con ID: " + id);
         }
-
+        validarUmbral(dto);
         repository.spActualizarUmbral(
                 id,
                 dto.getValorMin(),
                 dto.getValorMax(),
+                dto.getCalificacion(),
+                dto.getIncValorMin(),
+                dto.getIncValorMax(),
                 dto.getIdUnidadMedida(),
+                dto.getIdDescripcionUmbral(),
                 dto.getEstado()
         );
 
@@ -102,11 +123,20 @@ public class UmbralServiceImpl implements IUmbralService {
         dto.setIdUmbral(umbral.getUmbralid());
         dto.setValorMin(umbral.getValorMin());
         dto.setValorMax(umbral.getValorMax());
+        dto.setCalificacion(umbral.getCalificacion());
+        dto.setIncValorMin(umbral.getIncValorMin());
+        dto.setIncValorMax(umbral.getIncValorMax());
         dto.setEstado(umbral.getEstado());
 
         if (umbral.getUnidadMedida() != null) {
             dto.setIdUnidadMedida(
                     umbral.getUnidadMedida().getUmedidaid()
+            );
+        }
+
+        if (umbral.getDescripcionUmbral() != null) {
+            dto.setIdDescripcionUmbral(
+                    umbral.getDescripcionUmbral().getDescripUmbralId()
             );
         }
 

@@ -34,10 +34,11 @@ import {
 } from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
+import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
 
 
 export const routes: Routes = [
-  { path: '', component: LoginComponent },
+  { path: '', component: InicioComponent },
   {
     path: 'inicio',
     component: InicioComponent,
@@ -74,7 +75,9 @@ export const routes: Routes = [
 
       //Configuracion de Unidades de Medida
       { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
+      { path: 'configuracion-umbral/descripcion-umbral', component: DescripcionUmbralComponent },
       { path: 'configuracion-umbral/umbral', component: UmbralComponent },
+
       //Gestion vehicular
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
 

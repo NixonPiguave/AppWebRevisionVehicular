@@ -55,7 +55,7 @@ public class RolServiceImpl implements IRolService{
         if (!repository.existsById(id)) {
             throw new RuntimeException("Rol no encontrado con ID: " + id);
         }
-        repository.spActualizarRol(id, dto.getNombre(), dto.getEstado());
+        repository.spActualizarRol(id, dto.getNombre(), dto.getEstado(), dto.getPermisosJson());
         Rol rolActualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el rol actualizado"));
         return toDTO(rolActualizado);
