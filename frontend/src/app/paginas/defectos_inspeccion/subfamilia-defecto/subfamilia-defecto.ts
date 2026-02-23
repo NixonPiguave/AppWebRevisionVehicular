@@ -52,20 +52,20 @@ export class SubfamiliaDefectoComponent implements OnInit {
     };
   }
 
-  /**
-   * ✅ Cargar subfamilias y familias al inicio
-   */
+
   cargarDatos(): void {
     this.cargando = true;
     this.error = '';
 
-    // Cargar familias primero
     this.subfamiliaService.listarFamilias().subscribe({
       next: (familias) => {
-        this.familias = familias;
-        console.log('Familias cargadas:', familias);
 
-        // Luego cargar subfamilias
+        //  SOLO FAMILIAS ACTIVAS
+        this.familias = familias.filter(f => f.estado === 'A');
+
+        console.log('Familias activas cargadas:', this.familias);
+
+        // luego cargar subfamilias
         this.cargarSubfamilias();
       },
       error: (err) => {
@@ -76,7 +76,6 @@ export class SubfamiliaDefectoComponent implements OnInit {
       }
     });
   }
-
   cargarSubfamilias(): void {
     this.subfamiliaService.listar().subscribe({
       next: (data) => {

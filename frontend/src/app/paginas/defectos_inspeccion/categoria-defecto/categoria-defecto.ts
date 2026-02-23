@@ -58,11 +58,13 @@ export class CategoriaDefectoComponent implements OnInit {
     this.cargando = true;
     this.error = '';
 
-    // Cargar subfamilias primero
     this.categoriaService.listarSubfamilias().subscribe({
       next: (subfamilias) => {
-        this.subfamilias = subfamilias;
-        console.log('[CATEGORIAS] Subfamilias cargadas:', subfamilias);
+
+        // SOLO ACTIVAS
+        this.subfamilias = subfamilias.filter(s => s.estado === 'A');
+
+        console.log('[CATEGORIAS] Subfamilias activas cargadas:', this.subfamilias);
 
         // Luego cargar categorías
         this.cargarCategorias();
