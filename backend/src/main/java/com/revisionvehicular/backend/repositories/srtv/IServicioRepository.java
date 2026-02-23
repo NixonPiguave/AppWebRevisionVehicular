@@ -13,7 +13,7 @@ public interface IServicioRepository extends JpaRepository<Servicio, Long> {
     void insertarServicio(
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
-            @Param("p_requiere_revision") Boolean requiereRevision,
+            @Param("p_requiere_revision") String requiereRevision,
             @Param("p_estado") String estado
     );
 
@@ -22,7 +22,7 @@ public interface IServicioRepository extends JpaRepository<Servicio, Long> {
             @Param("p_id_tipo_tramite") Long idTipoTramite,
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
-            @Param("p_requiere_revision") Boolean requiereRevision,
+            @Param("p_requiere_revision") String requiereRevision,
             @Param("p_estado") String estado
     );
 
