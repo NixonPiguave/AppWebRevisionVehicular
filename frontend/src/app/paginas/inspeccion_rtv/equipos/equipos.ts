@@ -12,35 +12,29 @@ import { MatIconModule } from '@angular/material/icon';
   styleUrl: './equipos.css',
 })
 export class Equipos implements OnInit {
-  // Lista de equipos (se carga desde el backend)
   equipos: Equipo[] = [];
   cargando: boolean = false;
   error: string = '';
 
-  // Filtros y paginación
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
-  equipoEditando: Equipo = {
-    equipoid: null,
-    influencia: 0,
-    ultimaCalibracion: null,
-    ultimoMantenimiento: null,
-    estado: 'A',
-    codigoInterno: '',
-    equipo: '',
-    modelo: '',
-    serialEquipo: ''
-  };
+  equipoEditando: Equipo = this.getEquipoVacio();
   guardando: boolean = false;
 
-  // Modal detalle
   mostrarModalDetalle: boolean = false;
   equipoDetalle: Equipo | null = null;
+
+  //  Errores de validación por campo
+  erroresValidacion: {
+    serialEquipo?: string;
+    codigoInterno?: string;
+    ultimaCalibracion?: string;
+    ultimoMantenimiento?: string;
+  } = {};
 
   constructor(
     private equiposService: EquiposService,
@@ -51,6 +45,20 @@ export class Equipos implements OnInit {
     this.cargarEquipos();
   }
 
+  getEquipoVacio(): Equipo {
+    return {
+      equipoid: null,
+      influencia: 0,
+      ultimaCalibracion: null,
+      ultimoMantenimiento: null,
+      estado: 'A',
+      codigoInterno: '',
+      equipo: '',
+      modelo: '',
+      serialEquipo: ''
+    };
+  }
+
   cargarEquipos(): void {
     this.cargando = true;
     this.error = '';
@@ -58,13 +66,13 @@ export class Equipos implements OnInit {
 
     this.equiposService.listarEquipos().subscribe({
       next: (data) => {
-        console.log('Equipos cargados:', data);
+        console.log('[EQUIPOS] Cargados:', data);
         this.equipos = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar equipos:', err);
+        console.error('[EQUIPOS] Error al cargar:', err);
         this.error = 'Error al cargar los equipos. Verifica que el backend esté corriendo.';
         this.cargando = false;
         this.cdr.detectChanges();
@@ -72,7 +80,6 @@ export class Equipos implements OnInit {
     });
   }
 
-  // Getter para equipos filtrados
   get equiposFiltrados(): Equipo[] {
     if (!this.filtro.trim()) {
       return this.equipos;
@@ -83,24 +90,21 @@ export class Equipos implements OnInit {
         equipo.equipo.toLowerCase().includes(filtroLower) ||
         equipo.modelo.toLowerCase().includes(filtroLower) ||
         equipo.serialEquipo.toLowerCase().includes(filtroLower) ||
-        equipo.codigoInterno.toLowerCase().includes(filtroLower)  ||
+        equipo.codigoInterno.toLowerCase().includes(filtroLower) ||
         this.getEstadoTexto(equipo.estado).toLowerCase().includes(filtroLower)
     );
   }
 
-  // Getter para equipos paginados
   get equiposPaginados(): Equipo[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
     return this.equiposFiltrados.slice(inicio, fin);
   }
 
-  // Getter para total de páginas
   get totalPaginas(): number {
     return Math.ceil(this.equiposFiltrados.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -109,103 +113,170 @@ export class Equipos implements OnInit {
     return paginas;
   }
 
-  // Convertir estado a texto
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // Formatear fecha para mostrar
   formatearFecha(fecha: Date | null): string {
     if (!fecha) return 'No registrada';
     const fechaObj = new Date(fecha);
     return fechaObj.toLocaleDateString('es-ES');
   }
 
-  // Cambiar página
   irAPagina(pagina: number): void {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaActual = pagina;
     }
   }
 
-  // Reset página al cambiar filtro o registros por página
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
 
-  // Abrir modal para crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
-    this.equipoEditando = {
-      equipoid: null,
-      influencia: 0,
-      ultimaCalibracion: null,
-      ultimoMantenimiento: null,
-      estado: 'A',
-      codigoInterno: '',
-      equipo: '',
-      modelo: '',
-      serialEquipo: ''
-    };
+    this.equipoEditando = this.getEquipoVacio();
+    this.erroresValidacion = {};
     this.mostrarModalForm = true;
   }
 
-  // Abrir modal para editar
   abrirModalEditar(equipo: Equipo): void {
     this.modoEdicion = true;
     this.equipoEditando = { ...equipo };
+    this.erroresValidacion = {};
     this.mostrarModalForm = true;
   }
 
-  // Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
-    this.equipoEditando = {
-      equipoid: null,
-      influencia: 0,
-      ultimaCalibracion: null,
-      ultimoMantenimiento: null,
-      estado: 'A',
-      codigoInterno: '',
-      equipo: '',
-      modelo: '',
-      serialEquipo: ''
-    };
+    this.equipoEditando = this.getEquipoVacio();
+    this.erroresValidacion = {};
   }
 
-  // Guardar equipo (crear o editar)
-  guardarEquipo(): void {
-    // Validaciones
+
+   //Validar campos únicos y fechas
+  validarFormulario(): boolean {
+    this.erroresValidacion = {}; // Limpiar errores previos
+
+    // Validaciones básicas
     if (!this.equipoEditando.equipo.trim()) {
       alert('El nombre del equipo es requerido');
-      return;
-    }
-    if (!this.equipoEditando.modelo.trim()) {
-      alert('El modelo es requerido');
-      return;
-    }
-    if (!this.equipoEditando.serialEquipo.trim()) {
-      alert('El número de serie es requerido');
-      return;
-    }
-    if (!this.equipoEditando.codigoInterno.trim()) {
-      alert('El código interno es requerido');
-      return;
+      return false;
     }
 
+    if (!this.equipoEditando.modelo.trim()) {
+      alert('El modelo es requerido');
+      return false;
+    }
+
+    if (!this.equipoEditando.serialEquipo.trim()) {
+      alert('El número de serie es requerido');
+      return false;
+    }
+
+    if (!this.equipoEditando.codigoInterno.trim()) {
+      alert('El código interno es requerido');
+      return false;
+    }
+
+    // Validar unicidad de serial (solo si cambió o es nuevo)
+    if (!this.modoEdicion || this.serialCambio()) {
+      const serialDuplicado = this.equipos.find(
+        e => e.serialEquipo.toLowerCase() === this.equipoEditando.serialEquipo.toLowerCase() &&
+          e.equipoid !== this.equipoEditando.equipoid
+      );
+      if (serialDuplicado) {
+        this.erroresValidacion.serialEquipo = 'Este número de serie ya está registrado';
+        alert('El número de serie ya está registrado en otro equipo');
+        return false;
+      }
+    }
+
+    // Validar unicidad de código interno (solo si cambió o es nuevo)
+    if (!this.modoEdicion || this.codigoCambio()) {
+      const codigoDuplicado = this.equipos.find(
+        e => e.codigoInterno.toLowerCase() === this.equipoEditando.codigoInterno.toLowerCase() &&
+          e.equipoid !== this.equipoEditando.equipoid
+      );
+      if (codigoDuplicado) {
+        this.erroresValidacion.codigoInterno = 'Este código interno ya está registrado';
+        alert('El código interno ya está registrado en otro equipo');
+        return false;
+      }
+    }
+
+    // Validar fechas no futuras
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Ignorar hora
+
+    if (this.equipoEditando.ultimaCalibracion) {
+      const fechaCalibracion = new Date(this.equipoEditando.ultimaCalibracion);
+      fechaCalibracion.setHours(0, 0, 0, 0);
+
+      if (fechaCalibracion > hoy) {
+        this.erroresValidacion.ultimaCalibracion = 'La fecha de calibración no puede ser futura';
+        alert('La fecha de última calibración no puede ser mayor a la fecha actual');
+        return false;
+      }
+    }
+
+    if (this.equipoEditando.ultimoMantenimiento) {
+      const fechaMantenimiento = new Date(this.equipoEditando.ultimoMantenimiento);
+      fechaMantenimiento.setHours(0, 0, 0, 0);
+
+      if (fechaMantenimiento > hoy) {
+        this.erroresValidacion.ultimoMantenimiento = 'La fecha de mantenimiento no puede ser futura';
+        alert('La fecha de último mantenimiento no puede ser mayor a la fecha actual');
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+
+   // NUEVO: Detectar si cambió el serial
+  private serialCambio(): boolean {
+    const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
+    return !equipoOriginal || equipoOriginal.serialEquipo !== this.equipoEditando.serialEquipo;
+  }
+
+
+   //Detectar si cambió el código interno
+  private codigoCambio(): boolean {
+    const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
+    return !equipoOriginal || equipoOriginal.codigoInterno !== this.equipoEditando.codigoInterno;
+  }
+
+
+  getFechaHoy(): string {
+    const hoy = new Date();
+    const year = hoy.getFullYear();
+    const month = String(hoy.getMonth() + 1).padStart(2, '0');
+    const day = String(hoy.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+   //Manejo de errores del backend
+  guardarEquipo(): void {
+    if (!this.validarFormulario()) return;
+
+    console.log('[EQUIPOS] Guardando:', this.equipoEditando);
     this.guardando = true;
 
     if (this.modoEdicion && this.equipoEditando.equipoid) {
       // Editar existente
       this.equiposService.actualizarEquipo(this.equipoEditando.equipoid, this.equipoEditando).subscribe({
         next: () => {
+          console.log('[EQUIPOS] Actualizado OK');
           this.cargarEquipos();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al actualizar equipo:', err);
-          alert('Error al actualizar el equipo');
+          console.error('[EQUIPOS] Error al actualizar:', err);
+          this.manejarErrorBackend(err);
+          this.cargarEquipos();
           this.guardando = false;
         }
       });
@@ -213,26 +284,51 @@ export class Equipos implements OnInit {
       // Crear nuevo
       this.equiposService.crearEquipo(this.equipoEditando).subscribe({
         next: () => {
+          console.log('[EQUIPOS] Creado OK');
           this.cargarEquipos();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al crear equipo:', err);
-          alert('Error al crear el equipo');
           this.guardando = false;
+          this.cerrarModalForm();
+          this.cargarEquipos();
         }
       });
     }
   }
 
-  // Abrir modal detalle
+
+   // Interpretar errores del backend
+  private manejarErrorBackend(err: any): void {
+    const mensajeError = err.error?.message || err.error || err.message || 'Error desconocido';
+    console.log('[EQUIPOS] Mensaje de error:', mensajeError);
+
+    // Detectar tipo de error por palabras clave
+    const mensajeLower = mensajeError.toLowerCase();
+
+    if (mensajeLower.includes('serial') || mensajeLower.includes('serie')) {
+      this.erroresValidacion.serialEquipo = 'El número de serie ya está registrado';
+      alert('Error: El número de serie ya existe en el sistema');
+    } else if (mensajeLower.includes('codigo') || mensajeLower.includes('código')) {
+      this.erroresValidacion.codigoInterno = 'El código interno ya está registrado';
+      alert('Error: El código interno ya existe en el sistema');
+    } else if (mensajeLower.includes('unique') || mensajeLower.includes('duplicate') || mensajeLower.includes('duplicado')) {
+      // Error genérico de duplicado
+      alert('Error: Ya existe un registro con estos datos. Verifica el número de serie y código interno.');
+    } else {
+      // Error genérico
+      alert(`Error al guardar el equipo: ${mensajeError}`);
+    }
+
+    this.cdr.detectChanges();
+  }
+
   verDetalle(equipo: Equipo): void {
     this.equipoDetalle = equipo;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.equipoDetalle = null;

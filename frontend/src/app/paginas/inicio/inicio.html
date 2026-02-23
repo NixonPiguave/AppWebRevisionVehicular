@@ -14,12 +14,30 @@
     [class.show]="sidebarOpen">
 
     <!-- LOGO -->
+
+    <!-- LOGO DINÁMICO -->
     <div class="sidebar-logo">
+      <!-- Spinner mientras carga -->
+      <div class="logo-loading" *ngIf="cargandoIcono">
+        <div class="spinner-logo-small"></div>
+      </div>
+
+      <!-- Ícono de empresa desde Cloudinary (si existe) -->
       <img
-        src="/logo-rtv.png"
-        alt="Logo RTV"
+        *ngIf="!cargandoIcono && empresaIcono"
+        [src]="empresaIcono"
+        [alt]="empresaNombre"
         class="logo"
       />
+
+      <!-- Logo por defecto (si no hay ícono en BD) -->
+      <img
+        *ngIf="!cargandoIcono && !empresaIcono"
+        src="/logo-rtv.png"
+        alt="RTV"
+        class="logo"
+      />
+
       <span *ngIf="!sidebarCollapsed">RTV</span>
     </div>
 
@@ -224,13 +242,6 @@
             <a routerLink="/inicio/ant/Calendarizacion-Matriculacion" routerLinkActive="active" class="submenu-item">Calendarización Matriculación</a>
             <a class="submenu-item">Tipo de Trámite</a>
             <a class="submenu-item">Tipos de Excepción</a>
-            <a class="submenu-item">Estados de Excepción</a>
-            <a class="submenu-item">Estados de Multa</a>
-            <a class="submenu-item">Tarifario</a>
-            <a class="submenu-item">Documentos Requeridos</a>
-            <a class="submenu-item">Entidades de Tránsito</a>
-            <a class="submenu-item">Formas de Pago</a>
-            <a class="submenu-item">Tipos de Documento</a>
           </div>
         </div>
       </div>
@@ -312,12 +323,31 @@
           <mat-icon>menu</mat-icon>
         </button>
 
-        <img
-          src="/logo-rtv.png"
-          alt=""
-          class="header-logo"
-        />
-        <span class="title">Revisión Técnica Vehicular</span>
+        <!-- LOGO DINÁMICO -->
+          <!-- Spinner mientras carga -->
+          <div class="logo-loading" *ngIf="cargandoIcono">
+            <div class="spinner-logo-small"></div>
+          </div>
+
+          <!-- Ícono de empresa desde Cloudinary (si existe) -->
+          <img
+            *ngIf="!cargandoIcono && empresaIcono"
+            [src]="empresaIcono"
+            [alt]="empresaNombre"
+            class="logo"
+          />
+
+          <!-- Logo por defecto (si no hay ícono en BD) -->
+          <img
+            *ngIf="!cargandoIcono && !empresaIcono"
+            src="/logo-rtv.png"
+            alt="RTV"
+            class="logo"
+          />
+
+          <span class="title">Revisión Técnica Vehicular</span>
+
+
       </div>
 
       <div class="right">

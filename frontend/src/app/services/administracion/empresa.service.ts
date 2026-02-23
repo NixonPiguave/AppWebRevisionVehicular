@@ -10,6 +10,7 @@ export interface Empresa {
   correo: string;
   logoempresa: string;
   ruc: string;
+  iconoempresa: string;
 }
 
 @Injectable({
@@ -21,23 +22,18 @@ export class EmpresaService {
 
   constructor(private http: HttpClient) {}
 
-  /**
-   * Obtener todas las empresas
-   */
+
+   // Obtener todas las empresas
   listarEmpresas(): Observable<Empresa[]> {
     return this.http.get<Empresa[]>(this.apiUrl);
   }
 
-  /**
-   * Crear una nueva empresa
-   */
+   // Crear una nueva empresa
   crearEmpresa(empresa: Empresa): Observable<Empresa> {
     return this.http.post<Empresa>(this.apiUrl, empresa);
   }
 
-  /**
-   * Actualizar una empresa existente
-   */
+   // Actualizar una empresa existente
   actualizarEmpresa(id: number, empresa: Empresa): Observable<Empresa> {
     return this.http.put<Empresa>(`${this.apiUrl}/${id}`, empresa);
   }

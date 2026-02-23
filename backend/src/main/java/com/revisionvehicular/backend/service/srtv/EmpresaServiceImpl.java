@@ -18,7 +18,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
         this.repository = repository;
     }
     public EmpresaDTO save(EmpresaDTO dto) {
-        repository.insertar(dto.getNombre(), dto.getRuc(), dto.getDireccion(), dto.getTelefono(), dto.getCorreo(), dto.getLogoempresa());
+        repository.insertar(dto.getNombre(), dto.getRuc(), dto.getDireccion(), dto.getTelefono(), dto.getCorreo(), dto.getLogoempresa(),dto.getIconoempresa());
         Empresa empresa=repository.getEmpresaByNombre(dto.getNombre()).orElseThrow(() -> new RuntimeException("Error al crear empresa"));
         return toDTO(empresa);
     }
@@ -54,7 +54,8 @@ public class EmpresaServiceImpl implements IEmpresaService {
                 dto.getDireccion(),
                 dto.getTelefono(),
                 dto.getCorreo(),
-                dto.getLogoempresa()
+                dto.getLogoempresa(),
+                dto.getIconoempresa()
         );
         Empresa EmpresaActualizada = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar la empresa actualizada"));
@@ -79,6 +80,7 @@ public class EmpresaServiceImpl implements IEmpresaService {
         dto.setTelefono(empresa.getTelefono());
         dto.setCorreo(empresa.getCorreo());
         dto.setLogoempresa(empresa.getLogoempresa());
+        dto.setIconoempresa(empresa.getIconoempresa());
         return dto;
     }
 }

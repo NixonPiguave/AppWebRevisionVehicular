@@ -29,13 +29,19 @@ export class EmpresaComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   empresaDetalle: Empresa | null = null;
 
+  // Variables para logo
   logoPreview: string | null = null;
   logoFile: File | null = null;
-  uploadingLogo: boolean = false; // ← NUEVO
+  uploadingLogo: boolean = false;
+
+  //  Variables para ícono
+  iconoPreview: string | null = null;
+  iconoFile: File | null = null;
+  uploadingIcono: boolean = false;
 
   constructor(
     private empresaService: EmpresaService,
-    private cloudinaryService: CloudinaryService, // ← NUEVO
+    private cloudinaryService: CloudinaryService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -51,6 +57,7 @@ export class EmpresaComponent implements OnInit {
       telefono: '',
       correo: '',
       logoempresa: '',
+      iconoempresa: '',
       ruc: ''
     };
   }
@@ -62,13 +69,13 @@ export class EmpresaComponent implements OnInit {
 
     this.empresaService.listarEmpresas().subscribe({
       next: (data) => {
-        console.log('Empresas cargadas:', data);
+        console.log('[EMPRESA] Empresas cargadas:', data);
         this.empresas = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar empresas:', err);
+        console.error('[EMPRESA] Error al cargar empresas:', err);
         this.error = 'Error al cargar las empresas. Verifica que el backend esté corriendo.';
         this.cargando = false;
         this.cdr.detectChanges();
@@ -122,7 +129,10 @@ export class EmpresaComponent implements OnInit {
     this.empresaEditando = this.getEmpresaVacia();
     this.logoPreview = null;
     this.logoFile = null;
+    this.iconoPreview = null;
+    this.iconoFile = null;
     this.uploadingLogo = false;
+    this.uploadingIcono = false;
     this.mostrarModalForm = true;
   }
 
@@ -130,13 +140,20 @@ export class EmpresaComponent implements OnInit {
     this.modoEdicion = true;
     this.empresaEditando = { ...empresa };
 
-    // Si tiene logo de Cloudinary (URL), mostrarlo
+    // Logo
     this.logoPreview = empresa.logoempresa && empresa.logoempresa.startsWith('http')
       ? empresa.logoempresa
       : null;
 
+    // Ícono
+    this.iconoPreview = empresa.iconoempresa && empresa.iconoempresa.startsWith('http')
+      ? empresa.iconoempresa
+      : null;
+
     this.logoFile = null;
+    this.iconoFile = null;
     this.uploadingLogo = false;
+    this.uploadingIcono = false;
     this.mostrarModalForm = true;
   }
 
@@ -145,7 +162,10 @@ export class EmpresaComponent implements OnInit {
     this.empresaEditando = this.getEmpresaVacia();
     this.logoPreview = null;
     this.logoFile = null;
+    this.iconoPreview = null;
+    this.iconoFile = null;
     this.uploadingLogo = false;
+    this.uploadingIcono = false;
   }
 
   onLogoSelected(event: Event): void {
@@ -153,14 +173,12 @@ export class EmpresaComponent implements OnInit {
     if (input.files && input.files[0]) {
       const file = input.files[0];
 
-      // Validar tipo
       if (!file.type.startsWith('image/')) {
         alert('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
         input.value = '';
         return;
       }
 
-      // Validar tamaño (máx 2MB)
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
         alert(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
@@ -168,14 +186,46 @@ export class EmpresaComponent implements OnInit {
         return;
       }
 
-      console.log('[LOGO] Archivo seleccionado:', file.name, `(${(file.size / 1024).toFixed(2)}KB)`);
+      console.log('[LOGO] Archivo seleccionado:', file.name);
 
       this.logoFile = file;
 
-      // Preview local
       const reader = new FileReader();
       reader.onload = (e) => {
         this.logoPreview = e.target?.result as string;
+        this.cdr.detectChanges();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+
+   // NUEVO: Seleccionar ícono
+  onIconoSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      if (!file.type.startsWith('image/')) {
+        alert('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
+        input.value = '';
+        return;
+      }
+
+      const maxSize = 2 * 1024 * 1024;
+      if (file.size > maxSize) {
+        alert(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        input.value = '';
+        return;
+      }
+
+      console.log('[ICONO] Archivo seleccionado:', file.name);
+
+      this.iconoFile = file;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.iconoPreview = e.target?.result as string;
         this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
@@ -194,6 +244,20 @@ export class EmpresaComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+
+   // NUEVO: Remover ícono
+  removerIcono(): void {
+    console.log('[ICONO] Removiendo preview');
+    this.iconoPreview = null;
+    this.iconoFile = null;
+
+    if (!this.modoEdicion) {
+      this.empresaEditando.iconoempresa = '';
+    }
+
+    this.cdr.detectChanges();
+  }
+
   validarFormulario(): boolean {
     if (!this.empresaEditando.nombre.trim()) {
       alert('El nombre de la empresa es requerido');
@@ -205,7 +269,6 @@ export class EmpresaComponent implements OnInit {
       return false;
     }
 
-    // Validar RUC (13 dígitos para Ecuador)
     if (!/^\d{13}$/.test(this.empresaEditando.ruc)) {
       alert('El RUC debe tener exactamente 13 dígitos numéricos');
       return false;
@@ -228,7 +291,6 @@ export class EmpresaComponent implements OnInit {
   guardarEmpresa(): void {
     if (!this.validarFormulario()) return;
 
-    // Doble check al guardar
     if (!this.modoEdicion && this.empresas.length >= 1) {
       console.warn('[VALIDACIÓN] Intento crear segunda empresa bloqueado.');
       alert('Ya existe una empresa. No se puede crear otra.');
@@ -238,45 +300,89 @@ export class EmpresaComponent implements OnInit {
 
     this.guardando = true;
 
-    // Si hay logo nuevo, subirlo a Cloudinary primero
-    if (this.logoFile) {
-      console.log('[CLOUDINARY] Subiendo nuevo logo...');
-      this.uploadingLogo = true;
+    // Subir ícono Y logo si hay archivos
+    const uploadPromises: Promise<void>[] = [];
 
-      // Si está en modo edición y tenía logo antiguo, eliminarlo
+    // Logo
+    if (this.logoFile) {
       const logoAntiguo = this.modoEdicion && this.empresaEditando.logoempresa
         ? this.empresaEditando.logoempresa
         : null;
 
-      this.cloudinaryService.uploadImage(this.logoFile, 'empresas').subscribe({
-        next: (response) => {
-          console.log('[CLOUDINARY] Nuevo logo subido:', response.url);
-          this.empresaEditando.logoempresa = response.url;
+      uploadPromises.push(
+        new Promise((resolve, reject) => {
+          this.uploadingLogo = true;
+          this.cloudinaryService.uploadImage(this.logoFile!, 'empresas').subscribe({
+            next: (response) => {
+              console.log('[CLOUDINARY] Logo subido:', response.url);
+              this.empresaEditando.logoempresa = response.url;
 
-          //  Eliminar logo antiguo de Cloudinary
-          if (logoAntiguo && logoAntiguo.startsWith('http')) {
-            const publicId = this.cloudinaryService.extractPublicId(logoAntiguo);
-            if (publicId) {
-              console.log('[CLOUDINARY] Eliminando logo antiguo:', publicId);
-              this.cloudinaryService.deleteFile(publicId).subscribe({
-                next: () => console.log('[CLOUDINARY] Logo antiguo eliminado'),
-                error: (err) => console.warn('[CLOUDINARY] No se pudo eliminar logo antiguo:', err)
-              });
+              if (logoAntiguo && logoAntiguo.startsWith('http')) {
+                const publicId = this.cloudinaryService.extractPublicId(logoAntiguo);
+                if (publicId) {
+                  this.cloudinaryService.deleteFile(publicId).subscribe();
+                }
+              }
+
+              this.uploadingLogo = false;
+              resolve();
+            },
+            error: (err) => {
+              console.error('[CLOUDINARY] Error logo:', err);
+              this.uploadingLogo = false;
+              reject(err);
             }
-          }
+          });
+        })
+      );
+    }
 
+    // Ícono
+    if (this.iconoFile) {
+      const iconoAntiguo = this.modoEdicion && this.empresaEditando.iconoempresa
+        ? this.empresaEditando.iconoempresa
+        : null;
+
+      uploadPromises.push(
+        new Promise((resolve, reject) => {
+          this.uploadingIcono = true;
+          this.cloudinaryService.uploadImage(this.iconoFile!, 'iconoempresa').subscribe({
+            next: (response) => {
+              console.log('[CLOUDINARY] Ícono subido:', response.url);
+              this.empresaEditando.iconoempresa = response.url;
+
+              if (iconoAntiguo && iconoAntiguo.startsWith('http')) {
+                const publicId = this.cloudinaryService.extractPublicId(iconoAntiguo);
+                if (publicId) {
+                  this.cloudinaryService.deleteFile(publicId).subscribe();
+                }
+              }
+
+              this.uploadingIcono = false;
+              resolve();
+            },
+            error: (err) => {
+              console.error('[CLOUDINARY] Error ícono:', err);
+              this.uploadingIcono = false;
+              reject(err);
+            }
+          });
+        })
+      );
+    }
+
+    // Esperar a que todas las subidas terminen
+    if (uploadPromises.length > 0) {
+      Promise.all(uploadPromises)
+        .then(() => {
           this.guardarEmpresaEnBackend();
-        },
-        error: (err) => {
-          console.error('[CLOUDINARY] Error:', err);
-          alert('Error al subir la imagen. Intenta de nuevo.');
+        })
+        .catch((err) => {
+          alert('Error al subir imágenes. Intenta de nuevo.');
           this.guardando = false;
-          this.uploadingLogo = false;
           this.cdr.detectChanges();
-        }
-      });
+        });
     } else {
-      // Sin logo nuevo, guardar directo
       this.guardarEmpresaEnBackend();
     }
   }
@@ -294,13 +400,11 @@ export class EmpresaComponent implements OnInit {
           this.cargarEmpresas();
           this.cerrarModalForm();
           this.guardando = false;
-          this.uploadingLogo = false;
         },
         error: (err) => {
           console.error('[EMPRESA] Error actualizar:', err);
           alert('Error al actualizar la empresa');
           this.guardando = false;
-          this.uploadingLogo = false;
         }
       });
     } else {
@@ -312,13 +416,11 @@ export class EmpresaComponent implements OnInit {
           this.cargarEmpresas();
           this.cerrarModalForm();
           this.guardando = false;
-          this.uploadingLogo = false;
         },
         error: (err) => {
           console.error('[EMPRESA] Error crear:', err);
           alert('Error al crear la empresa');
           this.guardando = false;
-          this.uploadingLogo = false;
         }
       });
     }

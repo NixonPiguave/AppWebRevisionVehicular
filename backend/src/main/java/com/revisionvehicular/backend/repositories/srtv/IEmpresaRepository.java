@@ -20,7 +20,8 @@ public interface IEmpresaRepository extends JpaRepository<Empresa, Long>
             @Param("p_direccion") String pdireccion,
             @Param("p_telefono") String ptelefono,
             @Param("p_correo") String pcorreo,
-            @Param("p_logoempresa") String plogoempresa
+            @Param("p_logoempresa") String plogoempresa,
+            @Param("p_iconoempresa") String piconoempresa
     );
     @Procedure(procedureName = "sp_empresa_actualizar")
     void spActualizarEmpresa(
@@ -30,7 +31,8 @@ public interface IEmpresaRepository extends JpaRepository<Empresa, Long>
             @Param("p_direccion") String pdireccion,
             @Param("p_telefono") String ptelefono,
             @Param("p_correo") String pcorreo,
-            @Param("p_logoempresa") String plogoempresa
+            @Param("p_logoempresa") String plogoempresa,
+            @Param("p_iconoempresa") String piconoempresa
     );
 
 }

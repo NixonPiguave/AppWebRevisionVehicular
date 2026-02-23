@@ -32,6 +32,9 @@ public class Empresa {
     private String logoempresa;
     @Column(nullable = false)
     private String ruc;
+    @Column(nullable = true)
+    private String iconoempresa;
+
     @OneToMany(mappedBy = "empresa")
     private List<Usuario> usuarios = new ArrayList<>();
 }

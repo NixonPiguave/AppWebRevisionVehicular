@@ -55,7 +55,7 @@ export class CloudinaryService {
 
 
    // Obtener URL optimizada de Cloudinary con transformaciones
-   //Útil para redimensionar imágenes on-the-fly
+   //Útil para redimensionar imágenes
 
   getOptimizedUrl(
     publicId: string,
@@ -87,7 +87,6 @@ export class CloudinaryService {
 
    // Extraer publicId de una URL de Cloudinary
    // Para eliminar imágenes
-
   extractPublicId(cloudinaryUrl: string): string | null {
     const match = cloudinaryUrl.match(/\/v\d+\/(.+)\.\w+$/);
     return match ? match[1] : null;

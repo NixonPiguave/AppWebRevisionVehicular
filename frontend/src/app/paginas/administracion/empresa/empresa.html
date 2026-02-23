@@ -193,6 +193,45 @@
             <span>Subiendo imagen a Cloudinary...</span>
           </div>
 
+          <div class="form-grupo">
+            <label>Ícono de la Empresa (Sidebar)</label>
+            <small style="color: #666; font-size: 12px; margin-bottom: 8px; display: block;">
+              Imagen pequeña que aparecerá en el menú lateral (recomendado: 36x36px o 48x48px)
+            </small>
+            <div class="logo-upload-container">
+
+              <!-- Preview del ícono -->
+              <div class="logo-preview icono-preview" *ngIf="iconoPreview">
+                <img [src]="iconoPreview" alt="Preview del ícono" />
+                <button type="button" class="btn-remover-logo" (click)="removerIcono()" [disabled]="uploadingIcono">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+
+              <!-- Input para seleccionar ícono -->
+              <div class="logo-input-wrapper" *ngIf="!iconoPreview && !uploadingIcono">
+                <input
+                  type="file"
+                  id="icono"
+                  (change)="onIconoSelected($event)"
+                  accept="image/*"
+                  class="logo-input"
+                />
+                <label for="icono" class="logo-input-label">
+                  <mat-icon>add_photo_alternate</mat-icon>
+                  <span>Seleccionar ícono</span>
+                  <small>(JPG, PNG, GIF, WebP - Máx 2MB)</small>
+                </label>
+              </div>
+
+              <!-- Indicador de subida ícono -->
+              <div class="upload-progress" *ngIf="uploadingIcono">
+                <div class="spinner-upload"></div>
+                <span>Subiendo ícono a Cloudinary...</span>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
