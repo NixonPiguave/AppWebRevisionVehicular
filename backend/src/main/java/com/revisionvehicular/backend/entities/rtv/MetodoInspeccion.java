@@ -13,7 +13,7 @@ public class MetodoInspeccion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long metodoinspeccionid;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 100, unique = true)
     private String nombre;
 
     @Column(length = 255)
@@ -21,5 +21,4 @@ public class MetodoInspeccion {
 
     @Column(length = 50)
     private String estado;
-
 }

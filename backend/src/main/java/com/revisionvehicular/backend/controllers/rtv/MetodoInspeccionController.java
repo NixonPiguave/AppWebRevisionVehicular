@@ -22,7 +22,7 @@ public class MetodoInspeccionController {
     @PostMapping
     public ResponseEntity<MetodoInspeccionDTO> crear(
             @RequestBody MetodoInspeccionDTO dto
-    ) {
+    ){
         MetodoInspeccionDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }

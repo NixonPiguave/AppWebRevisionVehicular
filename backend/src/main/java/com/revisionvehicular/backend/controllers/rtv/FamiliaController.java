@@ -34,8 +34,7 @@ public class FamiliaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<FamiliaDTO> obtenerPorId(
-            @PathVariable Long id
-    ) {
+            @PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 

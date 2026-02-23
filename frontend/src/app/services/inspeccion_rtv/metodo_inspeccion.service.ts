@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface MetodoInspeccion {
-  metodoInspeccionId: number | null;
+  id: number | null;
   nombre: string;
   descripcion: string;
   estado: string;
@@ -15,7 +15,7 @@ export interface MetodoInspeccion {
 export class MetodoInspeccionService {
 
   // URL del backend para metodo de inspección
-  private apiUrl = 'http://localhost:8080/api/metodo-inspeccion';
+  private apiUrl = 'http://localhost:8080/api/metodosinpeccion';
 
   constructor(private http: HttpClient) {}
 
