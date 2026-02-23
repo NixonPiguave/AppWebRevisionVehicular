@@ -51,9 +51,6 @@ export class Equipos implements OnInit {
     this.cargarEquipos();
   }
 
-  /**
-   * Cargar equipos desde el backend
-   */
   cargarEquipos(): void {
     this.cargando = true;
     this.error = '';

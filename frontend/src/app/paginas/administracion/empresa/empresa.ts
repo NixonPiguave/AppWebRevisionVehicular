@@ -243,7 +243,7 @@ export class EmpresaComponent implements OnInit {
       console.log('[CLOUDINARY] Subiendo nuevo logo...');
       this.uploadingLogo = true;
 
-      // ✅ NUEVO: Si está en modo edición y tenía logo antiguo, eliminarlo
+      // Si está en modo edición y tenía logo antiguo, eliminarlo
       const logoAntiguo = this.modoEdicion && this.empresaEditando.logoempresa
         ? this.empresaEditando.logoempresa
         : null;
@@ -253,7 +253,7 @@ export class EmpresaComponent implements OnInit {
           console.log('[CLOUDINARY] Nuevo logo subido:', response.url);
           this.empresaEditando.logoempresa = response.url;
 
-          // ✅ NUEVO: Eliminar logo antiguo de Cloudinary
+          //  Eliminar logo antiguo de Cloudinary
           if (logoAntiguo && logoAntiguo.startsWith('http')) {
             const publicId = this.cloudinaryService.extractPublicId(logoAntiguo);
             if (publicId) {
