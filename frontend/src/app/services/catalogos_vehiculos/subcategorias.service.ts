@@ -8,9 +8,7 @@ export interface Subcategoria {
   nombre: string;
   descripcion: string;
   estado: string;
-
   categoriaId: number;
-
   codigo?: string;
 }
 export interface Categoria {
@@ -32,15 +30,12 @@ export class SubcategoriasService {
   listar(): Observable<Subcategoria[]> {
     return this.http.get<Subcategoria[]>(this.apiUrl);
   }
-
   crear(subcategoria: Subcategoria): Observable<Subcategoria> {
     return this.http.post<Subcategoria>(this.apiUrl, subcategoria);
   }
-
   actualizar(id: number, subcategoria: Subcategoria): Observable<Subcategoria> {
     return this.http.put<Subcategoria>(`${this.apiUrl}/${id}`, subcategoria);
   }
-
   listarCategorias(): Observable<Categoria[]> {
     return this.http.get<Categoria[]>(this.catUrl);
   }

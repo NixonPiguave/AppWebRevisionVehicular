@@ -10,7 +10,6 @@ import java.util.Optional;
 public interface IRolRepository extends JpaRepository<Rol, Long> {
     Optional<Rol> getRolByRolId(Long rolId);
     Optional<Rol> getRolByNombre( String nombre);
-    Optional<Rol> getRolByEstado( String estado);
     @Procedure(procedureName = "sp_rol_insertar")
     void spInsertarRol(
             @Param("p_nombre") String pnombre,

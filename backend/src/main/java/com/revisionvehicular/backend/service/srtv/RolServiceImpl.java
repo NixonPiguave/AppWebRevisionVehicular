@@ -23,10 +23,8 @@ public class RolServiceImpl implements IRolService{
                 dto.getEstado(),
                 dto.getPermisosJson()
         );
-
         Rol rol = repository.getRolByNombre(dto.getNombre())
                 .orElseThrow(() -> new RuntimeException("Error al crear rol"));
-
         return toDTO(rol);
     }
     @Override

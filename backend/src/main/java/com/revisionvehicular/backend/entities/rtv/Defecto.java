@@ -10,7 +10,8 @@ public class Defecto {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long defecto_id;
+    @Column(name = "defecto_id")
+    private Long defectoid;
 
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;
