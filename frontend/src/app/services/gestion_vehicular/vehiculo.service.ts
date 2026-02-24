@@ -89,6 +89,27 @@ export interface TipoCombustible {
   estado: string;
 }
 
+export interface TipoMatricula {
+  id: number | null;
+  nombre: string;
+  descripcion: string;
+  estado: string;
+}
+export interface TipoVehiculo {
+  id: number | null;
+  nombre: string;
+  descripcion: string;
+  estado: string;
+  claseId: number;
+  claseNombre?: string;
+}
+export interface Traccion {
+  id: number | null;
+  tipo: string;
+  descripcion: string;
+  estado: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -104,6 +125,9 @@ export class VehiculoService {
   private apiModelo = 'http://localhost:8080/api/modelosvehiculo';
   private apiSubcategorias = 'http://localhost:8080/api/subcategorias';
   private apiCombustible = 'http://localhost:8080/api/combustible';
+  private apiTipomatricula = 'http://localhost:8080/api/tipomatricula';
+  private apiTipoVehiculo = 'http://localhost:8080/api/tipoVehiculo';
+  private apiTracciones = 'http://localhost:8080/api/tracciones';
 
   constructor(private http: HttpClient) {}
 
@@ -150,6 +174,19 @@ export class VehiculoService {
   }
   listarSubcategoria(): Observable<Subcategoria[]> {
     return this.http.get<Subcategoria[]>(this.apiSubcategorias);
+  }
+  listarTiposCombustible(): Observable<TipoCombustible[]> {
+    return this.http.get<TipoCombustible[]>(this.apiCombustible);
+  }
+
+  listarTiposMatricula(): Observable<TipoMatricula[]> {
+    return this.http.get<TipoMatricula[]>(this.apiTipomatricula);
+  }
+  listarTipoVehiculo(): Observable<TipoVehiculo[]> {
+    return this.http.get<TipoVehiculo[]>(this.apiTipoVehiculo);
+  }
+  listarTracciones(): Observable<Traccion[]> {
+    return this.http.get<Traccion[]>(this.apiTracciones);
   }
 
 }
