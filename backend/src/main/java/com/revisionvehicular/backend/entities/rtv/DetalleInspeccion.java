@@ -34,4 +34,5 @@ public class DetalleInspeccion {
     @ManyToOne
     @JoinColumn(name = "metodo_inspeccion_id", nullable = false)
     private MetodoInspeccion  metodoInspeccion;
+    
 }

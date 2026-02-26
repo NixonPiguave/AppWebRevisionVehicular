@@ -23,7 +23,7 @@ public interface ISubcategoriaRepository extends JpaRepository<Subcategoria, Lon
 
     @Procedure(procedureName = "sp_subcategoria_modificar")
     void spModificarSubcategoria(
-            @Param("p_subcategoria_id") Long subcategoriaId,
+            @Param("p_id") Long subcategoriaId,
             @Param("p_codigo") String codigo,
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
@@ -33,5 +33,4 @@ public interface ISubcategoriaRepository extends JpaRepository<Subcategoria, Lon
 
     Optional<Subcategoria> findByCodigo(String codigo);
 
-    //List<Subcategoria> findByCategoriaCategoriaId(Long categoriaId);
 }

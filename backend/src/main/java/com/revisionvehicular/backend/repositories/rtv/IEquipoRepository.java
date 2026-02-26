@@ -1,6 +1,5 @@
 package com.revisionvehicular.backend.repositories.rtv;
 
-import com.revisionvehicular.backend.entities.cv.Categoria;
 import com.revisionvehicular.backend.entities.rtv.Equipos;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.query.Procedure;
@@ -12,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface IEquipoRepository extends JpaRepository<Equipos, Long> {
+
     @Procedure(procedureName = "sp_rtv_equipos_insertar")
     void spInsertarEquipo(
             @Param("p_influencia") Integer pInfluencia,
@@ -36,7 +36,16 @@ public interface IEquipoRepository extends JpaRepository<Equipos, Long> {
             @Param("p_modelo") String pModelo,
             @Param("p_serial_equipo") String pSerialEquipo
     );
-    Optional<Equipos> getByEquipo(String equipo);
-    Optional<Equipos> findById(Long id);
 
+     // Buscar equipo por serial (único)
+    Optional<Equipos> findBySerialEquipo(String serialEquipo);
+
+     // Verificar si existe un serial
+    boolean existsBySerialEquipo(String serialEquipo);
+
+     //Verificar si existe un código interno
+    boolean existsByCodigoInterno(String codigoInterno);
+
+     // Buscar por ID
+    Optional<Equipos> findById(Long id);
 }

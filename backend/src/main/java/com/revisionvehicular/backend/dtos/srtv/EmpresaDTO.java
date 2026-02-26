@@ -9,4 +9,5 @@ public class EmpresaDTO {
     private String correo;
     private String logoempresa;
     private String ruc;
+    private String iconoempresa;
 }

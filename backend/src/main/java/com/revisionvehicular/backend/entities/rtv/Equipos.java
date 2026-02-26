@@ -18,9 +18,9 @@ public class Equipos {
     private String equipo;
     @Column(nullable = false, length = 100)
     private String modelo;
-    @Column(name="serial_equipo",nullable = false, length = 100)
+    @Column(name="serial_equipo",nullable = false, length = 100, unique = true)
     private String serialEquipo;
-    @Column(name="codigo_interno",nullable = false, length = 100)
+    @Column(name="codigo_interno",nullable = false, length = 100, unique = true)
     private String codigoInterno;
     @Column(name="fecha_ultimo_mantenimiento",nullable = false)
     private LocalDate ultimoMantenimiento;

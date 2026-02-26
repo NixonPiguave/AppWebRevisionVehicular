@@ -10,7 +10,6 @@
     Cargando métodos de inspección...
   </div>
 
-  <!-- Contenido principal -->
   <div *ngIf="!cargando || error">
     <!-- Header -->
     <div class="metodo-inspeccion-header">
@@ -21,7 +20,7 @@
       </button>
     </div>
 
-    <!-- Controles -->
+
     <div class="metodo-inspeccion-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
@@ -50,7 +49,6 @@
       </div>
     </div>
 
-    <!-- Tabla -->
     <div class="tabla-contenedor">
       <table class="metodo-inspeccion-tabla">
         <thead>
@@ -64,7 +62,7 @@
         </thead>
         <tbody>
         <tr *ngFor="let metodo of metodosPaginados">
-          <td>{{ metodo.metodoInspeccionId }}</td>
+          <td>{{ metodo.id }}</td>
           <td>{{ metodo.nombre }}</td>
           <td class="td-descripcion">{{ metodo.descripcion }}</td>
           <td>
@@ -104,7 +102,6 @@
       </table>
     </div>
 
-    <!-- Paginación -->
     <div class="paginacion" *ngIf="totalPaginas > 1">
       <button
         class="btn-pagina"
@@ -211,7 +208,7 @@
     <div class="modal-body" *ngIf="metodoDetalle">
       <div class="detalle-item">
         <span class="detalle-label">ID:</span>
-        <span class="detalle-valor">{{ metodoDetalle.metodoInspeccionId }}</span>
+        <span class="detalle-valor">{{ metodoDetalle.id }}</span>
       </div>
       <div class="detalle-item">
         <span class="detalle-label">Nombre:</span>

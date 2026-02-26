@@ -108,3 +108,301 @@ mat-icon { vertical-align: middle; }
   .marca-tabla { font-size: 12px; }
   .marca-tabla th, .marca-tabla td { padding: 10px 8px; }
 }
+/* ============================================
+   LOGO EN TABLA
+   ============================================ */
+.logo-tabla {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f8f8f8;
+}
+
+.logo-tabla img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-tabla-placeholder {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  background: #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+}
+
+.logo-tabla-placeholder mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+/* ============================================
+   LOGO UPLOAD EN FORMULARIO (CLOUDINARY)
+   ============================================ */
+.logo-upload-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logo-preview {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e0e0e0;
+}
+
+.logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #f8f8f8;
+}
+
+.btn-remover-logo {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.btn-remover-logo:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.btn-remover-logo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-remover-logo mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.logo-input-wrapper {
+  position: relative;
+}
+
+.logo-input {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.logo-input-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 24px;
+  border: 2px dashed #d0d0d0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #666;
+}
+
+.logo-input-label:hover {
+  border-color: #2d5a27;
+  background: #f5f9f5;
+  color: #2d5a27;
+}
+
+.logo-input-label mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.logo-input-label small {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
+}
+
+/* ============================================
+   INDICADOR DE SUBIDA CLOUDINARY
+   ============================================ */
+.upload-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 8px;
+  color: #2e7d32;
+  font-size: 14px;
+}
+
+.spinner-upload {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #c8e6c9;
+  border-top-color: #2e7d32;
+  border-radius: 50%;
+  animation: spinUpload 0.8s linear infinite;
+}
+
+@keyframes spinUpload {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   LOGO EN DETALLE
+   ============================================ */
+.detalle-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.detalle-logo-img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 12px;
+  border: 2px solid #e0e0e0;
+  object-fit: contain;
+  background: #f8f8f8;
+  padding: 12px;
+}
+
+/* ============================================
+   SELECTOR DE PAÍSES AUTOCOMPLETADO
+   ============================================ */
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #d0d0d0;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  max-height: 300px;
+  overflow: hidden;
+  margin-top: -8px;
+}
+
+.autocomplete-search {
+  position: relative;
+  padding: 8px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #f8f8f8;
+}
+
+.autocomplete-search input {
+  width: 100%;
+  padding: 8px 32px 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  outline: none;
+}
+
+.autocomplete-search input:focus {
+  border-color: #2d5a27;
+}
+
+.autocomplete-search mat-icon {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+}
+
+.autocomplete-list {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.autocomplete-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.15s ease;
+}
+
+.autocomplete-item:hover {
+  background: #f5f9f5;
+  color: #2d5a27;
+}
+
+.autocomplete-empty {
+  padding: 16px;
+  text-align: center;
+  color: #999;
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Cerrar dropdown al hacer clic fuera */
+.autocomplete-wrapper .form-input:focus {
+  border-radius: 8px 8px 0 0;
+}
+
+/* ============================================
+   RESPONSIVE PARA NUEVOS ELEMENTOS
+   ============================================ */
+@media (max-width: 768px) {
+  .logo-tabla {
+    width: 40px;
+    height: 40px;
+  }
+
+  .logo-tabla-placeholder {
+    width: 40px;
+    height: 40px;
+  }
+
+  .autocomplete-dropdown {
+    max-height: 200px;
+  }
+}

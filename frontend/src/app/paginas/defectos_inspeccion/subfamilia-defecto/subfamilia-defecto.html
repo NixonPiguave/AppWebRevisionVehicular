@@ -1,38 +1,47 @@
-<div class="subfamilia-defecto-container">
+<div class="crud-container">
+
   <!-- Mensaje de error -->
   <div class="mensaje-error" *ngIf="error">
-    {{ error }}
-    <button class="btn-reintentar" (click)="cargarSubfamiliasDefectos()">Reintentar</button>
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarDatos()">Reintentar</button>
   </div>
 
   <!-- Loading -->
   <div class="cargando" *ngIf="cargando && !error">
-    Cargando subfamilias de defectos...
+    <div class="spinner"></div>
+    <span>Cargando subfamilias de defectos...</span>
   </div>
 
   <!-- Contenido principal -->
   <div *ngIf="!cargando || error">
-    <!-- Header -->
-    <div class="subfamilia-defecto-header">
+
+    <!-- Header con título y botón agregar -->
+    <div class="crud-header">
       <h2>Gestión de Subfamilias de Defectos</h2>
       <button class="btn-agregar" (click)="abrirModalCrear()">
         <mat-icon>add</mat-icon>
-        Nueva Subfamilia
+        <span>Nueva Subfamilia</span>
       </button>
     </div>
 
-    <!-- Controles -->
-    <div class="subfamilia-defecto-controles">
+    <!-- Controles de filtro y paginación -->
+    <div class="crud-controles">
       <div class="control-grupo">
         <label for="filtro">Buscar:</label>
-        <input
-          type="text"
-          id="filtro"
-          [(ngModel)]="filtro"
-          (ngModelChange)="onFiltroChange()"
-          placeholder="Buscar por ID, familia, nombre, descripción..."
-          class="input-filtro"
-        />
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por nombre, familia..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
       </div>
       <div class="control-grupo">
         <label for="registros">Mostrar:</label>
@@ -52,11 +61,11 @@
 
     <!-- Tabla -->
     <div class="tabla-contenedor">
-      <table class="subfamilia-defecto-tabla">
+      <table class="crud-tabla">
         <thead>
         <tr>
-          <th>ID Subfamilia</th>
-          <th>ID Familia</th>
+          <th>ID</th>
+          <th>Familia</th>
           <th>Nombre</th>
           <th>Descripción</th>
           <th>Estado</th>
@@ -64,19 +73,19 @@
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let subfamilia of subfamiliasDefectosPaginadas">
-          <td>{{ subfamilia.subfamiliaId }}</td>
-          <td>{{ subfamilia.familiaId }}</td>
+        <tr *ngFor="let subfamilia of subfamiliasPaginadas">
+          <td>{{ subfamilia.id }}</td>
+          <td> <span class="badge-familia">{{ getNombreFamilia(subfamilia.familiaId) }} </span></td>
           <td>{{ subfamilia.nombre }}</td>
           <td>{{ subfamilia.descripcion }}</td>
           <td>
-            <span
-              class="estado-badge"
-              [class.activo]="subfamilia.estado === 'A'"
-              [class.inactivo]="subfamilia.estado === 'I'"
-            >
-              {{ getEstadoTexto(subfamilia.estado) }}
-            </span>
+              <span
+                class="estado-badge"
+                [class.activo]="subfamilia.estado === 'A'"
+                [class.inactivo]="subfamilia.estado === 'I'"
+              >
+                {{ getEstadoTexto(subfamilia.estado) }}
+              </span>
           </td>
           <td class="td-acciones">
             <button
@@ -86,7 +95,6 @@
             >
               <mat-icon>visibility</mat-icon>
             </button>
-
             <button
               class="btn-accion btn-editar"
               (click)="abrirModalEditar(subfamilia)"
@@ -97,7 +105,7 @@
           </td>
         </tr>
 
-        <tr *ngIf="subfamiliasDefectosPaginadas.length === 0 && !error && !cargando">
+        <tr *ngIf="subfamiliasPaginadas.length === 0 && !error && !cargando">
           <td colspan="6" class="sin-registros">
             No se encontraron registros
           </td>
@@ -106,46 +114,48 @@
       </table>
     </div>
 
-    <!-- Paginación -->
-    <div class="paginacion" *ngIf="totalPaginas > 1">
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual - 1)"
-        [disabled]="paginaActual === 1"
-      >
-        Anterior
-      </button>
+    <!-- Footer con info y paginación -->
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="subfamiliasFiltradas.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > subfamiliasFiltradas.length
+        ? subfamiliasFiltradas.length
+        : paginaActual * registrosPorPagina }}
+        de {{ subfamiliasFiltradas.length }} registros
+      </div>
 
-      <button
-        *ngFor="let pagina of paginas"
-        class="btn-pagina"
-        [class.activa]="pagina === paginaActual"
-        (click)="irAPagina(pagina)"
-      >
-        {{ pagina }}
-      </button>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
 
-      <button
-        class="btn-pagina"
-        (click)="irAPagina(paginaActual + 1)"
-        [disabled]="paginaActual === totalPaginas"
-      >
-        Siguiente
-      </button>
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
     </div>
 
-    <!-- Info -->
-    <div class="info-registros" *ngIf="subfamiliasDefectosFiltradas.length > 0">
-      Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
-      {{ paginaActual * registrosPorPagina > subfamiliasDefectosFiltradas.length
-      ? subfamiliasDefectosFiltradas.length
-      : paginaActual * registrosPorPagina }}
-      de {{ subfamiliasDefectosFiltradas.length }} registros
-    </div>
   </div>
 </div>
 
-<!-- Modal Crear / Editar -->
+<!-- Modal Crear/Editar -->
 <div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
   <div class="modal-contenido" (click)="$event.stopPropagation()">
     <div class="modal-header">
@@ -156,56 +166,70 @@
     </div>
 
     <div class="modal-body">
+
+      <!-- Selector de Familia -->
       <div class="form-grupo">
-        <label for="familiaId">ID Familia *</label>
-        <input
-          type="number"
+        <label for="familiaId">Familia *</label>
+        <select
           id="familiaId"
-          [(ngModel)]="subfamiliaDefectoEditando.familiaId"
-          class="form-input"
-          placeholder="Ingrese el ID de la familia"
-          min="1"
-        />
+          [(ngModel)]="subfamiliaEditando.familiaId"
+          class="form-select"
+        >
+          <option [value]="0" disabled>-- Seleccione una familia --</option>
+          <option
+            *ngFor="let familia of familias"
+            [value]="familia.id"
+          >
+            {{ familia.nombre }}
+          </option>
+        </select>
       </div>
 
+      <!-- Nombre -->
       <div class="form-grupo">
-        <label for="nombre">Nombre *</label>
+        <label for="nombre">Nombre de la Subfamilia *</label>
         <input
           type="text"
           id="nombre"
-          [(ngModel)]="subfamiliaDefectoEditando.nombre"
+          [(ngModel)]="subfamiliaEditando.nombre"
+          placeholder="Ej: Luces delanteras, Frenos traseros"
           class="form-input"
-          placeholder="Ingrese el nombre"
-          maxlength="100"
         />
       </div>
 
+      <!-- Descripción -->
       <div class="form-grupo">
-        <label for="descripcion">Descripción *</label>
+        <label for="descripcion">Descripción</label>
         <textarea
           id="descripcion"
-          [(ngModel)]="subfamiliaDefectoEditando.descripcion"
-          class="form-textarea"
-          placeholder="Ingrese la descripción"
-          rows="4"
-          maxlength="255"
+          [(ngModel)]="subfamiliaEditando.descripcion"
+          placeholder="Descripción detallada de la subfamilia"
+          class="form-input"
+          rows="3"
         ></textarea>
       </div>
 
+      <!-- Estado -->
       <div class="form-grupo">
-        <label for="estado">Estado *</label>
-        <select id="estado" [(ngModel)]="subfamiliaDefectoEditando.estado" class="form-select">
+        <label for="estado">Estado</label>
+        <select
+          id="estado"
+          [(ngModel)]="subfamiliaEditando.estado"
+          class="form-select"
+        >
           <option value="A">Activo</option>
           <option value="I">Inactivo</option>
         </select>
       </div>
+
     </div>
 
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
         Cancelar
       </button>
-      <button class="btn-guardar" (click)="guardarSubfamiliaDefecto()" [disabled]="guardando">
+      <button class="btn-guardar" (click)="guardarSubfamilia()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
         {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Subfamilia') }}
       </button>
     </div>
@@ -216,43 +240,53 @@
 <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
   <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
     <div class="modal-header">
-      <h3>Detalle de la Subfamilia de Defecto</h3>
+      <h3>Detalle de Subfamilia de Defecto</h3>
       <button class="btn-cerrar" (click)="cerrarModalDetalle()">
         <mat-icon>close</mat-icon>
       </button>
     </div>
 
-    <div class="modal-body" *ngIf="subfamiliaDefectoDetalle">
-      <div class="detalle-item">
-        <span class="detalle-label">ID Subfamilia:</span>
-        <span class="detalle-valor">{{ subfamiliaDefectoDetalle.subfamiliaId }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">ID Familia:</span>
-        <span class="detalle-valor">{{ subfamiliaDefectoDetalle.familiaId }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Nombre:</span>
-        <span class="detalle-valor">{{ subfamiliaDefectoDetalle.nombre }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Descripción:</span>
-        <span class="detalle-valor">{{ subfamiliaDefectoDetalle.descripcion }}</span>
-      </div>
-      <div class="detalle-item">
-        <span class="detalle-label">Estado:</span>
-        <span
-          class="estado-badge"
-          [class.activo]="subfamiliaDefectoDetalle.estado === 'A'"
-          [class.inactivo]="subfamiliaDefectoDetalle.estado === 'I'"
-        >
-          {{ getEstadoTexto(subfamiliaDefectoDetalle.estado) }}
-        </span>
+    <div class="modal-body" *ngIf="subfamiliaDetalle">
+      <div class="detalle-card">
+
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ subfamiliaDetalle.id }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Familia:</span>
+          <span class="detalle-valor resaltado">{{ getNombreFamilia(subfamiliaDetalle.familiaId) }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre:</span>
+          <span class="detalle-valor">{{ subfamiliaDetalle.nombre }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Descripción:</span>
+          <span class="detalle-valor">{{ subfamiliaDetalle.descripcion || 'No especificada' }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span
+            class="estado-badge"
+            [class.activo]="subfamiliaDetalle.estado === 'A'"
+            [class.inactivo]="subfamiliaDetalle.estado === 'I'"
+          >
+            {{ getEstadoTexto(subfamiliaDetalle.estado) }}
+          </span>
+        </div>
+
       </div>
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">
+        Cerrar
+      </button>
     </div>
   </div>
 </div>

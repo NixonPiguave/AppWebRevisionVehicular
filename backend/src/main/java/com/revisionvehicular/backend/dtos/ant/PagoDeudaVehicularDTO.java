@@ -11,6 +11,9 @@ public class PagoDeudaVehicularDTO {
 
     private Long idDeudaVehicular;
 
+    private Long idMetodoPago;
+    private String nombreMetodoPago;
+
     private LocalDateTime fechaPago;
 
     private BigDecimal montoOriginal;
@@ -18,6 +21,5 @@ public class PagoDeudaVehicularDTO {
     private BigDecimal montoPendiente;
     private BigDecimal montoTotal;
 
-    private String metodoPago;
     private String estado;
 }

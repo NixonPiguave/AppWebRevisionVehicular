@@ -17,16 +17,16 @@ export class MetodoInspeccionComponent implements OnInit {
   cargando: boolean = false;
   error: string = '';
 
-  // Filtros y paginación
+
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
 
-  // Modal crear/editar
+
   mostrarModalForm: boolean = false;
   modoEdicion: boolean = false;
   metodoEditando: MetodoInspeccion = {
-    metodoInspeccionId: null,
+    id: null,
     nombre: '',
     descripcion: '',
     estado: 'A'
@@ -46,9 +46,7 @@ export class MetodoInspeccionComponent implements OnInit {
     this.cargarMetodosInspeccion();
   }
 
-  /**
-   * Cargar métodos de inspección desde el backend
-   */
+
   cargarMetodosInspeccion(): void {
     this.cargando = true;
     this.error = '';
@@ -70,7 +68,7 @@ export class MetodoInspeccionComponent implements OnInit {
     });
   }
 
-  // Getter para métodos filtrados
+
   get metodosFiltrados(): MetodoInspeccion[] {
     if (!this.filtro.trim()) {
       return this.metodosInspeccion;
@@ -80,24 +78,23 @@ export class MetodoInspeccionComponent implements OnInit {
       (metodo) =>
         metodo.nombre.toLowerCase().includes(filtroLower) ||
         metodo.descripcion.toLowerCase().includes(filtroLower) ||
-        (metodo.metodoInspeccionId?.toString() || '').includes(filtroLower) ||
+        (metodo.id?.toString() || '').includes(filtroLower) ||
         this.getEstadoTexto(metodo.estado).toLowerCase().includes(filtroLower)
     );
   }
 
-  // Getter para métodos paginados
+
   get metodosPaginados(): MetodoInspeccion[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
     return this.metodosFiltrados.slice(inicio, fin);
   }
 
-  // Getter para total de páginas
+
   get totalPaginas(): number {
     return Math.ceil(this.metodosFiltrados.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -127,7 +124,7 @@ export class MetodoInspeccionComponent implements OnInit {
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.metodoEditando = {
-      metodoInspeccionId: null,
+      id: null,
       nombre: '',
       descripcion: '',
       estado: 'A'
@@ -146,14 +143,13 @@ export class MetodoInspeccionComponent implements OnInit {
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.metodoEditando = {
-      metodoInspeccionId: null,
+      id: null,
       nombre: '',
       descripcion: '',
       estado: 'A'
     };
   }
 
-  // Guardar método de inspección (crear o editar)
   guardarMetodoInspeccion(): void {
     if (!this.metodoEditando.nombre.trim()) {
       alert('El nombre del método de inspección es requerido');
@@ -167,10 +163,10 @@ export class MetodoInspeccionComponent implements OnInit {
 
     this.guardando = true;
 
-    if (this.modoEdicion && this.metodoEditando.metodoInspeccionId) {
+    if (this.modoEdicion && this.metodoEditando.id) {
       // Editar existente
       this.metodoInspeccionService.actualizarMetodoInspeccion(
-        this.metodoEditando.metodoInspeccionId,
+        this.metodoEditando.id,
         this.metodoEditando
       ).subscribe({
         next: () => {
@@ -185,7 +181,7 @@ export class MetodoInspeccionComponent implements OnInit {
         }
       });
     } else {
-      // Crear nuevo
+
       this.metodoInspeccionService.crearMetodoInspeccion(this.metodoEditando).subscribe({
         next: () => {
           this.cargarMetodosInspeccion();
@@ -201,13 +197,12 @@ export class MetodoInspeccionComponent implements OnInit {
     }
   }
 
-  // Abrir modal detalle
+
   verDetalle(metodo: MetodoInspeccion): void {
     this.metodoDetalle = metodo;
     this.mostrarModalDetalle = true;
   }
 
-  // Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.metodoDetalle = null;

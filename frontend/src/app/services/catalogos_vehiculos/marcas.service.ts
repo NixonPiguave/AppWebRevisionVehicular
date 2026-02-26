@@ -19,25 +19,20 @@ export interface MarcaVehiculo {
 })
 export class MarcaVehiculoService {
   private apiUrl = 'http://localhost:8080/api/marcas';
-
   constructor(private http: HttpClient) {}
 
   listarMarcas(): Observable<MarcaVehiculo[]> {
     return this.http.get<MarcaVehiculo[]>(this.apiUrl);
   }
-
   crearMarca(marca: MarcaVehiculo): Observable<MarcaVehiculo> {
     return this.http.post<MarcaVehiculo>(this.apiUrl, marca);
   }
-
   actualizarMarca(id: number, marca: MarcaVehiculo): Observable<MarcaVehiculo> {
     return this.http.put<MarcaVehiculo>(`${this.apiUrl}/${id}`, marca);
   }
-
   obtenerMarcaPorId(id: number): Observable<MarcaVehiculo> {
     return this.http.get<MarcaVehiculo>(`${this.apiUrl}/${id}`);
   }
-
   eliminarMarca(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }

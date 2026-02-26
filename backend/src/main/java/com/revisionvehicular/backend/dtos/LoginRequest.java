@@ -9,4 +9,5 @@ public class LoginRequest {
 
     private String usuario;
     private String password;
+    private String estado;
 }

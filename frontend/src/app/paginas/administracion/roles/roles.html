@@ -170,14 +170,21 @@
         </select>
       </div>
 
-      <!-- ⭐ NUEVA SECCIÓN: Permisos -->
+
       <div class="form-grupo permisos-grupo">
         <label class="permisos-label">
           Permisos del Rol *
           <span class="permisos-ayuda">(Seleccione al menos uno)</span>
         </label>
 
-        <div class="permisos-lista">
+        <!-- Loading de permisos -->
+        <div *ngIf="permisosDisponibles.length === 0" class="permisos-cargando">
+          <mat-icon>hourglass_empty</mat-icon>
+          Cargando permisos...
+        </div>
+
+        <!-- Lista dinámica (ya no hardcodeada) -->
+        <div class="permisos-lista" *ngIf="permisosDisponibles.length > 0">
           <div
             *ngFor="let permiso of permisosFormulario"
             class="permiso-item"

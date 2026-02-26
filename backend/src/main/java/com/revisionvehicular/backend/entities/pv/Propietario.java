@@ -23,7 +23,7 @@ public class Propietario {
     private String nombre;
 
     @Column(name = "telefono",length = 30)
-    private Integer telefono;
+    private String telefono;
 
     @Column(name = "correo",nullable = true, length = 30)
     private String correo;

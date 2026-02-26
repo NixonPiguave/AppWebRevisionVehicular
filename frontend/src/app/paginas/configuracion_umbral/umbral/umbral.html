@@ -1,0 +1,179 @@
+<div class="crud-container">
+
+  <!-- Mensaje de error -->
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarDatos()">Reintentar</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando umbrales...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+
+    <!-- Header -->
+    <div class="crud-header">
+      <h2>Gestión de Umbrales</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        <span>Nuevo Umbral</span>
+      </button>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="crud-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Unidad</th>
+          <th>Descripción</th>
+          <th>Mín</th>
+          <th>Máx</th>
+          <th>Calif.</th>
+          <th>Inc Min</th>
+          <th>Inc Max</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let umbral of umbralesPaginados">
+          <td>{{ umbral.idUmbral }}</td>
+          <td>{{ umbral.nombreUnidad }}</td>
+          <td>{{ umbral.nombreDescripcion }}</td>
+          <td>{{ umbral.valorMin }}</td>
+          <td>{{ umbral.valorMax }}</td>
+          <td>{{ umbral.calificacion }}</td>
+          <td>
+            <mat-icon *ngIf="umbral.incValorMin === 1">check</mat-icon>
+            <mat-icon *ngIf="umbral.incValorMin === 0">close</mat-icon>
+          </td>
+          <td>
+            <mat-icon *ngIf="umbral.incValorMax === 1">check</mat-icon>
+            <mat-icon *ngIf="umbral.incValorMax === 0">close</mat-icon>
+          </td>
+          <td>
+            <span
+              class="estado-badge"
+              [class.activo]="umbral.estado === 'A'"
+              [class.inactivo]="umbral.estado === 'I'"
+            >
+              {{ getEstadoTexto(umbral.estado) }}
+            </span>
+          </td>
+          <td class="td-acciones">
+            <button class="btn-accion btn-editar"
+                    (click)="abrirModalEditar(umbral)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-wide" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Umbral' : 'Nuevo Umbral' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Unidad -->
+      <div class="form-grupo">
+        <label>Unidad de Medida *</label>
+        <select [(ngModel)]="umbralEditando.idUnidadMedida" class="form-select">
+          <option [value]="0" disabled>-- Seleccione unidad --</option>
+          <option *ngFor="let u of unidades" [value]="u.idUnidadMedida">
+            {{ u.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Descripción -->
+      <div class="form-grupo">
+        <label>Descripción *</label>
+        <select [(ngModel)]="umbralEditando.idDescripcionUmbral" class="form-select">
+          <option [value]="0" disabled>-- Seleccione descripción --</option>
+          <option *ngFor="let d of descripciones" [value]="d.idDescripcionUmbral">
+            {{ d.descripcion }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Valores -->
+      <div class="form-grupo">
+        <label>Valor Mínimo *</label>
+        <input type="number"
+               [(ngModel)]="umbralEditando.valorMin"
+               class="form-input" />
+      </div>
+
+      <div class="form-grupo">
+        <label>Valor Máximo *</label>
+        <input type="number"
+               [(ngModel)]="umbralEditando.valorMax"
+               class="form-input" />
+      </div>
+      <!-- Checkboxes -->
+      <div class="form-grupo checkbox-group">
+        <label>
+          <input type="checkbox"
+                 [checked]="umbralEditando.incValorMin === 1"
+                 (change)="umbralEditando.incValorMin = $event.target.checked ? 1 : 0">
+          Incluye Valor Mínimo
+        </label>
+      </div>
+      <div class="form-grupo checkbox-group">
+        <label>
+          <input type="checkbox"
+                 [checked]="umbralEditando.incValorMax === 1"
+                 (change)="umbralEditando.incValorMax = $event.target.checked ? 1 : 0">
+          Incluye Valor Máximo
+        </label>
+      </div>
+      <div class="form-grupo">
+        <label>Calificación *</label>
+        <select [(ngModel)]="umbralEditando.calificacion" class="form-select">
+          <option [value]="0">0</option>
+          <option [value]="1">1</option>
+          <option [value]="2">2</option>
+          <option [value]="3">3</option>
+        </select>
+      </div>
+
+      <!-- Estado -->
+      <div class="form-grupo">
+        <label>Estado</label>
+        <select [(ngModel)]="umbralEditando.estado" class="form-select">
+          <option value="A">Activo</option>
+          <option value="I">Inactivo</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardar()">
+        {{ modoEdicion ? 'Guardar Cambios' : 'Crear Umbral' }}
+      </button>
+    </div>
+
+  </div>
+</div>

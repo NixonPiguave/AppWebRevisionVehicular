@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.ant;
 
+import com.revisionvehicular.backend.entities.srtv.MetodosPago;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -32,8 +33,9 @@ public class PagoDeudaVehicular {
     @Column(name = "monto_pendiente", precision = 10, scale = 2, nullable = false)
     private BigDecimal montoPendiente;
 
-    @Column(name = "metodo_pagado", precision = 10, scale = 2, nullable = false)
-    private String metodoPago;
+    @ManyToOne
+    @JoinColumn(name = "id_metodo_pago", nullable = false)
+    private MetodosPago metodoPago;
 
     @Column(name = "monto_total", precision = 10, scale = 2, nullable = false)
     private BigDecimal montoTotal;

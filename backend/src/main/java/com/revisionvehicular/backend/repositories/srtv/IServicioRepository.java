@@ -10,11 +10,10 @@ import org.springframework.stereotype.Repository;
 public interface IServicioRepository extends JpaRepository<Servicio, Long> {
 
     @Procedure(name = "sp_insertar_servicio")
-    Long insertarServicio(
+    void insertarServicio(
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
             @Param("p_requiere_revision") String requiereRevision,
-            @Param("p_genera_multa") String generaMulta,
             @Param("p_estado") String estado
     );
 
@@ -24,7 +23,7 @@ public interface IServicioRepository extends JpaRepository<Servicio, Long> {
             @Param("p_nombre") String nombre,
             @Param("p_descripcion") String descripcion,
             @Param("p_requiere_revision") String requiereRevision,
-            @Param("p_genera_multa") String generaMulta,
             @Param("p_estado") String estado
     );
+
 }

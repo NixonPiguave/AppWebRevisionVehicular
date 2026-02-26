@@ -656,3 +656,62 @@ mat-icon {
     width: 100%;
   }
 }
+
+
+/* ============================================
+   VALIDACIONES Y ERRORES
+   ============================================ */
+
+/* Campo único */
+.campo-unico {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #666;
+  font-style: italic;
+}
+
+/* Input con error */
+.input-error {
+  border-color: #dc2626 !important;
+  background-color: #fef2f2 !important;
+}
+
+.input-error:focus {
+  border-color: #dc2626 !important;
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+/* Mensaje de error */
+.error-mensaje {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #dc2626;
+  font-size: 0.85rem;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.error-mensaje mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Hint informativo */
+.input-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.input-hint mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #999;
+}

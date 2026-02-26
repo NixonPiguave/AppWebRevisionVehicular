@@ -21,19 +21,15 @@ export interface Modelo {
   anioDesde: number;
   anioHasta: number;
   estado: string;
-
   marcaId: number;
-
-  // Campos auxiliares para mostrar nombres en la tabla no se si usarlo
   marcaNombre?: string;
-
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class ModeloService {
-  private apiUrl = 'http://localhost:8080/api/modelos';
+  private apiUrl = 'http://localhost:8080/api/modelosvehiculo';
   private marcasUrl = 'http://localhost:8080/api/marcas';
 
 
@@ -42,20 +38,15 @@ export class ModeloService {
   listar(): Observable<Modelo[]> {
     return this.http.get<Modelo[]>(this.apiUrl);
   }
-
-
   crear(modelo: Modelo): Observable<Modelo> {
     return this.http.post<Modelo>(this.apiUrl, modelo);
   }
-
-  actualizarUsuario(id: number, modelo: Modelo): Observable<Modelo> {
+  actualizar(id: number, modelo: Modelo): Observable<Modelo> {
     return this.http.put<Modelo>(`${this.apiUrl}/${id}`, modelo);
   }
-
   obtenerID(id: number): Observable<Modelo> {
     return this.http.get<Modelo>(`${this.apiUrl}/${id}`);
   }
-
   // Cargar datos para los selects
   listarMarcas(): Observable<Marca[]> {
     return this.http.get<Marca[]>(this.marcasUrl);

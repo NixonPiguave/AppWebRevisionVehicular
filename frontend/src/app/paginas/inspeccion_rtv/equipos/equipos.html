@@ -183,26 +183,40 @@
             />
           </div>
 
+
+          <!-- Serial con validación -->
           <div class="form-grupo">
-            <label for="serialEquipo">Número de Serie *</label>
+            <label for="serialEquipo">Número de Serie * <span class="campo-unico">(único)</span></label>
             <input
               type="text"
               id="serialEquipo"
               [(ngModel)]="equipoEditando.serialEquipo"
               class="form-input"
+              [class.input-error]="erroresValidacion.serialEquipo"
               placeholder="Ingrese el número de serie"
             />
+            <small class="error-mensaje" *ngIf="erroresValidacion.serialEquipo">
+              <mat-icon>error</mat-icon>
+              {{ erroresValidacion.serialEquipo }}
+            </small>
           </div>
 
+
+          <!-- Código Interno con validación -->
           <div class="form-grupo">
-            <label for="codigoInterno">Código Interno *</label>
+            <label for="codigoInterno">Código Interno * <span class="campo-unico">(único)</span></label>
             <input
               type="text"
               id="codigoInterno"
               [(ngModel)]="equipoEditando.codigoInterno"
               class="form-input"
+              [class.input-error]="erroresValidacion.codigoInterno"
               placeholder="Ingrese el código interno"
             />
+            <small class="error-mensaje" *ngIf="erroresValidacion.codigoInterno">
+              <mat-icon>error</mat-icon>
+              {{ erroresValidacion.codigoInterno }}
+            </small>
           </div>
         </div>
 
@@ -219,6 +233,8 @@
             />
           </div>
 
+
+          <!-- Fecha de calibración con validación -->
           <div class="form-grupo">
             <label for="fechaUltimaCalibracion">Última Calibración</label>
             <input
@@ -226,9 +242,20 @@
               id="fechaUltimaCalibracion"
               [(ngModel)]="equipoEditando.ultimaCalibracion"
               class="form-input"
+              [class.input-error]="erroresValidacion.ultimaCalibracion"
+              [max]="getFechaHoy()"
             />
+            <small class="error-mensaje" *ngIf="erroresValidacion.ultimaCalibracion">
+              <mat-icon>error</mat-icon>
+              {{ erroresValidacion.ultimaCalibracion }}
+            </small>
+            <small class="input-hint" *ngIf="!erroresValidacion.ultimaCalibracion">
+              <mat-icon>info</mat-icon>
+              No puede ser mayor a la fecha actual
+            </small>
           </div>
 
+          <!-- Fecha de mantenimiento con validación -->
           <div class="form-grupo">
             <label for="fechaUltimoMantenimiento">Último Mantenimiento</label>
             <input
@@ -236,7 +263,17 @@
               id="fechaUltimoMantenimiento"
               [(ngModel)]="equipoEditando.ultimoMantenimiento"
               class="form-input"
+              [class.input-error]="erroresValidacion.ultimoMantenimiento"
+              [max]="getFechaHoy()"
             />
+            <small class="error-mensaje" *ngIf="erroresValidacion.ultimoMantenimiento">
+              <mat-icon>error</mat-icon>
+              {{ erroresValidacion.ultimoMantenimiento }}
+            </small>
+            <small class="input-hint" *ngIf="!erroresValidacion.ultimoMantenimiento">
+              <mat-icon>info</mat-icon>
+              No puede ser mayor a la fecha actual
+            </small>
           </div>
 
           <div class="form-grupo">

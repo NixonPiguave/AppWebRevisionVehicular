@@ -9,14 +9,11 @@ public class PagoMultaDTO {
 
     private Long idPagoMulta;
     private Long idMulta;
-
     private LocalDate fechaPago;
-
     private BigDecimal montoOriginal;
     private BigDecimal montoPagado;
     private BigDecimal montoPendiente;
     private BigDecimal montoTotal;
-
-    private String metodoPago;
+    private Long idMetodoPago;
     private String estado;
 }

@@ -1,13 +1,17 @@
 package com.revisionvehicular.backend.entities.srtv;
 
+import com.revisionvehicular.backend.entities.rtv.TarifarioTramite;
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 
 @Entity
 @Table(name = "srtv_tipo_servicio")
 @Data
 public class Servicio {
-    @jakarta.persistence.Id
+
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_tipo_tramite")
     private Long idTipoTramite;
@@ -18,13 +22,22 @@ public class Servicio {
     @Column(name = "descripcion", length = 255)
     private String descripcion;
 
-    @Column(name = "requiere_revision", nullable = false)
-    private String requiereRevision;
-
-    @Column(name = "genera_multa", nullable = false)
+    @Column(name = "genera_multa", length = 255, nullable = false)
     private String generaMulta;
+
+    @Column(name = "requiere_revision", length = 255, nullable = false)
+    private String requiereRevision;
 
     @Column(name = "estado", length = 20, nullable = false)
     private String estado;
 
+    @ManyToOne
+    @JoinColumn(name = "metodo_pago_id")
+    private MetodosPago metodosPago;
+
+    @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TarifarioTramite> tarifarios;
+
+    @OneToMany(mappedBy = "servicio", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Turnos> turnos;
 }

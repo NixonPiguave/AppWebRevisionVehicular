@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 @Table(name = "cv_cap_carga")
 @Data
 public class CapCarga {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long capcargaid;

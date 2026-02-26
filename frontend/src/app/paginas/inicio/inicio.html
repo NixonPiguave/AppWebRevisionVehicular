@@ -14,12 +14,30 @@
     [class.show]="sidebarOpen">
 
     <!-- LOGO -->
+
+    <!-- LOGO DINÁMICO -->
     <div class="sidebar-logo">
+      <!-- Spinner mientras carga -->
+      <div class="logo-loading" *ngIf="cargandoIcono">
+        <div class="spinner-logo-small"></div>
+      </div>
+
+      <!-- Ícono de empresa desde Cloudinary (si existe) -->
       <img
-        src="/logo-rtv.png"
-        alt="Logo RTV"
+        *ngIf="!cargandoIcono && empresaIcono"
+        [src]="empresaIcono"
+        [alt]="empresaNombre"
         class="logo"
       />
+
+      <!-- Logo por defecto (si no hay ícono en BD) -->
+      <img
+        *ngIf="!cargandoIcono && !empresaIcono"
+        src="/logo-rtv.png"
+        alt="RTV"
+        class="logo"
+      />
+
       <span *ngIf="!sidebarCollapsed">RTV</span>
     </div>
 
@@ -57,7 +75,7 @@
 
           <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
             <a class="submenu-item">Vehículos</a>
-            <a class="submenu-item">Propietario</a>
+            <a routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
             <a class="submenu-item">Revisiones</a>
             <a class="submenu-item">Resultados de Revisión</a>
           </div>
@@ -120,10 +138,10 @@
           <div class="submenu" [class.open]="catalogoVehiculosOpen && !sidebarCollapsed">
             <a routerLink="/inicio/catalogo-vehiculos/marcas" routerLinkActive="active" class="submenu-item">Marcas</a>
             <a routerLink="/inicio/catalogo-vehiculos/modelos" routerLinkActive="active" class="submenu-item">Modelos</a>
-            <a class="submenu-item">Tipos de Vehículo</a>
+            <a routerLink="/inicio/catalogo-vehiculos/tipo-vehiculo" routerLinkActive="active" class="submenu-item">Tipos de Vehículo</a>
             <a routerLink="/inicio/catalogo-vehiculos/clases" routerLinkActive="active" class="submenu-item">Clases</a>
             <a routerLink="/inicio/catalogo-vehiculos/categorias" routerLinkActive="active" class="submenu-item">Categorías</a>
-            <a class="submenu-item">Subcategorías</a>
+            <a  routerLink="/inicio/catalogo-vehiculos/subcategorias" routerLinkActive="active" class="submenu-item">Subcategorías</a>
             <a routerLink="/inicio/catalogo-vehiculos/tipo-combustible" routerLinkActive="active" class="submenu-item">Tipos de Combustible</a>
             <a routerLink="/inicio/catalogo-vehiculos/tipo-matricula" routerLinkActive="active" class="submenu-item">Tipos de Matrícula</a>
             <a routerLink="/inicio/catalogo-vehiculos/traccion" routerLinkActive="active" class="submenu-item">Tracción</a>
@@ -221,16 +239,9 @@
           </div>
 
           <div class="submenu" [class.open]="antTramitesOpen && !sidebarCollapsed">
-            <a class="submenu-item">Tipos de Trámite</a>
-            <a class="submenu-item">Estados de Trámite</a>
+            <a routerLink="/inicio/ant/Calendarizacion-Matriculacion" routerLinkActive="active" class="submenu-item">Calendarización Matriculación</a>
+            <a class="submenu-item">Tipo de Trámite</a>
             <a class="submenu-item">Tipos de Excepción</a>
-            <a class="submenu-item">Estados de Excepción</a>
-            <a class="submenu-item">Estados de Multa</a>
-            <a class="submenu-item">Tarifario</a>
-            <a class="submenu-item">Documentos Requeridos</a>
-            <a class="submenu-item">Entidades de Tránsito</a>
-            <a class="submenu-item">Formas de Pago</a>
-            <a class="submenu-item">Tipos de Documento</a>
           </div>
         </div>
       </div>
@@ -260,7 +271,8 @@
 
           <div class="submenu" [class.open]="configuracionUmbralOpen && !sidebarCollapsed">
             <a routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
-            <a class="submenu-item">Descripción de Umbral</a>
+            <a routerLink="/inicio/configuracion-umbral/descripcion-umbral" routerLinkActive="active" class="submenu-item">Descripción de Umbral</a>
+            <a routerLink="/inicio/configuracion-umbral/umbral" routerLinkActive="active" class="submenu-item">Umbral</a>
           </div>
         </div>
       </div>
@@ -311,12 +323,31 @@
           <mat-icon>menu</mat-icon>
         </button>
 
-        <img
-          src="/logo-rtv.png"
-          alt=""
-          class="header-logo"
-        />
-        <span class="title">Revisión Técnica Vehicular</span>
+        <!-- LOGO DINÁMICO -->
+          <!-- Spinner mientras carga -->
+          <div class="logo-loading" *ngIf="cargandoIcono">
+            <div class="spinner-logo-small"></div>
+          </div>
+
+          <!-- Ícono de empresa desde Cloudinary (si existe) -->
+          <img
+            *ngIf="!cargandoIcono && empresaIcono"
+            [src]="empresaIcono"
+            [alt]="empresaNombre"
+            class="logo"
+          />
+
+          <!-- Logo por defecto (si no hay ícono en BD) -->
+          <img
+            *ngIf="!cargandoIcono && !empresaIcono"
+            src="/logo-rtv.png"
+            alt="RTV"
+            class="logo"
+          />
+
+          <span class="title">Revisión Técnica Vehicular</span>
+
+
       </div>
 
       <div class="right">

@@ -10,7 +10,8 @@ public class UnidadMedida {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long umedida_id;
+    @Column(name = "umedida_id")
+    private Long umedidaid;
 
     @Column(nullable = false, length = 50)
     private String nombre;

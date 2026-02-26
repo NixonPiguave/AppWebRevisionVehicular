@@ -57,10 +57,10 @@
         <thead>
         <tr>
           <th>ID</th>
+          <th>Logo</th>
           <th>Nombre</th>
           <th>Empresa</th>
           <th>País de Origen</th>
-          <th>Grupo Automotriz</th>
           <th>Estado</th>
           <th class="th-acciones">Acciones</th>
         </tr>
@@ -68,10 +68,17 @@
         <tbody>
         <tr *ngFor="let marca of marcasPaginadas">
           <td>{{ marca.id }}</td>
+          <td>
+            <div class="logo-tabla" *ngIf="marca.logoUrl && marca.logoUrl.startsWith('http')">
+              <img [src]="marca.logoUrl" [alt]="marca.nombre" />
+            </div>
+            <div class="logo-tabla-placeholder" *ngIf="!marca.logoUrl || !marca.logoUrl.startsWith('http')">
+              <mat-icon>image</mat-icon>
+            </div>
+          </td>
           <td class="txt-resaltado">{{ marca.nombre }}</td>
           <td>{{ marca.empresa }}</td>
           <td>{{ marca.paisOrigen }}</td>
-          <td>{{ marca.grupoAutomotriz }}</td>
           <td>
             <span
               class="estado-badge"
@@ -184,15 +191,49 @@
       </div>
 
       <div class="form-row">
+        <!--  Selector de país con autocompletado -->
         <div class="form-grupo">
           <label for="paisOrigen">País de Origen</label>
-          <input
-            type="text"
-            id="paisOrigen"
-            [(ngModel)]="marcaEditando.paisOrigen"
-            class="form-input"
-            placeholder="Ej: Japón, Estados Unidos"
-          />
+          <div class="autocomplete-wrapper">
+            <input
+              type="text"
+              id="paisOrigen"
+              [(ngModel)]="marcaEditando.paisOrigen"
+              (focus)="abrirListaPaises()"
+              class="form-input"
+              placeholder="Selecciona o escribe un país"
+              autocomplete="off"
+              readonly=""
+            />
+            <mat-icon class="autocomplete-icon">public</mat-icon>
+
+            <!-- Lista desplegable de países -->
+            <div class="autocomplete-dropdown" *ngIf="mostrarListaPaises">
+              <div class="autocomplete-search">
+                <input
+                  type="text"
+                  [(ngModel)]="filtroPais"
+                  (ngModelChange)="filtrarPaises()"
+                  placeholder="Buscar país..."
+                  class="autocomplete-search-input"
+                  (click)="$event.stopPropagation()"
+                />
+                <mat-icon>search</mat-icon>
+              </div>
+              <div class="autocomplete-list">
+                <div
+                  *ngFor="let pais of paisesFiltrados"
+                  class="autocomplete-item"
+                  (click)="seleccionarPais(pais); $event.stopPropagation()"
+                >
+                  {{ pais }}
+                </div>
+                <div *ngIf="paisesFiltrados.length === 0" class="autocomplete-empty">
+                  No se encontraron países
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="form-grupo">
@@ -229,15 +270,42 @@
         </div>
       </div>
 
+      <!--  Logo con Cloudinary -->
       <div class="form-grupo">
-        <label for="logoUrl">URL del Logo</label>
-        <input
-          type="url"
-          id="logoUrl"
-          [(ngModel)]="marcaEditando.logoUrl"
-          class="form-input"
-          placeholder="https://ejemplo.com/logo.png"
-        />
+        <label>Logo de la Marca</label>
+        <div class="logo-upload-container">
+
+          <!-- Preview del logo -->
+          <div class="logo-preview" *ngIf="logoPreview">
+            <img [src]="logoPreview" alt="Preview del logo" />
+            <button type="button" class="btn-remover-logo" (click)="removerLogo()" [disabled]="uploadingLogo">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+
+          <!-- Input para seleccionar -->
+          <div class="logo-input-wrapper" *ngIf="!logoPreview && !uploadingLogo">
+            <input
+              type="file"
+              id="logoMarca"
+              (change)="onLogoSelected($event)"
+              accept="image/*"
+              class="logo-input"
+            />
+            <label for="logoMarca" class="logo-input-label">
+              <mat-icon>cloud_upload</mat-icon>
+              <span>Seleccionar logo</span>
+              <small>(JPG, PNG, GIF, WebP - Máx 2MB)</small>
+            </label>
+          </div>
+
+          <!-- Indicador de subida -->
+          <div class="upload-progress" *ngIf="uploadingLogo">
+            <div class="spinner-upload"></div>
+            <span>Subiendo logo a Cloudinary...</span>
+          </div>
+
+        </div>
       </div>
 
       <div class="form-grupo">
@@ -272,6 +340,11 @@
     </div>
 
     <div class="modal-body" *ngIf="marcaDetalle">
+      <!-- Logo en detalle -->
+      <div class="detalle-logo-container" *ngIf="marcaDetalle.logoUrl && marcaDetalle.logoUrl.startsWith('http')">
+        <img [src]="marcaDetalle.logoUrl" [alt]="marcaDetalle.nombre" class="detalle-logo-img" />
+      </div>
+
       <div class="detalle-card">
         <div class="detalle-item">
           <span class="detalle-label">ID del Registro:</span>
@@ -300,10 +373,6 @@
         <div class="detalle-item">
           <span class="detalle-label">Fecha de Baja:</span>
           <span class="detalle-valor">{{ formatearFecha(marcaDetalle.fechaBaja) }}</span>
-        </div>
-        <div class="detalle-item">
-          <span class="detalle-label">Logo URL:</span>
-          <span class="detalle-valor">{{ marcaDetalle.logoUrl || 'No especificado' }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Estado:</span>

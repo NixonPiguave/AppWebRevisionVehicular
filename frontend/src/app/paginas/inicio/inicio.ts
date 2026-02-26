@@ -1,7 +1,8 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { EmpresaService } from '../../services/administracion/empresa.service'; // ✅ NUEVO
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -17,6 +18,11 @@ export class InicioComponent implements OnInit {
   sidebarOpen = false;
   nombreUsuario: string = 'Usuario';
 
+  //  Variables para ícono dinámico
+  empresaIcono: string | null = null;
+  empresaNombre: string = 'RTV';
+  cargandoIcono: boolean = true;
+
   // Estado de expansión para cada sección principal
   gestionVehicularOpen = false;
   operacionesOpen = false;
@@ -29,11 +35,46 @@ export class InicioComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private empresaService: EmpresaService,
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit() {
     this.checkScreenSize();
+    this.cargarIconoEmpresa();
+  }
+
+   // Cargar ícono de empresa para sidebar
+  cargarIconoEmpresa(): void {
+    this.empresaService.listarEmpresas().subscribe({
+      next: (empresas) => {
+        if (empresas.length > 0) {
+          const empresa = empresas[0];
+
+          // Si tiene ícono de Cloudinary, usarlo
+          if (empresa.iconoempresa && empresa.iconoempresa.startsWith('http')) {
+            this.empresaIcono = empresa.iconoempresa;
+            console.log('[INICIO] Ícono de empresa cargado:', this.empresaIcono);
+          }
+
+          // Usar nombre corto de la empresa (opcional)
+          if (empresa.nombre) {
+            // Puedes usar las iniciales o nombre completo
+            this.empresaNombre = empresa.nombre.substring(0, 3).toUpperCase();
+          }
+        }
+
+        this.cargandoIcono = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.warn('[INICIO] No se pudo cargar ícono de empresa:', err);
+        // No es crítico, usar ícono por defecto
+        this.cargandoIcono = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   toggleSidebar() {
@@ -81,7 +122,6 @@ export class InicioComponent implements OnInit {
     }
   }
 
-  // Métodos para toggle de cada sección (comportamiento acordeón)
   toggleGestionVehicular() {
     this.closeAllExcept('gestionVehicular');
     this.gestionVehicularOpen = !this.gestionVehicularOpen;
@@ -122,7 +162,6 @@ export class InicioComponent implements OnInit {
     this.administracionOpen = !this.administracionOpen;
   }
 
-  // Cerrar todas las secciones excepto la que se está abriendo
   private closeAllExcept(sectionName: string) {
     if (sectionName !== 'gestionVehicular') this.gestionVehicularOpen = false;
     if (sectionName !== 'operaciones') this.operacionesOpen = false;

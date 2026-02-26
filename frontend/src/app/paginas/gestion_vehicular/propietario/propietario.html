@@ -1,0 +1,287 @@
+<div class="crud-container">
+  <!-- Mensaje de error -->
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargarPropietarios()">Reintentar</button>
+  </div>
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando propietarios...</span>
+  </div>
+
+  <!-- Contenido principal -->
+  <div *ngIf="!cargando || error">
+    <!-- Header -->
+    <div class="crud-header">
+      <h2>Gestión de Propietarios</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        <span>Nuevo Propietario</span>
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="crud-controles">
+      <div class="control-grupo">
+        <label for="filtro">Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            id="filtro"
+            [(ngModel)]="filtro"
+            (ngModelChange)="onFiltroChange()"
+            placeholder="Buscar por nombre, documento, correo..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+      <div class="control-grupo">
+        <label for="registros">Mostrar:</label>
+        <select
+          id="registros"
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="crud-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Documento</th>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Teléfono</th>
+          <th>Fecha Registro</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let propietario of propietariosPaginados">
+          <td>{{ propietario.idPropietario }}</td>
+          <td>
+            <span class="badge-documento">{{ propietario.documentoIdentidad }}</span>
+          </td>
+          <td class="txt-resaltado">{{ propietario.nombre }}</td>
+          <td>{{ propietario.correo }}</td>
+          <td>{{ propietario.telefono }}</td>
+          <td>{{ formatearFecha(propietario.fechaRegistro) }}</td>
+          <td class="td-acciones">
+            <button
+              class="btn-accion btn-ver"
+              (click)="verDetalle(propietario)"
+              title="Ver detalle"
+            >
+              <mat-icon>visibility</mat-icon>
+            </button>
+
+            <button
+              class="btn-accion btn-editar"
+              (click)="abrirModalEditar(propietario)"
+              title="Editar"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="propietariosPaginados.length === 0 && !error && !cargando">
+          <td colspan="7" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Footer con paginación e info -->
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="propietariosFiltrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > propietariosFiltrados.length
+        ? propietariosFiltrados.length
+        : paginaActual * registrosPorPagina }}
+        de {{ propietariosFiltrados.length }} registros
+      </div>
+
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual - 1)"
+          [disabled]="paginaActual === 1"
+        >
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <button
+          *ngFor="let pagina of paginas"
+          class="btn-pagina"
+          [class.activa]="pagina === paginaActual"
+          (click)="irAPagina(pagina)"
+        >
+          {{ pagina }}
+        </button>
+
+        <button
+          class="btn-pagina"
+          (click)="irAPagina(paginaActual + 1)"
+          [disabled]="paginaActual === totalPaginas"
+        >
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Crear / Editar -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-wide" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Propietario' : 'Nuevo Propietario' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Documento de Identidad -->
+      <div class="form-grupo">
+        <label for="documentoIdentidad">Documento de Identidad <span class="required">*</span></label>
+        <input
+          type="text"
+          id="documentoIdentidad"
+          [(ngModel)]="propietarioEditando.documentoIdentidad"
+          class="form-input"
+          placeholder="Ej: 1234567890"
+          maxlength="13"
+        />
+        <small class="form-hint">Cédula o RUC</small>
+      </div>
+
+      <!-- Nombre -->
+      <div class="form-grupo">
+        <label for="nombre">Nombre Completo <span class="required">*</span></label>
+        <input
+          type="text"
+          id="nombre"
+          [(ngModel)]="propietarioEditando.nombre"
+          class="form-input"
+          placeholder="Ej: Juan Pérez García"
+        />
+      </div>
+
+      <!-- Correo -->
+      <div class="form-grupo">
+        <label for="correo">Correo Electrónico <span class="required">*</span></label>
+        <input
+          type="email"
+          id="correo"
+          [(ngModel)]="propietarioEditando.correo"
+          class="form-input"
+          placeholder="Ej: juan.perez@example.com"
+        />
+      </div>
+
+      <!-- Teléfono -->
+      <div class="form-grupo">
+        <label for="telefono">Teléfono</label>
+        <input
+          type="tel"
+          id="telefono"
+          [(ngModel)]="propietarioEditando.telefono"
+          class="form-input"
+          placeholder="Ej: 0987654321"
+          pattern="[0-9]*"
+        />
+        <small class="form-hint">Solo números</small>
+      </div>
+
+      <!-- Dirección -->
+      <div class="form-grupo">
+        <label for="direccion">Dirección</label>
+        <textarea
+          id="direccion"
+          [(ngModel)]="propietarioEditando.direccion"
+          class="form-input"
+          rows="2"
+          placeholder="Ingrese la dirección del propietario"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">
+        Cancelar
+      </button>
+      <button class="btn-guardar" (click)="guardarPropietario()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'add_circle' }}</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Propietario') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Detalle del Propietario</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="propietarioDetalle">
+      <div class="detalle-card">
+        <div class="detalle-item">
+          <span class="detalle-label">ID del Registro:</span>
+          <span class="detalle-valor">#{{ propietarioDetalle.idPropietario }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Documento:</span>
+          <span class="badge-documento">{{ propietarioDetalle.documentoIdentidad }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Nombre Completo:</span>
+          <span class="detalle-valor resaltado">{{ propietarioDetalle.nombre }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Correo Electrónico:</span>
+          <span class="detalle-valor">{{ propietarioDetalle.correo }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Teléfono:</span>
+          <span class="detalle-valor">{{ propietarioDetalle.telefono }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Dirección:</span>
+          <span class="detalle-valor">{{ propietarioDetalle.direccion || 'Sin dirección registrada' }}</span>
+        </div>
+        <div class="detalle-item">
+          <span class="detalle-label">Fecha de Registro:</span>
+          <span class="detalle-valor">{{ formatearFecha(propietarioDetalle.fechaRegistro) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar Vista</button>
+    </div>
+  </div>
+</div>
