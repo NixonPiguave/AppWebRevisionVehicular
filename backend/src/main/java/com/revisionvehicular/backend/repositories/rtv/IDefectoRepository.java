@@ -13,7 +13,6 @@ public interface IDefectoRepository extends JpaRepository<Defecto, Long> {
     void insertarDefecto(
             @Param("p_codigo") String codigo,
             @Param("p_descripcion") String descripcion,
-            @Param("p_gravedad") String gravedad,
             @Param("p_tipo_defecto_id") Long tipoDefectoId,
             @Param("p_subfamilia_id") Long subfamiliaId,
             @Param("p_categoria_id") Long categoriaId,
@@ -25,7 +24,6 @@ public interface IDefectoRepository extends JpaRepository<Defecto, Long> {
             @Param("p_defecto_id") Long defectoId,
             @Param("p_codigo") String codigo,
             @Param("p_descripcion") String descripcion,
-            @Param("p_gravedad") String gravedad,
             @Param("p_tipo_defecto_id") Long tipoDefectoId,
             @Param("p_subfamilia_id") Long subfamiliaId,
             @Param("p_categoria_id") Long categoriaId,

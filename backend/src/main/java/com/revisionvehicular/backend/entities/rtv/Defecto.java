@@ -19,8 +19,6 @@ public class Defecto {
     @Column(nullable = false, length = 255)
     private String descripcion;
 
-    @Column(nullable = false, length = 50)
-    private String gravedad;
 
     @ManyToOne
     @JoinColumn(name = "tipo_defecto_id", nullable = false)

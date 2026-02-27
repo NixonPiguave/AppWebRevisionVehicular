@@ -69,6 +69,7 @@ export const routes: Routes = [
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
       { path: 'defectos-inspeccion/categoria-defecto', component: CategoriaDefectoComponent },
       { path: 'defectos-inspeccion/familia-defecto', component: FamiliaComponent },
+      { path: 'defectos-inspeccion/defectos', component: DefectosComponent},
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },

@@ -8,7 +8,6 @@ public class DefectoDTO {
     private Long id;
     private String codigo;
     private String descripcion;
-    private String gravedad;
     private String estado;
 
     private Long tipoDefectoId;

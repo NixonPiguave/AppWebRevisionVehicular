@@ -1,0 +1,303 @@
+<div class="usuarios-container">
+
+  <!-- Loading -->
+  <div class="cargando" *ngIf="cargando">
+    Cargando vehículos...
+  </div>
+
+  <div *ngIf="!cargando">
+
+    <!-- Header -->
+    <div class="usuarios-header">
+      <h2>Gestión de Vehículos</h2>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nuevo Vehículo
+      </button>
+    </div>
+
+    <!-- Controles -->
+    <div class="usuarios-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <input
+          type="text"
+          [(ngModel)]="filtro"
+          (ngModelChange)="onFiltroChange()"
+          placeholder="Buscar por matrícula, VIN, chasis..."
+          class="input-filtro"
+        />
+      </div>
+
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select
+          [(ngModel)]="registrosPorPagina"
+          (ngModelChange)="onFiltroChange()"
+          class="select-registros"
+        >
+          <option [value]="5">5</option>
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="tabla-contenedor">
+      <table class="usuarios-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Matrícula</th>
+          <th>VIN</th>
+          <th>Chasis</th>
+          <th>Modelo</th>
+          <th>Color</th>
+          <th>Año</th>
+          <th>Tipo</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let vehiculo of vehiculosPaginados">
+          <td>{{ vehiculo.id }}</td>
+          <td>{{ vehiculo.matricula }}</td>
+          <td>{{ vehiculo.vin }}</td>
+          <td>{{ vehiculo.chasis }}</td>
+          <td>{{ obtenerNombreModelos(vehiculo.modeloVehiculoId) }}</td>
+          <td>{{ vehiculo.color }}</td>
+          <td>{{ vehiculo.anioFabricacion }}</td>
+          <td>{{ obtenerNombreTipoVehi(vehiculo.tipoVehiculoId) }}</td>
+          <td>
+              <span
+                class="estado-badge"
+                [class.estado-activo]="vehiculo.estado === 'A'"
+                [class.estado-inactivo]="vehiculo.estado !== 'A'"
+              >
+                {{ getEstadoTexto(vehiculo.estado) }}
+              </span>
+          </td>
+          <td class="td-acciones">
+            <button class="btn-accion btn-ver" (click)="verDetalle(vehiculo)">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(vehiculo)">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="vehiculosPaginados.length === 0">
+          <td colspan="10" class="sin-registros">
+            No se encontraron registros
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="paginacion" *ngIf="totalPaginas > 1">
+      <button
+        class="btn-pagina"
+        (click)="paginaActual = paginaActual - 1"
+        [disabled]="paginaActual === 1"
+      >
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <button
+        *ngFor="let pagina of [].constructor(totalPaginas); let i = index"
+        class="btn-pagina"
+        [class.activa]="paginaActual === i + 1"
+        (click)="paginaActual = i + 1"
+      >
+        {{ i + 1 }}
+      </button>
+
+      <button
+        class="btn-pagina"
+        (click)="paginaActual = paginaActual + 1"
+        [disabled]="paginaActual === totalPaginas"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+
+    <!-- Info -->
+    <div class="info-registros" *ngIf="vehiculosFiltrados.length > 0">
+      Mostrando
+      {{ (paginaActual - 1) * registrosPorPagina + 1 }}
+      a
+      {{
+        paginaActual * registrosPorPagina > vehiculosFiltrados.length
+          ? vehiculosFiltrados.length
+          : paginaActual * registrosPorPagina
+      }}
+      de {{ vehiculosFiltrados.length }} registros
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL CREAR / EDITAR -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>{{ modoEdicion ? 'Editar Vehículo' : 'Nuevo Vehículo' }}</h3>
+      <button class="btn-cerrar" (click)="cerrarModalForm()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Matrícula *</label>
+          <input type="text" [(ngModel)]="vehiculoEditando.matricula" class="form-input">
+        </div>
+
+        <div class="form-grupo">
+          <label>VIN *</label>
+          <input type="text" [(ngModel)]="vehiculoEditando.vin" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Chasis *</label>
+          <input type="text" [(ngModel)]="vehiculoEditando.chasis" class="form-input">
+        </div>
+
+        <div class="form-grupo">
+          <label>Color</label>
+          <input type="text" [(ngModel)]="vehiculoEditando.color" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Año Fabricación</label>
+          <input type="number" [(ngModel)]="vehiculoEditando.anioFabricacion" class="form-input">
+        </div>
+
+        <div class="form-grupo">
+          <label>Capacidad Pasajeros</label>
+          <input type="number" [(ngModel)]="vehiculoEditando.capacidadPasajeros" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Tipo Vehículo</label>
+          <select [(ngModel)]="vehiculoEditando.tipoVehiculoId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let tipo of tipoVehiculo" [value]="tipo.id">
+              {{ tipo.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Modelo</label>
+          <select [(ngModel)]="vehiculoEditando.modeloVehiculoId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let m of modelo" [value]="m.id">
+              {{ m.nombre }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Estado</label>
+          <select [(ngModel)]="vehiculoEditando.estado" class="form-select">
+            <option value="A">Activo</option>
+            <option value="I">Inactivo</option>
+          </select>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Vehículo') }}
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL DETALLE -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-detalle" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <h3>Detalle del Vehículo</h3>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body" *ngIf="vehiculoDetalle">
+      <div class="detalle-grid">
+
+        <div class="detalle-item">
+          <span class="detalle-label">ID:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.id }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Estado:</span>
+          <span class="detalle-valor">
+            {{ getEstadoTexto(vehiculoDetalle.estado) }}
+          </span>
+        </div>
+
+        <div class="detalle-item full-width">
+          <span class="detalle-label">Matrícula:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.matricula }}</span>
+        </div>
+
+        <div class="detalle-item full-width">
+          <span class="detalle-label">VIN:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.vin }}</span>
+        </div>
+
+        <div class="detalle-item full-width">
+          <span class="detalle-label">Chasis:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.chasis }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Modelo:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreModelos(vehiculoDetalle.modeloVehiculoId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Tipo:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreTipoVehi(vehiculoDetalle.tipoVehiculoId) }}
+          </span>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+
+  </div>
+</div>
