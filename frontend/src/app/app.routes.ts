@@ -35,6 +35,8 @@ import {
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
+import {VehiculoComponent} from './paginas/gestion_vehicular/vehiculos/vehiculos';
+import {DefectosComponent} from './paginas/defectos_inspeccion/defectos/defectos';
 
 
 export const routes: Routes = [
@@ -80,6 +82,7 @@ export const routes: Routes = [
 
       //Gestion vehicular
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
+      { path: 'gestion_vehicular/vehiculo', component: VehiculoComponent },
 
       //ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
