@@ -25,6 +25,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
 
         repository.spInsertarVehiculo(
                 dto.getPropietarioId(),
+                dto.getMatricula(),
                 dto.getChasis(),
                 dto.getVin(),
                 dto.getModeloVehiculoId(),
@@ -59,6 +60,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
         repository.spModificarVehiculo(
                 id,
                 dto.getPropietarioId(),
+                dto.getMatricula(),
                 dto.getChasis(),
                 dto.getVin(),
                 dto.getModeloVehiculoId(),

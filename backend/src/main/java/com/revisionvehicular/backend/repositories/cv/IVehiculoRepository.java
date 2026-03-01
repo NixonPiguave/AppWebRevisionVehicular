@@ -14,6 +14,7 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
     @Procedure(procedureName = "sp_vehiculo_insertar")
     void spInsertarVehiculo(
             @Param("p_id_propietario") Long propietarioId,
+            @Param("p_matricula") String matricula,
             @Param("p_chasis") String chasis,
             @Param("p_vin") String vin,
             @Param("p_id_modelo") Long modeloId,
@@ -35,6 +36,7 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
     void spModificarVehiculo(
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_propietario") Long propietarioId,
+            @Param("p_matricula") String matricula,           // ✅ AGREGADO
             @Param("p_chasis") String chasis,
             @Param("p_vin") String vin,
             @Param("p_id_modelo") Long modeloId,

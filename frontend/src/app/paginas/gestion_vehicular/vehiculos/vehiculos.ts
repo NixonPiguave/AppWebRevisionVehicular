@@ -3,15 +3,28 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { forkJoin } from 'rxjs';
 
 import {
   VehiculoService,
   Vehiculo,
   AmbitoOperacional,
-  CapacidadCarga, Categoria, Eje, MarcaVehiculo, Modelo, Subcategoria, TipoCombustible, TipoMatricula, TipoVehiculo,
+  CapacidadCarga,
+  Categoria,
+  Clase,
+  Eje,
+  MarcaVehiculo,
+  Modelo,
+  Subcategoria,
+  TipoCombustible,
+  TipoMatricula,
+  TipoVehiculo,
   Traccion
 } from '../../../services/gestion_vehicular/vehiculo.service';
-import {Clase} from '../../../services/catalogos_vehiculos/clases.service';
+import {
+  Propietario,
+  PropietarioService
+} from '../../../services/gestion_vehicular/propietario.service';
 
 @Component({
   selector: 'app-vehiculo',
@@ -23,18 +36,34 @@ import {Clase} from '../../../services/catalogos_vehiculos/clases.service';
 export class VehiculoComponent implements OnInit {
 
   vehiculos: Vehiculo[] = [];
-  ambito: AmbitoOperacional[]=[];
-  capacidadCarga: CapacidadCarga[]=[];
-  categoria: Categoria[]=[];
-  clase: Clase[]=[];
-  eje: Eje[]=[];
-  marca: MarcaVehiculo[]=[];
-  modelo: Modelo[]=[];
-  subcategoria: Subcategoria[]=[];
-  tipoCombustible: TipoCombustible[]=[];
-  tipoMatricula: TipoMatricula[]=[];
-  tipoVehiculo: TipoVehiculo[]=[];
-  traccion: Traccion[]=[];
+  ambito: AmbitoOperacional[] = [];
+  capacidadCarga: CapacidadCarga[] = [];
+  categoria: Categoria[] = [];
+  clase: Clase[] = [];
+  eje: Eje[] = [];
+  marca: MarcaVehiculo[] = [];
+  modelo: Modelo[] = [];
+  subcategoria: Subcategoria[] = [];
+  tipoCombustible: TipoCombustible[] = [];
+  tipoMatricula: TipoMatricula[] = [];
+  tipoVehiculo: TipoVehiculo[] = [];
+  traccion: Traccion[] = [];
+
+  propietarios: Propietario[] = [];
+  filtroPropietario = '';
+
+  coloresVehiculo: string[] = [
+    'Blanco',
+    'Negro',
+    'Gris',
+    'Rojo',
+    'Azul',
+    'Verde',
+    'Amarillo',
+    'Naranja',
+    'Marrón',
+    'Plateado'
+  ];
 
 
   cargando = false;
@@ -55,11 +84,14 @@ export class VehiculoComponent implements OnInit {
 
   constructor(
     private vehiculoService: VehiculoService,
+    private propietarioService: PropietarioService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.cargarDatos();
+    this.cargarDatosCatalogo();
+    this.cargarPropietarios();
   }
 
   private vehiculoVacio(): Vehiculo {
@@ -85,116 +117,41 @@ export class VehiculoComponent implements OnInit {
     };
   }
 
-  cargarDatosCatalogo(): void{
-    this.cargando = true;
 
-    this.vehiculoService.listarAmbitosOperacionales().subscribe({
-      next: (ambito)=>{
-        this.ambito = ambito;
+  cargarDatosCatalogo(): void {
+    forkJoin({
+      ambito: this.vehiculoService.listarAmbitosOperacionales(),
+      capacidadCarga: this.vehiculoService.listarCapacidadesCarga(),
+      categoria: this.vehiculoService.listarCategorias(),
+      clase: this.vehiculoService.listarClases(),
+      eje: this.vehiculoService.listarEjes(),
+      marca: this.vehiculoService.listarMarcas(),
+      modelo: this.vehiculoService.listarModelo(),
+      subcategoria: this.vehiculoService.listarSubcategoria(),
+      tipoCombustible: this.vehiculoService.listarTiposCombustible(),
+      tipoMatricula: this.vehiculoService.listarTiposMatricula(),
+      tipoVehiculo: this.vehiculoService.listarTipoVehiculo(),
+      traccion: this.vehiculoService.listarTracciones()
+    }).subscribe({
+      next: (data) => {
+        this.ambito = data.ambito;
+        this.capacidadCarga = data.capacidadCarga;
+        this.categoria = data.categoria;
+        this.clase = data.clase;
+        this.eje = data.eje;
+        this.marca = data.marca;
+        this.modelo = data.modelo;
+        this.subcategoria = data.subcategoria;
+        this.tipoCombustible = data.tipoCombustible;
+        this.tipoMatricula = data.tipoMatricula;
+        this.tipoVehiculo = data.tipoVehiculo;
+        this.traccion = data.traccion;
         this.cdr.detectChanges();
       },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Ambito Operacional ' + error);
+      error: (err) => {
+        console.error('Error al cargar catálogos:', err);
       }
     });
-    this.vehiculoService.listarCapacidadesCarga().subscribe({
-      next: (capcarga)=> {
-        this.capacidadCarga = capcarga;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de capacidades de Carga ' + error);
-      }
-    });
-    this.vehiculoService.listarCategorias().subscribe({
-      next: (categoria)=> {
-        this.categoria = categoria;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Categoria ' + error);
-      }
-    });
-    this.vehiculoService.listarClases().subscribe({
-      next: (clase)=> {
-        this.clase = clase;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Clase ' + error);
-      }
-    });
-    this.vehiculoService.listarEjes().subscribe({
-      next: (eje)=> {
-        this.eje = eje;
-        this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Eje ' + error);
-      }
-    });
-    this.vehiculoService.listarMarcas().subscribe({
-      next: (capacidadCarga)=> {
-        this.marca = capacidadCarga;
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Marcas ' + error);
-      }
-    });
-    this.vehiculoService.listarModelo().subscribe({
-      next: (capacidadModelo)=> {
-         this.modelo = capacidadModelo;
-         this.cdr.detectChanges();
-      },
-      error: (error) => {
-        console.error( 'Error al cargar listado de Modelo ' + error);
-      }
-    });
-  this.vehiculoService.listarSubcategoria().subscribe({
-    next: (subcategoria)=> {
-      this.subcategoria = subcategoria;
-      this.cdr.detectChanges();
-    },
-    error: (error) => {
-      console.error( 'Error al cargar listado de Subcategoria ' + error);
-    }
-  });
-  this.vehiculoService.listarTiposCombustible().subscribe({
-    next: (capacidadTiposCombustible)=> {
-      this.tipoCombustible= capacidadTiposCombustible;
-      this.cdr.detectChanges();
-    },
-    error: (error) => {
-      console.error( 'Error al cargar listado de tipos de combustible: ' + error );
-    }
-  });
-  this.vehiculoService.listarTiposMatricula().subscribe({
-    next: (tipoMatri)=>{
-      this.tipoMatricula = tipoMatri;
-      this.cdr.detectChanges();
-    },
-    error: (error) => {
-      console.error('Error al cargar listado de tipo matrícula' + error );
-    }
-  });
-  this.vehiculoService.listarTipoVehiculo().subscribe({
-    next: (tipoVehiculo)=> {
-      this.tipoVehiculo = tipoVehiculo;
-      this.cdr.detectChanges();
-    },
-      error: (error) => {
-      console.error( 'Error al cargar listado de Tipo vehiculo ' + error);
-      }
-  });
-  this.vehiculoService.listarTracciones().subscribe({
-    next: (tracciones)=> {
-      this.traccion= tracciones;
-      this.cdr.detectChanges();
-    },
-    error: (error) => {
-      console.error( 'Error al cargar listado de Tracciones ' + error);
-    }
-  })
   }
 
   cargarDatos(): void {
@@ -215,6 +172,19 @@ export class VehiculoComponent implements OnInit {
       }
     });
   }
+
+  cargarPropietarios(): void {
+    this.propietarioService.listar().subscribe({
+      next: (data) => {
+        this.propietarios = data;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error al cargar propietarios:', err);
+      }
+    });
+  }
+
   get vehiculosFiltrados(): Vehiculo[] {
     if (!this.filtro.trim()) return this.vehiculos;
 
@@ -246,6 +216,31 @@ export class VehiculoComponent implements OnInit {
     this.paginaActual = 1;
   }
 
+  get propietariosFiltrados(): Propietario[] {
+    const f = this.filtroPropietario.trim().toLowerCase();
+    if (!f) return this.propietarios;
+
+    return this.propietarios.filter(p =>
+      (p.nombre || '').toLowerCase().includes(f) ||
+      (p.documentoIdentidad || '').toLowerCase().includes(f)
+    );
+  }
+
+  onFiltroPropietarioChange(): void {
+    const lista = this.propietariosFiltrados;
+
+    if (!this.filtroPropietario.trim()) {
+      this.vehiculoEditando.propietarioId = 0;
+      return;
+    }
+
+    if (lista.length === 1) {
+      this.vehiculoEditando.propietarioId = lista[0].idPropietario ?? 0;
+    } else if (lista.length === 0) {
+      this.vehiculoEditando.propietarioId = 0;
+    }
+  }
+
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.vehiculoEditando = this.vehiculoVacio();
@@ -263,6 +258,11 @@ export class VehiculoComponent implements OnInit {
   }
 
   guardar(): void {
+    if (!this.vehiculoEditando.propietarioId || this.vehiculoEditando.propietarioId <= 0) {
+      alert('Debe seleccionar un propietario');
+      return;
+    }
+
     if (!this.vehiculoEditando.chasis.trim()) {
       alert('El chasis es obligatorio');
       return;
@@ -291,7 +291,6 @@ export class VehiculoComponent implements OnInit {
     this.guardando = true;
 
     if (this.modoEdicion && this.vehiculoEditando.id) {
-
       this.vehiculoService.actualizar(
         this.vehiculoEditando.id,
         this.vehiculoEditando
@@ -306,9 +305,7 @@ export class VehiculoComponent implements OnInit {
           this.guardando = false;
         }
       });
-
     } else {
-
       const nuevo: Vehiculo = { ...this.vehiculoEditando, id: null };
 
       this.vehiculoService.crear(nuevo).subscribe({
@@ -335,53 +332,84 @@ export class VehiculoComponent implements OnInit {
     this.vehiculoDetalle = null;
   }
 
-  //metodos para obtener nombre de los datos
   obtenerNombreAmbito(id: number): string {
     const ambi = this.ambito.find(a => a.id === id);
     return ambi ? ambi.ambito : 'N/A';
   }
-  obtenerNombreCapcarga(id:number): string {
+
+  obtenerNombreCapcarga(id: number): string {
     const capcarga = this.capacidadCarga.find(c => c.id === id);
     return capcarga ? capcarga.capacidad + ' ' + capcarga.unidad : 'N/A';
   }
-  obtenerNombreCategorias(id:number): string {
-    const cate= this.categoria.find(c=>c.categoriaid===id);
-    return cate? cate.nombre : 'N/A';
+
+  obtenerNombreCategorias(id: number): string {
+    const cate = this.categoria.find(c => c.categoriaid === id);
+    return cate ? cate.nombre : 'N/A';
   }
-  obtenerNombreClases(id:number): string {
-    const clases= this.clase.find(c=>c.id===id);
-    return clases? clases.clase : 'N/A';
+
+  obtenerNombreClases(id: number): string {
+    const clases = this.clase.find(c => c.id === id);
+    return clases ? clases.clase : 'N/A';
   }
-  obtenerNombreEjes(id:number): string {
-    const eje= this.eje.find(e=>e.id===id);
-    return eje? 'Ejes :'+ eje.cantidad : 'N/A';
+
+  obtenerNombreEjes(id: number): string {
+    const eje = this.eje.find(e => e.id === id);
+    return eje ? 'Ejes: ' + eje.cantidad : 'N/A';
   }
-  obtenerNombreMarcas(id:number): string {
-    const marca= this.marca.find(m=>m.id===id);
-    return marca? marca.nombre : 'N/A';
+
+  obtenerNombreMarcas(id: number): string {
+    const marca = this.marca.find(m => m.id === id);
+    return marca ? marca.nombre : 'N/A';
   }
-  obtenerNombreModelos(id:number): string {
-    const model= this.modelo.find(m=>m.id===id);
-    return model? model.nombre: 'N/A';
+
+  obtenerNombreMarcaPorModelo(modeloVehiculoId: number): string {
+    const model = this.modelo.find(m => m.id === modeloVehiculoId);
+    if (!model) return 'N/A';
+
+    const marca = this.marca.find(ma => ma.id === model.marcaId);
+    return marca ? marca.nombre : 'N/A';
   }
-  obtenerNombresubcate(id:number): string {
-    const cate= this.categoria.find(c=>c.categoriaid===id);
-    return cate? cate.nombre: 'N/A';
+
+  obtenerNombreModelos(id: number): string {
+    const model = this.modelo.find(m => m.id === id);
+    return model ? model.nombre : 'N/A';
   }
-  obtenerNombreTipoCombus(id:number): string {
-    const tipoComb= this.tipoCombustible.find(tc=>tc.Id===id);
-    return tipoComb? tipoComb.nombre: 'N/A';
+
+  obtenerNombresubcate(id: number): string {
+    const sub = this.subcategoria.find(s => s.id === id);
+    return sub ? sub.nombre : 'N/A';
   }
-  obtenerNombreTipoMatricula(id:number): string {
-    const matri= this.tipoMatricula.find(tm=>tm.id===id);
-    return matri? matri.nombre: 'N/A';
+
+  obtenerNombreCategoriaPorSubcategoria(id: number): string {
+    const sub = this.subcategoria.find(s => s.id === id);
+    if (!sub) return 'N/A';
+
+    const cate = this.categoria.find(c => c.categoriaid === sub.categoriaId);
+    return cate ? cate.nombre : 'N/A';
   }
-  obtenerNombreTipoVehi(id:number): string {
-    const tipovehi= this.tipoVehiculo.find(tv=>tv.id===id);
-    return tipovehi? tipovehi.nombre: 'N/A';
+
+  obtenerNombreTipoCombus(id: number): string {
+    const tipoComb = this.tipoCombustible.find(tc => tc.Id === id);
+    return tipoComb ? tipoComb.nombre : 'N/A';
   }
-  obtenerNombreTraccion(id:number): string {
-    const traccion= this.traccion.find(tr=>tr.id===id);
-    return traccion? traccion.tipo: 'N/A';
+
+  obtenerNombreTipoMatricula(id: number): string {
+    const matri = this.tipoMatricula.find(tm => tm.id === id);
+    return matri ? matri.nombre : 'N/A';
+  }
+
+  obtenerNombreTipoVehi(id: number): string {
+    const tipovehi = this.tipoVehiculo.find(tv => tv.id === id);
+    return tipovehi ? tipovehi.nombre : 'N/A';
+  }
+
+  obtenerNombreTraccion(id: number): string {
+    const traccion = this.traccion.find(tr => tr.id === id);
+    return traccion ? traccion.tipo : 'N/A';
+  }
+
+  obtenerNombrePropietario(id: number): string {
+    const p = this.propietarios.find(pr => pr.idPropietario === id);
+    return p ? p.nombre : 'N/A';
   }
 }

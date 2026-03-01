@@ -159,6 +159,29 @@
 
       <div class="form-row">
         <div class="form-grupo">
+          <label>Buscar propietario</label>
+          <input
+            type="text"
+            [(ngModel)]="filtroPropietario"
+            (ngModelChange)="onFiltroPropietarioChange()"
+            class="form-input"
+            placeholder="Buscar por nombre o documento"
+          />
+        </div>
+
+        <div class="form-grupo">
+          <label>Propietario *</label>
+          <select [(ngModel)]="vehiculoEditando.propietarioId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let p of propietariosFiltrados" [value]="p.idPropietario">
+              {{ p.nombre }} - {{ p.documentoIdentidad }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
           <label>Matrícula *</label>
           <input type="text" [(ngModel)]="vehiculoEditando.matricula" class="form-input">
         </div>
@@ -177,7 +200,12 @@
 
         <div class="form-grupo">
           <label>Color</label>
-          <input type="text" [(ngModel)]="vehiculoEditando.color" class="form-input">
+          <select [(ngModel)]="vehiculoEditando.color" class="form-select">
+            <option [ngValue]="null">Seleccione</option>
+            <option *ngFor="let c of coloresVehiculo" [ngValue]="c">
+              {{ c }}
+            </option>
+          </select>
         </div>
       </div>
 
@@ -216,6 +244,82 @@
       </div>
 
       <div class="form-row">
+        <div class="form-grupo">
+          <label>Capacidad de carga</label>
+          <select [(ngModel)]="vehiculoEditando.capCargaId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let c of capacidadCarga" [value]="c.id">
+              {{ c.capacidad }} {{ c.unidad }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Ámbito operacional</label>
+          <select [(ngModel)]="vehiculoEditando.ambitoOperacionalId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let a of ambito" [value]="a.id">
+              {{ a.ambito }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Ejes</label>
+          <select [(ngModel)]="vehiculoEditando.ejesId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let e of eje" [value]="e.id">
+              {{ e.cantidad }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Tracción</label>
+          <select [(ngModel)]="vehiculoEditando.traccionId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let t of traccion" [value]="t.id">
+              {{ t.tipo }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Tipo de combustible</label>
+          <select [(ngModel)]="vehiculoEditando.tipoCombustibleId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let tc of tipoCombustible" [value]="tc.Id">
+              {{ tc.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-grupo">
+          <label>Tipo de matrícula</label>
+          <select [(ngModel)]="vehiculoEditando.tipoMatriculaId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let tm of tipoMatricula" [value]="tm.id">
+              {{ tm.nombre }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-grupo">
+          <label>Subcategoría</label>
+          <select [(ngModel)]="vehiculoEditando.subcategoriaId" class="form-select">
+            <option [value]="0">Seleccione</option>
+            <option *ngFor="let s of subcategoria" [value]="s.id">
+              {{ s.nombre }}
+            </option>
+          </select>
+        </div>
+
         <div class="form-grupo">
           <label>Estado</label>
           <select [(ngModel)]="vehiculoEditando.estado" class="form-select">
@@ -263,6 +367,13 @@
           </span>
         </div>
 
+        <div class="detalle-item">
+          <span class="detalle-label">Propietario:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombrePropietario(vehiculoDetalle.propietarioId) }}
+          </span>
+        </div>
+
         <div class="detalle-item full-width">
           <span class="detalle-label">Matrícula:</span>
           <span class="detalle-valor">{{ vehiculoDetalle.matricula }}</span>
@@ -286,9 +397,87 @@
         </div>
 
         <div class="detalle-item">
+          <span class="detalle-label">Marca:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreMarcaPorModelo(vehiculoDetalle.modeloVehiculoId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
           <span class="detalle-label">Tipo:</span>
           <span class="detalle-valor">
             {{ obtenerNombreTipoVehi(vehiculoDetalle.tipoVehiculoId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Categoría:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreCategoriaPorSubcategoria(vehiculoDetalle.subcategoriaId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Subcategoría:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombresubcate(vehiculoDetalle.subcategoriaId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Año fabricación:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.anioFabricacion }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Color:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.color }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Cap. pasajeros:</span>
+          <span class="detalle-valor">{{ vehiculoDetalle.capacidadPasajeros }}</span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Cap. carga:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreCapcarga(vehiculoDetalle.capCargaId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Ámbito operacional:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreAmbito(vehiculoDetalle.ambitoOperacionalId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Ejes:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreEjes(vehiculoDetalle.ejesId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Tracción:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreTraccion(vehiculoDetalle.traccionId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Combustible:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreTipoCombus(vehiculoDetalle.tipoCombustibleId) }}
+          </span>
+        </div>
+
+        <div class="detalle-item">
+          <span class="detalle-label">Tipo matrícula:</span>
+          <span class="detalle-valor">
+            {{ obtenerNombreTipoMatricula(vehiculoDetalle.tipoMatriculaId) }}
           </span>
         </div>
 
