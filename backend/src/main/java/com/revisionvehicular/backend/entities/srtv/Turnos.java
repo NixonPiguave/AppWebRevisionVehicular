@@ -30,7 +30,7 @@ public class Turnos {
     @ManyToOne
     @JoinColumn(name = "id_tipo_tramite", nullable = false)
     private Servicio servicio;
-
+    //comentario para subir
     @ManyToOne
     @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
