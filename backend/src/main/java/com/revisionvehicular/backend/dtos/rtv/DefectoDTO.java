@@ -9,6 +9,13 @@ public class DefectoDTO {
     private String codigo;
     private String descripcion;
     private String estado;
+    private String puntoDeTrabajo;
+    private String maquinaria;
+    private String procedimientos;
+    private String tipo1;
+    private String tipo2;
+    private String tipo3;
+    private String observaciones;
 
     private Long tipoDefectoId;
     private Long subfamiliaId;

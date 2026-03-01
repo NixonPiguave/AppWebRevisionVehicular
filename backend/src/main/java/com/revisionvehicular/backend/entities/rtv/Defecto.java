@@ -19,6 +19,26 @@ public class Defecto {
     @Column(nullable = false, length = 255)
     private String descripcion;
 
+    @Column(nullable = false, length = 255)
+    private String puntoDeTrabajo;
+
+    @Column(nullable = false, length = 255)
+    private String maquinaria;
+
+    @Column(nullable = false, length = 255)
+    private String procedimientos;
+
+    @Column(nullable = false, length = 255)
+    private String tipo1;
+
+    @Column(nullable = false, length = 255)
+    private String tipo2;
+
+    @Column(nullable = false, length = 255)
+    private String tipo3;
+
+    @Column(nullable = false, length = 255)
+    private String observaciones;
 
     @ManyToOne
     @JoinColumn(name = "tipo_defecto_id", nullable = false)

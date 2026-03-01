@@ -23,6 +23,13 @@ public class DefectoServiceImpl implements IDefectoService {
         dto.setId(entity.getDefectoid());
         dto.setCodigo(entity.getCodigo());
         dto.setDescripcion(entity.getDescripcion());
+        dto.setPuntoDeTrabajo(entity.getPuntoDeTrabajo());
+        dto.setMaquinaria(entity.getMaquinaria());
+        dto.setProcedimientos(entity.getProcedimientos());
+        dto.setTipo1(entity.getTipo1());
+        dto.setTipo2(entity.getTipo2());
+        dto.setTipo3(entity.getTipo3());
+        dto.setObservaciones(entity.getObservaciones());
         dto.setEstado(entity.getEstado());
         dto.setTipoDefectoId(entity.getTipoDefecto().getTipo_defecto_id());
         dto.setSubfamiliaId(entity.getSubfamilia().getSubfamilia_id());
@@ -37,6 +44,13 @@ public class DefectoServiceImpl implements IDefectoService {
         repository.insertarDefecto(
                 dto.getCodigo(),
                 dto.getDescripcion(),
+                dto.getPuntoDeTrabajo(),
+                dto.getMaquinaria(),
+                dto.getProcedimientos(),
+                dto.getTipo1(),
+                dto.getTipo2(),
+                dto.getTipo3(),
+                dto.getObservaciones(),
                 dto.getTipoDefectoId(),
                 dto.getSubfamiliaId(),
                 dto.getCategoriaId(),
@@ -66,6 +80,13 @@ public class DefectoServiceImpl implements IDefectoService {
                 id,
                 dto.getCodigo(),
                 dto.getDescripcion(),
+                dto.getPuntoDeTrabajo(),
+                dto.getMaquinaria(),
+                dto.getProcedimientos(),
+                dto.getTipo1(),
+                dto.getTipo2(),
+                dto.getTipo3(),
+                dto.getObservaciones(),
                 dto.getTipoDefectoId(),
                 dto.getSubfamiliaId(),
                 dto.getCategoriaId(),

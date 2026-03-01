@@ -7,11 +7,17 @@ export interface Defectos {
   id: number | null;
   codigo: string;
   descripcion: string;
+  puntoDeTrabajo: string;
+  maquinaria: string;
+  procedimientos: string;
+  tipo1:string;
+  tipo2: string;
+  tipo3: string;
+  observaciones: string;
   estado: string;
   tipoDefectoId: number;
   subfamiliaId: number;
   categoriaId: number;
-  nombre: string;
 
   nombrecategoria?: string;
   nombrefamilia?: string;
