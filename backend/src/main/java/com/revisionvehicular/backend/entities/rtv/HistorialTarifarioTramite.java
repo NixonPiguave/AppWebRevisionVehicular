@@ -1,6 +1,7 @@
 package com.revisionvehicular.backend.entities.rtv;
 
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+import com.revisionvehicular.backend.entities.ant.EntidadesTransito;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,8 +23,8 @@ public class HistorialTarifarioTramite {
     private TarifarioTramite tarifarioTramite;
 
     @ManyToOne
-    @JoinColumn(name = "usuario_cambio_id")
-    private Usuario usuarioCambio;
+    @JoinColumn(name = "id_entidad_transito")
+    private EntidadesTransito entidadesTransito;
 
     @Column(name = "fecha_vigencia", nullable = false)
     private LocalDate fechaVigencia;

@@ -40,6 +40,10 @@ public class TramiteMatriculacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "id_tarifario_tramite")
+    private TarifarioTramite tarifarioTramite;
+
     @Column(name = "numero_tramite", nullable = false, unique = true, length = 30)
     private String numeroTramite;
 

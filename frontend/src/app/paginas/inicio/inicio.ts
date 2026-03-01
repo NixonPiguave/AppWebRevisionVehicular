@@ -2,7 +2,7 @@ import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EmpresaService } from '../../services/administracion/empresa.service'; // ✅ NUEVO
+import { EmpresaService } from '../../services/administracion/empresa.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
