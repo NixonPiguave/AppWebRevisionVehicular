@@ -36,6 +36,7 @@ export class InicioComponent implements OnInit {
   antTramitesOpen = false;
   configuracionUmbralOpen = false;
   administracionOpen = false;
+  accesosRapidosOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -90,6 +91,18 @@ export class InicioComponent implements OnInit {
     } else {
       this.sidebarCollapsed = !this.sidebarCollapsed;
     }
+  }
+
+  toggleAccesosRapidos() {
+    this.closeAllExcept('accesosRapidos');
+    this.accesosRapidosOpen = !this.accesosRapidosOpen;
+  }
+
+  irATramiteRapido(servicioId: number) {
+    this.router.navigate(
+      ['/inicio/administracion/turnos'],
+      { queryParams: { nuevo: 1, servicioId: servicioId } }
+    );
   }
 
   closeSidebar() {
@@ -196,6 +209,7 @@ export class InicioComponent implements OnInit {
     if (sectionName !== 'antTramites') this.antTramitesOpen = false;
     if (sectionName !== 'configuracionUmbral') this.configuracionUmbralOpen = false;
     if (sectionName !== 'administracion') this.administracionOpen = false;
+    if (sectionName !== 'accesosRapidos') this.accesosRapidosOpen = false; // ← nueva línea
   }
 
   cerrarSesion(): void {

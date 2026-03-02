@@ -6,7 +6,6 @@ import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.entities.rtv.TramiteMatriculacion;
 import jakarta.persistence.*;
 import lombok.Data;
-
 import java.time.LocalDate;
 
 @Entity
@@ -30,7 +29,7 @@ public class Turnos {
     @ManyToOne
     @JoinColumn(name = "id_tipo_tramite", nullable = false)
     private Servicio servicio;
-    //comentario para subir
+
     @ManyToOne
     @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
@@ -39,19 +38,15 @@ public class Turnos {
     @JoinColumn(name = "id_entidad", nullable = false)
     private EntidadesTransito entidad;
 
-    /** Fecha en la que se genera el turno */
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
-    /** Fecha en la que el turno fue atendido (si aplica) */
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;
 
-    /** Fecha en la que el turno fue cancelado/anulado (si aplica) */
     @Column(name = "fecha_cancelado")
     private LocalDate fechaCancelado;
 
-    /** GENERADO / CONFIRMADO / ATENDIDO / CANCELADO */
     @Column(name = "estado", length = 35)
     private String estado;
 }
