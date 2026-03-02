@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -6,7 +6,7 @@ import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
-import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
+import { Servicio } from '../../../services/administracion/servicio.service';
 
 @Component({
   selector: 'app-turnos',
@@ -21,7 +21,24 @@ export class TurnosComponent implements OnInit {
   modoEdicion = false;
   mostrarFormulario = false;
 
-  servicios: Servicio[] = [];
+  servicios: Servicio[] = [
+    { idTipoTramite: 1, nombre: 'Emisión de matrícula por Primera Vez.' },
+    { idTipoTramite: 2, nombre: 'Emisión de Documento Anual de Circulación a renovación anual de matrícula.' },
+    { idTipoTramite: 3, nombre: 'Duplicado de Documento de Matrícula.' },
+    { idTipoTramite: 4, nombre: 'Duplicado del Documento Anual de Circulación.' },
+    { idTipoTramite: 5, nombre: 'Transferencia de Dominio.' },
+    { idTipoTramite: 6, nombre: 'Cambio de Servicio.' },
+    { idTipoTramite: 7, nombre: 'Matriculación de Unidades de Carga' },
+    { idTipoTramite: 8, nombre: 'Cambio de Características' },
+    { idTipoTramite: 9, nombre: 'Bloqueo de vehículo' },
+    { idTipoTramite: 10, nombre: 'Desbloqueo de vehículo' },
+    { idTipoTramite: 11, nombre: 'Registro de Observaciones' },
+    { idTipoTramite: 12, nombre: 'Baja de vehículos' },
+    { idTipoTramite: 13, nombre: 'Registro de Incidentes' },
+    { idTipoTramite: 14, nombre: 'Anulación de Trámites' },
+    { idTipoTramite: 15, nombre: 'Registro de vehículos en la Base Única Nacional de Datos.' },
+    { idTipoTramite: 16, nombre: 'Casos especiales detectados en procesos de matriculación' }
+  ];
 
   // Selector Propietario (por cédula)
   mostrarModalPropietario = false;
@@ -49,13 +66,12 @@ export class TurnosComponent implements OnInit {
     private turnosService: TurnosService,
     private propietarioService: PropietarioService,
     private vehiculoService: VehiculoService,
-    private servicioService: ServicioService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.cargarTurnos();
-    this.cargarServicios();
 
     // Si viene con queryParams ?nuevo=1 (y opcionalmente IDs), abrir automáticamente el formulario
     this.route.queryParams.subscribe(params => {
@@ -82,9 +98,11 @@ export class TurnosComponent implements OnInit {
     this.turnosService.getAll().subscribe({
       next: (data) => {
         this.turnos = data;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error al cargar turnos:', error);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -177,18 +195,6 @@ export class TurnosComponent implements OnInit {
     this.mostrarFormulario = false;
     this.modoEdicion = false;
     this.turnoSeleccionado = null;
-  }
-
-  cargarServicios(): void {
-    this.servicioService.listar().subscribe({
-      next: (data) => {
-        this.servicios = data ?? [];
-      },
-      error: (err) => {
-        console.error('Error al cargar servicios:', err);
-        this.servicios = [];
-      }
-    });
   }
 
   // =======================

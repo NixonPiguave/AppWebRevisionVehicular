@@ -28,13 +28,14 @@ public class TurnosServiceImpl implements ITurnosService {
     @Override
     public TurnosDTO save(TurnosDTO dto) {
         Long entidadId = normalizarEntidadId(dto.getEntidadId());
+        Long tramiteId = null; // Se genera internamente en la capa RTV / BD
 
         // fechaFin / fechaCancelado se asignan vía SP (no desde el formulario)
         repository.insertarTurno(
                 dto.getPropietarioId(),
                 dto.getVehiculoId(),
                 dto.getServicioId(),
-                dto.getTramiteId(),
+                tramiteId,
                 entidadId,
                 dto.getFechaInicio(),
                 null,
@@ -76,13 +77,17 @@ public class TurnosServiceImpl implements ITurnosService {
                 ? existente.getEntidad().getIdEntidad()
                 : normalizarEntidadId(dto.getEntidadId());
 
+        Long tramiteId = existente.getTramite() != null
+                ? existente.getTramite().getIdTramite()
+                : null;
+
         // fechaFin / fechaCancelado no se editan desde el formulario
         repository.actualizarTurno(
                 id,
                 dto.getPropietarioId(),
                 dto.getVehiculoId(),
                 dto.getServicioId(),
-                dto.getTramiteId(),
+                tramiteId,
                 entidadId,
                 dto.getFechaInicio(),
                 existente.getFechaFin(),

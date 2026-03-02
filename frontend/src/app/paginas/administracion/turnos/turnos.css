@@ -221,11 +221,17 @@
   display: flex;
   gap: 10px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .btn-inline {
   padding: 10px 12px;
   white-space: nowrap;
+}
+
+.input-accion .form-control {
+  flex: 1;
+  min-width: 200px;
 }
 
 /* ===== Modal simple (selector) ===== */
