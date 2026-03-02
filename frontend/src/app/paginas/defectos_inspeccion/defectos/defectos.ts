@@ -420,7 +420,7 @@ export class DefectosComponent implements OnInit {
   }
 
   /**
-   * ✅ Ver detalle (muestra TODO)
+   *  Ver detalle (muestra TODO)
    */
   verDetalle(defecto: Defectos): void {
     this.defectoDetalle = defecto;
@@ -428,7 +428,7 @@ export class DefectosComponent implements OnInit {
   }
 
   /**
-   * ✅ Cerrar modal detalle
+   *  Cerrar modal detalle
    */
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
