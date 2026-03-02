@@ -99,10 +99,16 @@ export class InicioComponent implements OnInit {
   }
 
   irATramiteRapido(servicioId: number) {
-    this.router.navigate(
-      ['/inicio/administracion/turnos'],
-      { queryParams: { nuevo: 1, servicioId: servicioId } }
-    );
+    const rutasServicios: { [key: number]: string } = {
+      9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
+      10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
+      12: '/inicio/gestion_vehicular/baja-vehiculo',
+    };
+
+    const ruta = rutasServicios[servicioId];
+    if (ruta) {
+      this.router.navigate([ruta]);
+    }
   }
 
   closeSidebar() {
