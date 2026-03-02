@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-
 export interface Defectos {
   id: number | null;
   codigo: string;
@@ -10,9 +9,7 @@ export interface Defectos {
   puntoDeTrabajo: string;
   maquinaria: string;
   procedimientos: string;
-  tipo1:string;
-  tipo2: string;
-  tipo3: string;
+  descripciontipo: string;
   observaciones: string;
   estado: string;
   tipoDefectoId: number;
@@ -22,7 +19,7 @@ export interface Defectos {
   nombrecategoria?: string;
   nombrefamilia?: string;
   nombreSubfamilia?: string;
-  nombretipodefecto?:string;
+  nombretipodefecto?: string;
 }
 
 export interface CategoriaDefecto {
@@ -55,7 +52,6 @@ export interface TipoDefecto {
   nombre: string;
   descripcion: string;
   estado: string;
-
 }
 
 @Injectable({
@@ -65,9 +61,9 @@ export class DefectosService {
 
   private apiUrl = 'http://localhost:8080/api/defectos';
   private subFamiliasUrl = 'http://localhost:8080/api/subfamilias';
-  private categoriaUrl= 'http://localhost:8080/api/categoriasDefectos';
+  private categoriaUrl = 'http://localhost:8080/api/categoriasDefectos';
   private familiaUrl = 'http://localhost:8080/api/familias';
-  private tipoDefecto= 'http://localhost:8080/api/tipodefecto';
+  private tipoDefectoUrl = 'http://localhost:8080/api/tipodefecto';
 
   constructor(private http: HttpClient) {}
 
@@ -88,14 +84,14 @@ export class DefectosService {
   }
 
   listarCategorias(): Observable<CategoriaDefecto[]> {
-    return this.http.get<CategoriaDefecto[]>(this.apiUrl);
+    return this.http.get<CategoriaDefecto[]>(this.categoriaUrl);
   }
 
   listarFamilias(): Observable<Familia[]> {
-    return this.http.get<Familia[]>(this.apiUrl);
+    return this.http.get<Familia[]>(this.familiaUrl);
   }
 
   listarTipoDefectos(): Observable<TipoDefecto[]> {
-    return this.http.get<TipoDefecto[]>(this.apiUrl);
+    return this.http.get<TipoDefecto[]>(this.tipoDefectoUrl);
   }
 }

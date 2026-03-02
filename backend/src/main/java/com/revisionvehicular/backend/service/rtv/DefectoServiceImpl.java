@@ -18,22 +18,25 @@ public class DefectoServiceImpl implements IDefectoService {
     }
 
     private DefectoDTO toDTO(Defecto entity) {
-
         DefectoDTO dto = new DefectoDTO();
         dto.setId(entity.getDefectoid());
         dto.setCodigo(entity.getCodigo());
         dto.setDescripcion(entity.getDescripcion());
-        dto.setPuntoDeTrabajo(entity.getPuntoDeTrabajo());
+        dto.setPuntoDeTrabajo(entity.getPuntodetrabajo());
         dto.setMaquinaria(entity.getMaquinaria());
         dto.setProcedimientos(entity.getProcedimientos());
-        dto.setTipo1(entity.getTipo1());
-        dto.setTipo2(entity.getTipo2());
-        dto.setTipo3(entity.getTipo3());
+        dto.setDescripciontipo(entity.getDescripciontipo());
         dto.setObservaciones(entity.getObservaciones());
         dto.setEstado(entity.getEstado());
-        dto.setTipoDefectoId(entity.getTipoDefecto().getTipo_defecto_id());
-        dto.setSubfamiliaId(entity.getSubfamilia().getSubfamilia_id());
-        dto.setCategoriaId(entity.getRtvCategoria().getRtvcategoria_id());
+        if (entity.getTipoDefecto() != null) {
+            dto.setTipoDefectoId(entity.getTipoDefecto().getTipo_defecto_id());
+        }
+        if (entity.getSubfamilia() != null) {
+            dto.setSubfamiliaId(entity.getSubfamilia().getSubfamilia_id());
+        }
+        if (entity.getRtvCategoria() != null) {
+            dto.setCategoriaId(entity.getRtvCategoria().getRtvcategoria_id());
+        }
 
         return dto;
     }
@@ -47,9 +50,7 @@ public class DefectoServiceImpl implements IDefectoService {
                 dto.getPuntoDeTrabajo(),
                 dto.getMaquinaria(),
                 dto.getProcedimientos(),
-                dto.getTipo1(),
-                dto.getTipo2(),
-                dto.getTipo3(),
+                dto.getDescripciontipo(),
                 dto.getObservaciones(),
                 dto.getTipoDefectoId(),
                 dto.getSubfamiliaId(),
@@ -83,9 +84,7 @@ public class DefectoServiceImpl implements IDefectoService {
                 dto.getPuntoDeTrabajo(),
                 dto.getMaquinaria(),
                 dto.getProcedimientos(),
-                dto.getTipo1(),
-                dto.getTipo2(),
-                dto.getTipo3(),
+                dto.getDescripciontipo(),
                 dto.getObservaciones(),
                 dto.getTipoDefectoId(),
                 dto.getSubfamiliaId(),

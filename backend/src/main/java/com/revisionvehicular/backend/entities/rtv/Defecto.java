@@ -20,7 +20,7 @@ public class Defecto {
     private String descripcion;
 
     @Column(nullable = false, length = 255)
-    private String puntoDeTrabajo;
+    private String puntodetrabajo;
 
     @Column(nullable = false, length = 255)
     private String maquinaria;
@@ -29,13 +29,7 @@ public class Defecto {
     private String procedimientos;
 
     @Column(nullable = false, length = 255)
-    private String tipo1;
-
-    @Column(nullable = false, length = 255)
-    private String tipo2;
-
-    @Column(nullable = false, length = 255)
-    private String tipo3;
+    private String descripciontipo;
 
     @Column(nullable = false, length = 255)
     private String observaciones;

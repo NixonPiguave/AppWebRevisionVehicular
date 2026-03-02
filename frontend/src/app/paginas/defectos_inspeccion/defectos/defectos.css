@@ -686,3 +686,226 @@ mat-icon {
     padding: 10px 12px;
   }
 }
+/* ============================================
+   MODAL CON SCROLL - CORRECCIÓN
+   ============================================ */
+
+/* Override del modal base */
+.modal-contenido {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+  max-height: 90vh;  /* ✅ Altura máxima */
+  overflow-y: auto;   /* ✅ Scroll vertical */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Modal grande con scroll */
+.modal-form-grande {
+  max-width: 900px;
+  max-height: 90vh;  /* ✅ Altura máxima */
+  overflow-y: auto;   /* ✅ Scroll vertical */
+}
+
+/* Modal detalle con scroll */
+.modal-detalle-grande {
+  max-width: 700px;
+  max-height: 90vh;  /* ✅ Altura máxima */
+  overflow-y: auto;   /* ✅ Scroll vertical */
+}
+
+/* Header fijo en el top */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e8e8e8;
+  flex-shrink: 0;  /* No se reduce */
+  background: white;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Body con scroll */
+.modal-body {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Footer fijo en el bottom */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+  flex-shrink: 0;  /* No se reduce */
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+/* Grid de formulario */
+.form-grid-defectos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.form-columna {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ============================================
+   ESTILOS PERSONALIZADOS DEFECTOS
+   ============================================ */
+
+.detalle-seccion {
+  margin: 20px 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #2d5a27;
+  color: #2d5a27;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.detalle-seccion:first-child {
+  margin-top: 0;
+}
+
+
+
+.campo-rango {
+  font-size: 11px;
+  font-weight: 400;
+  color: #666;
+  font-style: italic;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 1024px) {
+  .form-grid-defectos {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .modal-form-grande {
+    max-width: 90vw;
+    margin: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .modal-form-grande,
+  .modal-detalle-grande {
+    max-width: 95vw;
+    max-height: 95vh;
+    margin: 8px;
+  }
+
+  .form-grid-defectos {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 16px;
+  }
+
+  .detalle-seccion {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-form-grande,
+  .modal-detalle-grande {
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .modal-header {
+    padding: 12px 16px;
+  }
+
+  .modal-header h3 {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 16px;
+  }
+
+  .modal-footer {
+    padding: 12px 16px;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-guardar,
+  .btn-cancelar {
+    width: 100%;
+  }
+
+  .form-grid-defectos {
+    gap: 12px;
+  }
+
+  .codigo-badge {
+    font-size: 13px;
+  }
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADO (opcional)
+   ============================================ */
+.modal-contenido::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modal-contenido::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 0 12px 12px 0;
+}
+
+.modal-contenido::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.modal-contenido::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 3px;
+}
+
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
