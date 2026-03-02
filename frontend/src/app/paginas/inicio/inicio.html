@@ -362,9 +362,22 @@
       </div>
 
       <div class="right">
-        <!-- Información de usuario -->
-        <mat-icon class="user-icon">person</mat-icon>
-        <span class="user">{{ nombreUsuario }}</span>
+        <!-- Información de usuario + rol -->
+        <div class="user-menu" #userMenu>
+          <button type="button" class="user-info" (click)="toggleMenuUsuario($event)">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div class="user-text">
+              <div class="user-name">{{ nombreUsuario }}</div>
+              <div class="user-role" *ngIf="rolUsuario">{{ rolUsuario }}</div>
+            </div>
+            <mat-icon class="user-chevron">expand_more</mat-icon>
+          </button>
+
+          <div class="user-dropdown" *ngIf="menuUsuarioAbierto">
+            <div class="user-dropdown-name">{{ nombreUsuario }}</div>
+            <div class="user-dropdown-role">{{ rolUsuario || 'Sin rol' }}</div>
+          </div>
+        </div>
 
         <!-- Botón de cerrar sesión -->
         <button class="logout" (click)="cerrarSesion()">

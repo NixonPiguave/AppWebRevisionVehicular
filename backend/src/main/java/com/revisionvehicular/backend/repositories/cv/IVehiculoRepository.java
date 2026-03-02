@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -56,4 +57,6 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     Optional<Vehiculo> findByChasis(String chasis);
     Optional<Vehiculo> findByVin(String vin);
+
+    List<Vehiculo> findByMatriculaContainingIgnoreCase(String matricula);
 }

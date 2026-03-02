@@ -2,11 +2,13 @@ package com.revisionvehicular.backend.repositories.pv;
 
 import com.revisionvehicular.backend.entities.pv.Propietario;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface IPropietarioRepository extends JpaRepository<Propietario, Long> {
@@ -31,4 +33,14 @@ public interface IPropietarioRepository extends JpaRepository<Propietario, Long>
             @Param("p_direccion") String direccion,
             @Param("p_fecharegistro") LocalDate fecharegistro
     );
+
+    @Query("""
+            select p from Propietario p
+            where (:cedula is null or :cedula = '' or lower(p.documentoIdentidad) like lower(concat('%', :cedula, '%')))
+              and not exists (
+                select 1 from com.revisionvehicular.backend.entities.ant.Multa m
+                where m.propietario = p
+              )
+            """)
+    List<Propietario> buscarElegiblesSinMultas(@Param("cedula") String cedula);
 }

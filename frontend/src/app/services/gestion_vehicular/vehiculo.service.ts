@@ -135,6 +135,13 @@ export class VehiculoService {
     return this.http.get<Vehiculo[]>(this.apiUrl);
   }
 
+  buscarPorPlaca(placa?: string): Observable<Vehiculo[]> {
+    const url = placa && placa.trim()
+      ? `${this.apiUrl}/buscar?placa=${encodeURIComponent(placa.trim())}`
+      : `${this.apiUrl}/buscar`;
+    return this.http.get<Vehiculo[]>(url);
+  }
+
   obtenerPorId(id: number): Observable<Vehiculo> {
     return this.http.get<Vehiculo>(`${this.apiUrl}/${id}`);
   }

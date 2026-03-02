@@ -99,6 +99,18 @@ public class VehiculoServiceImpl implements IVehiculoService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<VehiculoDTO> buscarPorPlaca(String placa) {
+        String filtro = placa == null ? "" : placa.trim();
+        if (filtro.isEmpty()) {
+            return findAll();
+        }
+        return repository.findByMatriculaContainingIgnoreCase(filtro)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     @Override
     public void delete(Long id) {

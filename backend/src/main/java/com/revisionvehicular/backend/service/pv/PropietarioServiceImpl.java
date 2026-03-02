@@ -107,4 +107,12 @@ public class PropietarioServiceImpl implements IPropietarioService {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<PropietarioDTO> buscarElegiblesSinMultas(String cedula) {
+        return repository.buscarElegiblesSinMultas(cedula)
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
 }

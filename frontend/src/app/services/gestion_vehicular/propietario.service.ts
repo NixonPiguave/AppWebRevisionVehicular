@@ -25,6 +25,17 @@ export class PropietarioService {
     return this.http.get<Propietario[]>(this.apiUrl);
   }
 
+  obtenerPorId(id: number): Observable<Propietario> {
+    return this.http.get<Propietario>(`${this.apiUrl}/${id}`);
+  }
+
+  listarElegibles(cedula?: string): Observable<Propietario[]> {
+    const url = cedula && cedula.trim()
+      ? `${this.apiUrl}/eligibles?cedula=${encodeURIComponent(cedula.trim())}`
+      : `${this.apiUrl}/eligibles`;
+    return this.http.get<Propietario[]>(url);
+  }
+
   crear(propietario: Propietario): Observable<Propietario> {
     return this.http.post<Propietario>(this.apiUrl, propietario);
   }

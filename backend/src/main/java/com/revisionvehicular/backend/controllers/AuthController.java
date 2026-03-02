@@ -1,7 +1,9 @@
 package com.revisionvehicular.backend.controllers;
 
 import com.revisionvehicular.backend.entities.srtv.Usuario;
+import com.revisionvehicular.backend.entities.srtv.UsuarioRoles;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
+import com.revisionvehicular.backend.repositories.srtv.IUsuarioRolesRepository;
 import com.revisionvehicular.backend.security.JwtUtil;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
@@ -10,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,12 +21,19 @@ import java.util.Optional;
 public class AuthController {
 
     private final IUsuarioRepository usuarioRepository;
+    private final IUsuarioRolesRepository usuarioRolesRepository;
     private final JwtUtil jwtUtil;
     private final AuditoriaService auditoriaService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-    public AuthController(IUsuarioRepository usuarioRepository, JwtUtil jwtUtil, AuditoriaService auditoriaService) {
+    public AuthController(
+            IUsuarioRepository usuarioRepository,
+            IUsuarioRolesRepository usuarioRolesRepository,
+            JwtUtil jwtUtil,
+            AuditoriaService auditoriaService
+    ) {
         this.usuarioRepository = usuarioRepository;
+        this.usuarioRolesRepository = usuarioRolesRepository;
         this.jwtUtil = jwtUtil;
         this.auditoriaService = auditoriaService;
     }
@@ -61,6 +71,7 @@ public class AuthController {
         response.put("usuario", user.getUsuario());
         response.put("nombre", user.getNombre() + " " + user.getApellido());
         response.put("usuarioId", user.getUsuarioId());
+        response.put("rol", obtenerNombreRol(user));
 
         return ResponseEntity.ok(response);
     }
@@ -79,5 +90,14 @@ public class AuthController {
         }
 
         return ResponseEntity.ok("Sesión cerrada");
+    }
+
+    private String obtenerNombreRol(Usuario user) {
+        List<UsuarioRoles> roles = usuarioRolesRepository.findByUsuario(user);
+        if (roles == null || roles.isEmpty()) {
+            return null;
+        }
+        UsuarioRoles primero = roles.get(0);
+        return (primero.getRol() != null) ? primero.getRol().getNombre() : null;
     }
 }

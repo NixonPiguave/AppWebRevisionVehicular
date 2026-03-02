@@ -32,6 +32,13 @@ public class PropietarioController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/eligibles")
+    public ResponseEntity<List<PropietarioDTO>> listarElegiblesSinMultas(
+            @RequestParam(value = "cedula", required = false) String cedula
+    ) {
+        return ResponseEntity.ok(service.buscarElegiblesSinMultas(cedula));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<PropietarioDTO> obtenerPorId(
             @PathVariable Long id

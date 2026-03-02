@@ -15,4 +15,6 @@ public interface IVehiculoService {
     VehiculoDTO findById(Long id);
 
     List<VehiculoDTO> findAll();
+
+    List<VehiculoDTO> buscarPorPlaca(String placa);
 }

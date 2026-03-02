@@ -4,7 +4,7 @@ export interface Turnos {
   vehiculoId: number;
   servicioId: number;
   tramiteId?: number;
-  entidadId: number;
+  entidadId?: number;
   fechaInicio: string;
   fechaFin?: string;
   fechaCancelado?: string;
