@@ -50,10 +50,14 @@
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </div>
 
-      <div class="menu-item">
+      <a
+        class="menu-item"
+        routerLink="/inicio/administracion/turnos"
+        [queryParams]="{ nuevo: 1 }"
+        routerLinkActive="active">
         <mat-icon class="menu-icon">playlist_add</mat-icon>
         <span *ngIf="!sidebarCollapsed">Registro de Trámite</span>
-      </div>
+      </a>
 
       <!-- ========================================
            GESTIÓN VEHICULAR
@@ -311,6 +315,7 @@
             <a routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
             <a routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
             <a routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
+            <a routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
           </div>
         </div>
       </div>

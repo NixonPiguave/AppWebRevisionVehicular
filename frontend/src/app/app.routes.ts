@@ -5,6 +5,7 @@ import { AreasComponent } from './paginas/administracion/areas/areas';
 import { EmpresaComponent } from './paginas/administracion/empresa/empresa';
 import { RolesComponent } from './paginas/administracion/roles/roles';
 import { UsuariosComponent } from './paginas/administracion/usuarios/usuarios';
+import { TurnosComponent } from './paginas/administracion/turnos/turnos';
 import { AmbitoOperacionalComponent } from './paginas/catalogos_vehiculos/ambito-operacional/ambito-operacional';
 import { CapacidadCargaComponent } from './paginas/catalogos_vehiculos/capacidad-carga/capacidad-carga';
 import {CategoriasComponent} from './paginas/catalogos_vehiculos/categorias/categorias';
@@ -87,6 +88,9 @@ export const routes: Routes = [
 
       //ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
+
+      // ADMINISTRACIÓN - TURNOS
+      { path: 'administracion/turnos', component: TurnosComponent },
     ]
   },
   { path: '**', redirectTo: '' }
