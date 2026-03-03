@@ -1,9 +1,12 @@
 package com.revisionvehicular.backend.entities.srtv;
 
+import com.revisionvehicular.backend.entities.ant.EntidadesTransito;
 import com.revisionvehicular.backend.entities.cv.Vehiculo;
 import com.revisionvehicular.backend.entities.pv.Propietario;
+import com.revisionvehicular.backend.entities.rtv.TramiteMatriculacion;
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "rtv_turnos")
@@ -26,6 +29,23 @@ public class Turnos {
     @ManyToOne
     @JoinColumn(name = "id_tipo_tramite", nullable = false)
     private Servicio servicio;
+
+    @ManyToOne
+    @JoinColumn(name = "id_tramite")
+    private TramiteMatriculacion tramite;
+
+    @ManyToOne
+    @JoinColumn(name = "id_entidad", nullable = false)
+    private EntidadesTransito entidad;
+
+    @Column(name = "fecha_inicio", nullable = false)
+    private LocalDate fechaInicio;
+
+    @Column(name = "fecha_fin")
+    private LocalDate fechaFin;
+
+    @Column(name = "fecha_cancelado")
+    private LocalDate fechaCancelado;
 
     @Column(name = "estado", length = 35)
     private String estado;

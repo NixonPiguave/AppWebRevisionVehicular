@@ -1,0 +1,311 @@
+<div class="rtv-container">
+
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido"><mat-icon>error_outline</mat-icon><span>{{ error }}</span></div>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando bajas de vehículos...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+
+    <div class="rtv-header">
+      <div class="header-titulo">
+        <mat-icon class="header-icono">remove_circle</mat-icon>
+        <div>
+          <h2>Baja de Vehículos</h2>
+        </div>
+      </div>
+      <button class="btn-agregar" (click)="abrirModalCrear()">
+        <mat-icon>add</mat-icon>
+        Nueva Baja
+      </button>
+    </div>
+
+    <div class="rtv-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()"
+                 placeholder="N° trámite, motivo, descripción..." class="input-filtro" />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+          <option [value]="10">10</option><option [value]="25">25</option><option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="rtv-tabla">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>N° Trámite</th>
+          <th>ID Vehículo</th>
+          <th>Motivo Baja</th>
+          <th>Descripción</th>
+          <th>Notif. SRI</th>
+          <th>Fecha Solicitud</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let r of paginados">
+          <td>{{ r.idBaja }}</td>
+          <td class="txt-resaltado">{{ r.numeroTramite }}</td>
+          <td>{{ r.vehiculoId }}</td>
+          <td>
+            <span class="motivo-badge motivo-{{ r.motivoBaja?.toLowerCase() }}">{{ r.motivoBaja }}</span>
+          </td>
+          <td class="td-truncar">{{ r.descripcionMotivo }}</td>
+          <td>
+              <span class="notif-badge" [class.notif-si]="r.notificadoSri === 'SI'" [class.notif-no]="r.notificadoSri === 'NO'">
+                {{ r.notificadoSri }}
+              </span>
+          </td>
+          <td>{{ r.fechaSolicitud | date:'dd/MM/yyyy' }}</td>
+          <td><span class="estado-badge" [ngClass]="getEstadoBadge(r.estado)">{{ r.estado }}</span></td>
+          <td class="td-acciones">
+            <button class="btn-accion btn-ver" (click)="verDetalle(r)" title="Ver detalle"><mat-icon>visibility</mat-icon></button>
+            <button class="btn-accion btn-editar" (click)="abrirModalEditar(r)" title="Editar"><mat-icon>edit</mat-icon></button>
+          </td>
+        </tr>
+        <tr *ngIf="paginados.length === 0 && !error && !cargando">
+          <td colspan="9" class="sin-registros">No se encontraron registros de bajas</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="filtrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }}
+        de {{ filtrados.length }} registros
+      </div>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1"><mat-icon>chevron_left</mat-icon></button>
+        <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== MODAL FORMULARIO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+
+    <div class="modal-header">
+      <div class="modal-header-titulo">
+        <mat-icon>{{ modoEdicion ? 'edit' : 'remove_circle' }}</mat-icon>
+        <h3>{{ modoEdicion ? 'Editar Baja' : 'Nueva Baja de Vehículo' }}</h3>
+      </div>
+      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- ADVERTENCIA IRREVERSIBLE -->
+      <div class="alerta-irreversible">
+        <mat-icon>warning</mat-icon>
+        <p><strong>PROCESO IRREVERSIBLE (Art.62).</strong> La baja elimina definitivamente el vehículo del registro activo. Verificar la causal y documentación antes de confirmar.</p>
+      </div>
+
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>ID Trámite *</label>
+            <input type="number" [(ngModel)]="editando.tramiteId" class="form-input" placeholder="ID del trámite" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Vehículo *</label>
+            <input type="number" [(ngModel)]="editando.vehiculoId" class="form-input" placeholder="ID del vehículo" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Propietario *</label>
+            <input type="number" [(ngModel)]="editando.propietarioId" class="form-input" placeholder="ID del propietario" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Entidad *</label>
+            <input type="number" [(ngModel)]="editando.entidadId" class="form-input" placeholder="ID entidad de tránsito" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Usuario *</label>
+            <input type="number" [(ngModel)]="editando.usuarioId" class="form-input" placeholder="ID del usuario" />
+          </div>
+          <div class="form-grupo">
+            <label>N° Trámite *</label>
+            <input type="text" [(ngModel)]="editando.numeroTramite" class="form-input" placeholder="Ej: TRK-2024-00789" maxlength="30" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>report_problem</mat-icon> Causal de Baja (Art.63)</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>Motivo de Baja *</label>
+            <select [(ngModel)]="editando.motivoBaja" class="form-select">
+              <option *ngFor="let m of motivosBaja" [value]="m">{{ m }}</option>
+            </select>
+          </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Descripción del Motivo *</label>
+            <textarea [(ngModel)]="editando.descripcionMotivo" class="form-input" rows="2"
+                      placeholder="Detalle de la causal específica (Art.63)" maxlength="500"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inspecciones: solo para NO_APROBACION_RTV -->
+      <div class="form-seccion" *ngIf="requiereInspecciones()">
+        <h4 class="seccion-titulo"><mat-icon>fact_check</mat-icon> 3 Reprobaciones Consecutivas (Art.63(2))</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>ID Inspección 1 *</label>
+            <input type="number" [(ngModel)]="editando.inspeccion1Id" class="form-input" placeholder="1er período reprobado" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Inspección 2 *</label>
+            <input type="number" [(ngModel)]="editando.inspeccion2Id" class="form-input" placeholder="2do período reprobado" />
+          </div>
+          <div class="form-grupo">
+            <label>ID Inspección 3 *</label>
+            <input type="number" [(ngModel)]="editando.inspeccion3Id" class="form-input" placeholder="3er período reprobado consecutivo" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Chatarrización: solo para VIDA_UTIL y SINIESTRO -->
+      <div class="form-seccion" *ngIf="requiereChatarrizado()">
+        <h4 class="seccion-titulo"><mat-icon>recycling</mat-icon> Chatarrización (Art.64)</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>Empresa Chatarrizado *</label>
+            <input type="text" [(ngModel)]="editando.empresaChatarrizado" class="form-input"
+                   placeholder="Empresa autorizada por MIPRO" maxlength="100" />
+          </div>
+          <div class="form-grupo">
+            <label>Fecha de Chatarrizado *</label>
+            <input type="date" [(ngModel)]="editando.fechaChatarrizado" class="form-input" />
+          </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Certificado de Chatarrizado *</label>
+            <input type="text" [(ngModel)]="editando.certChatarrizado" class="form-input"
+                   placeholder="URL o referencia del certificado" maxlength="255" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Orden judicial: solo para JUDICIAL -->
+      <div class="form-seccion" *ngIf="requiereOrdenJudicial()">
+        <h4 class="seccion-titulo"><mat-icon>gavel</mat-icon> Orden Judicial (Art.63(5))</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo form-grupo-full">
+            <label>Orden Judicial *</label>
+            <input type="text" [(ngModel)]="editando.ordenJudicial" class="form-input"
+                   placeholder="URL o referencia de la orden judicial" maxlength="255" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Constancia policial: solo para ROBO -->
+      <div class="form-seccion" *ngIf="requiereConstanciaPolicial()">
+        <h4 class="seccion-titulo"><mat-icon>local_police</mat-icon> Denuncia Policial (Art.63(4))</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo form-grupo-full">
+            <label>Constancia Policial *</label>
+            <input type="text" [(ngModel)]="editando.constanciaPolicial" class="form-input"
+                   placeholder="URL o referencia de la denuncia policial" maxlength="255" />
+          </div>
+        </div>
+      </div>
+
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>receipt_long</mat-icon> Notificación SRI (Art.65) y Estado</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>Notificado al SRI *</label>
+            <select [(ngModel)]="editando.notificadoSri" class="form-select">
+              <option *ngFor="let n of notificadoSriOpciones" [value]="n">{{ n }}</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label>Fecha Notificación SRI</label>
+            <input type="date" [(ngModel)]="editando.fechaNotificacionSri" class="form-input" />
+          </div>
+          <div class="form-grupo">
+            <label>Fecha Solicitud *</label>
+            <input type="datetime-local" [(ngModel)]="editando.fechaSolicitud" class="form-input" />
+          </div>
+          <div class="form-grupo">
+            <label>Fecha Conclusión</label>
+            <input type="datetime-local" [(ngModel)]="editando.fechaConclusion" class="form-input" />
+          </div>
+          <div class="form-grupo">
+            <label>Estado *</label>
+            <select [(ngModel)]="editando.estado" class="form-select">
+              <option *ngFor="let e of estadosOpciones" [value]="e">{{ e }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-guardar btn-peligro" (click)="guardar()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'remove_circle' }}</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Baja') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL DETALLE ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-titulo"><mat-icon>visibility</mat-icon><h3>Detalle de la Baja</h3></div>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body" *ngIf="detalle">
+      <div class="detalle-grid">
+        <div class="detalle-item"><span class="detalle-label">ID Baja</span><span class="detalle-valor">#{{ detalle.idBaja }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">N° Trámite</span><span class="detalle-valor resaltado">{{ detalle.numeroTramite }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">ID Trámite</span><span class="detalle-valor">{{ detalle.tramiteId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">ID Vehículo</span><span class="detalle-valor">{{ detalle.vehiculoId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">ID Propietario</span><span class="detalle-valor">{{ detalle.propietarioId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">ID Entidad</span><span class="detalle-valor">{{ detalle.entidadId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Motivo Baja</span><span class="detalle-valor">{{ detalle.motivoBaja }}</span></div>
+        <div class="detalle-item detalle-full"><span class="detalle-label">Descripción Motivo</span><span class="detalle-valor">{{ detalle.descripcionMotivo }}</span></div>
+        <div class="detalle-item" *ngIf="detalle.empresaChatarrizado"><span class="detalle-label">Empresa Chatarrizado</span><span class="detalle-valor">{{ detalle.empresaChatarrizado }}</span></div>
+        <div class="detalle-item" *ngIf="detalle.fechaChatarrizado"><span class="detalle-label">Fecha Chatarrizado</span><span class="detalle-valor">{{ detalle.fechaChatarrizado | date:'dd/MM/yyyy' }}</span></div>
+        <div class="detalle-item" *ngIf="detalle.ordenJudicial"><span class="detalle-label">Orden Judicial</span><span class="detalle-valor">{{ detalle.ordenJudicial }}</span></div>
+        <div class="detalle-item" *ngIf="detalle.constanciaPolicial"><span class="detalle-label">Constancia Policial</span><span class="detalle-valor">{{ detalle.constanciaPolicial }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Notificado SRI</span>
+          <span class="notif-badge" [class.notif-si]="detalle.notificadoSri === 'SI'" [class.notif-no]="detalle.notificadoSri === 'NO'">{{ detalle.notificadoSri }}</span>
+        </div>
+        <div class="detalle-item"><span class="detalle-label">Fecha Notif. SRI</span><span class="detalle-valor">{{ detalle.fechaNotificacionSri | date:'dd/MM/yyyy' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Fecha Solicitud</span><span class="detalle-valor">{{ detalle.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Fecha Conclusión</span><span class="detalle-valor">{{ detalle.fechaConclusion | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Estado</span><span class="estado-badge" [ngClass]="getEstadoBadge(detalle.estado)">{{ detalle.estado }}</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>

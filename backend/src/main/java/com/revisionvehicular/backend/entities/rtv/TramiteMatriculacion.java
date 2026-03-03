@@ -40,12 +40,12 @@ public class TramiteMatriculacion {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "id_tarifario_tramite")
+    private TarifarioTramite tarifarioTramite;
+
     @Column(name = "numero_tramite", nullable = false, unique = true, length = 30)
     private String numeroTramite;
-
-    /** SOLICITUD / PAGO / RTV / EMISION / CONCLUIDO / ANULADO */
-    @Column(name = "etapa_actual", nullable = false, length = 30)
-    private String etapaActual;
 
     /** SI / NO */
     @Column(name = "validado_sri", nullable = false, length = 255)
@@ -62,10 +62,6 @@ public class TramiteMatriculacion {
     /** SI / NO */
     @Column(name = "validado_homologacion", nullable = false, length = 255)
     private String validadoHomologacion;
-
-    /** PRESENCIAL / INTERNET / AUTOSERVICIO */
-    @Column(name = "canal_contacto", nullable = false, length = 30)
-    private String canalContacto;
 
     @Column(name = "fecha_solicitud", nullable = false)
     private LocalDateTime fechaSolicitud;

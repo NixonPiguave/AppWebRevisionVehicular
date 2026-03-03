@@ -1,8 +1,8 @@
-import { Component, HostListener, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { EmpresaService } from '../../services/administracion/empresa.service'; // ✅ NUEVO
+import { EmpresaService } from '../../services/administracion/empresa.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -17,6 +17,10 @@ export class InicioComponent implements OnInit {
   sidebarCollapsed = false;
   sidebarOpen = false;
   nombreUsuario: string = 'Usuario';
+  rolUsuario: string = '';
+  menuUsuarioAbierto: boolean = false;
+
+  @ViewChild('userMenu', { static: false }) userMenu?: ElementRef<HTMLElement>;
 
   //  Variables para ícono dinámico
   empresaIcono: string | null = null;
@@ -32,6 +36,7 @@ export class InicioComponent implements OnInit {
   antTramitesOpen = false;
   configuracionUmbralOpen = false;
   administracionOpen = false;
+  accesosRapidosOpen = false;
 
   constructor(
     private authService: AuthService,
@@ -43,6 +48,8 @@ export class InicioComponent implements OnInit {
   ngOnInit() {
     this.checkScreenSize();
     this.cargarIconoEmpresa();
+    this.nombreUsuario = this.authService.getNombre() ?? this.authService.getUsuario() ?? 'Usuario';
+    this.rolUsuario = this.authService.getRol() ?? '';
   }
 
    // Cargar ícono de empresa para sidebar
@@ -86,6 +93,24 @@ export class InicioComponent implements OnInit {
     }
   }
 
+  toggleAccesosRapidos() {
+    this.closeAllExcept('accesosRapidos');
+    this.accesosRapidosOpen = !this.accesosRapidosOpen;
+  }
+
+  irATramiteRapido(servicioId: number) {
+    const rutasServicios: { [key: number]: string } = {
+      9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
+      10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
+      12: '/inicio/gestion_vehicular/baja-vehiculo',
+    };
+
+    const ruta = rutasServicios[servicioId];
+    if (ruta) {
+      this.router.navigate([ruta]);
+    }
+  }
+
   closeSidebar() {
     if (this.isMobile()) {
       this.sidebarOpen = false;
@@ -120,6 +145,25 @@ export class InicioComponent implements OnInit {
     if (this.sidebarOpen) {
       this.closeSidebar();
     }
+    if (this.menuUsuarioAbierto) {
+      this.menuUsuarioAbierto = false;
+    }
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.menuUsuarioAbierto) return;
+    const target = event.target as Node | null;
+    const hostEl = this.userMenu?.nativeElement;
+    if (!hostEl || !target) return;
+    if (!hostEl.contains(target)) {
+      this.menuUsuarioAbierto = false;
+    }
+  }
+
+  toggleMenuUsuario(event: MouseEvent) {
+    event.stopPropagation();
+    this.menuUsuarioAbierto = !this.menuUsuarioAbierto;
   }
 
   toggleGestionVehicular() {
@@ -171,6 +215,7 @@ export class InicioComponent implements OnInit {
     if (sectionName !== 'antTramites') this.antTramitesOpen = false;
     if (sectionName !== 'configuracionUmbral') this.configuracionUmbralOpen = false;
     if (sectionName !== 'administracion') this.administracionOpen = false;
+    if (sectionName !== 'accesosRapidos') this.accesosRapidosOpen = false; // ← nueva línea
   }
 
   cerrarSesion(): void {

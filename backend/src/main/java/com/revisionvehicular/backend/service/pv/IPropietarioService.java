@@ -14,4 +14,6 @@ public interface IPropietarioService {
     PropietarioDTO findById(Long id);
 
     List<PropietarioDTO> findAll();
+
+    List<PropietarioDTO> buscarElegiblesSinMultas(String cedula);
 }

@@ -25,6 +25,11 @@ export class AuthService {
         localStorage.setItem('usuario', response.usuario);
         localStorage.setItem('nombre', response.nombre);
         localStorage.setItem('usuarioId', response.usuarioId);
+        if (response.rol) {
+          localStorage.setItem('rol', response.rol);
+        } else {
+          localStorage.removeItem('rol');
+        }
       })
     );
   }
@@ -37,6 +42,7 @@ export class AuthService {
         localStorage.removeItem('usuario');
         localStorage.removeItem('nombre');
         localStorage.removeItem('usuarioId');
+        localStorage.removeItem('rol');
       })
     );
   }
@@ -59,5 +65,9 @@ export class AuthService {
 
   getUsuarioId(): string | null {
     return localStorage.getItem('usuarioId');
+  }
+
+  getRol(): string | null {
+    return localStorage.getItem('rol');
   }
 }

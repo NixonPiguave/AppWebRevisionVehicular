@@ -29,6 +29,13 @@ public class VehiculoController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/buscar")
+    public ResponseEntity<List<VehiculoDTO>> buscarPorPlaca(
+            @RequestParam(value = "placa", required = false) String placa
+    ) {
+        return ResponseEntity.ok(service.buscarPorPlaca(placa));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<VehiculoDTO> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));

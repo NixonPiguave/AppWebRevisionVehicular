@@ -25,6 +25,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
 
         repository.spInsertarVehiculo(
                 dto.getPropietarioId(),
+                dto.getMatricula(),
                 dto.getChasis(),
                 dto.getVin(),
                 dto.getModeloVehiculoId(),
@@ -59,6 +60,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
         repository.spModificarVehiculo(
                 id,
                 dto.getPropietarioId(),
+                dto.getMatricula(),
                 dto.getChasis(),
                 dto.getVin(),
                 dto.getModeloVehiculoId(),
@@ -92,6 +94,18 @@ public class VehiculoServiceImpl implements IVehiculoService {
     @Override
     public List<VehiculoDTO> findAll() {
         return repository.findAll()
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VehiculoDTO> buscarPorPlaca(String placa) {
+        String filtro = placa == null ? "" : placa.trim();
+        if (filtro.isEmpty()) {
+            return findAll();
+        }
+        return repository.findByMatriculaContainingIgnoreCase(filtro)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());

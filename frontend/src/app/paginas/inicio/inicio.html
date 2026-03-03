@@ -50,6 +50,15 @@
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
       </div>
 
+      <a
+        class="menu-item"
+        routerLink="/inicio/administracion/turnos"
+        [queryParams]="{ nuevo: 1 }"
+        routerLinkActive="active">
+        <mat-icon class="menu-icon">playlist_add</mat-icon>
+        <span *ngIf="!sidebarCollapsed">Registro de Trámite</span>
+      </a>
+
       <!-- ========================================
            GESTIÓN VEHICULAR
            ======================================== -->
@@ -74,10 +83,41 @@
           </div>
 
           <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
-            <a class="submenu-item">Vehículos</a>
+            <a routerLink="/inicio/gestion_vehicular/vehiculo" routerLinkActive="active" class="submenu-item">Vehículos</a>
             <a routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
             <a class="submenu-item">Revisiones</a>
             <a class="submenu-item">Resultados de Revisión</a>
+          </div>
+        </div>
+        <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
+        <div class="menu-item-expandable">
+          <div
+            class="menu-item"
+            (click)="toggleAccesosRapidos()"
+            [class.active]="accesosRapidosOpen">
+            <mat-icon class="menu-icon">build</mat-icon>
+            <span *ngIf="!sidebarCollapsed">Trámites legales</span>
+            <mat-icon
+              *ngIf="!sidebarCollapsed"
+              class="menu-arrow"
+              [class.rotated]="accesosRapidosOpen">
+              expand_more
+            </mat-icon>
+          </div>
+
+          <div class="submenu" [class.open]="accesosRapidosOpen && !sidebarCollapsed">
+            <a class="submenu-item" (click)="irATramiteRapido(9)">
+              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock</mat-icon>
+              Bloqueo
+            </a>
+            <a class="submenu-item" (click)="irATramiteRapido(10)">
+              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock_open</mat-icon>
+              Desbloqueo
+            </a>
+            <a class="submenu-item" (click)="irATramiteRapido(12)">
+              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">remove_circle_outline</mat-icon>
+              Baja
+            </a>
           </div>
         </div>
       </div>
@@ -211,6 +251,7 @@
             <a routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
             <a routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
             <a routerLink="/inicio/defectos-inspeccion/tipos-defectos" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
+            <a routerLink="/inicio/defectos-inspeccion/defectos" routerLinkActive="active" class="submenu-item">Defectos</a>
           </div>
         </div>
       </div>
@@ -305,6 +346,7 @@
             <a routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
             <a routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
             <a routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
+            <a routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
           </div>
         </div>
       </div>
@@ -351,9 +393,22 @@
       </div>
 
       <div class="right">
-        <!-- Información de usuario -->
-        <mat-icon class="user-icon">person</mat-icon>
-        <span class="user">{{ nombreUsuario }}</span>
+        <!-- Información de usuario + rol -->
+        <div class="user-menu" #userMenu>
+          <button type="button" class="user-info" (click)="toggleMenuUsuario($event)">
+            <mat-icon class="user-icon">person</mat-icon>
+            <div class="user-text">
+              <div class="user-name">{{ nombreUsuario }}</div>
+              <div class="user-role" *ngIf="rolUsuario">{{ rolUsuario }}</div>
+            </div>
+            <mat-icon class="user-chevron">expand_more</mat-icon>
+          </button>
+
+          <div class="user-dropdown" *ngIf="menuUsuarioAbierto">
+            <div class="user-dropdown-name">{{ nombreUsuario }}</div>
+            <div class="user-dropdown-role">{{ rolUsuario || 'Sin rol' }}</div>
+          </div>
+        </div>
 
         <!-- Botón de cerrar sesión -->
         <button class="logout" (click)="cerrarSesion()">

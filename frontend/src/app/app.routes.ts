@@ -5,6 +5,7 @@ import { AreasComponent } from './paginas/administracion/areas/areas';
 import { EmpresaComponent } from './paginas/administracion/empresa/empresa';
 import { RolesComponent } from './paginas/administracion/roles/roles';
 import { UsuariosComponent } from './paginas/administracion/usuarios/usuarios';
+import { TurnosComponent } from './paginas/administracion/turnos/turnos';
 import { AmbitoOperacionalComponent } from './paginas/catalogos_vehiculos/ambito-operacional/ambito-operacional';
 import { CapacidadCargaComponent } from './paginas/catalogos_vehiculos/capacidad-carga/capacidad-carga';
 import {CategoriasComponent} from './paginas/catalogos_vehiculos/categorias/categorias';
@@ -35,7 +36,11 @@ import {
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
-
+import {VehiculoComponent} from './paginas/gestion_vehicular/vehiculos/vehiculos';
+import {DefectosComponent} from './paginas/defectos_inspeccion/defectos/defectos';
+import { BloqueoVehiculoComponent } from './paginas/gestion_vehicular/bloqueo-vehiculo/bloqueo-vehiculo';
+import { DesbloqueoVehiculoComponent } from './paginas/gestion_vehicular/desbloqueo-vehiculo/desbloqueo-vehiculo';
+import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo/baja-vehiculo';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -67,6 +72,7 @@ export const routes: Routes = [
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
       { path: 'defectos-inspeccion/categoria-defecto', component: CategoriaDefectoComponent },
       { path: 'defectos-inspeccion/familia-defecto', component: FamiliaComponent },
+      { path: 'defectos-inspeccion/defectos', component: DefectosComponent},
 
       //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
@@ -78,11 +84,18 @@ export const routes: Routes = [
       { path: 'configuracion-umbral/descripcion-umbral', component: DescripcionUmbralComponent },
       { path: 'configuracion-umbral/umbral', component: UmbralComponent },
 
-      //Gestion vehicular
+//Gestion vehicular
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
+      { path: 'gestion_vehicular/vehiculo', component: VehiculoComponent },
+      { path: 'gestion_vehicular/bloqueo-vehiculo', component: BloqueoVehiculoComponent },
+      { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
+      { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },
 
       //ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
+
+      // ADMINISTRACIÓN - TURNOS
+      { path: 'administracion/turnos', component: TurnosComponent },
     ]
   },
   { path: '**', redirectTo: '' }

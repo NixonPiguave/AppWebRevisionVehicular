@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,6 +15,7 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
     @Procedure(procedureName = "sp_vehiculo_insertar")
     void spInsertarVehiculo(
             @Param("p_id_propietario") Long propietarioId,
+            @Param("p_matricula") String matricula,
             @Param("p_chasis") String chasis,
             @Param("p_vin") String vin,
             @Param("p_id_modelo") Long modeloId,
@@ -35,6 +37,7 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
     void spModificarVehiculo(
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_propietario") Long propietarioId,
+            @Param("p_matricula") String matricula,           // ✅ AGREGADO
             @Param("p_chasis") String chasis,
             @Param("p_vin") String vin,
             @Param("p_id_modelo") Long modeloId,
@@ -54,4 +57,6 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     Optional<Vehiculo> findByChasis(String chasis);
     Optional<Vehiculo> findByVin(String vin);
+
+    List<Vehiculo> findByMatriculaContainingIgnoreCase(String matricula);
 }

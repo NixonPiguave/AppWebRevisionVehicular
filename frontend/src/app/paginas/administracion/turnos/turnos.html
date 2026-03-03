@@ -1,0 +1,275 @@
+<div class="turnos-container">
+  <div class="header">
+    <h2>Gestión de Turnos</h2>
+    <button class="btn btn-primary" (click)="nuevoTurno()">
+      <i class="icon-plus"></i> Nuevo Turno
+    </button>
+  </div>
+
+  <div class="formulario-container" *ngIf="mostrarFormulario">
+    <h3>{{ modoEdicion ? 'Editar Turno' : 'Nuevo Turno' }}</h3>
+    <form (ngSubmit)="guardarTurno()">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Propietario (cédula) *</label>
+          <div class="input-accion">
+            <input
+              type="text"
+              [value]="propietarioSeleccionadoInfo ? (propietarioSeleccionadoInfo.documentoIdentidad + ' - ' + propietarioSeleccionadoInfo.nombre) : ''"
+              class="form-control"
+              placeholder="Seleccione un propietario"
+              readonly
+            />
+            <button type="button" class="btn btn-secondary btn-inline" (click)="abrirSelectorPropietario()">
+              Buscar / Seleccionar
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="limpiarPropietario()"
+              [disabled]="!turnoForm.propietarioId"
+              title="Quitar propietario">
+              Quitar
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Vehículo (placa) *</label>
+          <div class="input-accion">
+            <input
+              type="text"
+              [value]="vehiculoSeleccionadoInfo ? (vehiculoSeleccionadoInfo.matricula + ' - ' + vehiculoSeleccionadoInfo.chasis) : ''"
+              class="form-control"
+              placeholder="Seleccione un vehículo"
+              readonly
+            />
+            <button type="button" class="btn btn-secondary btn-inline" (click)="abrirSelectorVehiculo()">
+              Buscar / Seleccionar
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="limpiarVehiculo()"
+              [disabled]="!turnoForm.vehiculoId"
+              title="Quitar vehículo">
+              Quitar
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="servicioId">Servicio *</label>
+          <select
+            id="servicioId"
+            [(ngModel)]="turnoForm.servicioId"
+            name="servicioId"
+            required
+            class="form-control"
+          >
+            <option [ngValue]="0" disabled>Seleccione un servicio</option>
+            <option *ngFor="let s of servicios" [ngValue]="s.idTipoTramite">
+              {{ s.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="fechaInicio">Fecha Inicio *</label>
+          <input
+            type="date"
+            id="fechaInicio"
+            [(ngModel)]="turnoForm.fechaInicio"
+            name="fechaInicio"
+            required
+            class="form-control"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="estado">Estado *</label>
+          <select
+            id="estado"
+            [(ngModel)]="turnoForm.estado"
+            name="estado"
+            required
+            class="form-control"
+          >
+            <option value="GENERADO">GENERADO</option>
+            <option value="CONFIRMADO">CONFIRMADO</option>
+            <option value="ATENDIDO">ATENDIDO</option>
+            <option value="CANCELADO">CANCELADO</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-success">
+          {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">
+          Cancelar
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ============================
+       Modal Propietarios (cédula)
+       ============================ -->
+  <div class="modal-overlay" *ngIf="mostrarModalPropietario" (click)="cerrarSelectorPropietario()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h4>Seleccionar propietario</h4>
+        <button type="button" class="btn-icon" (click)="cerrarSelectorPropietario()" title="Cerrar">✖</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-filtros">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar por cédula (documento)"
+            [(ngModel)]="busquedaCedula"
+            name="busquedaCedula"
+          />
+          <button type="button" class="btn btn-primary" (click)="buscarPropietariosElegibles()">
+            Buscar
+          </button>
+        </div>
+
+        <div class="modal-info" *ngIf="cargandoPropietarios">Cargando...</div>
+
+        <table class="tabla-modal" *ngIf="!cargandoPropietarios">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Nombre</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of propietariosElegibles">
+              <td>{{ p.documentoIdentidad }}</td>
+              <td>{{ p.nombre }}</td>
+              <td>
+                <button type="button" class="btn btn-success btn-inline" (click)="seleccionarPropietario(p)">
+                  Elegir
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="propietariosElegibles.length === 0">
+              <td colspan="3" class="text-center">No hay propietarios disponibles</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="modal-ayuda">
+          Solo se muestran propietarios <strong>sin multas</strong> en tablas ANT.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================
+       Modal Vehículos (placa)
+       ============================ -->
+  <div class="modal-overlay" *ngIf="mostrarModalVehiculo" (click)="cerrarSelectorVehiculo()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h4>Seleccionar vehículo</h4>
+        <button type="button" class="btn-icon" (click)="cerrarSelectorVehiculo()" title="Cerrar">✖</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-filtros">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Buscar por placa"
+            [(ngModel)]="busquedaPlaca"
+            name="busquedaPlaca"
+          />
+          <button type="button" class="btn btn-primary" (click)="buscarVehiculos()">
+            Buscar
+          </button>
+        </div>
+
+        <div class="modal-info" *ngIf="cargandoVehiculos">Cargando...</div>
+
+        <table class="tabla-modal" *ngIf="!cargandoVehiculos">
+          <thead>
+            <tr>
+              <th>Placa</th>
+              <th>Chasis</th>
+              <th>VIN</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let v of vehiculosEncontrados">
+              <td>{{ v.matricula }}</td>
+              <td>{{ v.chasis }}</td>
+              <td>{{ v.vin }}</td>
+              <td>
+                <button type="button" class="btn btn-success btn-inline" (click)="seleccionarVehiculo(v)">
+                  Elegir
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="vehiculosEncontrados.length === 0">
+              <td colspan="4" class="text-center">No hay vehículos registrados</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="modal-ayuda">
+          Solo se muestran vehículos <strong>ya registrados</strong> (búsqueda por placa).
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabla-container">
+    <table class="tabla-turnos">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Propietario</th>
+        <th>Vehículo</th>
+        <th>Servicio</th>
+        <th>Entidad</th>
+        <th>Fecha Inicio</th>
+        <th>Fecha Fin</th>
+        <th>Estado</th>
+        <th>Acciones</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let turno of turnos">
+        <td>{{ turno.turnoId }}</td>
+        <td>{{ turno.propietarioId }}</td>
+        <td>{{ turno.vehiculoId }}</td>
+        <td>{{ turno.servicioId }}</td>
+        <td>{{ turno.entidadId }}</td>
+        <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+        <td>{{ turno.fechaFin ? (turno.fechaFin | date: 'dd/MM/yyyy') : '-' }}</td>
+        <td>
+            <span class="badge" [ngClass]="'badge-' + turno.estado.toLowerCase()">
+              {{ turno.estado }}
+            </span>
+        </td>
+        <td class="acciones">
+          <button class="btn-icon btn-edit" (click)="editarTurno(turno)" title="Editar">
+            ✏️
+          </button>
+          <button class="btn-icon btn-delete" (click)="eliminarTurno(turno.turnoId!)" title="Eliminar">
+            🗑️
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="turnos.length === 0">
+        <td colspan="9" class="text-center">No hay turnos registrados</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

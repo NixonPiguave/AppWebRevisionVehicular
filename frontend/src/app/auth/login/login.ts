@@ -27,6 +27,7 @@ export class LoginComponent implements OnInit {
   empresaNombre: string = 'Revisión Técnica Vehicular';
   cargandoLogo: boolean = true;
 
+
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
@@ -73,6 +74,7 @@ export class LoginComponent implements OnInit {
   togglePassword() {
     this.hidePassword = !this.hidePassword;
   }
+
 
   login() {
     this.error = '';
