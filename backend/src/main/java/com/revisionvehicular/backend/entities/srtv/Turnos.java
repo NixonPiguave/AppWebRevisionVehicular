@@ -7,6 +7,7 @@ import com.revisionvehicular.backend.entities.rtv.TramiteMatriculacion;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "rtv_turnos")
@@ -49,4 +50,7 @@ public class Turnos {
 
     @Column(name = "estado", length = 35)
     private String estado;
+
+    @Column(name = "monto_pagado")
+    private BigDecimal montoPagado;
 }
