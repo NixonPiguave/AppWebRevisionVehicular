@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Repository
 public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
-    @Procedure(name = "sp_insertar_turno")
+    @Procedure(procedureName = "sp_insertar_turno")
     void insertarTurno(
             @Param("p_propietario_id") Long propietarioId,
             @Param("p_vehiculo_id") Long vehiculoId,
@@ -24,7 +24,7 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("p_estado") String estado
     );
 
-    @Procedure(name = "sp_actualizar_turno")
+    @Procedure(procedureName= "sp_actualizar_turno")
     void actualizarTurno(
             @Param("p_turno_id") Long turnoId,
             @Param("p_propietario_id") Long propietarioId,
