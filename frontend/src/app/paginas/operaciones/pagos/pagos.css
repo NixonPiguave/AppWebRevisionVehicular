@@ -1,0 +1,224 @@
+.turnos-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Título "Registro de Pagos" con fondo blanco */
+.pagos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.pagos-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.filtros {
+  margin-bottom: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.filtro-cedula-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 260px;
+}
+
+.filtro-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #555;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+.btn-sm {
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.btn-reintentar {
+  white-space: nowrap;
+}
+
+.tabla-container {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+.tabla-turnos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-turnos thead {
+  background-color: #1a2e1a;
+}
+
+.tabla-turnos th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: white;
+  font-size: 14px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.tabla-turnos th:first-child {
+  border-top-left-radius: 7px;
+}
+
+.tabla-turnos th:last-child {
+  border-top-right-radius: 7px;
+}
+
+.tabla-turnos td {
+  padding: 15px;
+  border-bottom: 1px solid #dee2e6;
+  color: #555;
+  font-size: 14px;
+}
+
+.tabla-turnos tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.badge {
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.badge-generado {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.badge-confirmado {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+
+.badge-atendido {
+  background-color: #e8f5e9;
+  color: #388e3c;
+}
+
+.badge-cancelado {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+}
+
+.form-control {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.input-monto {
+  width: 120px;
+  box-sizing: border-box;
+}
+
+.text-center {
+  text-align: center;
+  color: #999;
+  padding: 40px;
+}
+
+/* Estados de carga y error (mismo criterio que otras pantallas) */
+.mensaje-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 16px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cargando {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .pagos-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .tabla-container {
+    overflow-x: scroll;
+  }
+}
