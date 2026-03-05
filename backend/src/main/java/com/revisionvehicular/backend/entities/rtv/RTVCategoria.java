@@ -6,11 +6,12 @@ import lombok.Data;
 @Entity
 @Table(name = "rtv_categoria")
 @Data
-public class RTV_Categoria {
+public class RTVCategoria {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long rtvcategoria_id;
+    @Column(name="rtvcategoria_id")
+    private Long rtvcategoriaid;
 
     @Column(nullable = false, length = 50, unique = true)
     private String codigo;

@@ -43,7 +43,7 @@ public class Defecto {
     private Subfamilia subfamilia;
     @ManyToOne
     @JoinColumn(name = "categoria_id")
-    private RTV_Categoria rtvCategoria;
+    private RTVCategoria rtvCategoria;
 
     @Column(length = 50)
     private String estado;

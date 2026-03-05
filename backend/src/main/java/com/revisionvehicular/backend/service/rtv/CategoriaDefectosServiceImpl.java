@@ -1,7 +1,7 @@
 package com.revisionvehicular.backend.service.rtv;
 
 import com.revisionvehicular.backend.dtos.rtv.CategoriaDTO;
-import com.revisionvehicular.backend.entities.rtv.RTV_Categoria;
+import com.revisionvehicular.backend.entities.rtv.RTVCategoria;
 import com.revisionvehicular.backend.repositories.rtv.ICategoriaDefectosRepository;
 import org.springframework.stereotype.Service;
 
@@ -17,10 +17,10 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
         this.repository = repository;
     }
 
-    private CategoriaDTO toDTO(RTV_Categoria entity) {
+    private CategoriaDTO toDTO(RTVCategoria entity) {
 
         CategoriaDTO dto = new CategoriaDTO();
-        dto.setId(entity.getRtvcategoria_id());
+        dto.setId(entity.getRtvcategoriaid());
         dto.setCodigo(entity.getCodigo());
         dto.setNombre(entity.getNombre());
         dto.setDescripcion(entity.getDescripcion());
@@ -41,7 +41,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
                 dto.getSubfamiliaId()
         );
 
-        RTV_Categoria cat = repository.findAll()
+        RTVCategoria cat = repository.findAll()
                 .stream()
                 .filter(c -> c.getCodigo().equals(dto.getCodigo()))
                 .findFirst()
@@ -55,7 +55,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
     @Override
     public CategoriaDTO update(Long id, CategoriaDTO dto) {
 
-        RTV_Categoria existente = repository.findById(id)
+        RTVCategoria existente = repository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Categoria no encontrada con ID: " + id)
                 );
@@ -69,7 +69,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
                 dto.getSubfamiliaId()
         );
 
-        RTV_Categoria actualizada = repository.findById(id)
+        RTVCategoria actualizada = repository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar categoria")
                 );
@@ -90,7 +90,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
     @Override
     public CategoriaDTO findById(Long id) {
 
-        RTV_Categoria cat = repository.findById(id)
+        RTVCategoria cat = repository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Categoria no encontrada con ID: " + id)
                 );
