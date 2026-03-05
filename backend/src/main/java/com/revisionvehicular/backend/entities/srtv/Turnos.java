@@ -35,10 +35,6 @@ public class Turnos {
     @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
-    @ManyToOne
-    @JoinColumn(name = "id_entidad", nullable = false)
-    private EntidadesTransito entidad;
-
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 

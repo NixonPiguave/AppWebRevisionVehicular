@@ -26,7 +26,6 @@ public class TurnosServiceImpl implements ITurnosService {
                 dto.getVehiculoId(),
                 dto.getServicioId(),
                 null,
-                1L, // ✅ siempre CRTVMV
                 dto.getFechaInicio(),
                 null,
                 null,
@@ -72,7 +71,6 @@ public class TurnosServiceImpl implements ITurnosService {
                 dto.getVehiculoId(),
                 dto.getServicioId(),
                 tramiteId,
-                1L,
                 dto.getFechaInicio(),
                 existente.getFechaFin(),
                 existente.getFechaCancelado(),
