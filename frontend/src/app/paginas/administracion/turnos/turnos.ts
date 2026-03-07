@@ -12,8 +12,6 @@ import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/v
 import { Servicio } from '../../../services/administracion/servicio.service';
 import { EmpresaService } from '../../../services/administracion/empresa.service';
 import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
-import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
-import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-turnos',
@@ -59,14 +57,6 @@ export class TurnosComponent implements OnInit {
   busquedaPlaca = '';
   vehiculoSeleccionadoInfo: Vehiculo | null = null;
 
-  // Mapas auxiliares para mostrar nombre de propietario y placa en la tabla
-  propietariosMapa = new Map<number, Propietario>();
-  vehiculosMapa = new Map<number, Vehiculo>();
-
-  // Catálogo de modelos y marcas para los tickets
-  modelos: Modelo[] = [];
-  marcas: Marca[] = [];
-
   turnoForm: Turnos = {
     propietarioId: 0, vehiculoId: 0, servicioId: 0, fechaInicio: '', estado: 'GENERADO'
   };
@@ -77,18 +67,13 @@ export class TurnosComponent implements OnInit {
     private vehiculoService: VehiculoService,
     private empresaService: EmpresaService,
     private ticketService: TicketPagoService,
-    private modeloService: ModeloService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef,
-    private notification: NotificationService
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
     this.cargarTurnos();
-    this.cargarReferenciasPropietarios();
-    this.cargarReferenciasVehiculos();
-    this.cargarModelosYMarcas();
     this.route.queryParams.subscribe(params => {
       if (params['nuevo'] === '1' || params['nuevo'] === 'true') {
         this.nuevoTurno();
@@ -107,13 +92,7 @@ export class TurnosComponent implements OnInit {
 
   cargarTurnos(): void {
     this.turnosService.getAll().subscribe({
-      next: (data) => {
-        // Solo mostrar turnos en estado GENERADO en esta vista
-        this.turnos = (data ?? []).filter(
-          (t) => (t.estado || '').toUpperCase() === 'GENERADO'
-        );
-        this.cdr.detectChanges();
-      },
+      next: (data) => { this.turnos = data; this.cdr.detectChanges(); },
       error: (err)  => { console.error('Error al cargar turnos:', err); this.cdr.detectChanges(); }
     });
   }
@@ -123,21 +102,7 @@ export class TurnosComponent implements OnInit {
     this.mostrarFormulario = true;
     this.propietarioSeleccionadoInfo = null;
     this.vehiculoSeleccionadoInfo = null;
-
-    // Fecha de inicio automática: hoy (el procedimiento se encarga de fecha_fin)
-    const hoy = new Date();
-    const year = hoy.getFullYear();
-    const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
-    const day = hoy.getDate().toString().padStart(2, '0');
-    const fechaInicio = `${year}-${month}-${day}`;
-
-    this.turnoForm = {
-      propietarioId: 0,
-      vehiculoId: 0,
-      servicioId: 0,
-      fechaInicio,
-      estado: 'GENERADO'
-    };
+    this.turnoForm = { propietarioId: 0, vehiculoId: 0, servicioId: 0, fechaInicio: '', estado: 'GENERADO' };
   }
 
   editarTurno(turno: Turnos): void {
@@ -153,21 +118,16 @@ export class TurnosComponent implements OnInit {
 
   guardarTurno(): void {
     if (!this.turnoForm.propietarioId || this.turnoForm.propietarioId <= 0) {
-      this.notification.error('Debe seleccionar un propietario por cédula'); return;
+      alert('Debe seleccionar un propietario por cédula'); return;
     }
     if (!this.turnoForm.vehiculoId || this.turnoForm.vehiculoId <= 0) {
-      this.notification.error('Debe seleccionar un vehículo por placa'); return;
+      alert('Debe seleccionar un vehículo por placa'); return;
     }
     if (!this.turnoForm.servicioId || this.turnoForm.servicioId <= 0) {
-      this.notification.error('Debe seleccionar un servicio'); return;
+      alert('Debe seleccionar un servicio'); return;
     }
-    // Si por alguna razón viene sin fecha, la rellenamos con hoy
     if (!this.turnoForm.fechaInicio) {
-      const hoy = new Date();
-      const year = hoy.getFullYear();
-      const month = (hoy.getMonth() + 1).toString().padStart(2, '0');
-      const day = hoy.getDate().toString().padStart(2, '0');
-      this.turnoForm.fechaInicio = `${year}-${month}-${day}`;
+      alert('La fecha de inicio es requerida'); return;
     }
 
     if (this.modoEdicion && this.turnoSeleccionado?.turnoId) {
@@ -211,14 +171,6 @@ export class TurnosComponent implements OnInit {
     logoUrl?: string
   ): void {
     const nombreServicio = this.servicios.find(s => s.idTipoTramite === servicioId)?.nombre || '-';
-
-    // Marca y modelo para el ticket (si tenemos modeloVehiculoId)
-    const modeloNombre = vehiculo?.modeloVehiculoId
-      ? this.obtenerNombreModeloPorId(vehiculo.modeloVehiculoId)
-      : undefined;
-    const marcaNombre = vehiculo?.modeloVehiculoId
-      ? this.obtenerNombreMarcaPorModeloId(vehiculo.modeloVehiculoId)
-      : undefined;
     const hoy = new Date().toLocaleDateString('es-EC', {
       day: '2-digit', month: '2-digit', year: 'numeric'
     });
@@ -228,8 +180,6 @@ export class TurnosComponent implements OnInit {
       tipoProceso:        nombreServicio,
       placa:              vehiculo?.matricula        || `Vehículo #${turno.vehiculoId}`,
       anio:               vehiculo?.anioFabricacion  ?? undefined,
-      marca:              marcaNombre,
-      modelo:             modeloNombre,
       propietarioNombre:  propietario
         ? `${propietario.nombre ?? ''} ${propietario.telefono ?? ''}`.trim()
         : undefined,
@@ -247,7 +197,7 @@ export class TurnosComponent implements OnInit {
   }
 
   abrirInspeccion(turno: Turnos): void {
-    if (!turno.turnoId || !turno.vehiculoId) { this.notification.error('Este turno no tiene vehículo asociado.'); return; }
+    if (!turno.turnoId || !turno.vehiculoId) { alert('Este turno no tiene vehículo asociado.'); return; }
     this.router.navigate(['/inicio/inspeccion-rtv/registrar'], {
       queryParams: { turnoId: turno.turnoId, vehiculoId: turno.vehiculoId }
     });
@@ -277,55 +227,27 @@ export class TurnosComponent implements OnInit {
     this.mostrarModalPropietario = true;
     this.busquedaCedula = this.propietarioSeleccionadoInfo?.documentoIdentidad ?? this.busquedaCedula;
     this.buscarPropietariosElegibles();
-    this.cdr.detectChanges();
   }
-  cerrarSelectorPropietario(): void {
-    this.mostrarModalPropietario = false;
-    this.cdr.detectChanges();
-  }
+  cerrarSelectorPropietario(): void { this.mostrarModalPropietario = false; }
   buscarPropietariosElegibles(): void {
     this.cargandoPropietarios = true;
     this.propietariosElegibles = [];
     this.propietarioService.listarElegibles(this.busquedaCedula).subscribe({
-      next: (data) => {
-        this.propietariosElegibles = data ?? [];
-        this.cargandoPropietarios = false;
-        (data ?? []).forEach(p => {
-          if (p.idPropietario != null) this.propietariosMapa.set(p.idPropietario, p);
-        });
-        this.cdr.detectChanges();
-      },
-      error: (err)  => {
-        console.error('Error:', err);
-        this.cargandoPropietarios = false;
-        this.cdr.detectChanges();
-      }
+      next: (data) => { this.propietariosElegibles = data ?? []; this.cargandoPropietarios = false; },
+      error: (err)  => { console.error('Error:', err); this.cargandoPropietarios = false; }
     });
   }
   seleccionarPropietario(p: Propietario): void {
     this.propietarioSeleccionadoInfo = p;
     this.turnoForm.propietarioId = (p.idPropietario ?? 0) as number;
     this.cerrarSelectorPropietario();
-    if (p.idPropietario != null) this.propietariosMapa.set(p.idPropietario, p);
-    this.cdr.detectChanges();
   }
-  limpiarPropietario(): void {
-    this.propietarioSeleccionadoInfo = null;
-    this.turnoForm.propietarioId = 0;
-    this.cdr.detectChanges();
-  }
+  limpiarPropietario(): void { this.propietarioSeleccionadoInfo = null; this.turnoForm.propietarioId = 0; }
   private cargarPropietarioPorId(id: number): void {
     if (!id || id <= 0) return;
     this.propietarioService.obtenerPorId(id).subscribe({
-      next: (p) => {
-        this.propietarioSeleccionadoInfo = p;
-        if (p.idPropietario != null) this.propietariosMapa.set(p.idPropietario, p);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.warn('No se pudo cargar propietario:', err);
-        this.cdr.detectChanges();
-      }
+      next: (p) => (this.propietarioSeleccionadoInfo = p),
+      error: (err) => console.warn('No se pudo cargar propietario:', err)
     });
   }
 
@@ -334,125 +256,27 @@ export class TurnosComponent implements OnInit {
     this.mostrarModalVehiculo = true;
     this.busquedaPlaca = this.vehiculoSeleccionadoInfo?.matricula ?? this.busquedaPlaca;
     this.buscarVehiculos();
-    this.cdr.detectChanges();
   }
-  cerrarSelectorVehiculo(): void {
-    this.mostrarModalVehiculo = false;
-    this.cdr.detectChanges();
-  }
+  cerrarSelectorVehiculo(): void { this.mostrarModalVehiculo = false; }
   buscarVehiculos(): void {
     this.cargandoVehiculos = true;
     this.vehiculosEncontrados = [];
     this.vehiculoService.buscarPorPlaca(this.busquedaPlaca).subscribe({
-      next: (data) => {
-        this.vehiculosEncontrados = data ?? [];
-        this.cargandoVehiculos = false;
-        (data ?? []).forEach(v => {
-          if (v.id != null) this.vehiculosMapa.set(v.id, v);
-        });
-        this.cdr.detectChanges();
-      },
-      error: (err)  => {
-        console.error('Error:', err);
-        this.cargandoVehiculos = false;
-        this.cdr.detectChanges();
-      }
+      next: (data) => { this.vehiculosEncontrados = data ?? []; this.cargandoVehiculos = false; },
+      error: (err)  => { console.error('Error:', err); this.cargandoVehiculos = false; }
     });
   }
   seleccionarVehiculo(v: Vehiculo): void {
     this.vehiculoSeleccionadoInfo = v;
     this.turnoForm.vehiculoId = (v.id ?? 0) as number;
     this.cerrarSelectorVehiculo();
-    if (v.id != null) this.vehiculosMapa.set(v.id, v);
-    this.cdr.detectChanges();
   }
-  limpiarVehiculo(): void {
-    this.vehiculoSeleccionadoInfo = null;
-    this.turnoForm.vehiculoId = 0;
-    this.cdr.detectChanges();
-  }
+  limpiarVehiculo(): void { this.vehiculoSeleccionadoInfo = null; this.turnoForm.vehiculoId = 0; }
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
-      next: (v) => {
-        this.vehiculoSeleccionadoInfo = v;
-        if (v.id != null) this.vehiculosMapa.set(v.id, v);
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.warn('No se pudo cargar vehículo:', err);
-        this.cdr.detectChanges();
-      }
+      next: (v) => (this.vehiculoSeleccionadoInfo = v),
+      error: (err) => console.warn('No se pudo cargar vehículo:', err)
     });
-  }
-
-  // ── Carga de referencias para la tabla ───────────────────────────
-  private cargarReferenciasPropietarios(): void {
-    this.propietarioService.listar().subscribe({
-      next: (data) => {
-        (data ?? []).forEach(p => {
-          if (p.idPropietario != null) this.propietariosMapa.set(p.idPropietario, p);
-        });
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.warn('No se pudo cargar listado de propietarios:', err)
-    });
-  }
-
-  private cargarReferenciasVehiculos(): void {
-    this.vehiculoService.listar().subscribe({
-      next: (data) => {
-        (data ?? []).forEach(v => {
-          if (v.id != null) this.vehiculosMapa.set(v.id, v);
-        });
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.warn('No se pudo cargar listado de vehículos:', err)
-    });
-  }
-
-  // ── Helpers para mostrar en tabla ────────────────────────────────
-  obtenerNombrePropietario(id?: number): string {
-    if (!id) return '-';
-    const p = this.propietariosMapa.get(id);
-    return p ? p.nombre : id.toString();
-  }
-
-  obtenerPlacaVehiculo(id?: number): string {
-    if (!id) return '-';
-    const v = this.vehiculosMapa.get(id);
-    return v ? v.matricula : id.toString();
-  }
-
-  // ── Modelos / marcas para tickets ────────────────────────────────
-  private cargarModelosYMarcas(): void {
-    this.modeloService.listar().subscribe({
-      next: (modelos) => {
-        this.modelos = modelos ?? [];
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.warn('No se pudieron cargar modelos:', err)
-    });
-    this.modeloService.listarMarcas().subscribe({
-      next: (marcas) => {
-        this.marcas = marcas ?? [];
-        this.cdr.detectChanges();
-      },
-      error: (err) => console.warn('No se pudieron cargar marcas:', err)
-    });
-  }
-
-  private obtenerNombreModeloPorId(id?: number): string | undefined {
-    if (!id) return undefined;
-    const modelo = this.modelos.find(m => m.id === id);
-    return modelo?.nombre;
-  }
-
-  private obtenerNombreMarcaPorModeloId(idModelo?: number): string | undefined {
-    if (!idModelo) return undefined;
-    const modelo = this.modelos.find(m => m.id === idModelo);
-    if (!modelo) return undefined;
-    const marca = this.marcas.find(ma => ma.id === modelo.marcaId);
-    return marca?.nombre;
   }
 }

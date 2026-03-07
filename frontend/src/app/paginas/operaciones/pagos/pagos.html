@@ -48,30 +48,48 @@
       <!-- Paso 2: Formulario de pago (solo cuando hay turno seleccionado) -->
       <div class="form-pago" *ngIf="turnoSeleccionado">
         <h4>Datos del pago</h4>
-        <div class="form-grid">
-          <div class="form-group">
-            <label for="montoPagado">Monto a pagar *</label>
-            <input
-              type="number"
-              id="montoPagado"
-              [(ngModel)]="montoPagado"
-              name="montoPagado"
-              min="0"
-              step="0.01"
-              class="form-control input-monto"
-              placeholder="0.00"
-              required
-            />
-          </div>
+
+        <!-- Indicador mientras carga la tarifa -->
+        <div class="cargando-tarifa" *ngIf="cargandoTarifa">
+          <div class="spinner"></div>
+          <span>Consultando tarifa...</span>
         </div>
-        <div class="form-actions">
-          <button type="button" class="btn btn-success" (click)="registrarPago()" [disabled]="guardando || !montoValido()">
-            <mat-icon *ngIf="!guardando">payment</mat-icon>
-            {{ guardando ? 'Registrando...' : 'Registrar Pago' }}
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="limpiarTodo()">
-            Cancelar
-          </button>
+
+        <div *ngIf="!cargandoTarifa">
+          <!-- Aviso si no existe tarifa activa para el servicio -->
+          <div class="aviso-sin-tarifa" *ngIf="sinTarifa">
+            <mat-icon>info_outline</mat-icon>
+            <span>No se encontró tarifa activa para este servicio. Ingrese el monto manualmente.</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="montoPagado">Monto a pagar *</label>
+              <input
+                type="number"
+                id="montoPagado"
+                [(ngModel)]="montoPagado"
+                name="montoPagado"
+                min="0"
+                step="0.01"
+                class="form-control input-monto"
+                placeholder="0.00"
+                readonly
+                (keydown)="$event.preventDefault()"
+                (wheel)="$event.preventDefault()"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-success" (click)="registrarPago()" [disabled]="guardando || !montoValido()">
+              <mat-icon *ngIf="!guardando">payment</mat-icon>
+              {{ guardando ? 'Registrando...' : 'Registrar Pago' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="limpiarTodo()">
+              Cancelar
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -105,39 +123,39 @@
       <div class="tabla-modal-contenedor" *ngIf="!cargandoTurnos">
         <table class="tabla-modal">
           <thead>
-            <tr>
-              <th>ID</th>
-              <th>Propietario</th>
-              <th>Vehículo</th>
-              <th>Servicio</th>
-              <th>Fecha</th>
-              <th>Estado</th>
-              <th>Monto Pagado</th>
-              <th>Acción</th>
-            </tr>
+          <tr>
+            <th>ID</th>
+            <th>Propietario</th>
+            <th>Vehículo</th>
+            <th>Servicio</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Monto Pagado</th>
+            <th>Acción</th>
+          </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let t of turnosFiltrados">
-              <td>{{ t.turnoId }}</td>
-              <td>{{ t.propietarioId }}</td>
-              <td>{{ t.vehiculoId }}</td>
-              <td>{{ obtenerNombreServicio(t.servicioId) }}</td>
-              <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
-              <td>
+          <tr *ngFor="let t of turnosFiltrados">
+            <td>{{ t.turnoId }}</td>
+            <td>{{ t.propietarioId }}</td>
+            <td>{{ t.vehiculoId }}</td>
+            <td>{{ obtenerNombreServicio(t.servicioId) }}</td>
+            <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td>
                 <span class="badge" [ngClass]="'badge-' + (t.estado?.toLowerCase() || '')">
                   {{ t.estado }}
                 </span>
-              </td>
-              <td>{{ t.montoPagado != null ? (t.montoPagado | number:'1.2-2') : '-' }}</td>
-              <td>
-                <button type="button" class="btn btn-success btn-elegir" (click)="seleccionarTurno(t)">
-                  Elegir
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="turnosFiltrados.length === 0">
-              <td colspan="8" class="text-center">No se encontraron turnos</td>
-            </tr>
+            </td>
+            <td>{{ t.montoPagado != null ? (t.montoPagado | number:'1.2-2') : '-' }}</td>
+            <td>
+              <button type="button" class="btn btn-success btn-elegir" (click)="seleccionarTurno(t)">
+                Elegir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="turnosFiltrados.length === 0">
+            <td colspan="8" class="text-center">No se encontraron turnos</td>
+          </tr>
           </tbody>
         </table>
       </div>

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NotificationService } from '../notification.service';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -37,10 +36,7 @@ export class TicketPagoService {
   private overlayEl: HTMLElement | null = null;
   private printWin: Window | null = null;
 
-  constructor(
-    private http: HttpClient,
-    private notification: NotificationService
-  ) {}
+  constructor(private http: HttpClient) {}
 
   mostrar(data: TicketData): void {
     this.destruir();
@@ -67,6 +63,8 @@ export class TicketPagoService {
     this.overlayEl = null;
   }
 
+  // Abre una nueva ventana con el ticket ya renderizado y llama a print()
+  // Es el método más confiable cross-browser para imprimir un fragmento
   private imprimirEnVentana(data: TicketData): void {
     const html = `<!DOCTYPE html>
 <html lang="es">
@@ -81,13 +79,13 @@ export class TicketPagoService {
     ${this.estilosTicket()}
   </style>
 </head>
-<body onload="window.focus(); window.print();">
-  <script>window.addEventListener('afterprint', () => window.close());</script>
+<body onload="window.print(); window.close();">
   ${this.renderCuerpo(data)}
 </body>
 </html>`;
+
     const win = window.open('', '_blank', 'width=420,height=700,scrollbars=no');
-    if (!win) { this.notification.warn('Permite ventanas emergentes para imprimir el comprobante.'); return; }
+    if (!win) { alert('Permite ventanas emergentes para imprimir el comprobante.'); return; }
     win.document.write(html);
     win.document.close();
   }

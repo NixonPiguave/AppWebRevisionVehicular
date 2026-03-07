@@ -74,6 +74,18 @@
           </select>
         </div>
 
+        <div class="form-group">
+          <label for="fechaInicio">Fecha Inicio *</label>
+          <input
+            type="date"
+            id="fechaInicio"
+            [(ngModel)]="turnoForm.fechaInicio"
+            name="fechaInicio"
+            required
+            class="form-control"
+          />
+        </div>
+
         <!-- Estado: solo visible al editar; al crear queda fijo en GENERADO -->
         <div class="form-group" *ngIf="modoEdicion">
           <label for="estado">Estado *</label>
@@ -85,6 +97,9 @@
             class="form-control"
           >
             <option value="GENERADO">GENERADO</option>
+            <option value="CONFIRMADO">CONFIRMADO</option>
+            <option value="PAGADO">PAGADO</option>
+            <option value="ATENDIDO">ATENDIDO</option>
             <option value="CANCELADO">CANCELADO</option>
           </select>
         </div>
@@ -129,25 +144,25 @@
 
         <table class="tabla-modal" *ngIf="!cargandoPropietarios">
           <thead>
-            <tr>
-              <th>Cédula</th>
-              <th>Nombre</th>
-              <th>Acción</th>
-            </tr>
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Acción</th>
+          </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let p of propietariosElegibles">
-              <td>{{ p.documentoIdentidad }}</td>
-              <td>{{ p.nombre }}</td>
-              <td>
-                <button type="button" class="btn btn-success btn-inline" (click)="seleccionarPropietario(p)">
-                  Elegir
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="propietariosElegibles.length === 0">
-              <td colspan="3" class="text-center">No hay propietarios disponibles</td>
-            </tr>
+          <tr *ngFor="let p of propietariosElegibles">
+            <td>{{ p.documentoIdentidad }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>
+              <button type="button" class="btn btn-success btn-inline" (click)="seleccionarPropietario(p)">
+                Elegir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="propietariosElegibles.length === 0">
+            <td colspan="3" class="text-center">No hay propietarios disponibles</td>
+          </tr>
           </tbody>
         </table>
         <div class="modal-ayuda">
@@ -185,27 +200,27 @@
 
         <table class="tabla-modal" *ngIf="!cargandoVehiculos">
           <thead>
-            <tr>
-              <th>Placa</th>
-              <th>Chasis</th>
-              <th>VIN</th>
-              <th>Acción</th>
-            </tr>
+          <tr>
+            <th>Placa</th>
+            <th>Chasis</th>
+            <th>VIN</th>
+            <th>Acción</th>
+          </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let v of vehiculosEncontrados">
-              <td>{{ v.matricula }}</td>
-              <td>{{ v.chasis }}</td>
-              <td>{{ v.vin }}</td>
-              <td>
-                <button type="button" class="btn btn-success btn-inline" (click)="seleccionarVehiculo(v)">
-                  Elegir
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="vehiculosEncontrados.length === 0">
-              <td colspan="4" class="text-center">No hay vehículos registrados</td>
-            </tr>
+          <tr *ngFor="let v of vehiculosEncontrados">
+            <td>{{ v.matricula }}</td>
+            <td>{{ v.chasis }}</td>
+            <td>{{ v.vin }}</td>
+            <td>
+              <button type="button" class="btn btn-success btn-inline" (click)="seleccionarVehiculo(v)">
+                Elegir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="vehiculosEncontrados.length === 0">
+            <td colspan="4" class="text-center">No hay vehículos registrados</td>
+          </tr>
           </tbody>
         </table>
         <div class="modal-ayuda">
@@ -223,6 +238,7 @@
         <th>Propietario</th>
         <th>Vehículo</th>
         <th>Servicio</th>
+        <th>Entidad</th>
         <th>Fecha Inicio</th>
         <th>Fecha Fin</th>
         <th>Estado</th>
@@ -232,9 +248,10 @@
       <tbody>
       <tr *ngFor="let turno of turnos">
         <td>{{ turno.turnoId }}</td>
-        <td>{{ obtenerNombrePropietario(turno.propietarioId) }}</td>
-        <td>{{ obtenerPlacaVehiculo(turno.vehiculoId) }}</td>
+        <td>{{ turno.propietarioId }}</td>
+        <td>{{ turno.vehiculoId }}</td>
         <td>{{ turno.servicioId }}</td>
+        <td>{{ turno.entidadId }}</td>
         <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
         <td>{{ turno.fechaFin ? (turno.fechaFin | date: 'dd/MM/yyyy') : '-' }}</td>
         <td>
@@ -252,7 +269,7 @@
         </td>
       </tr>
       <tr *ngIf="turnos.length === 0">
-        <td colspan="8" class="text-center">No hay turnos registrados</td>
+        <td colspan="9" class="text-center">No hay turnos registrados</td>
       </tr>
       </tbody>
     </table>
