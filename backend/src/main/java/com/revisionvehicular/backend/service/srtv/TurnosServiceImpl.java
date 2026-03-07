@@ -90,6 +90,14 @@ public class TurnosServiceImpl implements ITurnosService {
         }
     }
 
+    @Override
+    public List<TurnosDTO> findTurnosPagados() {
+        return repository.findByEstadoOrderByFechaInicioDesc("PAGADO")
+                .stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
     private TurnosDTO toDTO(Turnos turno) {
         TurnosDTO dto = new TurnosDTO();
         dto.setTurnoId(turno.getTurnoId());

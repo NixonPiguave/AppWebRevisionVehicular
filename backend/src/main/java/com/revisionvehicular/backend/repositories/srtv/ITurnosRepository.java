@@ -7,9 +7,12 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Repository
 public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
+
+    List<Turnos> findByEstadoOrderByFechaInicioDesc(String estado);
 
     @Procedure(procedureName = "sp_insertar_turno")
     void insertarTurno(

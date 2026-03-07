@@ -19,6 +19,10 @@ export class TurnosService {
     return this.http.get<Turnos>(`${this.apiUrl}/${id}`);
   }
 
+  getPagados(): Observable<Turnos[]> {
+    return this.http.get<Turnos[]>(`${this.apiUrl}/pagados`);
+  }
+
   create(turno: Turnos): Observable<Turnos> {
     return this.http.post<Turnos>(this.apiUrl, turno);
   }

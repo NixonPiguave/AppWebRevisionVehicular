@@ -10,4 +10,5 @@ public interface ITurnosService {
     void delete(Long id);
     TurnosDTO findById(Long id);
     List<TurnosDTO> findAll();
+    List<TurnosDTO> findTurnosPagados();
 }

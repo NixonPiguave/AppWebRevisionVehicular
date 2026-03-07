@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
@@ -67,6 +67,7 @@ export class TurnosComponent implements OnInit {
     private propietarioService: PropietarioService,
     private vehiculoService: VehiculoService,
     private route: ActivatedRoute,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -176,6 +177,21 @@ export class TurnosComponent implements OnInit {
         }
       });
     }
+  }
+
+  abrirInspeccion(turno: Turnos): void {
+    const vehiculoId = turno.vehiculoId;
+    if (!turno.turnoId || !vehiculoId) {
+      alert('Este turno no tiene vehículo asociado.');
+      return;
+    }
+    this.router.navigate(['/inicio/inspeccion-rtv/registrar'], {
+      queryParams: { turnoId: turno.turnoId, vehiculoId }
+    });
+  }
+
+  esTurnoPagado(turno: Turnos): boolean {
+    return (turno.estado || '').toUpperCase() === 'PAGADO';
   }
 
   eliminarTurno(id: number): void {
