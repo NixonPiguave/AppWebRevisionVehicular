@@ -155,7 +155,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-    //Filtrar países en tiempo real
+  //Filtrar países en tiempo real
   filtrarPaises(): void {
     const filtro = this.filtroPais.toLowerCase();
     if (!filtro) {
@@ -168,7 +168,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-   //  Seleccionar país de la lista
+  //  Seleccionar país de la lista
   seleccionarPais(pais: string): void {
     this.marcaEditando.paisOrigen = pais;
     this.filtroPais = '';
@@ -176,7 +176,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-   // Mostrar lista de países
+  // Mostrar lista de países
   abrirListaPaises(): void {
     this.mostrarListaPaises = true;
     this.filtroPais = '';
@@ -214,7 +214,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-   // NUEVO: Manejo de selección de logo
+  // NUEVO: Manejo de selección de logo
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -250,7 +250,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-   //  Remover logo
+  //  Remover logo
   removerLogo(): void {
     console.log('[LOGO MARCA] Removiendo preview');
     this.logoPreview = null;
@@ -318,7 +318,7 @@ export class MarcaVehiculoComponent implements OnInit {
   }
 
 
-   // NUEVO: Guardar marca en backend
+  // NUEVO: Guardar marca en backend
   private guardarMarcaEnBackend(): void {
     const idValue = this.marcaEditando.id;
 

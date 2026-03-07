@@ -96,13 +96,13 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   // Obtener nombre de familia por ID
+  // Obtener nombre de familia por ID
   getNombreFamilia(familiaId: number): string {
     const familia = this.familias.find(f => f.id === familiaId);
     return familia ? familia.nombre : `ID: ${familiaId}`;
   }
 
-   // Filtrado
+  // Filtrado
   get subfamiliasFiltradas(): SubfamiliaDefecto[] {
     if (!this.filtro.trim()) return this.subfamilias;
 
@@ -119,7 +119,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   // Paginación
+  // Paginación
   get subfamiliasPaginadas(): SubfamiliaDefecto[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     return this.subfamiliasFiltradas.slice(inicio, inicio + this.registrosPorPagina);
@@ -148,20 +148,20 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   // Obtener texto de estado
+  // Obtener texto de estado
   getEstadoTexto(estado: string): string {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
 
-   // Abrir modal crear
+  // Abrir modal crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.subfamiliaEditando = this.getSubfamiliaVacia();
     this.mostrarModalForm = true;
   }
 
-   //Abrir modal editar
+  //Abrir modal editar
   abrirModalEditar(subfamilia: SubfamiliaDefecto): void {
     this.modoEdicion = true;
     this.subfamiliaEditando = { ...subfamilia };
@@ -169,7 +169,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   // Cerrar modal form
+  // Cerrar modal form
 
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
@@ -177,7 +177,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   //Validar formulario
+  //Validar formulario
   validarFormulario(): boolean {
     if (!this.subfamiliaEditando.nombre.trim()) {
       this.notification.error('El nombre de la subfamilia es obligatorio');
@@ -193,7 +193,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   //Guardar subfamilia
+  //Guardar subfamilia
   guardarSubfamilia(): void {
     if (!this.validarFormulario()) return;
 
@@ -237,14 +237,14 @@ export class SubfamiliaDefectoComponent implements OnInit {
   }
 
 
-   // Ver detalle
+  // Ver detalle
   verDetalle(subfamilia: SubfamiliaDefecto): void {
     this.subfamiliaDetalle = subfamilia;
     this.mostrarModalDetalle = true;
   }
 
 
-   //Cerrar modal detalle
+  //Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.subfamiliaDetalle = null;

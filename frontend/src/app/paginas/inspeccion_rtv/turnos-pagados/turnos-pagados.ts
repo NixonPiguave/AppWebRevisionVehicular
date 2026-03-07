@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-turnos-pagados',
@@ -38,7 +39,8 @@ export class TurnosPagadosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
-    private router: Router
+    private router: Router,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -49,7 +51,7 @@ export class TurnosPagadosComponent implements OnInit {
     this.cargando = true;
     this.error = '';
     this.turnosService.getPagados().subscribe({
-      next: (data) => {
+      next: (data: Turnos[]) => {
         this.turnos = data;
         this.cargando = false;
       },
@@ -69,7 +71,7 @@ export class TurnosPagadosComponent implements OnInit {
   iniciarInspeccion(turno: Turnos): void {
     const vehiculoId = (turno as any).vehiculoId ?? (turno as any).vehiculo?.id;
     if (!turno.turnoId || !vehiculoId) {
-      alert('Este turno no tiene vehículo asociado.');
+      this.notification.error('Este turno no tiene vehículo asociado.');
       return;
     }
     this.router.navigate(['/inicio/inspeccion-rtv/registrar'], {

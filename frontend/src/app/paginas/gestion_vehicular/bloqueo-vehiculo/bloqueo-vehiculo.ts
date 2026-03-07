@@ -1,11 +1,12 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BloqueoVehiculoService, BloqueoVehiculo } from '../../../services/rtv/BloqueoVehiculo.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
+import { NotificationService } from '../../../services/notification.service';
 
 const BLOQUEO_VACIO: BloqueoVehiculo = {
   idBloqueoSrv: null,
@@ -63,35 +64,15 @@ export class BloqueoVehiculoComponent implements OnInit {
   documentoHabilitanteUrl = '';
   uploadingDocumento = false;
 
-  // Turno vinculado (desde Recepción)
-  turnoIdVinculado: number | null = null;
-
   constructor(
     private service: BloqueoVehiculoService,
     private vehiculoService: VehiculoService,
     private cloudinaryService: CloudinaryService,
-    private route: ActivatedRoute,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
-  ngOnInit(): void {
-    this.cargar();
-
-    // Leer queryParams enviados desde Recepción
-    this.route.queryParams.subscribe(params => {
-      const turnoId    = params['turnoId']    ? +params['turnoId']    : null;
-      const vehiculoId = params['vehiculoId'] ? +params['vehiculoId'] : null;
-
-      if (turnoId && vehiculoId) {
-        this.turnoIdVinculado = turnoId;
-        // Abrir modal de creación pre-llenado con el vehículo del turno
-        this.abrirModalCrear();
-        this.editando.vehiculoId = vehiculoId;
-        this.editando.tramiteId  = turnoId;
-        this.cargarVehiculoPorId(vehiculoId);
-      }
-    });
-  }
+  ngOnInit(): void { this.cargar(); }
 
   cargar(): void {
     this.cargando = true;
@@ -150,11 +131,11 @@ export class BloqueoVehiculoComponent implements OnInit {
 
   guardar(): void {
     if (!this.editando.vehiculoId || !this.editando.motivo?.trim()) {
-      alert('Debe seleccionar un vehículo y especificar el motivo.');
+      this.notification.error('Debe seleccionar un vehículo y especificar el motivo.');
       return;
     }
     if (!this.documentoHabilitanteUrl && !this.documentoHabilitanteFile) {
-      alert('Debe adjuntar el documento habilitante.');
+      this.notification.error('Debe adjuntar el documento habilitante.');
       return;
     }
     this.guardando = true;
@@ -177,7 +158,7 @@ export class BloqueoVehiculoComponent implements OnInit {
             this.editando.documentoHabilitante = res.url;
             this.ejecutarGuardado(op);
           },
-          error: () => { this.guardando = false; alert('Error al subir el documento.'); }
+          error: () => { this.guardando = false; this.notification.error('Error al subir el documento.'); }
         });
       } else {
         this.editando.documentoHabilitante = this.documentoHabilitanteUrl;
@@ -190,7 +171,7 @@ export class BloqueoVehiculoComponent implements OnInit {
   private ejecutarGuardado(op: ReturnType<BloqueoVehiculoService['crear']> | ReturnType<BloqueoVehiculoService['actualizar']>): void {
     op.subscribe({
       next: () => { this.cargar(); this.cerrarModalForm(); this.guardando = false; },
-      error: () => { this.guardando = false; alert('Error al guardar el bloqueo.'); }
+      error: () => { this.guardando = false; this.notification.error('Error al guardar el bloqueo.'); }
     });
   }
 
@@ -229,7 +210,7 @@ export class BloqueoVehiculoComponent implements OnInit {
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
-      next: (v) => { this.vehiculoSeleccionadoInfo = v; this.cdr.detectChanges(); },
+      next: (v) => (this.vehiculoSeleccionadoInfo = v),
       error: () => console.warn('No se pudo cargar vehículo por ID')
     });
   }
@@ -242,18 +223,18 @@ export class BloqueoVehiculoComponent implements OnInit {
       const isPdf = file.type === 'application/pdf';
       const isImage = file.type.startsWith('image/');
       if (!isPdf && !isImage) {
-        alert('Solo se permiten PDF o imágenes (JPG, PNG, etc.)');
+        this.notification.error('Solo se permiten PDF o imágenes (JPG, PNG, etc.)');
         input.value = '';
         return;
       }
       const maxSize = 5 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert(`El archivo no debe superar 5MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        this.notification.error(`El archivo no debe superar 5MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         input.value = '';
         return;
       }
       this.documentoHabilitanteFile = file;
-      this.documentoHabilitanteUrl = '';
+      this.documentoHabilitanteUrl = ''; // Se subirá al guardar
       this.cdr.detectChanges();
     }
   }

@@ -156,7 +156,7 @@ export class Equipos implements OnInit {
   }
 
 
-   //Validar campos únicos y fechas
+  //Validar campos únicos y fechas
   validarFormulario(): boolean {
     this.erroresValidacion = {}; // Limpiar errores previos
 
@@ -237,14 +237,14 @@ export class Equipos implements OnInit {
   }
 
 
-   // NUEVO: Detectar si cambió el serial
+  // NUEVO: Detectar si cambió el serial
   private serialCambio(): boolean {
     const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
     return !equipoOriginal || equipoOriginal.serialEquipo !== this.equipoEditando.serialEquipo;
   }
 
 
-   //Detectar si cambió el código interno
+  //Detectar si cambió el código interno
   private codigoCambio(): boolean {
     const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
     return !equipoOriginal || equipoOriginal.codigoInterno !== this.equipoEditando.codigoInterno;
@@ -259,7 +259,7 @@ export class Equipos implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-   //Manejo de errores del backend
+  //Manejo de errores del backend
   guardarEquipo(): void {
     if (!this.validarFormulario()) return;
 
@@ -301,7 +301,7 @@ export class Equipos implements OnInit {
   }
 
 
-   // Interpretar errores del backend
+  // Interpretar errores del backend
   private manejarErrorBackend(err: any): void {
     const mensajeError = err.error?.message || err.error || err.message || 'Error desconocido';
     console.log('[EQUIPOS] Mensaje de error:', mensajeError);

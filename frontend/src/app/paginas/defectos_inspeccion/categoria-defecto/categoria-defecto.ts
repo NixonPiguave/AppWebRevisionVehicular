@@ -55,7 +55,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   //Cargar categorías y subfamilias
+  //Cargar categorías y subfamilias
   cargarDatos(): void {
     this.cargando = true;
     this.error = '';
@@ -98,14 +98,14 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   //Obtener nombre de subfamilia por ID
+  //Obtener nombre de subfamilia por ID
   getNombreSubfamilia(subfamiliaId: number): string {
     const subfamilia = this.subfamilias.find(s => s.id === subfamiliaId);
     return subfamilia ? subfamilia.nombre : `ID: ${subfamiliaId}`;
   }
 
 
-   // Filtrado
+  // Filtrado
   get categoriasFiltradas(): CategoriaDefecto[] {
     if (!this.filtro.trim()) return this.categorias;
 
@@ -123,7 +123,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Paginación
+  // Paginación
 
   get categoriasPaginadas(): CategoriaDefecto[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
@@ -157,7 +157,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   //Abrir modal crear
+  //Abrir modal crear
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.categoriaEditando = this.getCategoriaVacia();
@@ -165,7 +165,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Abrir modal editar
+  // Abrir modal editar
   abrirModalEditar(categoria: CategoriaDefecto): void {
     this.modoEdicion = true;
     this.categoriaEditando = { ...categoria };
@@ -173,14 +173,14 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   //Cerrar modal form
+  //Cerrar modal form
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.categoriaEditando = this.getCategoriaVacia();
   }
 
 
-   // Validar solo números en código (permite formato XX)
+  // Validar solo números en código (permite formato XX)
 
   validarCodigoNumerico(event: KeyboardEvent): void {
     const charCode = event.which ? event.which : event.keyCode;
@@ -195,7 +195,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Validar que nombre no contenga solo números
+  // Validar que nombre no contenga solo números
 
   validarNombreTexto(event: KeyboardEvent): void {
     const input = event.target as HTMLInputElement;
@@ -208,7 +208,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Validar formulario completo
+  // Validar formulario completo
   validarFormulario(): boolean {
     // Validar subfamilia
     if (!this.categoriaEditando.subfamiliaId || this.categoriaEditando.subfamiliaId === 0) {
@@ -244,7 +244,7 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Guardar categoría
+  // Guardar categoría
 
   guardarCategoria(): void {
     if (!this.validarFormulario()) return;
@@ -289,14 +289,14 @@ export class CategoriaDefectoComponent implements OnInit {
   }
 
 
-   // Ver detalle
+  // Ver detalle
   verDetalle(categoria: CategoriaDefecto): void {
     this.categoriaDetalle = categoria;
     this.mostrarModalDetalle = true;
   }
 
 
-   //Cerrar modal detalle
+  //Cerrar modal detalle
   cerrarModalDetalle(): void {
     this.mostrarModalDetalle = false;
     this.categoriaDetalle = null;

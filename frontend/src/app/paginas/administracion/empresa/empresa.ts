@@ -202,7 +202,7 @@ export class EmpresaComponent implements OnInit {
   }
 
 
-   // NUEVO: Seleccionar ícono
+  // NUEVO: Seleccionar ícono
   onIconoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files[0]) {
@@ -247,7 +247,7 @@ export class EmpresaComponent implements OnInit {
   }
 
 
-   // NUEVO: Remover ícono
+  // NUEVO: Remover ícono
   removerIcono(): void {
     console.log('[ICONO] Removiendo preview');
     this.iconoPreview = null;

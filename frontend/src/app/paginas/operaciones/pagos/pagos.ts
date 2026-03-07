@@ -2,24 +2,20 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
-import { PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
-import { EmpresaService } from '../../../services/administracion/empresa.service';
-import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
+import { NotificationService } from '../../../services/notification.service';
 
 const SERVICIOS: { id: number; nombre: string }[] = [
-  { id: 1,  nombre: 'Emisión de matrícula por Primera Vez.' },
-  { id: 2,  nombre: 'Emisión de Documento Anual de Circulación' },
-  { id: 3,  nombre: 'Duplicado de Documento de Matrícula.' },
-  { id: 4,  nombre: 'Duplicado del Documento Anual de Circulación.' },
-  { id: 5,  nombre: 'Transferencia de Dominio.' },
-  { id: 6,  nombre: 'Cambio de Servicio.' },
-  { id: 7,  nombre: 'Matriculación de Unidades de Carga' },
-  { id: 8,  nombre: 'Cambio de Características' },
-  { id: 9,  nombre: 'Bloqueo de vehículo' },
+  { id: 1, nombre: 'Emisión de matrícula por Primera Vez.' },
+  { id: 2, nombre: 'Emisión de Documento Anual de Circulación' },
+  { id: 3, nombre: 'Duplicado de Documento de Matrícula.' },
+  { id: 4, nombre: 'Duplicado del Documento Anual de Circulación.' },
+  { id: 5, nombre: 'Transferencia de Dominio.' },
+  { id: 6, nombre: 'Cambio de Servicio.' },
+  { id: 7, nombre: 'Matriculación de Unidades de Carga' },
+  { id: 8, nombre: 'Cambio de Características' },
+  { id: 9, nombre: 'Bloqueo de vehículo' },
   { id: 10, nombre: 'Desbloqueo de vehículo' },
   { id: 11, nombre: 'Registro de Observaciones' },
   { id: 12, nombre: 'Baja de vehículos' },
@@ -42,8 +38,6 @@ export class PagosComponent implements OnInit {
   turnosFiltrados: Turnos[] = [];
   turnoSeleccionado: Turnos | null = null;
   montoPagado: number | null = null;
-  cargandoTarifa = false;
-  sinTarifa = false;
 
   mostrarModalTurno = false;
   busquedaTurno = '';
@@ -54,13 +48,13 @@ export class PagosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
-    private propietarioService: PropietarioService,
-    private empresaService: EmpresaService,
-    private ticketService: TicketPagoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
-  ngOnInit(): void { this.cargarTurnos(); }
+  ngOnInit(): void {
+    this.cargarTurnos();
+  }
 
   cargarTurnos(): void {
     this.cargando = true;
@@ -72,7 +66,7 @@ export class PagosComponent implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
         this.error = 'Error al cargar los turnos.';
         this.cargando = false;
         this.cdr.detectChanges();
@@ -87,15 +81,16 @@ export class PagosComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  cerrarSelectorTurno(): void { this.mostrarModalTurno = false; }
+  cerrarSelectorTurno(): void {
+    this.mostrarModalTurno = false;
+  }
 
   filtrarTurnos(): void {
     const f = (this.busquedaTurno || '').toLowerCase().trim();
-    const sinPagar = this.turnos.filter(t => t.montoPagado == null);
     if (!f) {
-      this.turnosFiltrados = sinPagar;
+      this.turnosFiltrados = [...this.turnos];
     } else {
-      this.turnosFiltrados = sinPagar.filter(t =>
+      this.turnosFiltrados = this.turnos.filter(t =>
         (t.turnoId?.toString() || '').includes(f) ||
         (t.propietarioId?.toString() || '').includes(f) ||
         (t.vehiculoId?.toString() || '').includes(f) ||
@@ -109,39 +104,20 @@ export class PagosComponent implements OnInit {
 
   seleccionarTurno(t: Turnos): void {
     this.turnoSeleccionado = t;
-    this.montoPagado = null;
-    this.sinTarifa = false;
+    this.montoPagado = t.montoPagado != null ? Number(t.montoPagado) : null;
     this.cerrarSelectorTurno();
-    this.cargarTarifaDelTurno(t.turnoId!);
     this.cdr.detectChanges();
-  }
-
-  private cargarTarifaDelTurno(turnoId: number): void {
-    this.cargandoTarifa = true;
-    this.turnosService.obtenerTarifa(turnoId).subscribe({
-      next: (res) => {
-        this.montoPagado = res?.tarifa ?? null;
-        this.sinTarifa = this.montoPagado === null;
-        this.cargandoTarifa = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.montoPagado = null;
-        this.sinTarifa = true;
-        this.cargandoTarifa = false;
-        this.cdr.detectChanges();
-      }
-    });
   }
 
   limpiarTurno(): void {
     this.turnoSeleccionado = null;
     this.montoPagado = null;
-    this.sinTarifa = false;
     this.cdr.detectChanges();
   }
 
-  limpiarTodo(): void { this.limpiarTurno(); }
+  limpiarTodo(): void {
+    this.limpiarTurno();
+  }
 
   getTurnoDisplay(): string {
     if (!this.turnoSeleccionado) return '';
@@ -151,7 +127,8 @@ export class PagosComponent implements OnInit {
 
   obtenerNombreServicio(servicioId?: number): string {
     if (!servicioId) return '-';
-    return SERVICIOS.find(x => x.id === servicioId)?.nombre ?? String(servicioId);
+    const s = SERVICIOS.find(x => x.id === servicioId);
+    return s ? s.nombre : String(servicioId);
   }
 
   montoValido(): boolean {
@@ -159,52 +136,23 @@ export class PagosComponent implements OnInit {
   }
 
   registrarPago(): void {
-    if (!this.turnoSeleccionado?.turnoId) { alert('Debe seleccionar un turno.'); return; }
-    if (!this.montoValido()) { alert('Ingrese un monto válido (mayor o igual a 0).'); return; }
-
-    const turnoSnap = { ...this.turnoSeleccionado };
-    const montoSnap = Number(this.montoPagado);
+    if (!this.turnoSeleccionado?.turnoId) {
+      this.notification.error('Debe seleccionar un turno.');
+      return;
+    }
+    if (!this.montoValido()) {
+      this.notification.error('Ingrese un monto válido (mayor o igual a 0).');
+      return;
+    }
 
     this.guardando = true;
     this.error = '';
-    this.turnosService.registrarPago(turnoSnap.turnoId!, montoSnap).subscribe({
+    this.turnosService.registrarPago(this.turnoSeleccionado.turnoId, Number(this.montoPagado)).subscribe({
       next: () => {
-        this.guardando = false;
+        this.notification.success('Pago registrado correctamente.');
         this.limpiarTodo();
         this.cargarTurnos();
-
-        // Cargar propietario, empresa en paralelo → mostrar ticket
-        forkJoin({
-          propietario: turnoSnap.propietarioId
-            ? this.propietarioService.obtenerPorId(turnoSnap.propietarioId).pipe(catchError(() => of(null)))
-            : of(null),
-          empresa: this.empresaService.obtenerPrimera().pipe(catchError(() => of(null)))
-        }).subscribe(({ propietario, empresa }) => {
-          const nombreServicio = this.obtenerNombreServicio(turnoSnap.servicioId);
-          const hoy = new Date().toLocaleDateString('es-EC', {
-            day: '2-digit', month: '2-digit', year: 'numeric'
-          });
-
-          const data: TicketData = {
-            turnoId:           turnoSnap.turnoId!,
-            tipoProceso:       nombreServicio,
-            placa:             `Vehículo #${turnoSnap.vehiculoId}`,
-            propietarioNombre: propietario
-              ? `${(propietario as any).nombres ?? ''} ${(propietario as any).apellidos ?? ''}`.trim()
-              : undefined,
-            propietarioCedula: (propietario as any)?.documentoIdentidad ?? undefined,
-            logoUrl:           empresa?.logoempresa || undefined,
-            numero:            String(turnoSnap.turnoId).padStart(6, '0'),
-            estado:            'PAGADO',
-            fecha:             hoy,
-            items:             [{ descripcion: nombreServicio, valor: montoSnap }],
-            total:             montoSnap,
-            ciudad:            'Quevedo'
-          };
-
-          this.ticketService.mostrar(data);
-        });
-
+        this.guardando = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
