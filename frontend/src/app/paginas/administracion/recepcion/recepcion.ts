@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 
-// Mapa de servicios implementados → ruta Angular
 const RUTAS_TRAMITE: { [servicioId: number]: string } = {
   9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
   10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
@@ -49,24 +48,29 @@ export class RecepcionComponent implements OnInit {
   registrosPorPagina = 10;
   paginaActual = 1;
 
+  // Modal de confirmación
+  mostrarModalConfirmacion = false;
+  turnoAAtender: Turnos | null = null;
+  confirmando = false;
+  errorConfirmacion = '';
+
   constructor(
     private turnosService: TurnosService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.cargar();
-  }
+  ngOnInit(): void { this.cargar(); }
 
   cargar(): void {
     this.cargando = true;
     this.error = '';
     this.turnosService.getAll().subscribe({
       next: (data) => {
-        // Solo turnos con monto pagado (ya pagaron) y estado GENERADO o CONFIRMADO
+        // Solo turnos con monto pagado y en estado GENERADO o CONFIRMADO
         this.turnos = (data ?? []).filter(t =>
-          t.montoPagado != null && (t.estado === 'GENERADO' || t.estado === 'CONFIRMADO')
+          t.montoPagado != null &&
+          (t.estado === 'GENERADO' || t.estado === 'CONFIRMADO')
         );
         this.aplicarFiltro();
         this.cargando = false;
@@ -82,17 +86,13 @@ export class RecepcionComponent implements OnInit {
 
   aplicarFiltro(): void {
     const f = (this.filtro || '').toLowerCase().trim();
-    if (!f) {
-      this.filtrados = [...this.turnos];
-    } else {
-      this.filtrados = this.turnos.filter(t =>
-        (t.turnoId?.toString() || '').includes(f) ||
-        (t.propietarioId?.toString() || '').includes(f) ||
-        (t.vehiculoId?.toString() || '').includes(f) ||
-        (this.getNombreServicio(t.servicioId).toLowerCase()).includes(f) ||
-        (t.estado?.toLowerCase() || '').includes(f)
-      );
-    }
+    this.filtrados = !f ? [...this.turnos] : this.turnos.filter(t =>
+      (t.turnoId?.toString() || '').includes(f) ||
+      (t.propietarioId?.toString() || '').includes(f) ||
+      (t.vehiculoId?.toString() || '').includes(f) ||
+      (this.getNombreServicio(t.servicioId).toLowerCase()).includes(f) ||
+      (t.estado?.toLowerCase() || '').includes(f)
+    );
     this.paginaActual = 1;
     this.cdr.detectChanges();
   }
@@ -102,14 +102,8 @@ export class RecepcionComponent implements OnInit {
     return this.filtrados.slice(ini, ini + this.registrosPorPagina);
   }
 
-  get totalPaginas(): number {
-    return Math.ceil(this.filtrados.length / this.registrosPorPagina);
-  }
-
-  get paginas(): number[] {
-    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
-  }
-
+  get totalPaginas(): number { return Math.ceil(this.filtrados.length / this.registrosPorPagina); }
+  get paginas(): number[] { return Array.from({ length: this.totalPaginas }, (_, i) => i + 1); }
   irAPagina(p: number): void { this.paginaActual = p; }
 
   getNombreServicio(servicioId?: number): string {
@@ -121,17 +115,9 @@ export class RecepcionComponent implements OnInit {
     return servicioId != null && servicioId in RUTAS_TRAMITE;
   }
 
-  atenderTurno(turno: Turnos): void {
-    if (!turno.servicioId || !this.tramiteDisponible(turno.servicioId)) return;
-    const ruta = RUTAS_TRAMITE[turno.servicioId];
-    // Navegar al trámite pasando el turnoId y vehiculoId como queryParams
-    this.router.navigate([ruta], {
-      queryParams: {
-        turnoId: turno.turnoId,
-        vehiculoId: turno.vehiculoId,
-        propietarioId: turno.propietarioId
-      }
-    });
+  getIconoServicio(servicioId?: number): string {
+    const iconos: { [id: number]: string } = { 9: 'lock', 10: 'lock_open', 12: 'remove_circle' };
+    return servicioId && iconos[servicioId] ? iconos[servicioId] : 'assignment';
   }
 
   getEstadoBadgeClass(estado?: string): string {
@@ -144,10 +130,51 @@ export class RecepcionComponent implements OnInit {
     }
   }
 
-  getIconoServicio(servicioId?: number): string {
-    const iconos: { [id: number]: string } = {
-      9: 'lock', 10: 'lock_open', 12: 'remove_circle'
-    };
-    return servicioId && iconos[servicioId] ? iconos[servicioId] : 'assignment';
+  // =============================================
+  // MODAL DE CONFIRMACIÓN
+  // =============================================
+  abrirConfirmacion(turno: Turnos): void {
+    if (!this.tramiteDisponible(turno.servicioId)) return;
+    this.turnoAAtender = turno;
+    this.errorConfirmacion = '';
+    this.mostrarModalConfirmacion = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarConfirmacion(): void {
+    this.mostrarModalConfirmacion = false;
+    this.turnoAAtender = null;
+    this.errorConfirmacion = '';
+    this.confirmando = false;
+  }
+
+  confirmarAtencion(): void {
+    if (!this.turnoAAtender?.turnoId) return;
+
+    this.confirmando = true;
+    this.errorConfirmacion = '';
+
+    // 1. Cambiar estado a CONFIRMADO
+    this.turnosService.cambiarEstado(this.turnoAAtender.turnoId, 'CONFIRMADO').subscribe({
+      next: () => {
+        const turno = this.turnoAAtender!;
+        this.cerrarConfirmacion();
+
+        // 2. Navegar al formulario del trámite con los datos del turno
+        const ruta = RUTAS_TRAMITE[turno.servicioId!];
+        this.router.navigate([ruta], {
+          queryParams: {
+            turnoId:      turno.turnoId,
+            vehiculoId:   turno.vehiculoId,
+            propietarioId: turno.propietarioId
+          }
+        });
+      },
+      error: () => {
+        this.confirmando = false;
+        this.errorConfirmacion = 'Error al actualizar el estado del turno. Intente nuevamente.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 }

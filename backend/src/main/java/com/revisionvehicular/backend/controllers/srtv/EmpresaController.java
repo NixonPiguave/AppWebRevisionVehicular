@@ -9,27 +9,36 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("(api/empresa)")
+@RequestMapping("/api/empresa")
 public class EmpresaController {
+
     private final IEmpresaService service;
+
     public EmpresaController(IEmpresaService service) {
         this.service = service;
     }
+
     @PostMapping
-    public ResponseEntity<EmpresaDTO> crear(@RequestBody EmpresaDTO dto){
-        EmpresaDTO crear =service.save(dto);
+    public ResponseEntity<EmpresaDTO> crear(@RequestBody EmpresaDTO dto) {
+        EmpresaDTO crear = service.save(dto);
         return new ResponseEntity<>(crear, HttpStatus.CREATED);
     }
+
     @GetMapping
-    public ResponseEntity<List<EmpresaDTO>> listar(){
+    public ResponseEntity<List<EmpresaDTO>> listar() {
         return ResponseEntity.ok(service.findAll());
     }
+
     @PutMapping("/{id}")
-    public ResponseEntity<EmpresaDTO> actualizar(@PathVariable Long id, @RequestBody EmpresaDTO dto){
+    public ResponseEntity<EmpresaDTO> actualizar(
+            @PathVariable Long id,
+            @RequestBody EmpresaDTO dto
+    ) {
         return ResponseEntity.ok(service.update(id, dto));
     }
-    @DeleteMapping
-    public ResponseEntity<Void> eliminar(@PathVariable Long id){
+
+    @DeleteMapping("/{id}")           // ← corregido: faltaba /{id}
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }

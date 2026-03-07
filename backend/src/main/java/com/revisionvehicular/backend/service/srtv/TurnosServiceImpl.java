@@ -5,6 +5,7 @@ import com.revisionvehicular.backend.entities.rtv.TarifarioTramite;
 import com.revisionvehicular.backend.entities.srtv.Turnos;
 import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepository;
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -122,7 +123,26 @@ public class TurnosServiceImpl implements ITurnosService {
                 .map(TarifarioTramite::getTarifa)
                 .orElse(null);
     }
+    @Override
+    @Transactional
+    public TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado) {
+        Turnos turno = repository.findById(turnoId)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
 
+        repository.actualizarTurno(
+                turnoId,
+                turno.getPropietario() != null ? turno.getPropietario().getIdPropietario() : null,
+                turno.getVehiculo()    != null ? turno.getVehiculo().getVehiculoid()       : null,
+                turno.getServicio()    != null ? turno.getServicio().getIdTipoTramite()    : null,
+                turno.getTramite()     != null ? turno.getTramite().getIdTramite()         : null,
+                turno.getFechaInicio(),
+                turno.getFechaFin(),
+                turno.getFechaCancelado(),
+                nuevoEstado
+        );
+
+        return findById(turnoId);
+    }
     private TurnosDTO toDTO(Turnos turno) {
         TurnosDTO dto = new TurnosDTO();
         dto.setTurnoId(turno.getTurnoId());

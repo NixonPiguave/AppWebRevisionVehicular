@@ -76,4 +76,16 @@ public class TurnosController {
         TurnosDTO actualizado = service.actualizarMontoPagado(id, montoPagado);
         return ResponseEntity.ok(actualizado);
     }
+    @PatchMapping("/{id}/estado")
+    public ResponseEntity<TurnosDTO> cambiarEstado(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> body
+    ) {
+        String nuevoEstado = body.get("estado");
+        if (nuevoEstado == null || nuevoEstado.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        TurnosDTO actualizado = service.cambiarEstado(id, nuevoEstado);
+        return ResponseEntity.ok(actualizado);
+    }
 }

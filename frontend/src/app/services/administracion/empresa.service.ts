@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 export interface Empresa {
   empresaId: number | null;
@@ -8,7 +8,7 @@ export interface Empresa {
   direccion: string;
   telefono: string;
   correo: string;
-  logoempresa: string;
+  logoempresa: string;    // URL Cloudinary del logo
   ruc: string;
   iconoempresa: string;
 }
@@ -18,24 +18,26 @@ export interface Empresa {
 })
 export class EmpresaService {
 
-  private apiUrl = 'http://localhost:8080/(api/empresa)';
+  private apiUrl = 'http://localhost:8080/api/empresa';  // ← corregido: sin paréntesis
 
   constructor(private http: HttpClient) {}
 
-
-   // Obtener todas las empresas
   listarEmpresas(): Observable<Empresa[]> {
     return this.http.get<Empresa[]>(this.apiUrl);
   }
 
-   // Crear una nueva empresa
+  // Devuelve la primera empresa registrada (la empresa del sistema)
+  obtenerPrimera(): Observable<Empresa | null> {
+    return this.listarEmpresas().pipe(
+      map(lista => lista.length > 0 ? lista[0] : null)
+    );
+  }
+
   crearEmpresa(empresa: Empresa): Observable<Empresa> {
     return this.http.post<Empresa>(this.apiUrl, empresa);
   }
 
-   // Actualizar una empresa existente
   actualizarEmpresa(id: number, empresa: Empresa): Observable<Empresa> {
     return this.http.put<Empresa>(`${this.apiUrl}/${id}`, empresa);
   }
-
 }
