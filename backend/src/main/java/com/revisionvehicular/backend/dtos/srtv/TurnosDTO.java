@@ -17,5 +17,4 @@ public class TurnosDTO {
     private LocalDate fechaCancelado;
     private String estado;
     private BigDecimal montoPagado;
-    private String validador;
 }

@@ -1,7 +1,7 @@
 .pagos-container {
   padding: 20px;
-  width: 100%;
-  box-sizing: border-box;
+  max-width: 900px;
+  margin: 0 auto;
 }
 
 .spinner {
@@ -362,8 +362,7 @@
   border-radius: 12px;
   padding: 24px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  width: 100%;
-  box-sizing: border-box;
+  max-width: 500px;
 }
 
 .formulario-pago h3 {
@@ -438,47 +437,4 @@
   .tabla-container {
     overflow-x: scroll;
   }
-}
-
-/* Carga de tarifa */
-.cargando-tarifa {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 0;
-  color: #666;
-  font-size: 14px;
-}
-
-.cargando-tarifa .spinner {
-  width: 20px;
-  height: 20px;
-  margin: 0;
-}
-
-/* Aviso sin tarifa */
-.aviso-sin-tarifa {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  color: #f57f17;
-  padding: 10px 14px;
-  border-radius: 6px;
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-
-/* Ocultar flechas del input número en el campo monto */
-.input-monto::-webkit-outer-spin-button,
-.input-monto::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.input-monto[type=number] {
-  -moz-appearance: textfield;
-  appearance: textfield;
-  background-color: #f5f5f5;
-  cursor: default;
 }

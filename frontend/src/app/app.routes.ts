@@ -23,10 +23,9 @@ import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defe
 import { CategoriaDefectoComponent } from './paginas/defectos_inspeccion/categoria-defecto/categoria-defecto';
 import { FamiliaComponent } from './paginas/defectos_inspeccion/familia-defecto/familia-defecto';
 
+
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
-import { TurnosPagadosComponent } from './paginas/inspeccion_rtv/turnos-pagados/turnos-pagados';
-import { RegistrarInspeccionComponent } from './paginas/inspeccion_rtv/registrar-inspeccion/registrar-inspeccion';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
@@ -43,7 +42,6 @@ import { BloqueoVehiculoComponent } from './paginas/gestion_vehicular/bloqueo-ve
 import { DesbloqueoVehiculoComponent } from './paginas/gestion_vehicular/desbloqueo-vehiculo/desbloqueo-vehiculo';
 import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo/baja-vehiculo';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
-import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -70,7 +68,6 @@ export const routes: Routes = [
       { path: 'catalogo-vehiculos/tipo-matricula', component: TipoMatriculaComponent},
       { path: 'catalogo-vehiculos/tipo-vehiculo', component: TipoVehiculoComponent},
       { path: 'catalogo-vehiculos/traccion', component: TraccionComponent},
-
       // DEFECTOS INSPECCIÓN
       { path: 'defectos-inspeccion/tipos-defectos', component: TiposDefectosComponent },
       { path: 'defectos-inspeccion/subfamilia-defecto', component: SubfamiliaDefectoComponent },
@@ -78,34 +75,31 @@ export const routes: Routes = [
       { path: 'defectos-inspeccion/familia-defecto', component: FamiliaComponent },
       { path: 'defectos-inspeccion/defectos', component: DefectosComponent},
 
-      // INSPECCION_RTV
+      //INSPECION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
-      { path: 'inspeccion-rtv/turnos-pagados', component: TurnosPagadosComponent },
-      { path: 'inspeccion-rtv/registrar', component: RegistrarInspeccionComponent },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
       { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
 
-      // CONFIGURACION UMBRAL
+      //Configuracion de Unidades de Medida
       { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
       { path: 'configuracion-umbral/descripcion-umbral', component: DescripcionUmbralComponent },
       { path: 'configuracion-umbral/umbral', component: UmbralComponent },
 
-      // GESTIÓN VEHICULAR
+//Gestion vehicular
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
       { path: 'gestion_vehicular/vehiculo', component: VehiculoComponent },
       { path: 'gestion_vehicular/bloqueo-vehiculo', component: BloqueoVehiculoComponent },
       { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
       { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },
 
-      // ANT
+      //ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
 
       // ADMINISTRACIÓN - TURNOS
       { path: 'administracion/turnos', component: TurnosComponent },
 
-      // OPERACIONES
+      // OPERACIONES - PAGOS
       { path: 'operaciones/pagos', component: PagosComponent },
-      { path: 'operaciones/recepcion', component: RecepcionComponent },
     ]
   },
   { path: '**', redirectTo: '' }

@@ -49,7 +49,7 @@ export class TurnosPagadosComponent implements OnInit {
     this.cargando = true;
     this.error = '';
     this.turnosService.getPagados().subscribe({
-      next: (data) => {
+      next: (data: Turnos[]) => {
         this.turnos = data;
         this.cargando = false;
       },

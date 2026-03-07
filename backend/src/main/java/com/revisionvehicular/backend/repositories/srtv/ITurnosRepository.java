@@ -8,12 +8,15 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 
 @Repository
 public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
-    List<Turnos> findByEstadoOrderByFechaInicioDesc(String estado);
+    @Procedure(procedureName = "sp_actualizar_monto_pagado")
+    void actualizarMontoPagado(
+            @Param("p_turno_id") Long turnoId,
+            @Param("p_monto_pagado") BigDecimal montoPagado
+    );
 
     // Último turno insertado (mayor ID)
     Turnos findTopByOrderByTurnoIdDesc();
@@ -30,7 +33,7 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("p_estado") String estado
     );
 
-    @Procedure(procedureName = "sp_actualizar_turno")
+    @Procedure(procedureName= "sp_actualizar_turno")
     void actualizarTurno(
             @Param("p_turno_id") Long turnoId,
             @Param("p_propietario_id") Long propietarioId,
@@ -41,11 +44,5 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("p_fecha_fin") LocalDate fechaFin,
             @Param("p_fecha_cancelado") LocalDate fechaCancelado,
             @Param("p_estado") String estado
-    );
-
-    @Procedure(procedureName = "sp_actualizar_monto_pagado")
-    void actualizarMontoPagado(
-            @Param("p_turno_id") Long turnoId,
-            @Param("p_monto_pagado") BigDecimal montoPagado
     );
 }

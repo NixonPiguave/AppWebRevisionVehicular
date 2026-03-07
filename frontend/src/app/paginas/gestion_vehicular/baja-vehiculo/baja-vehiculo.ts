@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BajaVehiculoService, BajaVehiculo } from '../../../services/rtv/BajaVehiculo.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
@@ -84,40 +84,15 @@ export class BajaVehiculoComponent implements OnInit {
   constanciaPolicialUrl = '';
   uploadingDoc = false;
 
-  // Turno vinculado (desde Recepción)
-  turnoIdVinculado: number | null = null;
-
   constructor(
     private service: BajaVehiculoService,
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
     private cloudinaryService: CloudinaryService,
-    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.cargar();
-
-    // Leer queryParams enviados desde Recepción
-    this.route.queryParams.subscribe(params => {
-      const turnoId      = params['turnoId']      ? +params['turnoId']      : null;
-      const vehiculoId   = params['vehiculoId']   ? +params['vehiculoId']   : null;
-      const propietarioId = params['propietarioId'] ? +params['propietarioId'] : null;
-
-      if (turnoId && vehiculoId) {
-        this.turnoIdVinculado = turnoId;
-        this.abrirModalCrear();
-        this.editando.vehiculoId    = vehiculoId;
-        this.editando.tramiteId     = turnoId;
-        if (propietarioId) {
-          this.editando.propietarioId = propietarioId;
-          this.cargarPropietarioPorId(propietarioId);
-        }
-        this.cargarVehiculoPorId(vehiculoId);
-      }
-    });
-  }
+  ngOnInit(): void { this.cargar(); }
 
   cargar(): void {
     this.cargando = true;
@@ -221,7 +196,10 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.certChatarrizadoFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.certChatarrizadoFile, 'documentos');
           upload$.subscribe({
-            next: (res) => { this.editando.certChatarrizado = res.url; subirOrdenYConstanciaYGuardar(op); },
+            next: (res) => {
+              this.editando.certChatarrizado = res.url;
+              subirOrdenYConstanciaYGuardar(op);
+            },
             error: () => { this.guardando = false; alert('Error al subir certificado.'); }
           });
         } else {
@@ -241,7 +219,10 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.ordenJudicialFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.ordenJudicialFile, 'documentos');
           upload$.subscribe({
-            next: (res) => { this.editando.ordenJudicial = res.url; subirConstanciaYGuardar(operacion); },
+            next: (res) => {
+              this.editando.ordenJudicial = res.url;
+              subirConstanciaYGuardar(operacion);
+            },
             error: () => { this.guardando = false; alert('Error al subir orden judicial.'); }
           });
         } else {
@@ -261,7 +242,10 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.constanciaPolicialFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.constanciaPolicialFile, 'documentos');
           upload$.subscribe({
-            next: (res) => { this.editando.constanciaPolicial = res.url; this.ejecutarGuardado(operacion); },
+            next: (res) => {
+              this.editando.constanciaPolicial = res.url;
+              this.ejecutarGuardado(operacion);
+            },
             error: () => { this.guardando = false; alert('Error al subir constancia policial.'); }
           });
         } else {
@@ -295,7 +279,11 @@ export class BajaVehiculoComponent implements OnInit {
   buscarVehiculos(): void {
     this.cargandoVehiculos = true;
     this.vehiculoService.buscarPorPlaca(this.busquedaPlaca).subscribe({
-      next: (data) => { this.vehiculosEncontrados = data ?? []; this.cargandoVehiculos = false; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.vehiculosEncontrados = data ?? [];
+        this.cargandoVehiculos = false;
+        this.cdr.detectChanges();
+      },
       error: () => { this.cargandoVehiculos = false; this.cdr.detectChanges(); }
     });
   }
@@ -306,12 +294,15 @@ export class BajaVehiculoComponent implements OnInit {
     this.cerrarSelectorVehiculo();
   }
 
-  limpiarVehiculo(): void { this.vehiculoSeleccionadoInfo = null; this.editando.vehiculoId = null; }
+  limpiarVehiculo(): void {
+    this.vehiculoSeleccionadoInfo = null;
+    this.editando.vehiculoId = null;
+  }
 
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
-      next: (v) => { this.vehiculoSeleccionadoInfo = v; this.cdr.detectChanges(); },
+      next: (v) => (this.vehiculoSeleccionadoInfo = v),
       error: () => console.warn('No se pudo cargar vehículo por ID')
     });
   }
@@ -328,7 +319,11 @@ export class BajaVehiculoComponent implements OnInit {
   buscarPropietarios(): void {
     this.cargandoPropietarios = true;
     this.propietarioService.listarElegibles(this.busquedaCedula).subscribe({
-      next: (data) => { this.propietariosEncontrados = data ?? []; this.cargandoPropietarios = false; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.propietariosEncontrados = data ?? [];
+        this.cargandoPropietarios = false;
+        this.cdr.detectChanges();
+      },
       error: () => { this.cargandoPropietarios = false; this.cdr.detectChanges(); }
     });
   }
@@ -339,12 +334,15 @@ export class BajaVehiculoComponent implements OnInit {
     this.cerrarSelectorPropietario();
   }
 
-  limpiarPropietario(): void { this.propietarioSeleccionadoInfo = null; this.editando.propietarioId = null; }
+  limpiarPropietario(): void {
+    this.propietarioSeleccionadoInfo = null;
+    this.editando.propietarioId = null;
+  }
 
   private cargarPropietarioPorId(id: number): void {
     if (!id || id <= 0) return;
     this.propietarioService.obtenerPorId(id).subscribe({
-      next: (p) => { this.propietarioSeleccionadoInfo = p; this.cdr.detectChanges(); },
+      next: (p) => (this.propietarioSeleccionadoInfo = p),
       error: () => console.warn('No se pudo cargar propietario por ID')
     });
   }
@@ -353,20 +351,29 @@ export class BajaVehiculoComponent implements OnInit {
   private validarArchivo(file: File): boolean {
     const isPdf = file.type === 'application/pdf';
     const isImage = file.type.startsWith('image/');
-    if (!isPdf && !isImage) { alert('Solo se permiten PDF o imágenes.'); return false; }
-    if (file.size > 5 * 1024 * 1024) { alert('El archivo no debe superar 5MB.'); return false; }
+    if (!isPdf && !isImage) {
+      alert('Solo se permiten PDF o imágenes.');
+      return false;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      alert('El archivo no debe superar 5MB.');
+      return false;
+    }
     return true;
   }
 
   onCertChatarrizadoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.[0] && this.validarArchivo(input.files[0])) {
-      this.certChatarrizadoFile = input.files[0]; this.certChatarrizadoUrl = ''; this.cdr.detectChanges();
+      this.certChatarrizadoFile = input.files[0];
+      this.certChatarrizadoUrl = '';
+      this.cdr.detectChanges();
     }
   }
 
   removerCertChatarrizado(): void {
-    this.certChatarrizadoFile = null; this.certChatarrizadoUrl = '';
+    this.certChatarrizadoFile = null;
+    this.certChatarrizadoUrl = '';
     if (this.modoEdicion) this.editando.certChatarrizado = '';
     this.cdr.detectChanges();
   }
@@ -374,12 +381,15 @@ export class BajaVehiculoComponent implements OnInit {
   onOrdenJudicialSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.[0] && this.validarArchivo(input.files[0])) {
-      this.ordenJudicialFile = input.files[0]; this.ordenJudicialUrl = ''; this.cdr.detectChanges();
+      this.ordenJudicialFile = input.files[0];
+      this.ordenJudicialUrl = '';
+      this.cdr.detectChanges();
     }
   }
 
   removerOrdenJudicial(): void {
-    this.ordenJudicialFile = null; this.ordenJudicialUrl = '';
+    this.ordenJudicialFile = null;
+    this.ordenJudicialUrl = '';
     if (this.modoEdicion) this.editando.ordenJudicial = '';
     this.cdr.detectChanges();
   }
@@ -387,12 +397,15 @@ export class BajaVehiculoComponent implements OnInit {
   onConstanciaPolicialSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files?.[0] && this.validarArchivo(input.files[0])) {
-      this.constanciaPolicialFile = input.files[0]; this.constanciaPolicialUrl = ''; this.cdr.detectChanges();
+      this.constanciaPolicialFile = input.files[0];
+      this.constanciaPolicialUrl = '';
+      this.cdr.detectChanges();
     }
   }
 
   removerConstanciaPolicial(): void {
-    this.constanciaPolicialFile = null; this.constanciaPolicialUrl = '';
+    this.constanciaPolicialFile = null;
+    this.constanciaPolicialUrl = '';
     if (this.modoEdicion) this.editando.constanciaPolicial = '';
     this.cdr.detectChanges();
   }
@@ -407,8 +420,19 @@ export class BajaVehiculoComponent implements OnInit {
     return '';
   }
 
-  requiereChatarrizado(): boolean { return ['VIDA_UTIL', 'SINIESTRO'].includes(this.editando.motivoBaja); }
-  requiereInspecciones(): boolean { return this.editando.motivoBaja === 'NO_APROBACION_RTV'; }
-  requiereOrdenJudicial(): boolean { return this.editando.motivoBaja === 'JUDICIAL'; }
-  requiereConstanciaPolicial(): boolean { return this.editando.motivoBaja === 'ROBO'; }
+  requiereChatarrizado(): boolean {
+    return ['VIDA_UTIL', 'SINIESTRO'].includes(this.editando.motivoBaja);
+  }
+
+  requiereInspecciones(): boolean {
+    return this.editando.motivoBaja === 'NO_APROBACION_RTV';
+  }
+
+  requiereOrdenJudicial(): boolean {
+    return this.editando.motivoBaja === 'JUDICIAL';
+  }
+
+  requiereConstanciaPolicial(): boolean {
+    return this.editando.motivoBaja === 'ROBO';
+  }
 }

@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { BloqueoVehiculoService, BloqueoVehiculo } from '../../../services/rtv/BloqueoVehiculo.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
@@ -63,35 +63,14 @@ export class BloqueoVehiculoComponent implements OnInit {
   documentoHabilitanteUrl = '';
   uploadingDocumento = false;
 
-  // Turno vinculado (desde Recepción)
-  turnoIdVinculado: number | null = null;
-
   constructor(
     private service: BloqueoVehiculoService,
     private vehiculoService: VehiculoService,
     private cloudinaryService: CloudinaryService,
-    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.cargar();
-
-    // Leer queryParams enviados desde Recepción
-    this.route.queryParams.subscribe(params => {
-      const turnoId    = params['turnoId']    ? +params['turnoId']    : null;
-      const vehiculoId = params['vehiculoId'] ? +params['vehiculoId'] : null;
-
-      if (turnoId && vehiculoId) {
-        this.turnoIdVinculado = turnoId;
-        // Abrir modal de creación pre-llenado con el vehículo del turno
-        this.abrirModalCrear();
-        this.editando.vehiculoId = vehiculoId;
-        this.editando.tramiteId  = turnoId;
-        this.cargarVehiculoPorId(vehiculoId);
-      }
-    });
-  }
+  ngOnInit(): void { this.cargar(); }
 
   cargar(): void {
     this.cargando = true;
@@ -229,7 +208,7 @@ export class BloqueoVehiculoComponent implements OnInit {
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
-      next: (v) => { this.vehiculoSeleccionadoInfo = v; this.cdr.detectChanges(); },
+      next: (v) => (this.vehiculoSeleccionadoInfo = v),
       error: () => console.warn('No se pudo cargar vehículo por ID')
     });
   }
@@ -253,7 +232,7 @@ export class BloqueoVehiculoComponent implements OnInit {
         return;
       }
       this.documentoHabilitanteFile = file;
-      this.documentoHabilitanteUrl = '';
+      this.documentoHabilitanteUrl = ''; // Se subirá al guardar
       this.cdr.detectChanges();
     }
   }
