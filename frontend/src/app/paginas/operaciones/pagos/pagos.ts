@@ -9,6 +9,8 @@ import { Turnos } from '../../../models/Turnos.model';
 import { PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { EmpresaService } from '../../../services/administracion/empresa.service';
 import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
+import { VehiculoService, Vehiculo } from '../../../services/gestion_vehicular/vehiculo.service';
+import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
 
 const SERVICIOS: { id: number; nombre: string }[] = [
   { id: 1,  nombre: 'Emisión de matrícula por Primera Vez.' },
@@ -57,10 +59,19 @@ export class PagosComponent implements OnInit {
     private propietarioService: PropietarioService,
     private empresaService: EmpresaService,
     private ticketService: TicketPagoService,
+    private vehiculoService: VehiculoService,
+    private modeloService: ModeloService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void { this.cargarTurnos(); }
+  // Catálogo de modelos y marcas para tickets pagados
+  modelos: Modelo[] = [];
+  marcas: Marca[] = [];
+
+  ngOnInit(): void {
+    this.cargarTurnos();
+    this.cargarModelosYMarcas();
+  }
 
   cargarTurnos(): void {
     this.cargando = true;
@@ -91,7 +102,10 @@ export class PagosComponent implements OnInit {
 
   filtrarTurnos(): void {
     const f = (this.busquedaTurno || '').toLowerCase().trim();
-    const sinPagar = this.turnos.filter(t => t.montoPagado == null);
+    // Solo turnos sin pago y en estado GENERADO
+    const sinPagar = this.turnos.filter(
+      t => t.montoPagado == null && (t.estado || '').toUpperCase() === 'GENERADO'
+    );
     if (!f) {
       this.turnosFiltrados = sinPagar;
     } else {
@@ -178,17 +192,31 @@ export class PagosComponent implements OnInit {
           propietario: turnoSnap.propietarioId
             ? this.propietarioService.obtenerPorId(turnoSnap.propietarioId).pipe(catchError(() => of(null)))
             : of(null),
-          empresa: this.empresaService.obtenerPrimera().pipe(catchError(() => of(null)))
-        }).subscribe(({ propietario, empresa }) => {
+          empresa: this.empresaService.obtenerPrimera().pipe(catchError(() => of(null))),
+          vehiculo: turnoSnap.vehiculoId
+            ? this.vehiculoService.obtenerPorId(turnoSnap.vehiculoId).pipe(catchError(() => of(null)))
+            : of(null)
+        }).subscribe(({ propietario, empresa, vehiculo }) => {
           const nombreServicio = this.obtenerNombreServicio(turnoSnap.servicioId);
           const hoy = new Date().toLocaleDateString('es-EC', {
             day: '2-digit', month: '2-digit', year: 'numeric'
           });
 
+          let marcaNombre: string | undefined;
+          let modeloNombre: string | undefined;
+          if (vehiculo && (vehiculo as Vehiculo).modeloVehiculoId) {
+            const modeloId = (vehiculo as Vehiculo).modeloVehiculoId;
+            modeloNombre = this.obtenerNombreModeloPorId(modeloId);
+            marcaNombre = this.obtenerNombreMarcaPorModeloId(modeloId);
+          }
+
           const data: TicketData = {
             turnoId:           turnoSnap.turnoId!,
             tipoProceso:       nombreServicio,
-            placa:             `Vehículo #${turnoSnap.vehiculoId}`,
+            placa:             (vehiculo as Vehiculo | null)?.matricula || `Vehículo #${turnoSnap.vehiculoId}`,
+            anio:              (vehiculo as Vehiculo | null)?.anioFabricacion ?? undefined,
+            marca:             marcaNombre,
+            modelo:            modeloNombre,
             propietarioNombre: propietario
               ? `${(propietario as any).nombres ?? ''} ${(propietario as any).apellidos ?? ''}`.trim()
               : undefined,
@@ -213,5 +241,37 @@ export class PagosComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // ── Modelos / marcas para tickets ────────────────────────────────
+  private cargarModelosYMarcas(): void {
+    this.modeloService.listar().subscribe({
+      next: (modelos) => {
+        this.modelos = modelos ?? [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.warn('No se pudieron cargar modelos:', err)
+    });
+    this.modeloService.listarMarcas().subscribe({
+      next: (marcas) => {
+        this.marcas = marcas ?? [];
+        this.cdr.detectChanges();
+      },
+      error: (err) => console.warn('No se pudieron cargar marcas:', err)
+    });
+  }
+
+  private obtenerNombreModeloPorId(id?: number): string | undefined {
+    if (!id) return undefined;
+    const modelo = this.modelos.find(m => m.id === id);
+    return modelo?.nombre;
+  }
+
+  private obtenerNombreMarcaPorModeloId(idModelo?: number): string | undefined {
+    if (!idModelo) return undefined;
+    const modelo = this.modelos.find(m => m.id === idModelo);
+    if (!modelo) return undefined;
+    const marca = this.marcas.find(ma => ma.id === modelo.marcaId);
+    return marca?.nombre;
   }
 }
