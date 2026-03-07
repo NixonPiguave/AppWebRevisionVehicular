@@ -1,0 +1,155 @@
+<div class="recepcion-container">
+
+  <!-- ERROR -->
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <!-- CARGANDO -->
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando turnos en espera...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+
+    <!-- HEADER -->
+    <div class="recepcion-header">
+      <div class="header-titulo">
+        <mat-icon class="header-icono">how_to_reg</mat-icon>
+        <div>
+          <h2>Recepción de Trámites</h2>
+          <p class="header-subtitulo">Turnos pagados en espera de atención</p>
+        </div>
+      </div>
+      <button class="btn-recargar" (click)="cargar()">
+        <mat-icon>refresh</mat-icon>
+        Actualizar
+      </button>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="recepcion-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input
+            type="text"
+            [(ngModel)]="filtro"
+            (ngModelChange)="aplicarFiltro()"
+            placeholder="ID turno, propietario, vehículo, trámite..."
+            class="input-filtro"
+          />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="aplicarFiltro()" class="select-registros">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="tabla-contenedor">
+      <table class="recepcion-tabla">
+        <thead>
+        <tr>
+          <th>N° Turno</th>
+          <th>Propietario</th>
+          <th>Vehículo</th>
+          <th>Trámite</th>
+          <th>Fecha</th>
+          <th>Monto Pagado</th>
+          <th>Estado</th>
+          <th class="th-acciones">Acción</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr *ngFor="let t of paginados" [class.fila-disponible]="tramiteDisponible(t.servicioId)">
+          <td>
+            <span class="turno-id">#{{ t.turnoId }}</span>
+          </td>
+          <td>{{ t.propietarioId }}</td>
+          <td>{{ t.vehiculoId }}</td>
+          <td>
+            <div class="tramite-info">
+              <mat-icon class="tramite-icono">{{ getIconoServicio(t.servicioId) }}</mat-icon>
+              <span class="tramite-nombre">{{ getNombreServicio(t.servicioId) }}</span>
+            </div>
+            <span class="badge-no-disponible" *ngIf="!tramiteDisponible(t.servicioId)">
+                <mat-icon style="font-size:12px;vertical-align:middle">schedule</mat-icon>
+                En desarrollo
+              </span>
+          </td>
+          <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="monto">$ {{ t.montoPagado | number:'1.2-2' }}</span>
+          </td>
+          <td>
+              <span class="estado-badge" [ngClass]="getEstadoBadgeClass(t.estado)">
+                {{ t.estado }}
+              </span>
+          </td>
+          <td class="td-acciones">
+            <button
+              *ngIf="tramiteDisponible(t.servicioId)"
+              class="btn-atender"
+              (click)="atenderTurno(t)"
+              title="Atender este turno">
+              <mat-icon>play_arrow</mat-icon>
+              Atender
+            </button>
+            <span
+              *ngIf="!tramiteDisponible(t.servicioId)"
+              class="btn-no-disponible"
+              title="Trámite aún no implementado">
+                <mat-icon>hourglass_empty</mat-icon>
+                Pendiente
+              </span>
+          </td>
+        </tr>
+        <tr *ngIf="paginados.length === 0 && !error && !cargando">
+          <td colspan="8" class="sin-registros">
+            <mat-icon style="font-size:40px;color:#ccc;display:block;margin:0 auto 8px">inbox</mat-icon>
+            No hay turnos pagados en espera de atención
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="filtrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }}
+        de {{ filtrados.length }} turnos
+      </div>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button
+          *ngFor="let p of paginas"
+          class="btn-pagina"
+          [class.activa]="p === paginaActual"
+          (click)="irAPagina(p)">
+          {{ p }}
+        </button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
