@@ -15,6 +15,9 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     List<Turnos> findByEstadoOrderByFechaInicioDesc(String estado);
 
+    // Último turno insertado (mayor ID)
+    Turnos findTopByOrderByTurnoIdDesc();
+
     @Procedure(procedureName = "sp_insertar_turno")
     void insertarTurno(
             @Param("p_propietario_id") Long propietarioId,

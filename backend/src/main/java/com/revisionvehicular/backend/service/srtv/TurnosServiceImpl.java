@@ -39,15 +39,12 @@ public class TurnosServiceImpl implements ITurnosService {
                 dto.getEstado()
         );
 
-        return repository.findAll().stream()
-                .filter(t -> t.getPropietario() != null
-                        && t.getPropietario().getIdPropietario().equals(dto.getPropietarioId())
-                        && t.getVehiculo() != null
-                        && t.getVehiculo().getVehiculoid().equals(dto.getVehiculoId())
-                        && t.getFechaInicio().equals(dto.getFechaInicio()))
-                .findFirst()
-                .map(this::toDTO)
-                .orElseThrow(() -> new RuntimeException("Error al crear turno"));
+        // Tomar siempre el último turno insertado (mayor ID)
+        Turnos ultimo = repository.findTopByOrderByTurnoIdDesc();
+        if (ultimo == null) {
+            throw new RuntimeException("Error al crear turno");
+        }
+        return toDTO(ultimo);
     }
 
     @Override
