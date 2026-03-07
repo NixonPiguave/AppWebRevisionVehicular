@@ -31,6 +31,11 @@ public class TurnosController {
         return ResponseEntity.ok(service.findAll());
     }
 
+    @GetMapping("/pagados")
+    public ResponseEntity<List<TurnosDTO>> listarPagados() {
+        return ResponseEntity.ok(service.findTurnosPagados());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TurnosDTO> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));

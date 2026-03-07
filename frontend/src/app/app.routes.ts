@@ -25,6 +25,8 @@ import { FamiliaComponent } from './paginas/defectos_inspeccion/familia-defecto/
 
 // Importaciones de Inspección RTV
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
+import { TurnosPagadosComponent } from './paginas/inspeccion_rtv/turnos-pagados/turnos-pagados';
+import { RegistrarInspeccionComponent } from './paginas/inspeccion_rtv/registrar-inspeccion/registrar-inspeccion';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
@@ -78,6 +80,8 @@ export const routes: Routes = [
 
       // INSPECCION_RTV
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
+      { path: 'inspeccion-rtv/turnos-pagados', component: TurnosPagadosComponent },
+      { path: 'inspeccion-rtv/registrar', component: RegistrarInspeccionComponent },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
       { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
 
