@@ -1,0 +1,58 @@
+<div class="turnos-pagados-container">
+  <header class="header">
+    <button class="btn-volver" (click)="volver()">← Volver</button>
+    <h1>Turnos pagados – Iniciar inspección</h1>
+    <p class="subtitulo">Seleccione un turno pagado para comenzar la inspección visual.</p>
+  </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    {{ error }}
+    <button class="btn-reintentar" (click)="cargarTurnosPagados()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <span>Cargando turnos pagados...</span>
+  </div>
+
+  <div class="tabla-container" *ngIf="!cargando && !error">
+    <table class="tabla-turnos">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Propietario ID</th>
+          <th>Vehículo ID</th>
+          <th>Servicio</th>
+          <th>Fecha</th>
+          <th>Estado</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let turno of turnos">
+          <td>{{ turno.turnoId }}</td>
+          <td>{{ turno.propietarioId }}</td>
+          <td>{{ turno.vehiculoId }}</td>
+          <td>{{ getNombreServicio(turno.servicioId) }}</td>
+          <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
+          <td>
+            <span class="badge" [ngClass]="'badge-' + (turno.estado || '').toLowerCase()">
+              {{ turno.estado }}
+            </span>
+          </td>
+          <td class="acciones">
+            <button
+              type="button"
+              class="btn-inspeccion"
+              (click)="iniciarInspeccion(turno)"
+              title="Iniciar inspección visual">
+              Iniciar inspección visual
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="turnos.length === 0">
+          <td colspan="7" class="text-center">No hay turnos con estado PAGADO. Actualice el estado del turno a PAGADO para poder iniciar una inspección.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
