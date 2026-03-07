@@ -125,29 +125,31 @@
       <div class="form-seccion">
         <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
         <div class="form-grid-2">
-          <div class="form-grupo">
-            <label>ID Trámite *</label>
-            <input type="number" [(ngModel)]="editando.tramiteId" class="form-input" placeholder="ID del trámite" />
+          <div class="form-grupo form-grupo-full">
+            <label>Vehículo (placa) *</label>
+            <div class="input-accion">
+              <input type="text"
+                     [value]="vehiculoSeleccionadoInfo ? (vehiculoSeleccionadoInfo.matricula + ' - ' + vehiculoSeleccionadoInfo.chasis) : ''"
+                     class="form-input" placeholder="Seleccione un vehículo" readonly />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorVehiculo()">
+                <mat-icon>search</mat-icon> Buscar / Seleccionar
+              </button>
+              <button type="button" class="btn-quitar" (click)="limpiarVehiculo()"
+                      [disabled]="!editando.vehiculoId" title="Quitar vehículo">Quitar</button>
+            </div>
           </div>
-          <div class="form-grupo">
-            <label>ID Vehículo *</label>
-            <input type="number" [(ngModel)]="editando.vehiculoId" class="form-input" placeholder="ID del vehículo" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Propietario *</label>
-            <input type="number" [(ngModel)]="editando.propietarioId" class="form-input" placeholder="ID del propietario" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Entidad *</label>
-            <input type="number" [(ngModel)]="editando.entidadId" class="form-input" placeholder="ID entidad de tránsito" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Usuario *</label>
-            <input type="number" [(ngModel)]="editando.usuarioId" class="form-input" placeholder="ID del usuario" />
-          </div>
-          <div class="form-grupo">
-            <label>N° Trámite *</label>
-            <input type="text" [(ngModel)]="editando.numeroTramite" class="form-input" placeholder="Ej: TRK-2024-00789" maxlength="30" />
+          <div class="form-grupo form-grupo-full">
+            <label>Propietario (cédula) *</label>
+            <div class="input-accion">
+              <input type="text"
+                     [value]="propietarioSeleccionadoInfo ? (propietarioSeleccionadoInfo.documentoIdentidad + ' - ' + propietarioSeleccionadoInfo.nombre) : ''"
+                     class="form-input" placeholder="Seleccione un propietario" readonly />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorPropietario()">
+                <mat-icon>search</mat-icon> Buscar / Seleccionar
+              </button>
+              <button type="button" class="btn-quitar" (click)="limpiarPropietario()"
+                      [disabled]="!editando.propietarioId" title="Quitar propietario">Quitar</button>
+            </div>
           </div>
         </div>
       </div>
@@ -203,8 +205,29 @@
           </div>
           <div class="form-grupo form-grupo-full">
             <label>Certificado de Chatarrizado *</label>
-            <input type="text" [(ngModel)]="editando.certChatarrizado" class="form-input"
-                   placeholder="URL o referencia del certificado" maxlength="255" />
+            <div class="documento-upload-container">
+              <div class="documento-preview" *ngIf="certChatarrizadoUrl || certChatarrizadoFile">
+                <span class="doc-link" *ngIf="certChatarrizadoUrl">
+                  <a [href]="certChatarrizadoUrl" target="_blank"><mat-icon>description</mat-icon> Ver documento</a>
+                </span>
+                <span class="doc-filename" *ngIf="certChatarrizadoFile && !certChatarrizadoUrl">
+                  <mat-icon>attach_file</mat-icon> {{ certChatarrizadoFile.name }}
+                </span>
+                <button type="button" class="btn-remover-doc" (click)="removerCertChatarrizado()" [disabled]="uploadingDoc">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div class="documento-input-wrapper" *ngIf="!certChatarrizadoUrl && !certChatarrizadoFile && !uploadingDoc">
+                <input type="file" id="certChatarrizado" (change)="onCertChatarrizadoSelected($event)"
+                       accept="application/pdf,image/*" class="documento-input" />
+                <label for="certChatarrizado" class="documento-input-label">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Seleccionar certificado</span>
+                  <small>(PDF o imagen)</small>
+                </label>
+              </div>
+              <div class="upload-progress" *ngIf="uploadingDoc"><div class="spinner-upload"></div><span>Subiendo...</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -215,8 +238,29 @@
         <div class="form-grid-2">
           <div class="form-grupo form-grupo-full">
             <label>Orden Judicial *</label>
-            <input type="text" [(ngModel)]="editando.ordenJudicial" class="form-input"
-                   placeholder="URL o referencia de la orden judicial" maxlength="255" />
+            <div class="documento-upload-container">
+              <div class="documento-preview" *ngIf="ordenJudicialUrl || ordenJudicialFile">
+                <span class="doc-link" *ngIf="ordenJudicialUrl">
+                  <a [href]="ordenJudicialUrl" target="_blank"><mat-icon>description</mat-icon> Ver documento</a>
+                </span>
+                <span class="doc-filename" *ngIf="ordenJudicialFile && !ordenJudicialUrl">
+                  <mat-icon>attach_file</mat-icon> {{ ordenJudicialFile.name }}
+                </span>
+                <button type="button" class="btn-remover-doc" (click)="removerOrdenJudicial()" [disabled]="uploadingDoc">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div class="documento-input-wrapper" *ngIf="!ordenJudicialUrl && !ordenJudicialFile && !uploadingDoc">
+                <input type="file" id="ordenJudicial" (change)="onOrdenJudicialSelected($event)"
+                       accept="application/pdf,image/*" class="documento-input" />
+                <label for="ordenJudicial" class="documento-input-label">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Seleccionar orden judicial</span>
+                  <small>(PDF o imagen)</small>
+                </label>
+              </div>
+              <div class="upload-progress" *ngIf="uploadingDoc"><div class="spinner-upload"></div><span>Subiendo...</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -227,8 +271,29 @@
         <div class="form-grid-2">
           <div class="form-grupo form-grupo-full">
             <label>Constancia Policial *</label>
-            <input type="text" [(ngModel)]="editando.constanciaPolicial" class="form-input"
-                   placeholder="URL o referencia de la denuncia policial" maxlength="255" />
+            <div class="documento-upload-container">
+              <div class="documento-preview" *ngIf="constanciaPolicialUrl || constanciaPolicialFile">
+                <span class="doc-link" *ngIf="constanciaPolicialUrl">
+                  <a [href]="constanciaPolicialUrl" target="_blank"><mat-icon>description</mat-icon> Ver documento</a>
+                </span>
+                <span class="doc-filename" *ngIf="constanciaPolicialFile && !constanciaPolicialUrl">
+                  <mat-icon>attach_file</mat-icon> {{ constanciaPolicialFile.name }}
+                </span>
+                <button type="button" class="btn-remover-doc" (click)="removerConstanciaPolicial()" [disabled]="uploadingDoc">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div class="documento-input-wrapper" *ngIf="!constanciaPolicialUrl && !constanciaPolicialFile && !uploadingDoc">
+                <input type="file" id="constanciaPolicial" (change)="onConstanciaPolicialSelected($event)"
+                       accept="application/pdf,image/*" class="documento-input" />
+                <label for="constanciaPolicial" class="documento-input-label">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Seleccionar constancia policial</span>
+                  <small>(PDF o imagen)</small>
+                </label>
+              </div>
+              <div class="upload-progress" *ngIf="uploadingDoc"><div class="spinner-upload"></div><span>Subiendo...</span></div>
+            </div>
           </div>
         </div>
       </div>
@@ -306,6 +371,84 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL BÚSQUEDA VEHÍCULO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalVehiculo" (click)="cerrarSelectorVehiculo()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar vehículo</h4>
+      <button type="button" class="btn-cerrar" (click)="cerrarSelectorVehiculo()" title="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filtros">
+        <input type="text" class="form-input" placeholder="Buscar por placa" [(ngModel)]="busquedaPlaca" />
+        <button type="button" class="btn-agregar" (click)="buscarVehiculos()">Buscar</button>
+      </div>
+      <div class="modal-info" *ngIf="cargandoVehiculos">Cargando...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoVehiculos">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Chasis</th>
+            <th>VIN</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of vehiculosEncontrados">
+            <td>{{ v.matricula }}</td>
+            <td>{{ v.chasis }}</td>
+            <td>{{ v.vin }}</td>
+            <td>
+              <button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarVehiculo(v)">Elegir</button>
+            </td>
+          </tr>
+          <tr *ngIf="vehiculosEncontrados.length === 0">
+            <td colspan="4" class="sin-registros">No hay vehículos registrados</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL BÚSQUEDA PROPIETARIO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalPropietario" (click)="cerrarSelectorPropietario()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar propietario</h4>
+      <button type="button" class="btn-cerrar" (click)="cerrarSelectorPropietario()" title="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filtros">
+        <input type="text" class="form-input" placeholder="Buscar por cédula" [(ngModel)]="busquedaCedula" />
+        <button type="button" class="btn-agregar" (click)="buscarPropietarios()">Buscar</button>
+      </div>
+      <div class="modal-info" *ngIf="cargandoPropietarios">Cargando...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoPropietarios">
+        <thead>
+          <tr>
+            <th>Cédula</th>
+            <th>Nombre</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of propietariosEncontrados">
+            <td>{{ p.documentoIdentidad }}</td>
+            <td>{{ p.nombre }}</td>
+            <td>
+              <button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarPropietario(p)">Elegir</button>
+            </td>
+          </tr>
+          <tr *ngIf="propietariosEncontrados.length === 0">
+            <td colspan="3" class="sin-registros">No hay propietarios registrados</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

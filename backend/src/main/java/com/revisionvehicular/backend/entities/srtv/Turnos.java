@@ -49,4 +49,7 @@ public class Turnos {
 
     @Column(name = "monto_pagado")
     private BigDecimal montoPagado;
+
+    @Column(name = "validador", length = 64)
+    private String validador;
 }

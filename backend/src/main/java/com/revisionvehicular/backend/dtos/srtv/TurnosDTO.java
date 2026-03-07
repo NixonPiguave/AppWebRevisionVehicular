@@ -1,6 +1,7 @@
 package com.revisionvehicular.backend.dtos.srtv;
 
 import lombok.Data;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -15,4 +16,6 @@ public class TurnosDTO {
     private LocalDate fechaFin;
     private LocalDate fechaCancelado;
     private String estado;
+    private BigDecimal montoPagado;
+    private String validador;
 }

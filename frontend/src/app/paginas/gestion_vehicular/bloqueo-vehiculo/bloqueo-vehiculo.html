@@ -137,21 +137,24 @@
       <div class="form-seccion">
         <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
         <div class="form-grid-2">
-          <div class="form-grupo">
-            <label>ID Trámite *</label>
-            <input type="number" [(ngModel)]="editando.tramiteId" class="form-input" placeholder="ID del trámite" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Vehículo *</label>
-            <input type="number" [(ngModel)]="editando.vehiculoId" class="form-input" placeholder="ID del vehículo" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Entidad *</label>
-            <input type="number" [(ngModel)]="editando.entidadId" class="form-input" placeholder="ID entidad de tránsito" />
-          </div>
-          <div class="form-grupo">
-            <label>ID Usuario que Activa *</label>
-            <input type="number" [(ngModel)]="editando.usuarioActivaId" class="form-input" placeholder="ID del usuario" />
+          <div class="form-grupo form-grupo-full">
+            <label>Vehículo (placa) *</label>
+            <div class="input-accion">
+              <input
+                type="text"
+                [value]="vehiculoSeleccionadoInfo ? (vehiculoSeleccionadoInfo.matricula + ' - ' + vehiculoSeleccionadoInfo.chasis) : ''"
+                class="form-input"
+                placeholder="Seleccione un vehículo"
+                readonly
+              />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorVehiculo()">
+                <mat-icon>search</mat-icon> Buscar / Seleccionar
+              </button>
+              <button type="button" class="btn-quitar" (click)="limpiarVehiculo()"
+                      [disabled]="!editando.vehiculoId" title="Quitar vehículo">
+                Quitar
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -159,10 +162,6 @@
       <div class="form-seccion">
         <h4 class="seccion-titulo"><mat-icon>article</mat-icon> Datos del Bloqueo (Art.51-52)</h4>
         <div class="form-grid-2">
-          <div class="form-grupo">
-            <label>N° Trámite *</label>
-            <input type="text" [(ngModel)]="editando.numeroTramite" class="form-input" placeholder="Ej: TRK-2024-00123" maxlength="30" />
-          </div>
           <div class="form-grupo">
             <label>ID Tipo de Bloqueo *</label>
             <input type="number" [(ngModel)]="editando.tipoBloqueoId" class="form-input" placeholder="ID del catálogo tipo bloqueo" />
@@ -183,8 +182,32 @@
           </div>
           <div class="form-grupo form-grupo-full">
             <label>Documento Habilitante *</label>
-            <input type="text" [(ngModel)]="editando.documentoHabilitante" class="form-input"
-                   placeholder="URL o referencia: boleta, denuncia policial, mandato judicial, contrato notariado" maxlength="255" />
+            <div class="documento-upload-container">
+              <div class="documento-preview" *ngIf="documentoHabilitanteUrl || documentoHabilitanteFile">
+                <span class="doc-link" *ngIf="documentoHabilitanteUrl">
+                  <a [href]="documentoHabilitanteUrl" target="_blank"><mat-icon>description</mat-icon> Ver documento</a>
+                </span>
+                <span class="doc-filename" *ngIf="documentoHabilitanteFile && !documentoHabilitanteUrl">
+                  <mat-icon>attach_file</mat-icon> {{ documentoHabilitanteFile.name }}
+                </span>
+                <button type="button" class="btn-remover-doc" (click)="removerDocumentoHabilitante()" [disabled]="uploadingDocumento">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </div>
+              <div class="documento-input-wrapper" *ngIf="!documentoHabilitanteUrl && !documentoHabilitanteFile && !uploadingDocumento">
+                <input type="file" id="docHabilitante" (change)="onDocumentoHabilitanteSelected($event)"
+                       accept="application/pdf,image/*" class="documento-input" />
+                <label for="docHabilitante" class="documento-input-label">
+                  <mat-icon>cloud_upload</mat-icon>
+                  <span>Seleccionar documento</span>
+                  <small>(PDF o imagen - boleta, denuncia, mandato judicial)</small>
+                </label>
+              </div>
+              <div class="upload-progress" *ngIf="uploadingDocumento">
+                <div class="spinner-upload"></div>
+                <span>Subiendo documento...</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -259,6 +282,47 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL BÚSQUEDA VEHÍCULO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalVehiculo" (click)="cerrarSelectorVehiculo()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar vehículo</h4>
+      <button type="button" class="btn-cerrar" (click)="cerrarSelectorVehiculo()" title="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filtros">
+        <input type="text" class="form-input" placeholder="Buscar por placa"
+               [(ngModel)]="busquedaPlaca" />
+        <button type="button" class="btn-agregar" (click)="buscarVehiculos()">Buscar</button>
+      </div>
+      <div class="modal-info" *ngIf="cargandoVehiculos">Cargando...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoVehiculos">
+        <thead>
+          <tr>
+            <th>Placa</th>
+            <th>Chasis</th>
+            <th>VIN</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of vehiculosEncontrados">
+            <td>{{ v.matricula }}</td>
+            <td>{{ v.chasis }}</td>
+            <td>{{ v.vin }}</td>
+            <td>
+              <button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarVehiculo(v)">Elegir</button>
+            </td>
+          </tr>
+          <tr *ngIf="vehiculosEncontrados.length === 0">
+            <td colspan="4" class="sin-registros">No hay vehículos registrados</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

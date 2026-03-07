@@ -1,11 +1,15 @@
 package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
+import com.revisionvehicular.backend.entities.rtv.TarifarioTramite;
 import com.revisionvehicular.backend.entities.srtv.Turnos;
+import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepository;
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,13 +17,17 @@ import java.util.stream.Collectors;
 public class TurnosServiceImpl implements ITurnosService {
 
     private final ITurnosRepository repository;
+    private final ITarifarioTramiteRepository tarifarioRepository;
 
     @Autowired
-    public TurnosServiceImpl(ITurnosRepository repository) {
+    public TurnosServiceImpl(ITurnosRepository repository,
+                             ITarifarioTramiteRepository tarifarioRepository) {
         this.repository = repository;
+        this.tarifarioRepository = tarifarioRepository;
     }
 
     @Override
+    @Transactional
     public TurnosDTO save(TurnosDTO dto) {
         repository.insertarTurno(
                 dto.getPropietarioId(),
@@ -90,6 +98,26 @@ public class TurnosServiceImpl implements ITurnosService {
         }
     }
 
+    @Override
+    @Transactional
+    public TurnosDTO actualizarMontoPagado(Long turnoId, BigDecimal montoPagado) {
+        repository.actualizarMontoPagado(turnoId, montoPagado);
+        return findById(turnoId);
+    }
+
+    @Override
+    public BigDecimal obtenerTarifaPorTurno(Long turnoId) {
+        Turnos turno = repository.findById(turnoId)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
+
+        if (turno.getServicio() == null) return null;
+
+        return tarifarioRepository
+                .findByServicio_IdTipoTramiteAndEstado(turno.getServicio().getIdTipoTramite(), "ACTIVO")
+                .map(TarifarioTramite::getTarifa)
+                .orElse(null);
+    }
+
     private TurnosDTO toDTO(Turnos turno) {
         TurnosDTO dto = new TurnosDTO();
         dto.setTurnoId(turno.getTurnoId());
@@ -101,6 +129,8 @@ public class TurnosServiceImpl implements ITurnosService {
         dto.setFechaFin(turno.getFechaFin());
         dto.setFechaCancelado(turno.getFechaCancelado());
         dto.setEstado(turno.getEstado());
+        dto.setMontoPagado(turno.getMontoPagado());
+        dto.setValidador(turno.getValidador());
         return dto;
     }
 }

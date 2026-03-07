@@ -6,10 +6,17 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Repository
 public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
+
+    @Procedure(procedureName = "sp_actualizar_monto_pagado")
+    void actualizarMontoPagado(
+            @Param("p_turno_id") Long turnoId,
+            @Param("p_monto_pagado") BigDecimal montoPagado
+    );
 
     @Procedure(procedureName = "sp_insertar_turno")
     void insertarTurno(
@@ -23,7 +30,7 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("p_estado") String estado
     );
 
-    @Procedure(procedureName= "sp_actualizar_turno")
+    @Procedure(procedureName = "sp_actualizar_turno")
     void actualizarTurno(
             @Param("p_turno_id") Long turnoId,
             @Param("p_propietario_id") Long propietarioId,

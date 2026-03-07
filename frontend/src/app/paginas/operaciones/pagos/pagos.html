@@ -1,0 +1,164 @@
+<div class="pagos-container">
+  <div class="pagos-header">
+    <h2>Registro de Pagos</h2>
+  </div>
+
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+    <button class="btn btn-secondary btn-sm" (click)="cargarTurnos()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando turnos...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+    <!-- Paso 1: Buscar turno -->
+    <div class="formulario-pago">
+      <h3>Seleccionar turno para registrar pago</h3>
+      <div class="form-group">
+        <label>Turno *</label>
+        <div class="input-accion">
+          <input
+            type="text"
+            [value]="turnoSeleccionado ? getTurnoDisplay() : ''"
+            class="form-control"
+            placeholder="Busque y seleccione un turno"
+            readonly
+          />
+          <button type="button" class="btn btn-primary btn-inline" (click)="abrirSelectorTurno()">
+            <mat-icon>search</mat-icon>
+            Buscar / Seleccionar
+          </button>
+          <button
+            type="button"
+            class="btn btn-secondary btn-inline"
+            (click)="limpiarTurno()"
+            [disabled]="!turnoSeleccionado"
+            title="Quitar turno">
+            Quitar
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2: Formulario de pago (solo cuando hay turno seleccionado) -->
+      <div class="form-pago" *ngIf="turnoSeleccionado">
+        <h4>Datos del pago</h4>
+
+        <!-- Indicador mientras carga la tarifa -->
+        <div class="cargando-tarifa" *ngIf="cargandoTarifa">
+          <div class="spinner"></div>
+          <span>Consultando tarifa...</span>
+        </div>
+
+        <div *ngIf="!cargandoTarifa">
+          <!-- Aviso si no existe tarifa activa para el servicio -->
+          <div class="aviso-sin-tarifa" *ngIf="sinTarifa">
+            <mat-icon>info_outline</mat-icon>
+            <span>No se encontró tarifa activa para este servicio. Ingrese el monto manualmente.</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="montoPagado">Monto a pagar *</label>
+              <input
+                type="number"
+                id="montoPagado"
+                [(ngModel)]="montoPagado"
+                name="montoPagado"
+                min="0"
+                step="0.01"
+                class="form-control input-monto"
+                placeholder="0.00"
+                readonly
+                (keydown)="$event.preventDefault()"
+                (wheel)="$event.preventDefault()"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn btn-success" (click)="registrarPago()" [disabled]="guardando || !montoValido()">
+              <mat-icon *ngIf="!guardando">payment</mat-icon>
+              {{ guardando ? 'Registrando...' : 'Registrar Pago' }}
+            </button>
+            <button type="button" class="btn btn-secondary" (click)="limpiarTodo()">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Buscar turno -->
+<div class="modal-overlay" *ngIf="mostrarModalTurno" (click)="cerrarSelectorTurno()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar turno</h4>
+      <button type="button" class="btn-icon" (click)="cerrarSelectorTurno()" title="Cerrar">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="modal-filtros">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Buscar por ID, propietario, vehículo, estado..."
+          [(ngModel)]="busquedaTurno"
+          name="busquedaTurno"
+          (ngModelChange)="filtrarTurnos()"
+        />
+      </div>
+
+      <div class="modal-info" *ngIf="cargandoTurnos">Cargando turnos...</div>
+
+      <div class="tabla-modal-contenedor" *ngIf="!cargandoTurnos">
+        <table class="tabla-modal">
+          <thead>
+          <tr>
+            <th>ID</th>
+            <th>Propietario</th>
+            <th>Vehículo</th>
+            <th>Servicio</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Monto Pagado</th>
+            <th>Acción</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let t of turnosFiltrados">
+            <td>{{ t.turnoId }}</td>
+            <td>{{ t.propietarioId }}</td>
+            <td>{{ t.vehiculoId }}</td>
+            <td>{{ obtenerNombreServicio(t.servicioId) }}</td>
+            <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td>
+                <span class="badge" [ngClass]="'badge-' + (t.estado?.toLowerCase() || '')">
+                  {{ t.estado }}
+                </span>
+            </td>
+            <td>{{ t.montoPagado != null ? (t.montoPagado | number:'1.2-2') : '-' }}</td>
+            <td>
+              <button type="button" class="btn btn-success btn-elegir" (click)="seleccionarTurno(t)">
+                Elegir
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="turnosFiltrados.length === 0">
+            <td colspan="8" class="text-center">No se encontraron turnos</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

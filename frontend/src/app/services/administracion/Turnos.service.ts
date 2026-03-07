@@ -7,6 +7,7 @@ import { Turnos } from '../../models/Turnos.model';
   providedIn: 'root'
 })
 export class TurnosService {
+
   private apiUrl = 'http://localhost:8080/api/turnos';
 
   constructor(private http: HttpClient) {}
@@ -29,5 +30,13 @@ export class TurnosService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  obtenerTarifa(turnoId: number): Observable<{ tarifa: number }> {
+    return this.http.get<{ tarifa: number }>(`${this.apiUrl}/${turnoId}/tarifa`);
+  }
+
+  registrarPago(id: number, montoPagado: number): Observable<Turnos> {
+    return this.http.patch<Turnos>(`${this.apiUrl}/${id}/pago`, { montoPagado });
   }
 }

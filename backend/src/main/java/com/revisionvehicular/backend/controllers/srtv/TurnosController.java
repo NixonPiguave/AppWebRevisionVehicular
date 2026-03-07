@@ -6,7 +6,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/turnos")
@@ -19,9 +21,7 @@ public class TurnosController {
     }
 
     @PostMapping
-    public ResponseEntity<TurnosDTO> crear(
-            @RequestBody TurnosDTO dto
-    ) {
+    public ResponseEntity<TurnosDTO> crear(@RequestBody TurnosDTO dto) {
         TurnosDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }
@@ -32,9 +32,7 @@ public class TurnosController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TurnosDTO> obtenerPorId(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<TurnosDTO> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
     }
 
@@ -47,10 +45,30 @@ public class TurnosController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(
-            @PathVariable Long id
-    ) {
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}/tarifa")
+    public ResponseEntity<Map<String, BigDecimal>> obtenerTarifa(@PathVariable Long id) {
+        BigDecimal tarifa = service.obtenerTarifaPorTurno(id);
+        if (tarifa == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(Map.of("tarifa", tarifa));
+    }
+
+    @PatchMapping("/{id}/pago")
+    public ResponseEntity<TurnosDTO> registrarPago(
+            @PathVariable Long id,
+            @RequestBody Map<String, BigDecimal> body
+    ) {
+        BigDecimal montoPagado = body.get("montoPagado");
+        if (montoPagado == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        TurnosDTO actualizado = service.actualizarMontoPagado(id, montoPagado);
+        return ResponseEntity.ok(actualizado);
     }
 }
