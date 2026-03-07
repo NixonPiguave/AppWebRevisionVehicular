@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-modelos',
@@ -38,7 +39,8 @@ export class ModelosComponent implements OnInit {
 
   constructor(
     private modeloService: ModeloService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -151,13 +153,13 @@ export class ModelosComponent implements OnInit {
   private validarAnio(anio: number, campo: string): boolean {
     if (anio <= 0) {
       console.warn(`El campo "${campo}" no puede ser negativo ni cero. Valor: ${anio}`);
-      alert(`El ${campo} no puede ser negativo ni cero.`);
+      this.notification.error(`El ${campo} no puede ser negativo ni cero.`);
       return false;
     }
     const anioStr = anio.toString();
     if (anioStr.length !== 4) {
       console.warn(`[VALIDACIÓN] El campo "${campo}" debe tener exactamente 4 dígitos. Valor: ${anio}`);
-      alert(`El ${campo} debe tener exactamente 4 dígitos (Ej: 2015). Ingresaste: ${anio}`);
+      this.notification.error(`El ${campo} debe tener exactamente 4 dígitos (Ej: 2015). Ingresaste: ${anio}`);
       return false;
     }
     return true;
@@ -167,14 +169,14 @@ export class ModelosComponent implements OnInit {
     // Validar nombre
     if (!this.modeloEditando.nombre.trim()) {
       console.warn('[VALIDACIÓN] El nombre del modelo es requerido.');
-      alert('El nombre del modelo es requerido');
+      this.notification.error('El nombre del modelo es requerido');
       return;
     }
 
     // Validar marca
     if (!this.modeloEditando.marcaId || this.modeloEditando.marcaId === 0) {
       console.warn('[VALIDACIÓN] Debe seleccionar una marca.');
-      alert('Debe seleccionar una marca');
+      this.notification.error('Debe seleccionar una marca');
       return;
     }
 
@@ -187,7 +189,7 @@ export class ModelosComponent implements OnInit {
     // Validar que desde <= hasta
     if (this.modeloEditando.anioDesde > this.modeloEditando.anioHasta) {
       console.warn(`Año Desde (${this.modeloEditando.anioDesde}) no puede ser mayor que Año Hasta (${this.modeloEditando.anioHasta}).`);
-      alert('El Año Desde no puede ser mayor que el Año Hasta');
+      this.notification.error('El Año Desde no puede ser mayor que el Año Hasta');
       return;
     }
 
@@ -203,7 +205,7 @@ export class ModelosComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar modelo:', err);
-          alert('Error al actualizar el modelo');
+          this.notification.error('Error al actualizar el modelo');
           this.guardando = false;
         }
       });
@@ -225,7 +227,7 @@ export class ModelosComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear modelo:', err);
-          alert('Error al crear el modelo');
+          this.notification.error('Error al crear el modelo');
           this.guardando = false;
         }
       });

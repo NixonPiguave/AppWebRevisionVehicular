@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon'; // ← IMPORTAR Material Icons
 import { LineasService, Linea } from '../../../services/inspeccion_rtv/lineas.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-roles',
@@ -34,7 +35,8 @@ export class LineasInspeccionComponent implements OnInit {
 
   constructor(
     private rolesService: LineasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -140,7 +142,7 @@ export class LineasInspeccionComponent implements OnInit {
   // Guardar rol (crear o editar)
   guardarRol(): void {
     if (!this.rolEditando.nombre.trim()) {
-      alert('El nombre del Linea es requerido');
+      this.notification.error('El nombre de la línea es requerido');
       return;
     }
 
@@ -156,7 +158,7 @@ export class LineasInspeccionComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar Linea:', err);
-          alert('Error al actualizar la Linea');
+          this.notification.error('Error al actualizar la línea');
           this.guardando = false;
         }
       });
@@ -170,7 +172,7 @@ export class LineasInspeccionComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear Linea:', err);
-          alert('Error al crear la Linea');
+          this.notification.error('Error al crear la línea');
           this.guardando = false;
         }
       });

@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { EquiposService, Equipo } from '../../../services/inspeccion_rtv/equipos.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-equipos',
@@ -38,7 +39,8 @@ export class Equipos implements OnInit {
 
   constructor(
     private equiposService: EquiposService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -160,22 +162,22 @@ export class Equipos implements OnInit {
 
     // Validaciones básicas
     if (!this.equipoEditando.equipo.trim()) {
-      alert('El nombre del equipo es requerido');
+      this.notification.error('El nombre del equipo es requerido');
       return false;
     }
 
     if (!this.equipoEditando.modelo.trim()) {
-      alert('El modelo es requerido');
+      this.notification.error('El modelo es requerido');
       return false;
     }
 
     if (!this.equipoEditando.serialEquipo.trim()) {
-      alert('El número de serie es requerido');
+      this.notification.error('El número de serie es requerido');
       return false;
     }
 
     if (!this.equipoEditando.codigoInterno.trim()) {
-      alert('El código interno es requerido');
+      this.notification.error('El código interno es requerido');
       return false;
     }
 
@@ -187,7 +189,7 @@ export class Equipos implements OnInit {
       );
       if (serialDuplicado) {
         this.erroresValidacion.serialEquipo = 'Este número de serie ya está registrado';
-        alert('El número de serie ya está registrado en otro equipo');
+        this.notification.error('El número de serie ya está registrado en otro equipo');
         return false;
       }
     }
@@ -200,7 +202,7 @@ export class Equipos implements OnInit {
       );
       if (codigoDuplicado) {
         this.erroresValidacion.codigoInterno = 'Este código interno ya está registrado';
-        alert('El código interno ya está registrado en otro equipo');
+        this.notification.error('El código interno ya está registrado en otro equipo');
         return false;
       }
     }
@@ -215,7 +217,7 @@ export class Equipos implements OnInit {
 
       if (fechaCalibracion > hoy) {
         this.erroresValidacion.ultimaCalibracion = 'La fecha de calibración no puede ser futura';
-        alert('La fecha de última calibración no puede ser mayor a la fecha actual');
+        this.notification.error('La fecha de última calibración no puede ser mayor a la fecha actual');
         return false;
       }
     }
@@ -226,7 +228,7 @@ export class Equipos implements OnInit {
 
       if (fechaMantenimiento > hoy) {
         this.erroresValidacion.ultimoMantenimiento = 'La fecha de mantenimiento no puede ser futura';
-        alert('La fecha de último mantenimiento no puede ser mayor a la fecha actual');
+        this.notification.error('La fecha de último mantenimiento no puede ser mayor a la fecha actual');
         return false;
       }
     }
@@ -309,16 +311,16 @@ export class Equipos implements OnInit {
 
     if (mensajeLower.includes('serial') || mensajeLower.includes('serie')) {
       this.erroresValidacion.serialEquipo = 'El número de serie ya está registrado';
-      alert('Error: El número de serie ya existe en el sistema');
+      this.notification.error('Error: El número de serie ya existe en el sistema');
     } else if (mensajeLower.includes('codigo') || mensajeLower.includes('código')) {
       this.erroresValidacion.codigoInterno = 'El código interno ya está registrado';
-      alert('Error: El código interno ya existe en el sistema');
+      this.notification.error('Error: El código interno ya existe en el sistema');
     } else if (mensajeLower.includes('unique') || mensajeLower.includes('duplicate') || mensajeLower.includes('duplicado')) {
       // Error genérico de duplicado
-      alert('Error: Ya existe un registro con estos datos. Verifica el número de serie y código interno.');
+      this.notification.error('Error: Ya existe un registro con estos datos. Verifica el número de serie y código interno.');
     } else {
       // Error genérico
-      alert(`Error al guardar el equipo: ${mensajeError}`);
+      this.notification.error(`Error al guardar el equipo: ${mensajeError}`);
     }
 
     this.cdr.detectChanges();

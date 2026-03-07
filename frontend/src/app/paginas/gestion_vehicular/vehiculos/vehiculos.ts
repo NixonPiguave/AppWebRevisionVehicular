@@ -25,6 +25,7 @@ import {
   Propietario,
   PropietarioService
 } from '../../../services/gestion_vehicular/propietario.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-vehiculo',
@@ -85,7 +86,8 @@ export class VehiculoComponent implements OnInit {
   constructor(
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -259,32 +261,32 @@ export class VehiculoComponent implements OnInit {
 
   guardar(): void {
     if (!this.vehiculoEditando.propietarioId || this.vehiculoEditando.propietarioId <= 0) {
-      alert('Debe seleccionar un propietario');
+      this.notification.error('Debe seleccionar un propietario');
       return;
     }
 
     if (!this.vehiculoEditando.chasis.trim()) {
-      alert('El chasis es obligatorio');
+      this.notification.error('El chasis es obligatorio');
       return;
     }
 
     if (!this.vehiculoEditando.vin.trim()) {
-      alert('El VIN es obligatorio');
+      this.notification.error('El VIN es obligatorio');
       return;
     }
 
     if (!this.vehiculoEditando.matricula.trim()) {
-      alert('La matrícula es obligatoria');
+      this.notification.error('La matrícula es obligatoria');
       return;
     }
 
     if (this.vehiculoEditando.capacidadPasajeros <= 0) {
-      alert('La capacidad de pasajeros debe ser mayor a 0');
+      this.notification.error('La capacidad de pasajeros debe ser mayor a 0');
       return;
     }
 
     if (!this.vehiculoEditando.tipoVehiculoId) {
-      alert('Debe seleccionar un tipo de vehículo');
+      this.notification.error('Debe seleccionar un tipo de vehículo');
       return;
     }
 
@@ -296,12 +298,13 @@ export class VehiculoComponent implements OnInit {
         this.vehiculoEditando
       ).subscribe({
         next: () => {
+          this.notification.success('Vehículo actualizado correctamente.');
           this.cerrarModalForm();
           this.guardando = false;
           this.cargarDatos();
         },
         error: () => {
-          alert('Error al actualizar el vehículo');
+          this.notification.error('Error al actualizar el vehículo');
           this.guardando = false;
         }
       });
@@ -310,12 +313,13 @@ export class VehiculoComponent implements OnInit {
 
       this.vehiculoService.crear(nuevo).subscribe({
         next: () => {
+          this.notification.success('Vehículo creado correctamente.');
           this.cerrarModalForm();
           this.guardando = false;
           this.cargarDatos();
         },
         error: () => {
-          alert('Error al crear el vehículo');
+          this.notification.error('Error al crear el vehículo');
           this.guardando = false;
         }
       });

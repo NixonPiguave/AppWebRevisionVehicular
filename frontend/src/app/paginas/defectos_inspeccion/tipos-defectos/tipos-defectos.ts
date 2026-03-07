@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TiposDefectosService, TipoDefecto } from '../../../services/defectos_inspeccion/tipos_defectos.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-tipos-defectos',
@@ -36,7 +37,8 @@ export class TiposDefectosComponent implements OnInit {
 
   constructor(
     private tiposDefectosService: TiposDefectosService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -143,7 +145,7 @@ export class TiposDefectosComponent implements OnInit {
   guardarTipoDefecto(): void {
     // Validación simple: solo nombre es requerido
     if (!this.tipoDefectoEditando.nombre.trim()) {
-      alert('El nombre del tipo de defecto es requerido');
+      this.notification.error('El nombre del tipo de defecto es requerido');
       return;
     }
 
@@ -162,7 +164,7 @@ export class TiposDefectosComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar tipo de defecto:', err);
-          alert('Error al actualizar el tipo de defecto');
+          this.notification.error('Error al actualizar el tipo de defecto');
           this.guardando = false;
         }
       });
@@ -185,7 +187,7 @@ export class TiposDefectosComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear tipo de defecto:', err);
-          alert('Error al crear el tipo de defecto');
+          this.notification.error('Error al crear el tipo de defecto');
           this.guardando = false;
         }
       });

@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CapacidadCargaService, CapacidadCarga } from '../../../services/catalogos_vehiculos/capacidad_carga.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-capacidad-carga',
@@ -40,7 +41,8 @@ export class CapacidadCargaComponent implements OnInit {
 
   constructor(
     private capacidadService: CapacidadCargaService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -124,7 +126,7 @@ export class CapacidadCargaComponent implements OnInit {
     // ✅ Validar que se ingresó capacidad
     if (!this.capacidadEditando.capacidad || !this.capacidadEditando.unidad) {
       console.warn('Debe ingresar la capacidad y seleccionar una unidad.');
-      alert('Debe ingresar la capacidad y seleccionar una unidad.');
+      this.notification.error('Debe ingresar la capacidad y seleccionar una unidad.');
       return;
     }
 
@@ -132,7 +134,7 @@ export class CapacidadCargaComponent implements OnInit {
     const valorCapacidad = Number(this.capacidadEditando.capacidad);
     if (isNaN(valorCapacidad) || valorCapacidad <= 0) {
       console.warn('La capacidad debe ser un número mayor a cero. Valor ingresado:', this.capacidadEditando.capacidad);
-      alert('La capacidad debe ser un número mayor a cero. No se permiten valores negativos ni cero.');
+      this.notification.error('La capacidad debe ser un número mayor a cero. No se permiten valores negativos ni cero.');
       return;
     }
 
@@ -148,7 +150,7 @@ export class CapacidadCargaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
         }
       });
     } else {
@@ -160,7 +162,7 @@ export class CapacidadCargaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al crear');
+          this.notification.error('Error al crear');
         }
       });
     }

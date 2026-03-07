@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { FamiliaService, Familia } from '../../../services/defectos_inspeccion/familia-defecto.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-familia',
@@ -28,7 +29,11 @@ export class FamiliaComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   familiaDetalle: Familia | null = null;
 
-  constructor(private familiaService: FamiliaService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private familiaService: FamiliaService,
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.cargarFamilias();
@@ -102,7 +107,7 @@ export class FamiliaComponent implements OnInit {
 
   guardarFamilia(): void {
     if (!this.familiaEditando.nombre.trim()) {
-      alert('El nombre de la familia es obligatorio');
+      this.notification.error('El nombre de la familia es obligatorio');
       return;
     }
 
@@ -118,7 +123,7 @@ export class FamiliaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
         }
       });
     } else {
@@ -130,7 +135,7 @@ export class FamiliaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al crear');
+          this.notification.error('Error al crear');
         }
       });
     }

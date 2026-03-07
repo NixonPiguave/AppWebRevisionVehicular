@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SubfamiliaDefectoService, SubfamiliaDefecto, Familia } from '../../../services/defectos_inspeccion/subfamilia_defecto.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   standalone: true,
@@ -35,7 +36,8 @@ export class SubfamiliaDefectoComponent implements OnInit {
 
   constructor(
     private subfamiliaService: SubfamiliaDefectoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -178,12 +180,12 @@ export class SubfamiliaDefectoComponent implements OnInit {
    //Validar formulario
   validarFormulario(): boolean {
     if (!this.subfamiliaEditando.nombre.trim()) {
-      alert('El nombre de la subfamilia es obligatorio');
+      this.notification.error('El nombre de la subfamilia es obligatorio');
       return false;
     }
 
     if (!this.subfamiliaEditando.familiaId || this.subfamiliaEditando.familiaId === 0) {
-      alert('Debe seleccionar una familia');
+      this.notification.error('Debe seleccionar una familia');
       return false;
     }
 
@@ -212,7 +214,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
         },
         error: (err) => {
           console.error('[SUBFAMILIA] Error al actualizar:', err);
-          alert('Error al actualizar la subfamilia');
+          this.notification.error('Error al actualizar la subfamilia');
           this.guardando = false;
         }
       });
@@ -227,7 +229,7 @@ export class SubfamiliaDefectoComponent implements OnInit {
         },
         error: (err) => {
           console.error('[SUBFAMILIA] Error al crear:', err);
-          alert('Error al crear la subfamilia');
+          this.notification.error('Error al crear la subfamilia');
           this.guardando = false;
         }
       });

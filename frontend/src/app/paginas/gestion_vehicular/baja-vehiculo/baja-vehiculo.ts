@@ -7,6 +7,7 @@ import { BajaVehiculoService, BajaVehiculo } from '../../../services/rtv/BajaVeh
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
+import { NotificationService } from '../../../services/notification.service';
 
 const BAJA_VACIA: BajaVehiculo = {
   idBaja: null,
@@ -89,7 +90,8 @@ export class BajaVehiculoComponent implements OnInit {
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
     private cloudinaryService: CloudinaryService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void { this.cargar(); }
@@ -163,19 +165,19 @@ export class BajaVehiculoComponent implements OnInit {
 
   guardar(): void {
     if (!this.editando.vehiculoId || !this.editando.propietarioId || !this.editando.motivoBaja) {
-      alert('Debe seleccionar vehículo, propietario y motivo de baja.');
+      this.notification.error('Debe seleccionar vehículo, propietario y motivo de baja.');
       return;
     }
     if (this.requiereChatarrizado() && !this.certChatarrizadoUrl && !this.certChatarrizadoFile) {
-      alert('Debe adjuntar el certificado de chatarrizado.');
+      this.notification.error('Debe adjuntar el certificado de chatarrizado.');
       return;
     }
     if (this.requiereOrdenJudicial() && !this.ordenJudicialUrl && !this.ordenJudicialFile) {
-      alert('Debe adjuntar la orden judicial.');
+      this.notification.error('Debe adjuntar la orden judicial.');
       return;
     }
     if (this.requiereConstanciaPolicial() && !this.constanciaPolicialUrl && !this.constanciaPolicialFile) {
-      alert('Debe adjuntar la constancia policial.');
+      this.notification.error('Debe adjuntar la constancia policial.');
       return;
     }
     this.guardando = true;
@@ -200,7 +202,7 @@ export class BajaVehiculoComponent implements OnInit {
               this.editando.certChatarrizado = res.url;
               subirOrdenYConstanciaYGuardar(op);
             },
-            error: () => { this.guardando = false; alert('Error al subir certificado.'); }
+            error: () => { this.guardando = false; this.notification.error('Error al subir certificado.'); }
           });
         } else {
           this.editando.certChatarrizado = this.certChatarrizadoUrl;
@@ -223,7 +225,7 @@ export class BajaVehiculoComponent implements OnInit {
               this.editando.ordenJudicial = res.url;
               subirConstanciaYGuardar(operacion);
             },
-            error: () => { this.guardando = false; alert('Error al subir orden judicial.'); }
+            error: () => { this.guardando = false; this.notification.error('Error al subir orden judicial.'); }
           });
         } else {
           this.editando.ordenJudicial = this.ordenJudicialUrl;
@@ -246,7 +248,7 @@ export class BajaVehiculoComponent implements OnInit {
               this.editando.constanciaPolicial = res.url;
               this.ejecutarGuardado(operacion);
             },
-            error: () => { this.guardando = false; alert('Error al subir constancia policial.'); }
+            error: () => { this.guardando = false; this.notification.error('Error al subir constancia policial.'); }
           });
         } else {
           this.editando.constanciaPolicial = this.constanciaPolicialUrl;
@@ -263,7 +265,7 @@ export class BajaVehiculoComponent implements OnInit {
   private ejecutarGuardado(op: ReturnType<BajaVehiculoService['crear']> | ReturnType<BajaVehiculoService['actualizar']>): void {
     op.subscribe({
       next: () => { this.cargar(); this.cerrarModalForm(); this.guardando = false; },
-      error: () => { this.guardando = false; alert('Error al guardar la baja del vehículo.'); }
+      error: () => { this.guardando = false; this.notification.error('Error al guardar la baja del vehículo.'); }
     });
   }
 
@@ -352,11 +354,11 @@ export class BajaVehiculoComponent implements OnInit {
     const isPdf = file.type === 'application/pdf';
     const isImage = file.type.startsWith('image/');
     if (!isPdf && !isImage) {
-      alert('Solo se permiten PDF o imágenes.');
+      this.notification.error('Solo se permiten PDF o imágenes.');
       return false;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert('El archivo no debe superar 5MB.');
+      this.notification.error('El archivo no debe superar 5MB.');
       return false;
     }
     return true;

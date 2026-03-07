@@ -10,6 +10,7 @@ import {
   UnidadMedida,
   DescripcionUmbral
 } from '../../../services/configuracion_umbral/umbral.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-umbral',
@@ -52,7 +53,8 @@ export class UmbralComponent implements OnInit {
 
   constructor(
     private umbralService: UmbralService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -169,21 +171,21 @@ export class UmbralComponent implements OnInit {
   guardar(): void {
 
     if (this.umbralEditando.valorMin >= this.umbralEditando.valorMax) {
-      alert('El valor mínimo debe ser menor al valor máximo');
+      this.notification.error('El valor mínimo debe ser menor al valor máximo');
       return;
     }
 
     if (!this.umbralEditando.idUnidadMedida) {
-      alert('Debe seleccionar una unidad de medida');
+      this.notification.error('Debe seleccionar una unidad de medida');
       return;
     }
 
     if (!this.umbralEditando.idDescripcionUmbral) {
-      alert('Debe seleccionar una descripción');
+      this.notification.error('Debe seleccionar una descripción');
       return;
     }
     if (this.umbralEditando.valorMin < 0 || this.umbralEditando.valorMax < 0) {
-      alert('Los valores MIN y MAX no pueden ser negativos');
+      this.notification.error('Los valores MIN y MAX no pueden ser negativos');
       return;
     }
 
@@ -201,7 +203,7 @@ export class UmbralComponent implements OnInit {
           this.cargarDatos();
         },
         error: () => {
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
           this.guardando = false;
         }
       });
@@ -227,7 +229,7 @@ export class UmbralComponent implements OnInit {
           this.cargarDatos();
         },
         error: () => {
-          alert('Error al crear');
+          this.notification.error('Error al crear');
           this.guardando = false;
         }
       });
@@ -239,7 +241,7 @@ export class UmbralComponent implements OnInit {
 
     this.umbralService.eliminar(id).subscribe({
       next: () => this.cargarDatos(),
-      error: () => alert('Error al eliminar')
+      error: () => this.notification.error('Error al eliminar')
     });
   }
 

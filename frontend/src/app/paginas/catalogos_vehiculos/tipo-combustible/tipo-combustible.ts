@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TipoCombustibleService, TipoCombustible } from "../../../services/catalogos_vehiculos/tipo_combustible.service";
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-tipo-combustible',
@@ -28,7 +29,11 @@ export class TipoCombustibleComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   tipoDetalle: TipoCombustible | null = null;
 
-  constructor(private tipoService: TipoCombustibleService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private tipoService: TipoCombustibleService,
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.cargarTipos();
@@ -102,7 +107,7 @@ export class TipoCombustibleComponent implements OnInit {
 
   guardarTipo(): void {
     if (!this.tipoEditando.nombre.trim()) {
-      alert('El nombre del tipo de combustible es obligatorio');
+      this.notification.error('El nombre del tipo de combustible es obligatorio');
       return;
     }
 
@@ -118,7 +123,7 @@ export class TipoCombustibleComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
         }
       });
     } else {
@@ -130,7 +135,7 @@ export class TipoCombustibleComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al crear');
+          this.notification.error('Error al crear');
         }
       });
     }

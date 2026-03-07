@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TipoVehiculoService, TipoVehiculo, Clase } from '../../../services/catalogos_vehiculos/tipo_vehiculo.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-tipo-vehiculo',
@@ -38,7 +39,8 @@ export class TipoVehiculoComponent implements OnInit {
 
   constructor(
     private tipoVehiculoService: TipoVehiculoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -168,11 +170,11 @@ export class TipoVehiculoComponent implements OnInit {
   guardarTipoVehiculo(): void {
     // Validaciones
     if (!this.tipoVehiculoEditando.nombre.trim()) {
-      alert('El nombre del tipo de vehículo es requerido');
+      this.notification.error('El nombre del tipo de vehículo es requerido');
       return;
     }
     if (!this.tipoVehiculoEditando.claseId || this.tipoVehiculoEditando.claseId === 0) {
-      alert('Debe seleccionar una clase');
+      this.notification.error('Debe seleccionar una clase');
       return;
     }
 
@@ -192,7 +194,7 @@ export class TipoVehiculoComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar tipo de vehículo:', err);
-          alert('Error al actualizar el tipo de vehículo');
+          this.notification.error('Error al actualizar el tipo de vehículo');
           this.guardando = false;
         }
       });
@@ -214,7 +216,7 @@ export class TipoVehiculoComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear tipo de vehículo:', err);
-          alert('Error al crear el tipo de vehículo');
+          this.notification.error('Error al crear el tipo de vehículo');
           this.guardando = false;
         }
       });

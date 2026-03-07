@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MetodoInspeccionService, MetodoInspeccion } from '../../../services/inspeccion_rtv/metodo_inspeccion.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-metodo-inspeccion',
@@ -39,7 +40,8 @@ export class MetodoInspeccionComponent implements OnInit {
 
   constructor(
     private metodoInspeccionService: MetodoInspeccionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -152,12 +154,12 @@ export class MetodoInspeccionComponent implements OnInit {
 
   guardarMetodoInspeccion(): void {
     if (!this.metodoEditando.nombre.trim()) {
-      alert('El nombre del método de inspección es requerido');
+      this.notification.error('El nombre del método de inspección es requerido');
       return;
     }
 
     if (!this.metodoEditando.descripcion.trim()) {
-      alert('La descripción del método de inspección es requerida');
+      this.notification.error('La descripción del método de inspección es requerida');
       return;
     }
 
@@ -176,7 +178,7 @@ export class MetodoInspeccionComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar método de inspección:', err);
-          alert('Error al actualizar el método de inspección');
+          this.notification.error('Error al actualizar el método de inspección');
           this.guardando = false;
         }
       });
@@ -184,13 +186,14 @@ export class MetodoInspeccionComponent implements OnInit {
 
       this.metodoInspeccionService.crearMetodoInspeccion(this.metodoEditando).subscribe({
         next: () => {
+          this.notification.success('Método de inspección creado correctamente.');
           this.cargarMetodosInspeccion();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
           console.error('Error al crear método de inspección:', err);
-          alert('Error al crear el método de inspección');
+          this.notification.error('Error al crear el método de inspección');
           this.guardando = false;
         }
       });

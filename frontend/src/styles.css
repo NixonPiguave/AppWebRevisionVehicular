@@ -1,1 +1,49 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Notificaciones tipo toast (éxito, error, etc.) */
+.snackbar-base {
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.snackbar-success {
+  background-color: #2e7d32 !important;
+  color: #fff !important;
+}
+
+.snackbar-success .mat-mdc-snack-bar-label,
+.snackbar-success .mdc-snackbar__label {
+  color: #fff !important;
+}
+
+.snackbar-error {
+  background-color: #c62828 !important;
+  color: #fff !important;
+}
+
+.snackbar-error .mat-mdc-snack-bar-label,
+.snackbar-error .mdc-snackbar__label {
+  color: #fff !important;
+}
+
+.snackbar-warn {
+  background-color: #ef6c00 !important;
+  color: #fff !important;
+}
+
+.snackbar-warn .mat-mdc-snack-bar-label,
+.snackbar-warn .mdc-snackbar__label {
+  color: #fff !important;
+}
+
+.snackbar-info {
+  background-color: #1565c0 !important;
+  color: #fff !important;
+}
+
+.snackbar-info .mat-mdc-snack-bar-label,
+.snackbar-info .mdc-snackbar__label {
+  color: #fff !important;
+}

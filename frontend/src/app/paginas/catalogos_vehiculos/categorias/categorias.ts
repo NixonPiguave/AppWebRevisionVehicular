@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { CategoriasService, Categoria } from '../../../services/catalogos_vehiculos/categorias.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-categorias',
@@ -31,7 +32,8 @@ export class CategoriasComponent implements OnInit {
 
   constructor(
     private categoriasService: CategoriasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -102,7 +104,7 @@ export class CategoriasComponent implements OnInit {
 
   guardarCategoria(): void {
     if (!this.categoriaEditando.nombre || !this.categoriaEditando.codigo) {
-      alert('Nombre y Código son obligatorios');
+      this.notification.error('Nombre y Código son obligatorios');
       return;
     }
     this.guardando = true;
@@ -113,7 +115,7 @@ export class CategoriasComponent implements OnInit {
         this.guardando = false;
       },
       error: () => {
-        alert('Error al guardar');
+        this.notification.error('Error al guardar');
         this.guardando = false;
       }
     };

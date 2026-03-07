@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
+import { NotificationService } from '../../../services/notification.service';
 
 const SERVICIOS: { id: number; nombre: string }[] = [
   { id: 1, nombre: 'Emisión de matrícula por Primera Vez.' },
@@ -47,7 +48,8 @@ export class PagosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -135,11 +137,11 @@ export class PagosComponent implements OnInit {
 
   registrarPago(): void {
     if (!this.turnoSeleccionado?.turnoId) {
-      alert('Debe seleccionar un turno.');
+      this.notification.error('Debe seleccionar un turno.');
       return;
     }
     if (!this.montoValido()) {
-      alert('Ingrese un monto válido (mayor o igual a 0).');
+      this.notification.error('Ingrese un monto válido (mayor o igual a 0).');
       return;
     }
 
@@ -147,7 +149,7 @@ export class PagosComponent implements OnInit {
     this.error = '';
     this.turnosService.registrarPago(this.turnoSeleccionado.turnoId, Number(this.montoPagado)).subscribe({
       next: () => {
-        alert('Pago registrado correctamente.');
+        this.notification.success('Pago registrado correctamente.');
         this.limpiarTodo();
         this.cargarTurnos();
         this.guardando = false;

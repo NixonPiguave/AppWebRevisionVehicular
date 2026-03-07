@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AmbitoOperacionalService, AmbitoOperacional } from '../../../services/catalogos_vehiculos/ambito_operacional.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-ambito-operacional',
@@ -28,7 +29,11 @@ export class AmbitoOperacionalComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   ambitoDetalle: AmbitoOperacional | null = null;
 
-  constructor(private ambitoService: AmbitoOperacionalService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private ambitoService: AmbitoOperacionalService,
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void { this.cargarAmbitos(); }
 
@@ -96,7 +101,7 @@ export class AmbitoOperacionalComponent implements OnInit {
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: () => { this.guardando = false; alert('Error al actualizar'); }
+        error: () => { this.guardando = false; this.notification.error('Error al actualizar'); }
       });
     } else {
       this.ambitoService.crearAmbitoOperacional(this.ambitoEditando).subscribe({
@@ -105,7 +110,7 @@ export class AmbitoOperacionalComponent implements OnInit {
           this.cerrarModalForm();
           this.guardando = false;
         },
-        error: () => { this.guardando = false; alert('Error al crear'); }
+        error: () => { this.guardando = false; this.notification.error('Error al crear'); }
       });
     }
   }

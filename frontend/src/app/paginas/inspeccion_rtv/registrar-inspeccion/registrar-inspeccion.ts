@@ -13,6 +13,7 @@ import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.s
 import { UmbralService } from '../../../services/configuracion_umbral/umbral.service';
 import { LineasService } from '../../../services/inspeccion_rtv/lineas.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
+import { NotificationService } from '../../../services/notification.service';
 import { forkJoin } from 'rxjs';
 
 interface UbicacionesRevisadas {
@@ -85,7 +86,8 @@ export class RegistrarInspeccionComponent implements OnInit {
     private inspeccionService: InspeccionService,
     private umbralService: UmbralService,
     private lineasService: LineasService,
-    private vehiculoService: VehiculoService
+    private vehiculoService: VehiculoService,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -217,7 +219,7 @@ export class RegistrarInspeccionComponent implements OnInit {
 
   guardarInspeccion(): void {
     if (!this.vehiculoId) {
-      alert('No hay vehículo asociado a esta inspección.');
+      this.notification.error('No hay vehículo asociado a esta inspección.');
       return;
     }
 
@@ -246,13 +248,13 @@ export class RegistrarInspeccionComponent implements OnInit {
     this.inspeccionService.crear(payload).subscribe({
       next: () => {
         this.guardando = false;
-        alert('Inspección registrada correctamente.');
+        this.notification.success('Inspección registrada correctamente.');
         this.volver();
       },
       error: err => {
         console.error('Error al guardar inspección:', err);
         this.guardando = false;
-        alert(err?.error?.message || 'Error al guardar la inspección. Verifique el backend.');
+        this.notification.error(err?.error?.message || 'Error al guardar la inspección. Verifique el backend.');
       }
     });
   }

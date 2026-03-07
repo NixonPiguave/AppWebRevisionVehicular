@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { TraccionService, Traccion } from '../../../services/catalogos_vehiculos/traccion.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-traccion',
@@ -30,7 +31,8 @@ export class TraccionComponent implements OnInit {
 
   constructor(
     private traccionService: TraccionService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -123,7 +125,7 @@ export class TraccionComponent implements OnInit {
 
   guardarTraccion(): void {
     if (!this.traccionEditando.tipo.trim()) {
-      alert('El tipo de tracción es requerido');
+      this.notification.error('El tipo de tracción es requerido');
       return;
     }
 
@@ -139,7 +141,7 @@ export class TraccionComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar tracción:', err);
-          alert('Error al actualizar la tracción');
+          this.notification.error('Error al actualizar la tracción');
           this.guardando = false;
         }
       });
@@ -153,7 +155,7 @@ export class TraccionComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear tracción:', err);
-          alert('Error al crear la tracción');
+          this.notification.error('Error al crear la tracción');
           this.guardando = false;
         }
       });

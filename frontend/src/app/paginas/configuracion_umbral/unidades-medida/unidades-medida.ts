@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UnidadMedidaService, UnidadMedida } from '../../../services/configuracion_umbral/unidad-medida.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-unidad-medida',
@@ -34,8 +35,11 @@ export class UnidadMedidaComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   unidadDetalle: UnidadMedida | null = null;
 
-  constructor(private unidadService: UnidadMedidaService, private cdr: ChangeDetectorRef) {
-  }
+  constructor(
+    private unidadService: UnidadMedidaService,
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.cargarUnidades();
@@ -116,12 +120,12 @@ export class UnidadMedidaComponent implements OnInit {
 
   guardarUnidad(): void {
     if (!this.unidadEditando.nombre.trim()) {
-      alert('El nombre de la unidad de medida es obligatorio');
+      this.notification.error('El nombre de la unidad de medida es obligatorio');
       return;
     }
 
     if (!this.unidadEditando.simbolo.trim()) {
-      alert('El símbolo es obligatorio');
+      this.notification.error('El símbolo es obligatorio');
       return;
     }
 
@@ -137,7 +141,7 @@ export class UnidadMedidaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
         }
       });
     } else {
@@ -149,7 +153,7 @@ export class UnidadMedidaComponent implements OnInit {
         },
         error: () => {
           this.guardando = false;
-          alert('Error al crear');
+          this.notification.error('Error al crear');
         }
       });
     }

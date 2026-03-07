@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CategoriaDefectoService, CategoriaDefecto, SubfamiliaDefecto } from '../../../services/defectos_inspeccion/categoria_defecto.service';
+import { NotificationService } from '../../../services/notification.service';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
@@ -34,7 +35,8 @@ export class CategoriaDefectoComponent implements OnInit {
 
   constructor(
     private categoriaService: CategoriaDefectoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -210,31 +212,31 @@ export class CategoriaDefectoComponent implements OnInit {
   validarFormulario(): boolean {
     // Validar subfamilia
     if (!this.categoriaEditando.subfamiliaId || this.categoriaEditando.subfamiliaId === 0) {
-      alert('Debe seleccionar una subfamilia');
+      this.notification.error('Debe seleccionar una subfamilia');
       return false;
     }
 
     // Validar código
     if (!this.categoriaEditando.codigo.trim()) {
-      alert('El código es obligatorio');
+      this.notification.error('El código es obligatorio');
       return false;
     }
 
     // Validar que código sea numérico (ej: "01", "02")
     if (!/^\d{1,2}$/.test(this.categoriaEditando.codigo)) {
-      alert('El código debe ser numérico (ej: 01, 02, 10)');
+      this.notification.error('El código debe ser numérico (ej: 01, 02, 10)');
       return false;
     }
 
     // Validar nombre
     if (!this.categoriaEditando.nombre.trim()) {
-      alert('El nombre es obligatorio');
+      this.notification.error('El nombre es obligatorio');
       return false;
     }
 
     // Validar que nombre no sea solo números
     if (/^-?\d+$/.test(this.categoriaEditando.nombre.trim())) {
-      alert('El nombre no puede ser solo números (ej: -1, 123)');
+      this.notification.error('El nombre no puede ser solo números (ej: -1, 123)');
       return false;
     }
 
@@ -264,7 +266,7 @@ export class CategoriaDefectoComponent implements OnInit {
         },
         error: (err) => {
           console.error('[CATEGORIA] Error al actualizar:', err);
-          alert('Error al actualizar la categoría');
+          this.notification.error('Error al actualizar la categoría');
           this.guardando = false;
         }
       });
@@ -279,7 +281,7 @@ export class CategoriaDefectoComponent implements OnInit {
         },
         error: (err) => {
           console.error('[CATEGORIA] Error al crear:', err);
-          alert('Error al crear la categoría');
+          this.notification.error('Error al crear la categoría');
           this.guardando = false;
         }
       });

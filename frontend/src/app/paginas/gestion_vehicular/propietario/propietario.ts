@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { PropietarioService, Propietario } from '../../../services/gestion_vehicular/propietario.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-propietario',
@@ -38,7 +39,8 @@ export class PropietarioComponent implements OnInit {
 
   constructor(
     private propietarioService: PropietarioService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -153,21 +155,21 @@ export class PropietarioComponent implements OnInit {
   guardarPropietario(): void {
     // Validaciones
     if (!this.propietarioEditando.documentoIdentidad.trim()) {
-      alert('El documento de identidad es requerido');
+      this.notification.error('El documento de identidad es requerido');
       return;
     }
     if (!this.propietarioEditando.nombre.trim()) {
-      alert('El nombre es requerido');
+      this.notification.error('El nombre es requerido');
       return;
     }
     if (!this.propietarioEditando.correo.trim()) {
-      alert('El correo electrónico es requerido');
+      this.notification.error('El correo electrónico es requerido');
       return;
     }
     // Validación básica de email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.propietarioEditando.correo)) {
-      alert('Ingrese un correo electrónico válido');
+      this.notification.error('Ingrese un correo electrónico válido');
       return;
     }
 
@@ -187,7 +189,7 @@ export class PropietarioComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar propietario:', err);
-          alert('Error al actualizar el propietario');
+          this.notification.error('Error al actualizar el propietario');
           this.guardando = false;
         }
       });
@@ -211,7 +213,7 @@ export class PropietarioComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear propietario:', err);
-          alert('Error al crear el propietario');
+          this.notification.error('Error al crear el propietario');
           this.guardando = false;
         }
       });

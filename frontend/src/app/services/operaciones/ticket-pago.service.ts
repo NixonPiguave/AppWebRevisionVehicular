@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NotificationService } from '../notification.service';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
@@ -36,7 +37,10 @@ export class TicketPagoService {
   private overlayEl: HTMLElement | null = null;
   private printWin: Window | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private notification: NotificationService
+  ) {}
 
   mostrar(data: TicketData): void {
     this.destruir();
@@ -83,7 +87,7 @@ export class TicketPagoService {
 </body>
 </html>`;
     const win = window.open('', '_blank', 'width=420,height=700,scrollbars=no');
-    if (!win) { alert('Permite ventanas emergentes para imprimir el comprobante.'); return; }
+    if (!win) { this.notification.warn('Permite ventanas emergentes para imprimir el comprobante.'); return; }
     win.document.write(html);
     win.document.close();
   }

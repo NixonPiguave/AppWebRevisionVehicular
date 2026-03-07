@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MarcaVehiculoService, MarcaVehiculo } from '../../../services/catalogos_vehiculos/marcas.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-marca-vehiculo',
@@ -78,7 +79,8 @@ export class MarcaVehiculoComponent implements OnInit {
   constructor(
     private marcaService: MarcaVehiculoService,
     private cloudinaryService: CloudinaryService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -220,7 +222,7 @@ export class MarcaVehiculoComponent implements OnInit {
 
       // Validar tipo
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
+        this.notification.error('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
         input.value = '';
         return;
       }
@@ -228,7 +230,7 @@ export class MarcaVehiculoComponent implements OnInit {
       // Validar tamaño (máx 2MB)
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        this.notification.error(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         input.value = '';
         return;
       }
@@ -263,11 +265,11 @@ export class MarcaVehiculoComponent implements OnInit {
 
   guardarMarca(): void {
     if (!this.marcaEditando.nombre.trim()) {
-      alert('El nombre de la marca es obligatorio');
+      this.notification.error('El nombre de la marca es obligatorio');
       return;
     }
     if (!this.marcaEditando.paisOrigen || this.marcaEditando.paisOrigen.trim() === '') {
-      alert('Error: Seleccione un país');
+      this.notification.error('Error: Seleccione un país');
       return;
     }
     this.guardando = true;
@@ -303,7 +305,7 @@ export class MarcaVehiculoComponent implements OnInit {
         },
         error: (err) => {
           console.error('[CLOUDINARY] Error:', err);
-          alert('Error al subir el logo. Intenta de nuevo.');
+          this.notification.error('Error al subir el logo. Intenta de nuevo.');
           this.guardando = false;
           this.uploadingLogo = false;
           this.cdr.detectChanges();
@@ -334,7 +336,7 @@ export class MarcaVehiculoComponent implements OnInit {
         error: () => {
           this.guardando = false;
           this.uploadingLogo = false;
-          alert('Error al actualizar');
+          this.notification.error('Error al actualizar');
         }
       });
     } else {
@@ -351,7 +353,7 @@ export class MarcaVehiculoComponent implements OnInit {
         error: () => {
           this.guardando = false;
           this.uploadingLogo = false;
-          alert('Error al crear');
+          this.notification.error('Error al crear');
         }
       });
     }

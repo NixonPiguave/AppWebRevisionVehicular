@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { EmpresaService, Empresa } from '../../../services/administracion/empresa.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-empresas',
@@ -42,7 +43,8 @@ export class EmpresaComponent implements OnInit {
   constructor(
     private empresaService: EmpresaService,
     private cloudinaryService: CloudinaryService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -121,7 +123,7 @@ export class EmpresaComponent implements OnInit {
   abrirModalCrear(): void {
     if (this.empresas.length >= 1) {
       console.warn('[VALIDACIÓN] Ya existe empresa. No se puede crear otra.');
-      alert('Ya existe una empresa registrada.\n\nSolo se permite un registro. Usa el botón Editar para modificarla.');
+      this.notification.error('Ya existe una empresa registrada.\n\nSolo se permite un registro. Usa el botón Editar para modificarla.');
       return;
     }
 
@@ -174,14 +176,14 @@ export class EmpresaComponent implements OnInit {
       const file = input.files[0];
 
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
+        this.notification.error('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
         input.value = '';
         return;
       }
 
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        this.notification.error(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         input.value = '';
         return;
       }
@@ -207,14 +209,14 @@ export class EmpresaComponent implements OnInit {
       const file = input.files[0];
 
       if (!file.type.startsWith('image/')) {
-        alert('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
+        this.notification.error('Solo se permiten imágenes (JPG, PNG, GIF, WebP)');
         input.value = '';
         return;
       }
 
       const maxSize = 2 * 1024 * 1024;
       if (file.size > maxSize) {
-        alert(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        this.notification.error(`La imagen no debe superar 2MB. Tamaño actual: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
         input.value = '';
         return;
       }
@@ -260,28 +262,28 @@ export class EmpresaComponent implements OnInit {
 
   validarFormulario(): boolean {
     if (!this.empresaEditando.nombre.trim()) {
-      alert('El nombre de la empresa es requerido');
+      this.notification.error('El nombre de la empresa es requerido');
       return false;
     }
 
     if (!this.empresaEditando.ruc.trim()) {
-      alert('El RUC es requerido');
+      this.notification.error('El RUC es requerido');
       return false;
     }
 
     if (!/^\d{13}$/.test(this.empresaEditando.ruc)) {
-      alert('El RUC debe tener exactamente 13 dígitos numéricos');
+      this.notification.error('El RUC debe tener exactamente 13 dígitos numéricos');
       return false;
     }
 
     if (!this.empresaEditando.correo.trim()) {
-      alert('El correo es requerido');
+      this.notification.error('El correo es requerido');
       return false;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(this.empresaEditando.correo)) {
-      alert('El correo no tiene un formato válido');
+      this.notification.error('El correo no tiene un formato válido');
       return false;
     }
 
@@ -293,7 +295,7 @@ export class EmpresaComponent implements OnInit {
 
     if (!this.modoEdicion && this.empresas.length >= 1) {
       console.warn('[VALIDACIÓN] Intento crear segunda empresa bloqueado.');
-      alert('Ya existe una empresa. No se puede crear otra.');
+      this.notification.error('Ya existe una empresa. No se puede crear otra.');
       this.cerrarModalForm();
       return;
     }
@@ -378,7 +380,7 @@ export class EmpresaComponent implements OnInit {
           this.guardarEmpresaEnBackend();
         })
         .catch((err) => {
-          alert('Error al subir imágenes. Intenta de nuevo.');
+          this.notification.error('Error al subir imágenes. Intenta de nuevo.');
           this.guardando = false;
           this.cdr.detectChanges();
         });
@@ -403,7 +405,7 @@ export class EmpresaComponent implements OnInit {
         },
         error: (err) => {
           console.error('[EMPRESA] Error actualizar:', err);
-          alert('Error al actualizar la empresa');
+          this.notification.error('Error al actualizar la empresa');
           this.guardando = false;
         }
       });
@@ -419,7 +421,7 @@ export class EmpresaComponent implements OnInit {
         },
         error: (err) => {
           console.error('[EMPRESA] Error crear:', err);
-          alert('Error al crear la empresa');
+          this.notification.error('Error al crear la empresa');
           this.guardando = false;
         }
       });

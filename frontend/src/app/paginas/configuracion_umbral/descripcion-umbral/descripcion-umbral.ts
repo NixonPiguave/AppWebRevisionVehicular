@@ -7,6 +7,7 @@ import {
   DescripcionUmbralService,
   DescripcionUmbral
 } from '../../../services/configuracion_umbral/descripcion.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-descripcion-umbral',
@@ -38,7 +39,8 @@ export class DescripcionUmbralComponent implements OnInit {
 
   constructor(
     private descripcionService: DescripcionUmbralService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -116,7 +118,7 @@ export class DescripcionUmbralComponent implements OnInit {
 
   guardarDescripcion(): void {
     if (!this.descripcionEditando.descripcion.trim()) {
-      alert('La descripción es obligatoria');
+      this.notification.error('La descripción es obligatoria');
       return;
     }
 
@@ -134,7 +136,7 @@ export class DescripcionUmbralComponent implements OnInit {
           },
           error: () => {
             this.guardando = false;
-            alert('Error al actualizar');
+            this.notification.error('Error al actualizar');
           }
         });
     } else {
@@ -148,7 +150,7 @@ export class DescripcionUmbralComponent implements OnInit {
           },
           error: () => {
             this.guardando = false;
-            alert('Error al crear');
+            this.notification.error('Error al crear');
           }
         });
     }
@@ -165,7 +167,7 @@ export class DescripcionUmbralComponent implements OnInit {
             this.cargarDescripciones();
           },
           error: () => {
-            alert('Error al eliminar');
+            this.notification.error('Error al eliminar');
           }
         });
     }

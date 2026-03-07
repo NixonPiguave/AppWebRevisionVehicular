@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SubcategoriasService, Subcategoria, Categoria } from '../../../services/catalogos_vehiculos/subcategorias.service';
 import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-subcategorias',
@@ -38,7 +39,8 @@ export class SubcategoriasComponent implements OnInit {
 
   constructor(
     private subcategoriasService: SubcategoriasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -175,15 +177,15 @@ export class SubcategoriasComponent implements OnInit {
   guardarSubcategoria(): void {
     // Validaciones
     if (!this.subcategoriaEditando.codigoSubcategoria.trim()) {
-      alert('El código de la subcategoría es requerido');
+      this.notification.error('El código de la subcategoría es requerido');
       return;
     }
     if (!this.subcategoriaEditando.nombre.trim()) {
-      alert('El nombre de la subcategoría es requerido');
+      this.notification.error('El nombre de la subcategoría es requerido');
       return;
     }
     if (!this.subcategoriaEditando.categoriaId || this.subcategoriaEditando.categoriaId === 0) {
-      alert('Debe seleccionar una categoría');
+      this.notification.error('Debe seleccionar una categoría');
       return;
     }
 
@@ -203,7 +205,7 @@ export class SubcategoriasComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al actualizar subcategoría:', err);
-          alert('Error al actualizar la subcategoría');
+          this.notification.error('Error al actualizar la subcategoría');
           this.guardando = false;
         }
       });
@@ -226,7 +228,7 @@ export class SubcategoriasComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al crear subcategoría:', err);
-          alert('Error al crear la subcategoría');
+          this.notification.error('Error al crear la subcategoría');
           this.guardando = false;
         }
       });

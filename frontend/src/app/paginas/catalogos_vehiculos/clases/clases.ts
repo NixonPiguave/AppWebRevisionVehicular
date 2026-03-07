@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { ClasesService, Clase } from '../../../services/catalogos_vehiculos/clases.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-clases',
@@ -38,7 +39,8 @@ export class ClasesComponent implements OnInit {
 
   constructor(
     private clasesService: ClasesService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -141,7 +143,7 @@ export class ClasesComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: () => {
-          alert('Error al actualizar la clase');
+          this.notification.error('Error al actualizar la clase');
           this.guardando = false;
           this.cdr.detectChanges();
         }
@@ -155,7 +157,7 @@ export class ClasesComponent implements OnInit {
           this.cdr.detectChanges();
         },
         error: () => {
-          alert('Error al crear la clase');
+          this.notification.error('Error al crear la clase');
           this.guardando = false;
           this.cdr.detectChanges();
         }

@@ -11,6 +11,7 @@ import {
   Familia,
   TipoDefecto
 } from '../../../services/defectos_inspeccion/defectos.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-defectos',
@@ -46,7 +47,8 @@ export class DefectosComponent implements OnInit {
 
   constructor(
     private defectosService: DefectosService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -345,32 +347,32 @@ export class DefectosComponent implements OnInit {
   validarFormulario(): boolean {
     // Código obligatorio
     if (!this.defectoEditando.codigo.trim()) {
-      alert('El código es obligatorio');
+      this.notification.error('El código es obligatorio');
       return false;
     }
 
     // Código debe ser 1-9
     const codigoNum = parseInt(this.defectoEditando.codigo);
     if (isNaN(codigoNum) || codigoNum < 1 || codigoNum > 9) {
-      alert('El código debe ser un número entre 1 y 9');
+      this.notification.error('El código debe ser un número entre 1 y 9');
       return false;
     }
 
     // Descripción obligatoria
     if (!this.defectoEditando.descripcion.trim()) {
-      alert('La descripción es obligatoria');
+      this.notification.error('La descripción es obligatoria');
       return false;
     }
 
     // Tipo defecto obligatorio
     if (!this.defectoEditando.tipoDefectoId || this.defectoEditando.tipoDefectoId === 0) {
-      alert('Debe seleccionar un tipo de defecto');
+      this.notification.error('Debe seleccionar un tipo de defecto');
       return false;
     }
 
     // Categoría obligatoria (subfamilia y familia se autocompletan desde aquí)
     if (!this.defectoEditando.categoriaId || this.defectoEditando.categoriaId === 0) {
-      alert('Debe seleccionar una categoría');
+      this.notification.error('Debe seleccionar una categoría');
       return false;
     }
 
@@ -390,14 +392,14 @@ export class DefectosComponent implements OnInit {
       // Actualizar
       this.defectosService.actualizar(this.defectoEditando.id, this.defectoEditando).subscribe({
         next: () => {
-          console.log('[DEFECTOS] Actualizado OK');
+          this.notification.success('Defecto actualizado correctamente.');
           this.cargarDefectos();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
           console.error('[DEFECTOS] Error al actualizar:', err);
-          alert('Error al actualizar el defecto');
+          this.notification.error('Error al actualizar el defecto');
           this.guardando = false;
         }
       });
@@ -405,14 +407,14 @@ export class DefectosComponent implements OnInit {
       // Crear
       this.defectosService.crear(this.defectoEditando).subscribe({
         next: () => {
-          console.log('[DEFECTOS] Creado OK');
+          this.notification.success('Defecto creado correctamente.');
           this.cargarDefectos();
           this.cerrarModalForm();
           this.guardando = false;
         },
         error: (err) => {
           console.error('[DEFECTOS] Error al crear:', err);
-          alert('Error al crear el defecto');
+          this.notification.error('Error al crear el defecto');
           this.guardando = false;
         }
       });

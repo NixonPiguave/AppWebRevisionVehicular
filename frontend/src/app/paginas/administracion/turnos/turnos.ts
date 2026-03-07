@@ -13,6 +13,7 @@ import { Servicio } from '../../../services/administracion/servicio.service';
 import { EmpresaService } from '../../../services/administracion/empresa.service';
 import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
 import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-turnos',
@@ -79,7 +80,8 @@ export class TurnosComponent implements OnInit {
     private modeloService: ModeloService,
     private route: ActivatedRoute,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -151,13 +153,13 @@ export class TurnosComponent implements OnInit {
 
   guardarTurno(): void {
     if (!this.turnoForm.propietarioId || this.turnoForm.propietarioId <= 0) {
-      alert('Debe seleccionar un propietario por cédula'); return;
+      this.notification.error('Debe seleccionar un propietario por cédula'); return;
     }
     if (!this.turnoForm.vehiculoId || this.turnoForm.vehiculoId <= 0) {
-      alert('Debe seleccionar un vehículo por placa'); return;
+      this.notification.error('Debe seleccionar un vehículo por placa'); return;
     }
     if (!this.turnoForm.servicioId || this.turnoForm.servicioId <= 0) {
-      alert('Debe seleccionar un servicio'); return;
+      this.notification.error('Debe seleccionar un servicio'); return;
     }
     // Si por alguna razón viene sin fecha, la rellenamos con hoy
     if (!this.turnoForm.fechaInicio) {
@@ -245,7 +247,7 @@ export class TurnosComponent implements OnInit {
   }
 
   abrirInspeccion(turno: Turnos): void {
-    if (!turno.turnoId || !turno.vehiculoId) { alert('Este turno no tiene vehículo asociado.'); return; }
+    if (!turno.turnoId || !turno.vehiculoId) { this.notification.error('Este turno no tiene vehículo asociado.'); return; }
     this.router.navigate(['/inicio/inspeccion-rtv/registrar'], {
       queryParams: { turnoId: turno.turnoId, vehiculoId: turno.vehiculoId }
     });

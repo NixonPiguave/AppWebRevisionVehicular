@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { EjesService, Eje } from '../../../services/catalogos_vehiculos/ejes.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-ejes',
@@ -33,7 +34,8 @@ export class EjesComponent implements OnInit {
 
   constructor(
     private ejesService: EjesService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -120,7 +122,7 @@ export class EjesComponent implements OnInit {
 
   guardarEje(): void {
     if (!this.ejeEditando.cantidad || this.ejeEditando.cantidad <= 0) {
-      alert('La cantidad debe ser mayor a 0');
+      this.notification.error('La cantidad debe ser mayor a 0');
       return;
     }
 
@@ -141,7 +143,7 @@ export class EjesComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: () => {
-        alert('Error al procesar la solicitud');
+        this.notification.error('Error al procesar la solicitud');
         this.guardando = false;
         this.cdr.detectChanges();
       }

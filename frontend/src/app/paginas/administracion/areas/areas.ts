@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AreasService, Area } from '../../../services/administracion/areas.service';
-import {MatIconModule} from '@angular/material/icon';
+import { MatIconModule } from '@angular/material/icon';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-areas',
@@ -12,12 +13,12 @@ import {MatIconModule} from '@angular/material/icon';
   styleUrl: './areas.css',
 })
 export class AreasComponent implements OnInit {
-  // Lista de áreas (se carga desde el backend)
+  // Lista de ?reas (se carga desde el backend)
   areas: Area[] = [];
   cargando: boolean = false;
   error: string = '';
 
-  // Filtros y paginación
+  // Filtros y paginaci?n
   filtro: string = '';
   registrosPorPagina: number = 10;
   paginaActual: number = 1;
@@ -34,7 +35,8 @@ export class AreasComponent implements OnInit {
 
   constructor(
     private areasService: AreasService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +44,7 @@ export class AreasComponent implements OnInit {
   }
 
   /**
-   * Cargar áreas desde el backend
+   * Cargar ?reas desde el backend
    */
   cargarAreas(): void {
     this.cargando = true;
@@ -51,21 +53,21 @@ export class AreasComponent implements OnInit {
 
     this.areasService.listarAreas().subscribe({
       next: (data) => {
-        console.log('Áreas cargadas:', data);
+        console.log('��reas cargadas:', data);
         this.areas = data;
         this.cargando = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error al cargar áreas:', err);
-        this.error = 'Error al cargar las áreas. Verifica que el backend esté corriendo.';
+        console.error('Error al cargar ?reas:', err);
+        this.error = 'Error al cargar las ?reas. Verifica que el backend est? corriendo.';
         this.cargando = false;
         this.cdr.detectChanges();
       }
     });
   }
 
-  // Getter para áreas filtradas
+  // Getter para ?reas filtradas
   get areasFiltradas(): Area[] {
     if (!this.filtro.trim()) {
       return this.areas;
@@ -79,19 +81,19 @@ export class AreasComponent implements OnInit {
     );
   }
 
-  // Getter para áreas paginadas
+  // Getter para ?reas paginadas
   get areasPaginadas(): Area[] {
     const inicio = (this.paginaActual - 1) * this.registrosPorPagina;
     const fin = inicio + this.registrosPorPagina;
     return this.areasFiltradas.slice(inicio, fin);
   }
 
-  // Getter para total de páginas
+  // Getter para total de p?ginas
   get totalPaginas(): number {
     return Math.ceil(this.areasFiltradas.length / this.registrosPorPagina);
   }
 
-  // Getter para array de páginas
+  // Getter para array de p?ginas
   get paginas(): number[] {
     const paginas: number[] = [];
     for (let i = 1; i <= this.totalPaginas; i++) {
@@ -105,14 +107,14 @@ export class AreasComponent implements OnInit {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
-  // Cambiar página
+  // Cambiar p?gina
   irAPagina(pagina: number): void {
     if (pagina >= 1 && pagina <= this.totalPaginas) {
       this.paginaActual = pagina;
     }
   }
 
-  // Reset página al cambiar filtro o registros por página
+  // Reset p?gina al cambiar filtro o registros por p?gina
   onFiltroChange(): void {
     this.paginaActual = 1;
   }
@@ -137,10 +139,10 @@ export class AreasComponent implements OnInit {
     this.areaEditando = { areaId: null, nombre: '', estado: 'A' };
   }
 
-  // Guardar área (crear o editar)
+  // Guardar ?rea (crear o editar)
   guardarArea(): void {
     if (!this.areaEditando.nombre.trim()) {
-      alert('El nombre del área es requerido');
+      this.notification.error('El nombre del ?rea es requerido');
       return;
     }
 
@@ -155,8 +157,8 @@ export class AreasComponent implements OnInit {
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al actualizar área:', err);
-          alert('Error al actualizar el área');
+          console.error('Error al actualizar ?rea:', err);
+          this.notification.error('Error al actualizar el ?rea');
           this.guardando = false;
         }
       });
@@ -169,8 +171,8 @@ export class AreasComponent implements OnInit {
           this.guardando = false;
         },
         error: (err) => {
-          console.error('Error al crear área:', err);
-          alert('Error al crear el área');
+          console.error('Error al crear ?rea:', err);
+          this.notification.error('Error al crear el ?rea');
           this.guardando = false;
         }
       });
