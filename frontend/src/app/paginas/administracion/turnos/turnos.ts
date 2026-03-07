@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatIconModule } from '@angular/material/icon';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
@@ -11,7 +12,7 @@ import { Servicio } from '../../../services/administracion/servicio.service';
 @Component({
   selector: 'app-turnos',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule, DatePipe, MatIconModule],
   templateUrl: './turnos.html',
   styleUrls: ['./turnos.css']
 })

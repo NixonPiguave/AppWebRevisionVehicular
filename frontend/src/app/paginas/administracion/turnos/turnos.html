@@ -86,7 +86,8 @@
           />
         </div>
 
-        <div class="form-group">
+        <!-- Estado: solo visible al editar; al crear queda fijo en GENERADO -->
+        <div class="form-group" *ngIf="modoEdicion">
           <label for="estado">Estado *</label>
           <select
             id="estado"
@@ -259,11 +260,11 @@
             </span>
         </td>
         <td class="acciones">
-          <button class="btn-icon btn-edit" (click)="editarTurno(turno)" title="Editar">
-            ✏️
+          <button type="button" class="btn-icon btn-edit" (click)="editarTurno(turno)" title="Editar">
+            <mat-icon>edit</mat-icon>
           </button>
-          <button class="btn-icon btn-delete" (click)="eliminarTurno(turno.turnoId!)" title="Eliminar">
-            🗑️
+          <button type="button" class="btn-icon btn-delete" (click)="eliminarTurno(turno.turnoId!)" title="Eliminar">
+            <mat-icon>delete</mat-icon>
           </button>
         </td>
       </tr>
