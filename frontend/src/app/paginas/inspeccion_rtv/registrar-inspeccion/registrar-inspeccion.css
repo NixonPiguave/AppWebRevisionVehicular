@@ -1,0 +1,518 @@
+/* ============================================
+   REGISTRAR INSPECCIÓN - Revisión visual
+   ============================================ */
+
+.registrar-inspeccion {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ── Header ── */
+.inspeccion-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.btn-volver {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #333;
+  transition: background 0.2s;
+}
+.btn-volver:hover { background: #f0f0f0; }
+
+.inspeccion-header h1 {
+  flex: 1;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a2e1a;
+  margin: 0;
+}
+
+.header-info {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.badge-vehiculo, .badge-turno {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+}
+.badge-vehiculo { background: #e8f4e8; color: #2d5a27; border: 1px solid #b8d4b8; }
+.badge-turno    { background: #e3f2fd; color: #1565c0; border: 1px solid #90caf9; }
+
+/* ── Mensajes / loading ── */
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+  margin-bottom: 20px;
+}
+.mensaje-error mat-icon { flex-shrink: 0; }
+
+.btn-reintentar {
+  margin-left: auto;
+  padding: 6px 14px;
+  background: #c62828;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.btn-reintentar:hover { background: #b71c1c; }
+
+.cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 48px;
+  color: #666;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #2d5a27;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Layout principal ── */
+.inspeccion-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 28px;
+  flex: 1;
+}
+@media (max-width: 900px) {
+  .inspeccion-layout { grid-template-columns: 1fr; }
+}
+
+/* ── Panel Vehículo ── */
+.panel-vehiculo {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e8e8e8;
+}
+
+.panel-vehiculo h3,
+.panel-defectos h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.subtitulo {
+  margin: 0 0 20px 0;
+  font-size: 13px;
+  color: #666;
+}
+.vehiculo-svg-wrapper {
+  position: relative;
+  padding: 90px 140px;
+  max-width: 650px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+.vehiculo-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  pointer-events: none;
+  user-select: none;
+  transform: rotate(90deg);
+}
+.ub-check {
+  position: absolute;
+  background: #fff;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ub-check:hover {
+  border-color: #2d5a27;
+  background: #f4faf4;
+  box-shadow: 0 3px 10px rgba(45,90,39,0.18);
+}
+.ub-check.seleccionada {
+  border-color: #2d5a27;
+  background: #e8f4e8;
+}
+
+.ub-delantera {
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.ub-rdi {
+  top: 22%;
+  left: 52px;
+}
+
+.ub-rdd {
+  top: 22%;
+  right: 52px;
+}
+
+.ub-lat-izq {
+  top: 50%;
+  left: 52px;
+  transform: translateY(-50%);
+}
+
+.ub-lat-der {
+  top: 50%;
+  right: 52px;
+  transform: translateY(-50%);
+}
+
+/* ── BOTTOM LEFT: Rueda Trasera Izquierda ── */
+.ub-rti {
+  bottom: 22%;
+  left: 52px;
+}
+
+/* ── BOTTOM RIGHT: Rueda Trasera Derecha ── */
+.ub-rtd {
+  bottom: 22%;
+  right: 52px;
+}
+
+/* ── BOTTOM CENTER: Trasera ── */
+.ub-trasera {
+  bottom: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ── Label interno de cada checkbox ── */
+.ub-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+}
+
+.ub-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+/* ── Checkmark personalizado ── */
+.ub-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.checkmark {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border: 2px solid #aaa;
+  border-radius: 3px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.ub-label input:checked ~ .checkmark,
+.checkbox-label input:checked + .checkmark {
+  background: #2d5a27;
+  border-color: #2d5a27;
+}
+
+.ub-label input:checked ~ .checkmark::after,
+.checkbox-label input:checked + .checkmark::after {
+  content: '';
+  display: block;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  position: absolute;
+  top: 1px;
+  left: 4px;
+}
+
+/* ── Ubicaciones extra (Habitáculo + Parte Inferior) ── */
+.ubicaciones-extra {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.ub-extra {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  background: #fff;
+  border: 2px solid #d0d0d0;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+.ub-extra:hover {
+  border-color: #2d5a27;
+  background: #f4faf4;
+}
+.ub-extra.seleccionada {
+  border-color: #2d5a27;
+  background: #e8f4e8;
+}
+
+.ub-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: #2d5a27;
+}
+
+/* ── Contador de ubicaciones ── */
+.ub-contador {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #2d5a27;
+}
+.ub-contador mat-icon {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+/* ════════════════════════════════
+   PANEL DEFECTOS
+   ════════════════════════════════ */
+.panel-defectos {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid #e8e8e8;
+  display: flex;
+  flex-direction: column;
+}
+
+.defectos-filtro {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.defectos-filtro .icon-search {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.input-busqueda {
+  width: 100%;
+  padding: 10px 12px 10px 42px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+.input-busqueda:focus {
+  outline: none;
+  border-color: #2d5a27;
+}
+
+.defectos-lista {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 420px;
+  margin-bottom: 12px;
+}
+
+.defecto-item {
+  padding: 10px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  border: 1px solid transparent;
+  transition: background 0.2s;
+}
+.defecto-item:hover { background: #f5f5f5; }
+.defecto-item.seleccionado {
+  background: #e8f4e8;
+  border-color: #b8d4b8;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+.checkbox-label input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.defecto-checkbox { width: 100%; }
+
+.defecto-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.defecto-codigo { font-weight: 600; color: #2d5a27; font-size: 13px; }
+.defecto-desc   { font-size: 13px; color: #333; }
+.defecto-punto  { font-size: 11px; color: #666; }
+
+.sin-resultados {
+  text-align: center;
+  padding: 32px;
+  color: #999;
+}
+
+.defectos-paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 0;
+}
+
+.btn-pagina {
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.btn-pagina:hover:not(:disabled) { background: #f0f0f0; }
+.btn-pagina:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.pagina-info { font-size: 13px; color: #666; }
+
+.defectos-seleccionados {
+  font-size: 13px;
+  color: #2d5a27;
+  padding-top: 10px;
+  border-top: 1px solid #eee;
+}
+
+/* ════════════════════════════════
+   FOOTER
+   ════════════════════════════════ */
+.inspeccion-footer {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-end;
+}
+
+.observaciones-opcional {
+  flex: 1;
+  min-width: 200px;
+}
+.observaciones-opcional label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a4a4a;
+  margin-bottom: 6px;
+}
+.observaciones-opcional textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.footer-acciones {
+  display: flex;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+.btn-primary {
+  background: #2d5a27;
+  color: white;
+}
+.btn-primary:hover:not(:disabled) { background: #234a1e; }
+.btn-primary:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.btn-secondary {
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+}
+.btn-secondary:hover { background: #e0e0e0; }

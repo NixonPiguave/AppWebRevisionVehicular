@@ -1,0 +1,142 @@
+.turnos-pagados-container {
+  padding: 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.btn-volver {
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  background: transparent;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.btn-volver:hover {
+  background: #f0f0f0;
+}
+
+.header h1 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.subtitulo {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #ffebee;
+  border: 1px solid #ef5350;
+  border-radius: 8px;
+  color: #c62828;
+  margin-bottom: 20px;
+}
+
+.btn-reintentar {
+  padding: 6px 14px;
+  background: #c62828;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-reintentar:hover {
+  background: #b71c1c;
+}
+
+.cargando {
+  padding: 32px;
+  text-align: center;
+  color: #666;
+}
+
+.tabla-container {
+  overflow-x: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.tabla-turnos {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-turnos thead {
+  background: #f5f5f5;
+}
+
+.tabla-turnos th {
+  padding: 12px 14px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tabla-turnos td {
+  padding: 12px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.tabla-turnos tbody tr:hover {
+  background: #fafafa;
+}
+
+.tabla-turnos .text-center {
+  text-align: center;
+  padding: 32px;
+  color: #666;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badge-generado { background: #e3f2fd; color: #1565c0; }
+.badge-confirmado { background: #fff3e0; color: #e65100; }
+.badge-atendido { background: #e8f5e9; color: #2e7d32; }
+.badge-cancelado { background: #ffebee; color: #c62828; }
+.badge-pagado { background: #e8f5e9; color: #1b5e20; }
+
+.acciones {
+  white-space: nowrap;
+}
+
+.btn-inspeccion {
+  padding: 8px 16px;
+  background: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-inspeccion:hover {
+  background: #234a1e;
+}
