@@ -122,6 +122,17 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 .detalle-valor { font-size: 14px; color: #1a2e1a; font-weight: 500; }
 .detalle-valor.resaltado { color: #2d5a27; font-weight: 700; font-size: 15px; }
 
+.detalle-cargando { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 24px; color: #666; font-size: 13px; }
+.detalle-doc-acciones { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.detalle-doc-acciones .doc-link { color: #2d5a27; text-decoration: none; font-weight: 600; }
+.detalle-doc-acciones .doc-link:hover { text-decoration: underline; }
+.btn-doc-descargar { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border: 1px solid #2d5a27; background: #f5f9f5; color: #2d5a27; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-doc-descargar:hover { background: #e8f0e8; }
+.btn-doc-descargar mat-icon { font-size: 18px; width: 18px; height: 18px; }
+.btn-imprimir-reporte { display: flex; align-items: center; gap: 6px; padding: 9px 18px; border: none; background: #1a3d16; color: white; border-radius: 7px; font-size: 13px; font-weight: 600; cursor: pointer; }
+.btn-imprimir-reporte:hover { background: #122b0f; }
+.btn-imprimir-reporte mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
 /* UTILIDADES */
 .mensaje-error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 .error-contenido { display: flex; align-items: center; gap: 8px; }

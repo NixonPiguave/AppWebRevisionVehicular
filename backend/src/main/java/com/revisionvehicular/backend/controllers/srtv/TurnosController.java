@@ -33,8 +33,10 @@ public class TurnosController {
     }
 
     @GetMapping("/pagados")
-    public ResponseEntity<List<TurnosDTO>> listarPagados() {
-        return ResponseEntity.ok(service.findTurnosPagados());
+    public ResponseEntity<List<TurnosDTO>> listarPagados(
+            @RequestParam(required = false) Long servicioId
+    ) {
+        return ResponseEntity.ok(service.findTurnosPagadosPorServicio(servicioId));
     }
 
     @GetMapping("/{id}")

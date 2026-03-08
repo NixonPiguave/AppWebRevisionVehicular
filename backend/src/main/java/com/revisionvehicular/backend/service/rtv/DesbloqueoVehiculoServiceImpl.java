@@ -1,7 +1,9 @@
 package com.revisionvehicular.backend.service.rtv;
 
 import com.revisionvehicular.backend.dtos.rtv.DesbloqueoVehiculoDTO;
+import com.revisionvehicular.backend.entities.rtv.BloqueoVehiculo;
 import com.revisionvehicular.backend.entities.rtv.DesbloqueoVehiculo;
+import com.revisionvehicular.backend.repositories.rtv.IBloqueoVehiculoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IDesbloqueoVehiculoRepository;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
@@ -13,10 +15,14 @@ import java.util.stream.Collectors;
 public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService {
 
     private final IDesbloqueoVehiculoRepository repository;
+    private final IBloqueoVehiculoRepository bloqueoRepository;
     private final AuditoriaService auditoriaService;
 
-    public DesbloqueoVehiculoServiceImpl(IDesbloqueoVehiculoRepository repository, AuditoriaService auditoriaService) {
+    public DesbloqueoVehiculoServiceImpl(IDesbloqueoVehiculoRepository repository,
+                                         IBloqueoVehiculoRepository bloqueoRepository,
+                                         AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.bloqueoRepository = bloqueoRepository;
         this.auditoriaService = auditoriaService;
     }
 
@@ -29,9 +35,6 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
         dto.setFechaDesactivacion(entity.getFechaDesactivacion());
         dto.setEstado(entity.getEstado());
 
-        if (entity.getTramite() != null) {
-            dto.setTramiteId(entity.getTramite().getIdTramite());
-        }
         if (entity.getBloqueo() != null) {
             dto.setBloqueoId(entity.getBloqueo().getIdBloqueoSrv());
         }
@@ -50,8 +53,25 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
 
     @Override
     public DesbloqueoVehiculoDTO save(DesbloqueoVehiculoDTO dto) {
+        if (dto.getEntidadId() == null && dto.getBloqueoId() != null) {
+            bloqueoRepository.findById(dto.getBloqueoId())
+                    .map(BloqueoVehiculo::getEntidad)
+                    .filter(e -> e != null)
+                    .map(e -> e.getIdEntidad())
+                    .ifPresent(dto::setEntidadId);
+        }
+        if (dto.getUsuarioDesactivaId() == null) {
+            auditoriaService.getUsuarioActual()
+                    .map(u -> u.getUsuarioId())
+                    .ifPresent(dto::setUsuarioDesactivaId);
+        }
+        if (dto.getEntidadId() == null) {
+            throw new RuntimeException("Debe indicar la entidad de tránsito o seleccionar un bloqueo que la tenga asociada.");
+        }
+        if (dto.getUsuarioDesactivaId() == null) {
+            throw new RuntimeException("Debe iniciar sesión para registrar un desbloqueo de vehículo.");
+        }
         repository.insertarDesbloqueoVehiculo(
-                dto.getTramiteId(),
                 dto.getBloqueoId(),
                 dto.getVehiculoId(),
                 dto.getEntidadId(),
@@ -75,10 +95,26 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
     public DesbloqueoVehiculoDTO update(Long id, DesbloqueoVehiculoDTO dto) {
         DesbloqueoVehiculo existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Desbloqueo no encontrado con ID: " + id));
-
+        if (dto.getEntidadId() == null && dto.getBloqueoId() != null) {
+            bloqueoRepository.findById(dto.getBloqueoId())
+                    .map(BloqueoVehiculo::getEntidad)
+                    .filter(e -> e != null)
+                    .map(e -> e.getIdEntidad())
+                    .ifPresent(dto::setEntidadId);
+        }
+        if (dto.getUsuarioDesactivaId() == null) {
+            auditoriaService.getUsuarioActual()
+                    .map(u -> u.getUsuarioId())
+                    .ifPresent(dto::setUsuarioDesactivaId);
+        }
+        if (dto.getEntidadId() == null) {
+            throw new RuntimeException("Debe indicar la entidad de tránsito o seleccionar un bloqueo que la tenga asociada.");
+        }
+        if (dto.getUsuarioDesactivaId() == null) {
+            throw new RuntimeException("Debe iniciar sesión para actualizar un desbloqueo de vehículo.");
+        }
         repository.actualizarDesbloqueoVehiculo(
             id,
-            dto.getTramiteId(),
             dto.getBloqueoId(),
             dto.getVehiculoId(),
             dto.getEntidadId(),

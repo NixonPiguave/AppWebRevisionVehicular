@@ -15,6 +15,8 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     List<Turnos> findByEstadoOrderByFechaInicioDesc(String estado);
 
+    List<Turnos> findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(String estado, Long idTipoTramite);
+
     // Último turno insertado (mayor ID)
     Turnos findTopByOrderByTurnoIdDesc();
 

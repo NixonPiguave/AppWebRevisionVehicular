@@ -13,7 +13,6 @@ public interface IBloqueoVehiculoRepository extends JpaRepository<BloqueoVehicul
 
     @Procedure(procedureName = "sp_insertar_bloqueo_vehiculo")
     void insertarBloqueoVehiculo(
-            @Param("p_id_tramite") Long tramiteId,
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_entidad") Long entidadId,
             @Param("p_usuario_activa_id") Long usuarioActivaId,
@@ -31,7 +30,6 @@ public interface IBloqueoVehiculoRepository extends JpaRepository<BloqueoVehicul
     @Procedure(procedureName = "sp_actualizar_bloqueo_vehiculo")
     void actualizarBloqueoVehiculo(
             @Param("p_id_bloqueo_srv") Long idBloqueoSrv,
-            @Param("p_id_tramite") Long tramiteId,
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_entidad") Long entidadId,
             @Param("p_usuario_activa_id") Long usuarioActivaId,

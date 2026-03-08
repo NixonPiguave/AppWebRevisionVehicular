@@ -29,10 +29,6 @@ public class BloqueoVehiculo {
     private Long idBloqueoSrv;
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
-    private TramiteMatriculacion tramite;
-
-    @ManyToOne
     @JoinColumn(name = "vehiculo_id", nullable = false)
     private Vehiculo vehiculo;
 

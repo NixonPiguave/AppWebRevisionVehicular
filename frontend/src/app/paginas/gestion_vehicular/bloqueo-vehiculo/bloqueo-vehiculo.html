@@ -138,6 +138,19 @@
         <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
         <div class="form-grid-2">
           <div class="form-grupo form-grupo-full">
+            <label>Turno a procesar</label>
+            <div class="input-accion">
+              <input type="text"
+                     [value]="turnoSeleccionadoInfo ? ('TRN-' + turnoSeleccionadoInfo.turnoId + (turnoSeleccionadoInfo.vehiculoDescripcion ? ' — ' + turnoSeleccionadoInfo.vehiculoDescripcion : '')) : ''"
+                     class="form-input" placeholder="Seleccione el turno que desea procesar" readonly />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorTurno()">
+                <mat-icon>search</mat-icon> Buscar / Seleccionar
+              </button>
+              <button type="button" class="btn-quitar" (click)="limpiarTurno()"
+                      [disabled]="!turnoId" title="Quitar turno">Quitar</button>
+            </div>
+          </div>
+          <div class="form-grupo form-grupo-full">
             <label>Vehículo (placa) *</label>
             <div class="input-accion">
               <input
@@ -156,6 +169,13 @@
               </button>
             </div>
           </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Entidad de tránsito *</label>
+            <select [(ngModel)]="editando.entidadId" class="form-select" [disabled]="cargandoCatalogos">
+              <option [ngValue]="null">-- Seleccione entidad --</option>
+              <option *ngFor="let e of entidadesTransito" [ngValue]="e.idEntidad">{{ e.codigo }} - {{ e.nombre }}</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -163,12 +183,18 @@
         <h4 class="seccion-titulo"><mat-icon>article</mat-icon> Datos del Bloqueo (Art.51-52)</h4>
         <div class="form-grid-2">
           <div class="form-grupo">
-            <label>ID Tipo de Bloqueo *</label>
-            <input type="number" [(ngModel)]="editando.tipoBloqueoId" class="form-input" placeholder="ID del catálogo tipo bloqueo" />
+            <label>Tipo de Bloqueo *</label>
+            <select [(ngModel)]="editando.tipoBloqueoId" class="form-select" [disabled]="cargandoCatalogos">
+              <option [ngValue]="null">-- Seleccione tipo --</option>
+              <option *ngFor="let t of tiposBloqueo" [ngValue]="t.idTipoBloqueo">{{ t.codigo }} - {{ t.nombre }}</option>
+            </select>
           </div>
           <div class="form-grupo">
             <label>Institución Origen *</label>
-            <input type="text" [(ngModel)]="editando.institucionOrigen" class="form-input" placeholder="Nombre de la institución" maxlength="100" />
+            <select [(ngModel)]="editando.institucionOrigen" class="form-select" [disabled]="cargandoCatalogos">
+              <option value="">-- Seleccione institución --</option>
+              <option *ngFor="let inst of institucionesOrigen" [value]="inst">{{ inst }}</option>
+            </select>
           </div>
           <div class="form-grupo">
             <label>Procesos Bloqueados *</label>
@@ -235,10 +261,14 @@
     </div>
 
     <div class="modal-footer">
+      <div class="banner-recepcion" *ngIf="turnoId">
+        <mat-icon>confirmation_number</mat-icon>
+        <span>Al confirmar, el turno <strong>TRN-{{ turnoId }}</strong> quedará <strong>FINALIZADO</strong> y no aparecerá en Recepción.</span>
+      </div>
       <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
       <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
-        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'lock' }}</mat-icon>
-        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Bloqueo') }}
+        <mat-icon *ngIf="!guardando">{{ turnoId ? 'task_alt' : (modoEdicion ? 'save' : 'lock') }}</mat-icon>
+        {{ guardando ? 'Guardando...' : (turnoId ? 'Registrar Bloqueo y Finalizar Turno' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Bloqueo')) }}
       </button>
     </div>
   </div>
@@ -255,14 +285,17 @@
       <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="modal-body" *ngIf="detalle">
-      <div class="detalle-grid">
+      <div class="detalle-cargando" *ngIf="cargandoDetalle">
+        <div class="spinner"></div>
+        <span>Cargando datos del vehículo y propietario...</span>
+      </div>
+      <div class="detalle-grid" *ngIf="!cargandoDetalle">
         <div class="detalle-item"><span class="detalle-label">ID Bloqueo</span><span class="detalle-valor">#{{ detalle.idBloqueoSrv }}</span></div>
         <div class="detalle-item"><span class="detalle-label">N° Trámite</span><span class="detalle-valor resaltado">{{ detalle.numeroTramite }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Trámite</span><span class="detalle-valor">{{ detalle.tramiteId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Vehículo</span><span class="detalle-valor">{{ detalle.vehiculoId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Entidad</span><span class="detalle-valor">{{ detalle.entidadId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">Usuario Activa</span><span class="detalle-valor">{{ detalle.usuarioActivaId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">Tipo Bloqueo ID</span><span class="detalle-valor">{{ detalle.tipoBloqueoId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Vehículo</span><span class="detalle-valor">{{ detalleVehiculo ? (detalleVehiculo.matricula + ' - ' + detalleVehiculo.chasis) : (detalle.vehiculoId ?? '-') }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Entidad de tránsito</span><span class="detalle-valor">{{ detalleEntidadNombre || detalle.entidadId || '-' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Usuario que activa</span><span class="detalle-valor">{{ detalleUsuarioNombre || detalle.usuarioActivaId || '-' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Tipo de bloqueo</span><span class="detalle-valor">{{ detalleTipoBloqueoNombre || detalle.tipoBloqueoId || '-' }}</span></div>
         <div class="detalle-item"><span class="detalle-label">Institución Origen</span><span class="detalle-valor">{{ detalle.institucionOrigen }}</span></div>
         <div class="detalle-item detalle-full"><span class="detalle-label">Motivo</span><span class="detalle-valor">{{ detalle.motivo }}</span></div>
         <div class="detalle-item"><span class="detalle-label">Procesos Bloqueados</span>
@@ -272,7 +305,16 @@
             {{ detalle.procesosBloqueados }}
           </span>
         </div>
-        <div class="detalle-item detalle-full"><span class="detalle-label">Documento Habilitante</span><span class="detalle-valor">{{ detalle.documentoHabilitante }}</span></div>
+        <div class="detalle-item detalle-full">
+          <span class="detalle-label">Documento Habilitante</span>
+          <span class="detalle-valor detalle-doc-acciones" *ngIf="detalle.documentoHabilitante">
+            <a [href]="detalle.documentoHabilitante" target="_blank" rel="noopener" class="doc-link">Ver documento</a>
+            <button type="button" class="btn-doc-descargar" (click)="descargarDocumento(detalle.documentoHabilitante)">
+              <mat-icon>download</mat-icon> Descargar
+            </button>
+          </span>
+          <span class="detalle-valor" *ngIf="!detalle.documentoHabilitante">-</span>
+        </div>
         <div class="detalle-item"><span class="detalle-label">Fecha Activación</span><span class="detalle-valor">{{ detalle.fechaActivacion | date:'dd/MM/yyyy HH:mm' }}</span></div>
         <div class="detalle-item"><span class="detalle-label">Estado</span>
           <span class="estado-badge" [ngClass]="getEstadoBadge(detalle.estado)">{{ detalle.estado }}</span>
@@ -282,6 +324,9 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn-imprimir-reporte" (click)="imprimirReporteBloqueo()" *ngIf="detalle && !cargandoDetalle">
+        <mat-icon>print</mat-icon> Imprimir reporte
+      </button>
     </div>
   </div>
 </div>
@@ -323,6 +368,41 @@
           </tr>
         </tbody>
       </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL SELECCIÓN TURNO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalTurno" (click)="cerrarSelectorTurno()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar turno a procesar</h4>
+      <button type="button" class="btn-cerrar" (click)="cerrarSelectorTurno()" title="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-info-texto">Turnos pagados en espera. Al registrar el bloqueo, el turno quedará finalizado y no aparecerá en Recepción.</p>
+      <div class="modal-cargando" *ngIf="cargandoTurnos"><div class="spinner"></div> Cargando turnos...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoTurnos && turnosDisponibles.length > 0">
+        <thead>
+          <tr>
+            <th>Nº Turno</th>
+            <th>Vehículo</th>
+            <th>Propietario</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of turnosDisponibles">
+            <td><span class="numero-turno">TRN-{{ t.turnoId }}</span></td>
+            <td>{{ t.vehiculoDescripcion || ('# ' + t.vehiculoId) }}</td>
+            <td>{{ t.propietarioNombre || ('# ' + t.propietarioId) }}</td>
+            <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td><button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarTurno(t)">Elegir</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!cargandoTurnos && turnosDisponibles.length === 0" class="sin-registros">No hay turnos pagados disponibles.</p>
     </div>
   </div>
 </div>

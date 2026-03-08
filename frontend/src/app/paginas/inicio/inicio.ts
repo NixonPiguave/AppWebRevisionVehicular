@@ -119,6 +119,7 @@ export class InicioComponent implements OnInit {
     const rutasServicios: { [key: number]: string } = {
       9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
       10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
+      11: '/inicio/gestion_vehicular/registro-observaciones',
       12: '/inicio/gestion_vehicular/baja-vehiculo',
     };
 

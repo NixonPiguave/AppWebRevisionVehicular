@@ -119,6 +119,19 @@ public class TurnosServiceImpl implements ITurnosService {
     public List<TurnosDTO> findTurnosPagados() {
         return repository.findByEstadoOrderByFechaInicioDesc("PAGADO")
                 .stream()
+                .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TurnosDTO> findTurnosPagadosPorServicio(Long servicioId) {
+        if (servicioId == null) {
+            return findTurnosPagados();
+        }
+        return repository.findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc("PAGADO", servicioId)
+                .stream()
+                .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

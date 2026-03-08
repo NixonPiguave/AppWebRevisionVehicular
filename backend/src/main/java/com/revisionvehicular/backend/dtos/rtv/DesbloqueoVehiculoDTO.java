@@ -9,7 +9,6 @@ public class DesbloqueoVehiculoDTO {
 
     private Long idDesbloqueo;
 
-    private Long tramiteId;
     private Long bloqueoId;
     private Long vehiculoId;
     private Long entidadId;

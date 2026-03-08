@@ -126,6 +126,16 @@
         <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
         <div class="form-grid-2">
           <div class="form-grupo form-grupo-full">
+            <label>Turno a procesar</label>
+            <div class="input-accion">
+              <input type="text" [value]="numeroTurno" class="form-input" placeholder="Opcional: seleccione un turno de recepción" readonly />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorTurno()">
+                <mat-icon>search</mat-icon> Buscar / Seleccionar
+              </button>
+              <button type="button" class="btn-quitar" (click)="limpiarTurno()" [disabled]="!turnoId" title="Quitar turno">Quitar</button>
+            </div>
+          </div>
+          <div class="form-grupo form-grupo-full">
             <label>Vehículo (placa) *</label>
             <div class="input-accion">
               <input type="text"
@@ -150,6 +160,13 @@
               <button type="button" class="btn-quitar" (click)="limpiarPropietario()"
                       [disabled]="!editando.propietarioId" title="Quitar propietario">Quitar</button>
             </div>
+          </div>
+          <div class="form-grupo">
+            <label>Entidad de tránsito *</label>
+            <select [(ngModel)]="editando.entidadId" class="form-select" required>
+              <option [ngValue]="null">-- Seleccione entidad --</option>
+              <option *ngFor="let e of entidadesTransito" [ngValue]="e.idEntidad">{{ e.codigo }} - {{ e.nombre }}</option>
+            </select>
           </div>
         </div>
       </div>
@@ -331,10 +348,10 @@
 
     <div class="modal-footer">
 
-      <!-- Banner informativo cuando viene desde Recepción -->
-      <div class="banner-recepcion" *ngIf="fromRecepcion">
+      <!-- Banner informativo cuando hay turno seleccionado -->
+      <div class="banner-recepcion" *ngIf="turnoId">
         <mat-icon>confirmation_number</mat-icon>
-        <span>Procesando turno de Recepción — al confirmar, el turno quedará <strong>FINALIZADO</strong></span>
+        <span>Procesando turno de Recepción — al confirmar, el turno quedará <strong>FINALIZADO</strong> y no se mostrará en Recepción.</span>
       </div>
 
       <div class="footer-botones">
@@ -342,8 +359,8 @@
           Cancelar
         </button>
 
-        <!-- Botón normal (cuando NO viene de recepción) -->
-        <button *ngIf="!fromRecepcion"
+        <!-- Botón normal (sin turno seleccionado) -->
+        <button *ngIf="!turnoId"
                 class="btn-guardar btn-peligro"
                 (click)="guardar()"
                 [disabled]="guardando || finalizando">
@@ -351,8 +368,8 @@
           {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Baja') }}
         </button>
 
-        <!-- Botón rojo "Finalizar Turno" (cuando viene de Recepción) -->
-        <button *ngIf="fromRecepcion"
+        <!-- Botón "Registrar Baja y Finalizar Turno" (cuando hay turno seleccionado) -->
+        <button *ngIf="turnoId"
                 class="btn-guardar btn-finalizar-recepcion"
                 (click)="guardar()"
                 [disabled]="guardando || finalizando">
@@ -366,6 +383,41 @@
   </div>
 </div>
 
+<!-- ===== MODAL SELECCIÓN TURNO ===== -->
+<div class="modal-overlay" *ngIf="mostrarModalTurno" (click)="cerrarSelectorTurno()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar turno a procesar</h4>
+      <button type="button" class="btn-cerrar" (click)="cerrarSelectorTurno()" title="Cerrar"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-info-texto">Turnos pagados en espera. Al registrar la baja, el turno quedará finalizado y no aparecerá en Recepción.</p>
+      <div class="modal-cargando" *ngIf="cargandoTurnos"><div class="spinner"></div> Cargando turnos...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoTurnos && turnosDisponibles.length > 0">
+        <thead>
+          <tr>
+            <th>Nº Turno</th>
+            <th>Vehículo</th>
+            <th>Propietario</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of turnosDisponibles">
+            <td><span class="numero-turno">TRN-{{ t.turnoId }}</span></td>
+            <td>{{ t.vehiculoDescripcion || ('# ' + t.vehiculoId) }}</td>
+            <td>{{ t.propietarioNombre || ('# ' + t.propietarioId) }}</td>
+            <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td><button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarTurno(t)">Elegir</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!cargandoTurnos && turnosDisponibles.length === 0" class="sin-registros">No hay turnos pagados disponibles.</p>
+    </div>
+  </div>
+</div>
+
 <!-- ===== MODAL DETALLE ===== -->
 <div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
   <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
@@ -374,19 +426,42 @@
       <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
     </div>
     <div class="modal-body" *ngIf="detalle">
-      <div class="detalle-grid">
+      <div class="detalle-cargando" *ngIf="cargandoDetalle">
+        <div class="spinner"></div>
+        <span>Cargando datos del vehículo y propietario...</span>
+      </div>
+      <div class="detalle-grid" *ngIf="!cargandoDetalle">
         <div class="detalle-item"><span class="detalle-label">ID Baja</span><span class="detalle-valor">#{{ detalle.idBaja }}</span></div>
         <div class="detalle-item"><span class="detalle-label">N° Trámite</span><span class="detalle-valor resaltado">{{ detalle.numeroTramite }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Trámite</span><span class="detalle-valor">{{ detalle.tramiteId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Vehículo</span><span class="detalle-valor">{{ detalle.vehiculoId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Propietario</span><span class="detalle-valor">{{ detalle.propietarioId }}</span></div>
-        <div class="detalle-item"><span class="detalle-label">ID Entidad</span><span class="detalle-valor">{{ detalle.entidadId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Vehículo</span><span class="detalle-valor">{{ detalleVehiculo ? (detalleVehiculo.matricula + ' - ' + detalleVehiculo.chasis) : (detalle.vehiculoId ?? '-') }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Propietario</span><span class="detalle-valor">{{ detallePropietario ? (detallePropietario.documentoIdentidad + ' - ' + detallePropietario.nombre) : (detalle.propietarioId ?? '-') }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Entidad de tránsito</span><span class="detalle-valor">{{ detalleEntidadNombre || detalle.entidadId || '-' }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Usuario</span><span class="detalle-valor">{{ detalleUsuarioNombre || detalle.usuarioId || '-' }}</span></div>
         <div class="detalle-item"><span class="detalle-label">Motivo Baja</span><span class="detalle-valor">{{ detalle.motivoBaja }}</span></div>
         <div class="detalle-item detalle-full"><span class="detalle-label">Descripción Motivo</span><span class="detalle-valor">{{ detalle.descripcionMotivo }}</span></div>
         <div class="detalle-item" *ngIf="detalle.empresaChatarrizado"><span class="detalle-label">Empresa Chatarrizado</span><span class="detalle-valor">{{ detalle.empresaChatarrizado }}</span></div>
         <div class="detalle-item" *ngIf="detalle.fechaChatarrizado"><span class="detalle-label">Fecha Chatarrizado</span><span class="detalle-valor">{{ detalle.fechaChatarrizado | date:'dd/MM/yyyy' }}</span></div>
-        <div class="detalle-item" *ngIf="detalle.ordenJudicial"><span class="detalle-label">Orden Judicial</span><span class="detalle-valor">{{ detalle.ordenJudicial }}</span></div>
-        <div class="detalle-item" *ngIf="detalle.constanciaPolicial"><span class="detalle-label">Constancia Policial</span><span class="detalle-valor">{{ detalle.constanciaPolicial }}</span></div>
+        <div class="detalle-item detalle-full" *ngIf="detalle.certChatarrizado">
+          <span class="detalle-label">Cert. Chatarrizado</span>
+          <span class="detalle-valor detalle-doc-acciones">
+            <a [href]="detalle.certChatarrizado" target="_blank" rel="noopener" class="doc-link">Ver</a>
+            <button type="button" class="btn-doc-descargar" (click)="descargarDocumento(detalle.certChatarrizado, 'cert-chatarrizado-' + detalle.idBaja)"><mat-icon>download</mat-icon> Descargar</button>
+          </span>
+        </div>
+        <div class="detalle-item detalle-full" *ngIf="detalle.ordenJudicial">
+          <span class="detalle-label">Orden Judicial</span>
+          <span class="detalle-valor detalle-doc-acciones">
+            <a [href]="detalle.ordenJudicial" target="_blank" rel="noopener" class="doc-link">Ver</a>
+            <button type="button" class="btn-doc-descargar" (click)="descargarDocumento(detalle.ordenJudicial, 'orden-judicial-' + detalle.idBaja)"><mat-icon>download</mat-icon> Descargar</button>
+          </span>
+        </div>
+        <div class="detalle-item detalle-full" *ngIf="detalle.constanciaPolicial">
+          <span class="detalle-label">Constancia Policial</span>
+          <span class="detalle-valor detalle-doc-acciones">
+            <a [href]="detalle.constanciaPolicial" target="_blank" rel="noopener" class="doc-link">Ver</a>
+            <button type="button" class="btn-doc-descargar" (click)="descargarDocumento(detalle.constanciaPolicial, 'constancia-policial-' + detalle.idBaja)"><mat-icon>download</mat-icon> Descargar</button>
+          </span>
+        </div>
         <div class="detalle-item"><span class="detalle-label">Notificado SRI</span>
           <span class="notif-badge" [class.notif-si]="detalle.notificadoSri === 'SI'" [class.notif-no]="detalle.notificadoSri === 'NO'">{{ detalle.notificadoSri }}</span>
         </div>
@@ -398,6 +473,9 @@
     </div>
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalDetalle()">Cerrar</button>
+      <button class="btn-imprimir-reporte" (click)="imprimirReporteBaja()" *ngIf="detalle && !cargandoDetalle">
+        <mat-icon>print</mat-icon> Imprimir reporte
+      </button>
     </div>
   </div>
 </div>

@@ -9,7 +9,6 @@ public class BloqueoVehiculoDTO {
 
     private Long idBloqueoSrv;
 
-    private Long tramiteId;
     private Long vehiculoId;
     private Long entidadId;
     private Long usuarioActivaId;

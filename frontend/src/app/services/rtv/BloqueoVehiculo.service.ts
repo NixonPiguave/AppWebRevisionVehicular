@@ -4,7 +4,6 @@ import { Observable } from 'rxjs';
 
 export interface BloqueoVehiculo {
   idBloqueoSrv?: number | null;
-  tramiteId: number | null;
   vehiculoId: number | null;
   entidadId: number | null;
   usuarioActivaId: number | null;

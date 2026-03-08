@@ -32,9 +32,6 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
         dto.setEstado(entity.getEstado());
         dto.setObservaciones(entity.getObservaciones());
 
-        if (entity.getTramite() != null) {
-            dto.setTramiteId(entity.getTramite().getIdTramite());
-        }
         if (entity.getVehiculo() != null) {
             dto.setVehiculoId(entity.getVehiculo().getVehiculoid());
         }
@@ -53,8 +50,15 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
 
     @Override
     public BloqueoVehiculoDTO save(BloqueoVehiculoDTO dto) {
+        if (dto.getUsuarioActivaId() == null) {
+            auditoriaService.getUsuarioActual()
+                    .map(u -> u.getUsuarioId())
+                    .ifPresent(dto::setUsuarioActivaId);
+        }
+        if (dto.getUsuarioActivaId() == null) {
+            throw new RuntimeException("Debe iniciar sesión para registrar un bloqueo de vehículo.");
+        }
         repository.insertarBloqueoVehiculo(
-                dto.getTramiteId(),
                 dto.getVehiculoId(),
                 dto.getEntidadId(),
                 dto.getUsuarioActivaId(),
@@ -81,10 +85,16 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
     public BloqueoVehiculoDTO update(Long id, BloqueoVehiculoDTO dto) {
         BloqueoVehiculo existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Bloqueo no encontrado con ID: " + id));
-
+        if (dto.getUsuarioActivaId() == null) {
+            auditoriaService.getUsuarioActual()
+                    .map(u -> u.getUsuarioId())
+                    .ifPresent(dto::setUsuarioActivaId);
+        }
+        if (dto.getUsuarioActivaId() == null) {
+            throw new RuntimeException("Debe iniciar sesión para actualizar un bloqueo de vehículo.");
+        }
         repository.actualizarBloqueoVehiculo(
                 id,
-                dto.getTramiteId(),
                 dto.getVehiculoId(),
                 dto.getEntidadId(),
                 dto.getUsuarioActivaId(),

@@ -68,6 +68,11 @@ public class AuditoriaService {
         return usuarioRepository.findByUsuario(username);
     }
 
+    /** Devuelve el usuario actual de la sesión (JWT). Útil para asignar usuario_activa_id, usuario_id, etc. */
+    public Optional<Usuario> getUsuarioActual() {
+        return obtenerUsuarioActual();
+    }
+
     private AuditoriaDTO toDTO(Auditoria a) {
         AuditoriaDTO dto = new AuditoriaDTO();
         dto.setAuditoriaId(a.getAuditoriaId());

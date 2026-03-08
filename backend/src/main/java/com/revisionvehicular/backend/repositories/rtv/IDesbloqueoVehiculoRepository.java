@@ -13,7 +13,6 @@ public interface IDesbloqueoVehiculoRepository extends JpaRepository<DesbloqueoV
 
     @Procedure(procedureName = "sp_insertar_desbloqueo_vehiculo")
     void insertarDesbloqueoVehiculo(
-            @Param("p_id_tramite") Long tramiteId,
             @Param("p_bloqueo_id") Long bloqueoId,
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_entidad") Long entidadId,
@@ -28,7 +27,6 @@ public interface IDesbloqueoVehiculoRepository extends JpaRepository<DesbloqueoV
     @Procedure(procedureName = "sp_actualizar_desbloqueo_vehiculo")
     void actualizarDesbloqueoVehiculo(
             @Param("p_id_desbloqueo") Long idDesbloqueo,
-            @Param("p_id_tramite") Long tramiteId,
             @Param("p_bloqueo_id") Long bloqueoId,
             @Param("p_vehiculo_id") Long vehiculoId,
             @Param("p_id_entidad") Long entidadId,

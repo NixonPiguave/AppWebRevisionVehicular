@@ -89,10 +89,10 @@ export class RecepcionComponent implements OnInit {
     this.error = '';
     this.turnos = [];
 
-    this.http.get<TurnoRaw[]>(`${API}/turnos?estado=PAGADO`).pipe(
+    this.http.get<TurnoRaw[]>(`${API}/turnos/pagados`).pipe(
       catchError(() => of([] as TurnoRaw[]))
     ).subscribe(raw => {
-      // Filtrar solo los activos (PAGADO o EN_PROCESO, nunca FINALIZADO)
+      // Solo turnos PAGADO (los FINALIZADOS no vuelven del backend); excluir GENERADO por si acaso
       const activos = (raw || []).filter(t =>
         (t.estado || '').toUpperCase() !== 'FINALIZADO' &&
         (t.estado || '').toUpperCase() !== 'GENERADO'

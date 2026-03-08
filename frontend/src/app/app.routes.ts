@@ -44,6 +44,7 @@ import {DefectosComponent} from './paginas/defectos_inspeccion/defectos/defectos
 import { BloqueoVehiculoComponent } from './paginas/gestion_vehicular/bloqueo-vehiculo/bloqueo-vehiculo';
 import { DesbloqueoVehiculoComponent } from './paginas/gestion_vehicular/desbloqueo-vehiculo/desbloqueo-vehiculo';
 import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo/baja-vehiculo';
+import { RegistroObservacionesComponent } from './paginas/gestion_vehicular/registro-observaciones/registro-observaciones';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
@@ -108,6 +109,7 @@ export const routes: Routes = [
       { path: 'gestion_vehicular/bloqueo-vehiculo', component: BloqueoVehiculoComponent },
       { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
       { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },
+      { path: 'gestion_vehicular/registro-observaciones', component: RegistroObservacionesComponent },
 
       // ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },

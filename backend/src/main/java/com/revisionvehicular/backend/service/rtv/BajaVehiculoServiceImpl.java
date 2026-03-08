@@ -67,12 +67,24 @@ public class BajaVehiculoServiceImpl implements IBajaVehiculoService {
 
     @Override
     public BajaVehiculoDTO save(BajaVehiculoDTO dto) {
+        if (dto.getEntidadId() == null) {
+            throw new IllegalArgumentException("La entidad de tránsito es obligatoria.");
+        }
+        Long usuarioId = dto.getUsuarioId();
+        if (usuarioId == null) {
+            usuarioId = auditoriaService.getUsuarioActual()
+                    .map(u -> u.getUsuarioId())
+                    .orElse(null);
+        }
+        if (usuarioId == null) {
+            throw new IllegalArgumentException("No se pudo determinar el usuario. Debe iniciar sesión.");
+        }
         repository.insertarBajaVehiculo(
                 dto.getTramiteId(),
                 dto.getVehiculoId(),
                 dto.getPropietarioId(),
                 dto.getEntidadId(),
-                dto.getUsuarioId(),
+                usuarioId,
                 dto.getNumeroTramite(),
                 dto.getMotivoBaja(),
                 dto.getDescripcionMotivo(),
