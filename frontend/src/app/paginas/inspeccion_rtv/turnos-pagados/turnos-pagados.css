@@ -140,3 +140,92 @@
 .btn-inspeccion:hover {
   background: #234a1e;
 }
+
+/* Modal métodos de inspección */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.btn-cerrar {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: #666;
+  padding: 0 4px;
+}
+
+.btn-cerrar:hover {
+  color: #333;
+}
+
+.modal-subtitulo {
+  margin: 0 0 16px 0;
+  font-size: 13px;
+  color: #666;
+}
+
+.modal-cargando,
+.modal-mensaje {
+  padding: 24px;
+  text-align: center;
+  color: #666;
+}
+
+.modal-metodos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.btn-metodo {
+  flex: 1;
+  min-width: 120px;
+  padding: 16px 20px;
+  background: #fff;
+  border: 2px solid #2d5a27;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d5a27;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-metodo:hover {
+  background: #2d5a27;
+  color: #fff;
+}

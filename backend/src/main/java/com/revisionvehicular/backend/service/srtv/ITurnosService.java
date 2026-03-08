@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.service.srtv;
 
+import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
 
 import java.math.BigDecimal;
@@ -15,4 +16,5 @@ public interface ITurnosService {
     TurnosDTO actualizarMontoPagado(Long turnoId, BigDecimal montoPagado);
     BigDecimal obtenerTarifaPorTurno(Long turnoId);
     TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado);
+    List<MetodoInspeccionDTO> findMetodosInspeccionPendientes(Long turnoId);
 }

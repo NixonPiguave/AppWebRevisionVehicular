@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -180,13 +180,17 @@ export class RegistrarInspeccionComponent implements OnInit {
     private umbralService: UmbralService,
     private lineasService: LineasService,
     private vehiculoService: VehiculoService,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private cdr: ChangeDetectorRef
   ) {}
+
+  metodoInspeccionIdParam: number | null = null;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.turnoId = params['turnoId'] ? +params['turnoId'] : null;
       this.vehiculoId = params['vehiculoId'] ? +params['vehiculoId'] : null;
+      this.metodoInspeccionIdParam = params['metodoInspeccionId'] ? +params['metodoInspeccionId'] : null;
     });
 
     setTimeout(() => {
@@ -233,11 +237,13 @@ export class RegistrarInspeccionComponent implements OnInit {
         }
 
         this.cargando = false;
+        this.cdr.detectChanges();
       },
       error: err => {
         console.error('Error cargando datos:', err);
         this.error = 'Error al cargar los datos. Verifique que el backend esté en ejecución.';
         this.cargando = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -250,17 +256,18 @@ export class RegistrarInspeccionComponent implements OnInit {
           matricula:       v.matricula || v.placa,
           chasis:          v.chasis,
           vin:             v.vin,
-          marca:           v.marcaNombre  || v.marca?.nombre  || v.marca  || '',
+          marca:           v.marcaNombre || v.marca?.nombre || v.marca || '',
           modelo:          v.modeloNombre || v.modelo?.nombre || v.modelo || '',
           color:           v.color,
           anioFabricacion: v.anioFabricacion
         };
-        // ── Comparar contra datos de fábrica ──
         this.compararConFabrica();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.vehiculoInfo = { id, matricula: `Veh #${id}` };
         this.camposComparados = [];
+        this.cdr.detectChanges();
       }
     });
   }
@@ -378,10 +385,10 @@ export class RegistrarInspeccionComponent implements OnInit {
       return;
     }
 
-    const metodoVisual = this.metodosInspeccion.find(m =>
-      (m.nombre || '').toLowerCase().includes('visual')
-    );
-    const metodoId  = metodoVisual?.id ?? this.metodosInspeccion[0]?.id ?? 1;
+    const metodoId = this.metodoInspeccionIdParam
+      ?? this.metodosInspeccion.find(m => (m.nombre || '').toLowerCase().includes('visual'))?.id
+      ?? this.metodosInspeccion[0]?.id
+      ?? 1;
     const umbralId  = this.umbrales[0]?.idUmbral ?? 1;
     const lineaId   = this.lineas[0]?.id ?? 1;
 
@@ -410,6 +417,7 @@ export class RegistrarInspeccionComponent implements OnInit {
         console.error('Error al guardar inspección:', err);
         this.guardando = false;
         this.notification.error(err?.error?.message || 'Error al guardar la inspección. Verifique el backend.');
+        this.cdr.detectChanges();
       }
     });
   }

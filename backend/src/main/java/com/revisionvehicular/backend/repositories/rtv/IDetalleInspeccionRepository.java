@@ -2,12 +2,20 @@ package com.revisionvehicular.backend.repositories.rtv;
 
 import com.revisionvehicular.backend.entities.rtv.DetalleInspeccion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface IDetalleInspeccionRepository extends JpaRepository<DetalleInspeccion, Long> {
+
+    @Query(value = "SELECT DISTINCT di.metodo_inspeccion_id FROM rtv_detalle_inspeccion di " +
+            "JOIN rtv_inspeccion i ON di.inspeccion_id = i.inspeccion_id " +
+            "WHERE i.vehiculo_id = :vehiculoId", nativeQuery = true)
+    List<Long> findMetodoIdsRealizadosPorVehiculo(@Param("vehiculoId") Long vehiculoId);
 
     @Procedure(procedureName = "sp_insertar_detalle_inspeccion")
     void insertarDetalleInspeccion(

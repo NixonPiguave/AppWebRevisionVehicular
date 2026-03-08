@@ -53,7 +53,7 @@ export class AreasComponent implements OnInit {
 
     this.areasService.listarAreas().subscribe({
       next: (data) => {
-        console.log('ÿÿreas cargadas:', data);
+        console.log('ï¿½ï¿½reas cargadas:', data);
         this.areas = data;
         this.cargando = false;
         this.cdr.detectChanges();

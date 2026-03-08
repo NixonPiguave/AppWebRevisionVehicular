@@ -27,6 +27,8 @@ import { FamiliaComponent } from './paginas/defectos_inspeccion/familia-defecto/
 import { MetodoInspeccionComponent } from './paginas/inspeccion_rtv/metodo-inspeccion/metodo-inspeccion';
 import { TurnosPagadosComponent } from './paginas/inspeccion_rtv/turnos-pagados/turnos-pagados';
 import { RegistrarInspeccionComponent } from './paginas/inspeccion_rtv/registrar-inspeccion/registrar-inspeccion';
+import { RevisionMecatronica } from './paginas/inspeccion_rtv/revision-mecatronica/revision-mecatronica';
+import { RevisionGases } from './paginas/inspeccion_rtv/revision-gases/revision-gases';
 import { Equipos } from './paginas/inspeccion_rtv/equipos/equipos';
 import {LineasInspeccionComponent} from './paginas/inspeccion_rtv/lineas-inspeccion/lineas-inspeccion';
 import {UnidadMedidaComponent} from './paginas/configuracion_umbral/unidades-medida/unidades-medida';
@@ -82,6 +84,8 @@ export const routes: Routes = [
       { path: 'inspeccion-rtv/metodo-inspeccion', component: MetodoInspeccionComponent },
       { path: 'inspeccion-rtv/turnos-pagados', component: TurnosPagadosComponent },
       { path: 'inspeccion-rtv/registrar', component: RegistrarInspeccionComponent },
+      { path: 'inspeccion-rtv/revision-mecatronica', component: RevisionMecatronica },
+      { path: 'inspeccion-rtv/revision-gases', component: RevisionGases },
       { path: 'inspeccion-rtv/equipos', component: Equipos },
       { path: 'inspeccion-rtv/lineas-inspeccion', component: LineasInspeccionComponent },
 

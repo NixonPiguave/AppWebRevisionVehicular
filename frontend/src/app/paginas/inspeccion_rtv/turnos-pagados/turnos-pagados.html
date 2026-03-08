@@ -2,7 +2,7 @@
   <header class="header">
     <button class="btn-volver" (click)="volver()">← Volver</button>
     <h1>Turnos pagados – Iniciar inspección</h1>
-    <p class="subtitulo">Seleccione un turno pagado para comenzar la inspección visual.</p>
+    <p class="subtitulo">Seleccione un turno pagado para comenzar la inspección.</p>
   </header>
 
   <div class="mensaje-error" *ngIf="error">
@@ -43,9 +43,9 @@
             <button
               type="button"
               class="btn-inspeccion"
-              (click)="iniciarInspeccion(turno)"
-              title="Iniciar inspección visual">
-              Iniciar inspección visual
+              (click)="abrirModalMetodos(turno)"
+              title="Iniciar inspección">
+              Iniciar inspección
             </button>
           </td>
         </tr>
@@ -54,5 +54,31 @@
         </tr>
       </tbody>
     </table>
+  </div>
+
+  <!-- Modal métodos de inspección pendientes -->
+  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+    <div class="modal-contenido" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Seleccione el método de inspección</h2>
+        <button type="button" class="btn-cerrar" (click)="cerrarModal()" aria-label="Cerrar">×</button>
+      </div>
+      <p class="modal-subtitulo">Métodos pendientes para este turno (según inspecciones realizadas):</p>
+      <div class="modal-cargando" *ngIf="cargandoMetodos">
+        <span>Cargando métodos...</span>
+      </div>
+      <div class="modal-mensaje" *ngIf="!cargandoMetodos && metodosPendientes.length === 0">
+        No hay métodos de inspección pendientes. Todas las inspecciones ya fueron realizadas para este vehículo.
+      </div>
+      <div class="modal-metodos" *ngIf="!cargandoMetodos && metodosPendientes.length > 0">
+        <button
+          *ngFor="let metodo of metodosPendientes"
+          type="button"
+          class="btn-metodo"
+          (click)="seleccionarMetodo(metodo)">
+          {{ metodo.nombre }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

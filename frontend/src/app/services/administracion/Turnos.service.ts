@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
 import { Turnos } from '../../models/Turnos.model';
 
 @Injectable({
@@ -21,11 +20,9 @@ export class TurnosService {
     return this.http.get<Turnos>(`${this.apiUrl}/${id}`);
   }
 
-  // Devuelve solo los turnos que tienen monto pagado registrado
+  // Devuelve turnos con estado PAGADO (usa endpoint dedicado del backend)
   getPagados(): Observable<Turnos[]> {
-    return this.getAll().pipe(
-      map((turnos: Turnos[]) => turnos.filter(t => t.montoPagado != null))
-    );
+    return this.http.get<Turnos[]>(`${this.apiUrl}/pagados`);
   }
 
   create(turno: Turnos): Observable<Turnos> {
@@ -53,5 +50,12 @@ export class TurnosService {
   // Cambia el estado del turno (ej. GENERADO → CONFIRMADO)
   cambiarEstado(id: number, estado: string): Observable<Turnos> {
     return this.http.patch<Turnos>(`${this.apiUrl}/${id}/estado`, { estado });
+  }
+
+  // Métodos de inspección pendientes para el turno (no realizados según detalleinspección)
+  getMetodosInspeccionPendientes(turnoId: number): Observable<{ id: number; nombre: string; descripcion?: string; estado?: string }[]> {
+    return this.http.get<{ id: number; nombre: string; descripcion?: string; estado?: string }[]>(
+      `${this.apiUrl}/${turnoId}/metodos-inspeccion-pendientes`
+    );
   }
 }

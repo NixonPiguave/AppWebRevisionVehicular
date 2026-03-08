@@ -136,9 +136,13 @@ public class VehiculoServiceImpl implements IVehiculoService {
                 ? vehiculo.getPropietario().getIdPropietario()
                 : null);
 
-        dto.setModeloVehiculoId(vehiculo.getModeloVehiculo() != null
-                ? vehiculo.getModeloVehiculo().getIdModelo()
-                : null);
+        if (vehiculo.getModeloVehiculo() != null) {
+            dto.setModeloVehiculoId(vehiculo.getModeloVehiculo().getIdModelo());
+            dto.setModeloNombre(vehiculo.getModeloVehiculo().getNombre());
+            if (vehiculo.getModeloVehiculo().getMarca() != null) {
+                dto.setMarcaNombre(vehiculo.getModeloVehiculo().getMarca().getNombre());
+            }
+        }
 
         dto.setTipoVehiculoId(vehiculo.getTipoVehiculo() != null
                 ? vehiculo.getTipoVehiculo().getTipovehiculoid()

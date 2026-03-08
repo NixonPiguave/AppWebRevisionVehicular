@@ -3,13 +3,13 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 @Component({
-  selector: 'app-revision-mecatronica',
+  selector: 'app-revision-gases',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './revision-mecatronica.html',
-  styleUrl: './revision-mecatronica.css',
+  templateUrl: './revision-gases.html',
+  styleUrl: './revision-gases.css',
 })
-export class RevisionMecatronica {
+export class RevisionGases {
   constructor(private router: Router) {}
 
   volver(): void {

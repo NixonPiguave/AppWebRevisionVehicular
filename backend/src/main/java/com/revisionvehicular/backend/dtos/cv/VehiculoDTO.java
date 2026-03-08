@@ -10,6 +10,8 @@ public class VehiculoDTO {
     private String chasis;
     private String vin;
     private Long modeloVehiculoId;
+    private String marcaNombre;
+    private String modeloNombre;
     private Integer anioFabricacion;
     private String color;
     private String estado;

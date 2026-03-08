@@ -1,8 +1,12 @@
 package com.revisionvehicular.backend.service.srtv;
 
+import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
+import com.revisionvehicular.backend.entities.rtv.MetodoInspeccion;
 import com.revisionvehicular.backend.entities.rtv.TarifarioTramite;
 import com.revisionvehicular.backend.entities.srtv.Turnos;
+import com.revisionvehicular.backend.repositories.rtv.IDetalleInspeccionRepository;
+import com.revisionvehicular.backend.repositories.rtv.IMetodoInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepository;
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
 import jakarta.transaction.Transactional;
@@ -18,12 +22,18 @@ public class TurnosServiceImpl implements ITurnosService {
 
     private final ITurnosRepository repository;
     private final ITarifarioTramiteRepository tarifarioRepository;
+    private final IDetalleInspeccionRepository detalleInspeccionRepository;
+    private final IMetodoInspeccionRepository metodoInspeccionRepository;
 
     @Autowired
     public TurnosServiceImpl(ITurnosRepository repository,
-                             ITarifarioTramiteRepository tarifarioRepository) {
+                             ITarifarioTramiteRepository tarifarioRepository,
+                             IDetalleInspeccionRepository detalleInspeccionRepository,
+                             IMetodoInspeccionRepository metodoInspeccionRepository) {
         this.repository = repository;
         this.tarifarioRepository = tarifarioRepository;
+        this.detalleInspeccionRepository = detalleInspeccionRepository;
+        this.metodoInspeccionRepository = metodoInspeccionRepository;
     }
 
     @Override
@@ -140,6 +150,27 @@ public class TurnosServiceImpl implements ITurnosService {
 
         return findById(turnoId);
     }
+
+    @Override
+    public List<MetodoInspeccionDTO> findMetodosInspeccionPendientes(Long turnoId) {
+        repository.findById(turnoId)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
+        // Siempre mostrar todos los métodos (Visual, Mecatrónica, Gases) para que el usuario pueda elegir
+        return metodoInspeccionRepository.findAll().stream()
+                .filter(m -> m.getMetodoinspeccionid() != null)
+                .map(this::toMetodoDTO)
+                .collect(Collectors.toList());
+    }
+
+    private MetodoInspeccionDTO toMetodoDTO(MetodoInspeccion m) {
+        MetodoInspeccionDTO dto = new MetodoInspeccionDTO();
+        dto.setId(m.getMetodoinspeccionid());
+        dto.setNombre(m.getNombre());
+        dto.setDescripcion(m.getDescripcion());
+        dto.setEstado(m.getEstado());
+        return dto;
+    }
+
     private TurnosDTO toDTO(Turnos turno) {
         TurnosDTO dto = new TurnosDTO();
         dto.setTurnoId(turno.getTurnoId());

@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.controllers.srtv;
 
+import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
 import com.revisionvehicular.backend.service.srtv.ITurnosService;
 import org.springframework.http.HttpStatus;
@@ -39,6 +40,11 @@ public class TurnosController {
     @GetMapping("/{id}")
     public ResponseEntity<TurnosDTO> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("/{id}/metodos-inspeccion-pendientes")
+    public ResponseEntity<List<MetodoInspeccionDTO>> metodosInspeccionPendientes(@PathVariable Long id) {
+        return ResponseEntity.ok(service.findMetodosInspeccionPendientes(id));
     }
 
     @PutMapping("/{id}")

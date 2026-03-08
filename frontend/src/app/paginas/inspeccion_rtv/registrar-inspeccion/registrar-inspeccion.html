@@ -9,6 +9,9 @@
     <h1>Registro de Inspección - Revisión Visual</h1>
     <div class="header-info" *ngIf="vehiculoInfo">
       <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
+      <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
+        {{ vehiculoInfo.marca }}{{ vehiculoInfo.marca && vehiculoInfo.modelo ? ' · ' : '' }}{{ vehiculoInfo.modelo }}
+      </span>
       <span class="badge-turno" *ngIf="turnoId">Turno #{{ turnoId }}</span>
 
       <!-- Badge de validación de fábrica -->
