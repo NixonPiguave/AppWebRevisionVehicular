@@ -330,11 +330,38 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
-      <button class="btn-guardar btn-peligro" (click)="guardar()" [disabled]="guardando">
-        <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'remove_circle' }}</mat-icon>
-        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Baja') }}
-      </button>
+
+      <!-- Banner informativo cuando viene desde Recepción -->
+      <div class="banner-recepcion" *ngIf="fromRecepcion">
+        <mat-icon>confirmation_number</mat-icon>
+        <span>Procesando turno de Recepción — al confirmar, el turno quedará <strong>FINALIZADO</strong></span>
+      </div>
+
+      <div class="footer-botones">
+        <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando || finalizando">
+          Cancelar
+        </button>
+
+        <!-- Botón normal (cuando NO viene de recepción) -->
+        <button *ngIf="!fromRecepcion"
+                class="btn-guardar btn-peligro"
+                (click)="guardar()"
+                [disabled]="guardando || finalizando">
+          <mat-icon *ngIf="!guardando">{{ modoEdicion ? 'save' : 'remove_circle' }}</mat-icon>
+          {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Registrar Baja') }}
+        </button>
+
+        <!-- Botón rojo "Finalizar Turno" (cuando viene de Recepción) -->
+        <button *ngIf="fromRecepcion"
+                class="btn-guardar btn-finalizar-recepcion"
+                (click)="guardar()"
+                [disabled]="guardando || finalizando">
+          <span *ngIf="guardando || finalizando" class="spinner-btn-small"></span>
+          <mat-icon *ngIf="!guardando && !finalizando">task_alt</mat-icon>
+          {{ textoBotonGuardar }}
+        </button>
+      </div>
+
     </div>
   </div>
 </div>

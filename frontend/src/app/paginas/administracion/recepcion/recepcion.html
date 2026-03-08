@@ -1,43 +1,50 @@
-<div class="recepcion-container">
+<div class="rtv-container">
 
+  <!-- ERROR -->
   <div class="mensaje-error" *ngIf="error">
-    <div class="error-contenido"><mat-icon>error_outline</mat-icon><span>{{ error }}</span></div>
-    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon><span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargar()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
   </div>
 
+  <!-- CARGANDO -->
   <div class="cargando" *ngIf="cargando && !error">
     <div class="spinner"></div>
-    <span>Cargando turnos en espera...</span>
+    <span>Cargando turnos pagados...</span>
   </div>
 
   <div *ngIf="!cargando || error">
 
-    <div class="recepcion-header">
+    <!-- HEADER -->
+    <div class="rtv-header">
       <div class="header-titulo">
-        <mat-icon class="header-icono">how_to_reg</mat-icon>
+        <mat-icon class="header-icono">inbox</mat-icon>
         <div>
           <h2>Recepción de Trámites</h2>
           <p class="header-subtitulo">Turnos pagados en espera de atención</p>
         </div>
       </div>
-      <button class="btn-recargar" (click)="cargar()">
-        <mat-icon>refresh</mat-icon>
-        Actualizar
+      <button class="btn-actualizar" (click)="cargar()">
+        <mat-icon>refresh</mat-icon> Actualizar
       </button>
     </div>
 
-    <div class="recepcion-controles">
+    <!-- CONTROLES -->
+    <div class="rtv-controles">
       <div class="control-grupo">
         <label>Buscar:</label>
         <div class="input-busqueda-wrapper">
-          <input type="text" [(ngModel)]="filtro" (ngModelChange)="aplicarFiltro()"
-                 placeholder="ID turno, propietario, vehículo, trámite..." class="input-filtro" />
+          <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()"
+                 placeholder="Propietario, vehículo, servicio..." class="input-filtro" />
           <mat-icon class="icon-search">search</mat-icon>
         </div>
       </div>
       <div class="control-grupo">
         <label>Mostrar:</label>
-        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="aplicarFiltro()" class="select-registros">
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
           <option [value]="10">10</option>
           <option [value]="25">25</option>
           <option [value]="50">50</option>
@@ -46,144 +53,118 @@
       </div>
     </div>
 
+    <!-- TABLA -->
     <div class="tabla-contenedor">
-      <table class="recepcion-tabla">
+      <table class="rtv-tabla">
         <thead>
         <tr>
-          <th>N° Turno</th>
-          <th>Propietario</th>
-          <th>Vehículo</th>
-          <th>Trámite</th>
-          <th>Fecha</th>
-          <th>Monto Pagado</th>
-          <th>Estado</th>
-          <th class="th-acciones">Acción</th>
+          <th>Nº TURNO</th>
+          <th>PROPIETARIO</th>
+          <th>VEHÍCULO</th>
+          <th>SERVICIO / TRÁMITE</th>
+          <th>FECHA</th>
+          <th>MONTO</th>
+          <th>ESTADO</th>
+          <th class="th-acciones">ACCIÓN</th>
         </tr>
         </thead>
         <tbody>
-        <tr *ngFor="let t of paginados" [class.fila-disponible]="tramiteDisponible(t.servicioId)">
-          <td><span class="turno-id">#{{ t.turnoId }}</span></td>
-          <td>{{ t.propietarioId }}</td>
-          <td>{{ t.vehiculoId }}</td>
+
+        <tr *ngFor="let t of paginados">
+
+          <!-- Nº Turno -->
           <td>
-            <div class="tramite-info">
-              <mat-icon class="tramite-icono">{{ getIconoServicio(t.servicioId) }}</mat-icon>
-              <span class="tramite-nombre">{{ getNombreServicio(t.servicioId) }}</span>
+            <span class="numero-turno">TRN-{{ t.turnoId }}</span>
+          </td>
+
+          <!-- Propietario -->
+          <td>
+            <div class="info-cell">
+                <span class="avatar-icon">
+                  <mat-icon>person</mat-icon>
+                </span>
+              <span class="info-texto">{{ t.propietarioNombre }}</span>
             </div>
-            <span class="badge-no-disponible" *ngIf="!tramiteDisponible(t.servicioId)">
-                <mat-icon style="font-size:12px;vertical-align:middle">schedule</mat-icon>
-                En desarrollo
-              </span>
           </td>
-          <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
-          <td><span class="monto">$ {{ t.montoPagado | number:'1.2-2' }}</span></td>
+
+          <!-- Vehículo -->
           <td>
-            <span class="estado-badge" [ngClass]="getEstadoBadgeClass(t.estado)">{{ t.estado }}</span>
+            <div class="info-cell">
+                <span class="avatar-icon avatar-car">
+                  <mat-icon>directions_car</mat-icon>
+                </span>
+              <span class="info-texto">{{ t.vehiculoDescripcion }}</span>
+            </div>
           </td>
-          <td class="td-acciones">
-            <button *ngIf="tramiteDisponible(t.servicioId)"
-                    class="btn-atender" (click)="abrirConfirmacion(t)" title="Atender este turno">
-              <mat-icon>play_arrow</mat-icon>
-              Atender
-            </button>
-            <span *ngIf="!tramiteDisponible(t.servicioId)" class="btn-no-disponible">
-                <mat-icon>hourglass_empty</mat-icon>
-                Pendiente
+
+          <!-- Servicio / Trámite -->
+          <td>
+            <div class="servicio-cell">
+                <span class="tramite-badge" [ngClass]="getTramiteClass(t.tipoTramite)">
+                  <mat-icon>{{ getTramiteIcon(t.tipoTramite) }}</mat-icon>
+                  {{ t.tipoTramite }}
+                </span>
+              <span class="servicio-nombre">{{ t.servicioNombre }}</span>
+            </div>
+          </td>
+
+          <!-- Fecha -->
+          <td class="fecha-cell">
+            {{ t.fechaInicio | date:'dd/MM/yyyy' }}
+          </td>
+
+          <!-- Monto -->
+          <td class="monto-cell">
+            $ {{ (t.montoPagado ?? 0) | number:'1.2-2' }}
+          </td>
+
+          <!-- Estado -->
+          <td>
+              <span class="estado-badge" [ngClass]="getEstadoBadge(t.estado)">
+                {{ t.estado }}
               </span>
           </td>
+
+          <!-- Acción -->
+          <td class="td-acciones">
+            <button class="btn-iniciar" (click)="iniciarProceso(t)">
+              <mat-icon>play_circle_filled</mat-icon>
+              Iniciar Proceso
+            </button>
+          </td>
+
         </tr>
-        <tr *ngIf="paginados.length === 0 && !error && !cargando">
+
+        <!-- Sin resultados -->
+        <tr *ngIf="paginados.length === 0 && !cargando && !error">
           <td colspan="8" class="sin-registros">
-            <mat-icon style="font-size:40px;color:#ccc;display:block;margin:0 auto 8px">inbox</mat-icon>
-            No hay turnos pagados en espera de atención
+            <mat-icon class="sin-registros-icon">inbox</mat-icon>
+            <p>No hay turnos pagados en espera de atención</p>
           </td>
         </tr>
+
         </tbody>
       </table>
     </div>
 
+    <!-- PAGINACIÓN -->
     <div class="footer-tabla">
       <div class="info-registros" *ngIf="filtrados.length > 0">
-        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        Mostrando
+        {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
         {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }}
-        de {{ filtrados.length }} turnos
+        de {{ filtrados.length }} registros
       </div>
       <div class="paginacion" *ngIf="totalPaginas > 1">
         <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
           <mat-icon>chevron_left</mat-icon>
         </button>
-        <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
+        <button *ngFor="let p of paginas" class="btn-pagina"
+                [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
         <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
           <mat-icon>chevron_right</mat-icon>
         </button>
       </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ===== MODAL DE CONFIRMACIÓN ===== -->
-<div class="modal-overlay" *ngIf="mostrarModalConfirmacion" (click)="cerrarConfirmacion()">
-  <div class="modal-confirmacion" (click)="$event.stopPropagation()">
-
-    <div class="modal-conf-header">
-      <div class="modal-conf-titulo">
-        <mat-icon class="conf-icono">how_to_reg</mat-icon>
-        <h3>Confirmar atención</h3>
-      </div>
-      <button class="btn-cerrar" (click)="cerrarConfirmacion()"><mat-icon>close</mat-icon></button>
-    </div>
-
-    <div class="modal-conf-body" *ngIf="turnoAAtender">
-      <div class="conf-aviso">
-        <mat-icon>info</mat-icon>
-        <p>El cliente está presente. Al confirmar, el turno pasará a estado <strong>CONFIRMADO</strong> y se abrirá el formulario del trámite.</p>
-      </div>
-
-      <div class="conf-detalle">
-        <div class="conf-item">
-          <span class="conf-lbl">N° Turno</span>
-          <span class="conf-val turno-id">#{{ turnoAAtender.turnoId }}</span>
-        </div>
-        <div class="conf-item">
-          <span class="conf-lbl">Trámite</span>
-          <span class="conf-val">{{ getNombreServicio(turnoAAtender.servicioId) }}</span>
-        </div>
-        <div class="conf-item">
-          <span class="conf-lbl">Propietario ID</span>
-          <span class="conf-val">{{ turnoAAtender.propietarioId }}</span>
-        </div>
-        <div class="conf-item">
-          <span class="conf-lbl">Vehículo ID</span>
-          <span class="conf-val">{{ turnoAAtender.vehiculoId }}</span>
-        </div>
-        <div class="conf-item">
-          <span class="conf-lbl">Monto Pagado</span>
-          <span class="conf-val conf-monto">$ {{ turnoAAtender.montoPagado | number:'1.2-2' }}</span>
-        </div>
-        <div class="conf-item">
-          <span class="conf-lbl">Estado actual</span>
-          <span class="estado-badge" [ngClass]="getEstadoBadgeClass(turnoAAtender.estado)">
-            {{ turnoAAtender.estado }}
-          </span>
-        </div>
-      </div>
-
-      <div class="conf-error" *ngIf="errorConfirmacion">
-        <mat-icon>error_outline</mat-icon>
-        {{ errorConfirmacion }}
-      </div>
-    </div>
-
-    <div class="modal-conf-footer">
-      <button class="btn-cancelar" (click)="cerrarConfirmacion()" [disabled]="confirmando">
-        Cancelar
-      </button>
-      <button class="btn-confirmar" (click)="confirmarAtencion()" [disabled]="confirmando">
-        <mat-icon *ngIf="!confirmando">check_circle</mat-icon>
-        <span *ngIf="confirmando" class="spinner-mini"></span>
-        {{ confirmando ? 'Confirmando...' : 'Confirmar y Abrir Trámite' }}
-      </button>
     </div>
 
   </div>

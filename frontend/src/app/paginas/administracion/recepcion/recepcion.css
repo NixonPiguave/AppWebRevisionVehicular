@@ -1,83 +1,143 @@
-.recepcion-container { padding: 24px; max-width: 1300px; margin: 0 auto; }
+/* ============================================================
+   RECEPCIÓN DE TRÁMITES — CSS
+   ============================================================ */
 
-/* HEADER */
-.recepcion-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.rtv-container { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+/* ── HEADER ─────────────────────────────────────────────── */
+.rtv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .header-titulo { display: flex; align-items: center; gap: 14px; }
 .header-icono { font-size: 32px; width: 32px; height: 32px; color: #2d5a27; }
-.recepcion-header h2 { margin: 0; font-size: 22px; font-weight: 700; color: #1a2e1a; }
+.rtv-header h2 { margin: 0; font-size: 22px; font-weight: 700; color: #1a2e1a; }
 .header-subtitulo { margin: 2px 0 0; font-size: 12px; color: #7a9474; font-style: italic; }
 
-.btn-recargar { display: flex; align-items: center; gap: 8px; padding: 10px 20px; background: #2d5a27; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
-.btn-recargar:hover { background: #234a1e; }
+.btn-actualizar {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; background: #2d5a27; color: white;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-actualizar:hover { background: #234a1e; }
+.btn-actualizar mat-icon { font-size: 18px; }
 
-/* CONTROLES */
-.recepcion-controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
+/* ── CONTROLES ───────────────────────────────────────────── */
+.rtv-controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
 .control-grupo { display: flex; align-items: center; gap: 8px; }
 .control-grupo label { font-size: 14px; color: #4a4a4a; font-weight: 500; }
 .input-busqueda-wrapper { position: relative; }
-.input-filtro { padding: 8px 36px 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 14px; width: 300px; transition: border-color 0.2s, box-shadow 0.2s; }
+.input-filtro { padding: 9px 36px 9px 14px; border: 1px solid #d0d0d0; border-radius: 7px; font-size: 14px; width: 320px; transition: border-color 0.2s, box-shadow 0.2s; }
 .input-filtro:focus { outline: none; border-color: #2d5a27; box-shadow: 0 0 0 3px rgba(45,90,39,0.1); }
-.icon-search { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 20px; pointer-events: none; }
+.icon-search { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 20px; pointer-events: none; }
 .select-registros { padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 14px; cursor: pointer; background: white; }
 .select-registros:focus { outline: none; border-color: #2d5a27; }
 .registros-texto { font-size: 14px; color: #4a4a4a; }
 
-/* TABLA */
+/* ── TABLA ───────────────────────────────────────────────── */
 .tabla-contenedor { overflow-x: auto; border-radius: 8px; border: 1px solid #e0e0e0; background: white; }
-.recepcion-tabla { width: 100%; border-collapse: collapse; min-width: 900px; }
-.recepcion-tabla th, .recepcion-tabla td { padding: 13px 14px; text-align: left; }
-.recepcion-tabla th { background: #1a2e1a; color: white; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; }
-.recepcion-tabla th:first-child { border-top-left-radius: 7px; }
-.recepcion-tabla th:last-child { border-top-right-radius: 7px; }
-.recepcion-tabla tbody tr { border-bottom: 1px solid #e8e8e8; transition: background 0.15s; }
-.recepcion-tabla tbody tr:hover { background: #f5f9f5; }
-.recepcion-tabla tbody tr:last-child { border-bottom: none; }
-.recepcion-tabla td { font-size: 13px; color: #333; }
-.fila-disponible:hover { background: #eef7eb !important; }
-.turno-id { font-weight: 700; color: #1a2e1a; font-size: 14px; }
-.monto { font-weight: 600; color: #2d5a27; }
-.th-acciones, .td-acciones { text-align: center; }
+.rtv-tabla { width: 100%; border-collapse: collapse; min-width: 920px; }
+.rtv-tabla th, .rtv-tabla td { padding: 14px 16px; text-align: left; vertical-align: middle; }
+.rtv-tabla th { background: #1a2e1a; color: white; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+.rtv-tabla th:first-child { border-top-left-radius: 7px; }
+.rtv-tabla th:last-child  { border-top-right-radius: 7px; }
+.rtv-tabla tbody tr { border-bottom: 1px solid #eee; transition: background 0.15s; }
+.rtv-tabla tbody tr:hover { background: #f5f9f5; }
+.rtv-tabla tbody tr:last-child { border-bottom: none; }
+.rtv-tabla td { font-size: 13px; color: #333; }
+.th-acciones { text-align: center !important; }
+.td-acciones { text-align: center; }
 
-/* TRÁMITE INFO */
-.tramite-info { display: flex; align-items: center; gap: 6px; }
-.tramite-icono { font-size: 16px; color: #2d5a27; }
-.tramite-nombre { font-size: 13px; }
-.badge-no-disponible { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; background: #fff3cd; color: #856404; border-radius: 4px; padding: 2px 7px; margin-top: 4px; font-weight: 600; }
+/* ── NÚMERO DE TURNO ─────────────────────────────────────── */
+.numero-turno {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #1b5e20;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
 
-/* BADGES ESTADO */
-.estado-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
-.badge-generado { background: #d4edda; color: #155724; }
-.badge-confirmado { background: #cce5ff; color: #004085; }
-.badge-atendido { background: #e2e3e5; color: #383d41; }
-.badge-cancelado { background: #f8d7da; color: #721c24; }
+/* ── CELDAS CON ICONO ────────────────────────────────────── */
+.info-cell { display: flex; align-items: center; gap: 10px; }
+.avatar-icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #e8f5e9; flex-shrink: 0;
+}
+.avatar-icon mat-icon { font-size: 18px; width: 18px; height: 18px; color: #2d5a27; }
+.avatar-car { background: #e3f2fd; }
+.avatar-car mat-icon { color: #1565c0; }
+.info-texto { font-weight: 500; color: #1a2e1a; }
 
-/* BOTONES ACCIÓN */
-.btn-atender { display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px; background: #2d5a27; color: white; border: none; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-.btn-atender:hover { background: #234a1e; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(45,90,39,0.25); }
-.btn-atender mat-icon { font-size: 16px; }
-.btn-no-disponible { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #f0f0f0; color: #888; border-radius: 7px; font-size: 12px; font-weight: 500; white-space: nowrap; }
-.btn-no-disponible mat-icon { font-size: 15px; }
+/* ── SERVICIO CELL ───────────────────────────────────────── */
+.servicio-cell { display: flex; flex-direction: column; gap: 4px; }
+.servicio-nombre { font-size: 11px; color: #888; font-style: italic; padding-left: 2px; }
 
-/* PAGINACIÓN */
+/* ── BADGES TRÁMITE ─────────────────────────────────────── */
+.tramite-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; white-space: nowrap;
+}
+.tramite-badge mat-icon { font-size: 13px; width: 13px; height: 13px; }
+.tipo-baja        { background: #fce4ec; color: #880e4f; }
+.tipo-bloqueo     { background: #fff3e0; color: #e65100; }
+.tipo-desbloqueo  { background: #e8f5e9; color: #1b5e20; }
+.tipo-inspeccion  { background: #e3f2fd; color: #1565c0; }
+
+/* ── BADGES ESTADO ───────────────────────────────────────── */
+.estado-badge {
+  display: inline-block; padding: 4px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;
+}
+.badge-pagado     { background: #fff8e1; color: #f57f17; }
+.badge-proceso    { background: #e3f2fd; color: #1565c0; }
+.badge-finalizado { background: #d4edda; color: #155724; }
+
+.fecha-cell { color: #555; white-space: nowrap; font-size: 13px; }
+.monto-cell { font-weight: 700; color: #1a2e1a; white-space: nowrap; font-size: 14px; }
+
+/* ── BOTÓN INICIAR PROCESO ───────────────────────────────── */
+.btn-iniciar {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; background: #2d5a27; color: white;
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.btn-iniciar:hover {
+  background: #234a1e;
+  box-shadow: 0 4px 12px rgba(45,90,39,0.3);
+  transform: translateY(-1px);
+}
+.btn-iniciar:active { transform: translateY(0); }
+.btn-iniciar mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+/* ── SIN REGISTROS ───────────────────────────────────────── */
+.sin-registros { text-align: center; padding: 56px 20px !important; }
+.sin-registros-icon { font-size: 52px; width: 52px; height: 52px; color: #ddd; display: block; margin: 0 auto 12px; }
+.sin-registros p { color: #aaa; font-style: italic; margin: 0; }
+
+/* ── PAGINACIÓN ──────────────────────────────────────────── */
 .footer-tabla { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
 .paginacion { display: flex; gap: 6px; }
 .btn-pagina { padding: 7px 12px; border: 1px solid #d0d0d0; background: white; color: #333; border-radius: 6px; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; }
 .btn-pagina:hover:not(:disabled) { background: #f5f5f5; border-color: #2d5a27; }
 .btn-pagina.activa { background: #2d5a27; color: white; border-color: #2d5a27; }
-.btn-pagina:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-pagina:disabled { opacity: 0.35; cursor: not-allowed; }
 .info-registros { font-size: 13px; color: #666; }
-.sin-registros { text-align: center; color: #888; font-style: italic; padding: 40px !important; }
 
-/* UTILIDADES */
+/* ── UTILIDADES ──────────────────────────────────────────── */
 .mensaje-error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
 .error-contenido { display: flex; align-items: center; gap: 8px; }
-.btn-reintentar { padding: 7px 14px; background: #991b1b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
-.cargando { text-align: center; padding: 48px; color: #666; display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.spinner { width: 36px; height: 36px; border: 3px solid rgba(45,90,39,0.2); border-top-color: #2d5a27; border-radius: 50%; animation: spin 0.8s linear infinite; }
+.btn-reintentar { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: #991b1b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.cargando { text-align: center; padding: 56px; color: #666; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.spinner { width: 36px; height: 36px; border: 3px solid rgba(45,90,39,0.15); border-top-color: #2d5a27; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 @media (max-width: 768px) {
-  .recepcion-header { flex-direction: column; align-items: flex-start; gap: 16px; }
-  .recepcion-controles { flex-direction: column; align-items: flex-start; }
+  .rtv-header { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .rtv-controles { flex-direction: column; align-items: flex-start; }
   .input-filtro { width: 100%; }
 }

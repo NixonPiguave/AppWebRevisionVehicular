@@ -3,33 +3,49 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
-import { TurnosService } from '../../../services/administracion/Turnos.service';
-import { Turnos } from '../../../models/Turnos.model';
+import { HttpClient } from '@angular/common/http';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
-const RUTAS_TRAMITE: { [servicioId: number]: string } = {
-  9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
-  10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
-  12: '/inicio/gestion_vehicular/baja-vehiculo',
+/* ─── Estructura real que devuelve el backend ─────────────── */
+export interface TurnoRaw {
+  turnoId:      number;
+  propietarioId: number;
+  vehiculoId:   number;
+  servicioId:   number;
+  tramiteId:    number | null;
+  entidadId:    number | null;
+  estado:       string;
+  montoPagado:  number | null;
+  fechaInicio:  string;
+  fechaFin:     string | null;
+  fechaCancelado: string | null;
+  validador:    string | null;
+}
+
+/* ─── Turno enriquecido con datos de propietario/vehículo ── */
+export interface TurnoEnriquecido extends TurnoRaw {
+  propietarioNombre: string;
+  vehiculoDescripcion: string;
+  servicioNombre: string;
+  tipoTramite: string;   // derivado del servicioId
+}
+
+/* Mapeo servicioId → tipo de trámite y nombre
+   Ajusta estos IDs según tu catálogo de servicios */
+const MAPA_SERVICIOS: Record<number, { nombre: string; tipo: string }> = {
+  1: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
+  2: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
+  3: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
+  4: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
+  5: { nombre: 'Desbloqueo Vehículo',  tipo: 'DESBLOQUEO'  },
+  6: { nombre: 'Bloqueo Vehículo',     tipo: 'BLOQUEO'     },
+  7: { nombre: 'Baja Vehículo',        tipo: 'BAJA'        },
+  8: { nombre: 'Baja Vehículo',        tipo: 'BAJA'        },
+  9: { nombre: 'Trámite Especial',     tipo: 'INSPECCION'  },
 };
 
-const NOMBRES_SERVICIO: { [id: number]: string } = {
-  1:  'Emisión de matrícula por Primera Vez',
-  2:  'Emisión de Documento Anual de Circulación',
-  3:  'Duplicado de Documento de Matrícula',
-  4:  'Duplicado del Documento Anual de Circulación',
-  5:  'Transferencia de Dominio',
-  6:  'Cambio de Servicio',
-  7:  'Matriculación de Unidades de Carga',
-  8:  'Cambio de Características',
-  9:  'Bloqueo de Vehículo',
-  10: 'Desbloqueo de Vehículo',
-  11: 'Registro de Observaciones',
-  12: 'Baja de Vehículos',
-  13: 'Registro de Incidentes',
-  14: 'Anulación de Trámites',
-  15: 'Registro en Base Única Nacional',
-  16: 'Casos Especiales',
-};
+const API = 'http://localhost:8080/api';
 
 @Component({
   selector: 'app-recepcion',
@@ -40,141 +56,226 @@ const NOMBRES_SERVICIO: { [id: number]: string } = {
 })
 export class RecepcionComponent implements OnInit {
 
-  turnos: Turnos[] = [];
-  filtrados: Turnos[] = [];
+  turnos: TurnoEnriquecido[] = [];
   cargando = false;
   error = '';
   filtro = '';
   registrosPorPagina = 10;
   paginaActual = 1;
 
-  // Modal de confirmación
-  mostrarModalConfirmacion = false;
-  turnoAAtender: Turnos | null = null;
-  confirmando = false;
-  errorConfirmacion = '';
-
   constructor(
-    private turnosService: TurnosService,
+    private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void { this.cargar(); }
 
+  /* ══════════════════════════════════════════════════════
+     CARGA Y ENRIQUECIMIENTO
+  ══════════════════════════════════════════════════════ */
   cargar(): void {
     this.cargando = true;
     this.error = '';
-    this.turnosService.getAll().subscribe({
-      next: (data) => {
-        // Solo turnos con monto pagado y en estado GENERADO o CONFIRMADO
-        this.turnos = (data ?? []).filter(t =>
-          t.montoPagado != null &&
-          (t.estado === 'GENERADO' || t.estado === 'CONFIRMADO')
-        );
-        this.aplicarFiltro();
+    this.turnos = [];
+
+    this.http.get<TurnoRaw[]>(`${API}/turnos?estado=PAGADO`).pipe(
+      catchError(() => of([] as TurnoRaw[]))
+    ).subscribe(raw => {
+      // Filtrar solo los activos (PAGADO o EN_PROCESO, nunca FINALIZADO)
+      const activos = (raw || []).filter(t =>
+        (t.estado || '').toUpperCase() !== 'FINALIZADO' &&
+        (t.estado || '').toUpperCase() !== 'GENERADO'
+      );
+
+      if (activos.length === 0) {
         this.cargando = false;
         this.cdr.detectChanges();
-      },
-      error: () => {
-        this.error = 'Error al cargar los turnos de recepción.';
-        this.cargando = false;
-        this.cdr.detectChanges();
+        return;
       }
+
+      // Obtener IDs únicos para hacer menos llamadas
+      const propietarioIds = [...new Set(activos.map(t => t.propietarioId))];
+      const vehiculoIds    = [...new Set(activos.map(t => t.vehiculoId))];
+
+      // Llamadas paralelas para obtener propietarios y vehículos
+      const propietarios$ = forkJoin(
+        propietarioIds.map(id =>
+          this.http.get<any>(`${API}/propietarios/${id}`).pipe(
+            catchError(() => of({ idPropietario: id, nombre: `Propietario #${id}` }))
+          )
+        )
+      );
+
+      const vehiculos$ = forkJoin(
+        vehiculoIds.map(id =>
+          this.http.get<any>(`${API}/vehiculos/${id}`).pipe(
+            catchError(() => of({ id, matricula: `Vehículo #${id}` }))
+          )
+        )
+      );
+
+      forkJoin({ propietarios: propietarios$, vehiculos: vehiculos$ }).subscribe({
+        next: ({ propietarios, vehiculos }) => {
+          // Mapas para lookup rápido
+          const propMap = new Map<number, any>();
+          propietarios.forEach(p => {
+            const id = p.idPropietario ?? p.id ?? p.propietarioId;
+            propMap.set(id, p);
+          });
+
+          const vehMap = new Map<number, any>();
+          vehiculos.forEach(v => {
+            const id = v.id ?? v.idVehiculo ?? v.vehiculoId;
+            vehMap.set(id, v);
+          });
+
+          // Enriquecer cada turno con los datos obtenidos
+          this.turnos = activos.map(t => {
+            const prop = propMap.get(t.propietarioId);
+            const veh  = vehMap.get(t.vehiculoId);
+            const svc  = MAPA_SERVICIOS[t.servicioId];
+
+            return {
+              ...t,
+              propietarioNombre:    this.extraerNombrePropietario(prop, t.propietarioId),
+              vehiculoDescripcion:  this.extraerDescripcionVehiculo(veh, t.vehiculoId),
+              servicioNombre:       svc?.nombre ?? `Servicio #${t.servicioId}`,
+              tipoTramite:          svc?.tipo    ?? 'INSPECCION',
+            };
+          });
+
+          this.cargando = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          // Si falla el enriquecimiento, muestra con IDs
+          this.turnos = activos.map(t => ({
+            ...t,
+            propietarioNombre:   `Propietario #${t.propietarioId}`,
+            vehiculoDescripcion: `Vehículo #${t.vehiculoId}`,
+            servicioNombre:      MAPA_SERVICIOS[t.servicioId]?.nombre ?? `Servicio #${t.servicioId}`,
+            tipoTramite:         MAPA_SERVICIOS[t.servicioId]?.tipo    ?? 'INSPECCION',
+          }));
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }
+      });
     });
   }
 
-  aplicarFiltro(): void {
-    const f = (this.filtro || '').toLowerCase().trim();
-    this.filtrados = !f ? [...this.turnos] : this.turnos.filter(t =>
-      (t.turnoId?.toString() || '').includes(f) ||
-      (t.propietarioId?.toString() || '').includes(f) ||
-      (t.vehiculoId?.toString() || '').includes(f) ||
-      (this.getNombreServicio(t.servicioId).toLowerCase()).includes(f) ||
-      (t.estado?.toLowerCase() || '').includes(f)
-    );
-    this.paginaActual = 1;
-    this.cdr.detectChanges();
+  /* ─── Extrae el nombre del propietario de cualquier estructura ── */
+  private extraerNombrePropietario(p: any, fallbackId: number): string {
+    if (!p) return `Propietario #${fallbackId}`;
+    // Intenta los campos más comunes
+    const nombre  = p.nombre   ?? p.nombres   ?? p.name      ?? '';
+    const apellido = p.apellido ?? p.apellidos ?? p.lastName  ?? '';
+    if (nombre && apellido) return `${nombre} ${apellido}`;
+    if (nombre)             return nombre;
+    if (p.nombreCompleto)   return p.nombreCompleto;
+    if (p.razonSocial)      return p.razonSocial;
+    return `Propietario #${fallbackId}`;
   }
 
-  get paginados(): Turnos[] {
+  /* ─── Extrae la descripción del vehículo de cualquier estructura ── */
+  private extraerDescripcionVehiculo(v: any, fallbackId: number): string {
+    if (!v) return `Vehículo #${fallbackId}`;
+
+    const placa  = v.matricula ?? v.placa ?? '';
+
+    // Marca: puede ser string o un objeto { descripcion, nombre }
+    let marca = '';
+    if (typeof v.marca === 'string')       marca = v.marca;
+    else if (typeof v.marca === 'object' && v.marca)
+      marca = v.marca.descripcion ?? v.marca.nombre ?? '';
+    marca = marca || (v.marcaDescripcion ?? v.nombreMarca ?? '');
+
+    // Modelo: igual
+    let modelo = '';
+    if (typeof v.modelo === 'string')      modelo = v.modelo;
+    else if (typeof v.modelo === 'object' && v.modelo)
+      modelo = v.modelo.descripcion ?? v.modelo.nombre ?? '';
+    modelo = modelo || (v.modeloDescripcion ?? v.nombreModelo ?? '');
+
+    if (marca && modelo && placa) return `${marca} ${modelo} (${placa})`;
+    if (marca && modelo)          return `${marca} ${modelo}`;
+    if (marca && placa)           return `${marca} (${placa})`;
+    if (placa)                    return placa;
+    return `Vehículo #${fallbackId}`;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     FILTROS Y PAGINACIÓN
+  ══════════════════════════════════════════════════════ */
+  get filtrados(): TurnoEnriquecido[] {
+    const f = this.filtro.toLowerCase();
+    if (!f) return this.turnos;
+    return this.turnos.filter(t =>
+      t.turnoId?.toString().includes(f) ||
+      t.propietarioNombre.toLowerCase().includes(f) ||
+      t.vehiculoDescripcion.toLowerCase().includes(f) ||
+      t.tipoTramite.toLowerCase().includes(f) ||
+      t.servicioNombre.toLowerCase().includes(f)
+    );
+  }
+
+  get paginados(): TurnoEnriquecido[] {
     const ini = (this.paginaActual - 1) * this.registrosPorPagina;
     return this.filtrados.slice(ini, ini + this.registrosPorPagina);
   }
 
-  get totalPaginas(): number { return Math.ceil(this.filtrados.length / this.registrosPorPagina); }
-  get paginas(): number[] { return Array.from({ length: this.totalPaginas }, (_, i) => i + 1); }
-  irAPagina(p: number): void { this.paginaActual = p; }
+  get totalPaginas(): number { return Math.ceil(this.filtrados.length / this.registrosPorPagina) || 1; }
+  get paginas(): number[]    { return Array.from({ length: this.totalPaginas }, (_, i) => i + 1); }
+  irAPagina(p: number): void { if (p >= 1 && p <= this.totalPaginas) this.paginaActual = p; }
+  onFiltroChange(): void     { this.paginaActual = 1; }
 
-  getNombreServicio(servicioId?: number): string {
-    if (!servicioId) return '-';
-    return NOMBRES_SERVICIO[servicioId] || `Servicio #${servicioId}`;
-  }
+  /* ══════════════════════════════════════════════════════
+     NAVEGACIÓN AL FORMULARIO DE PROCESO
+  ══════════════════════════════════════════════════════ */
+  iniciarProceso(t: TurnoEnriquecido): void {
+    const rutas: Record<string, string> = {
+      'BAJA':       '/inicio/gestion_vehicular/baja-vehiculo',
+      'BLOQUEO':    '/inicio/gestion_vehicular/bloqueo-vehiculo',
+      'DESBLOQUEO': '/inicio/gestion_vehicular/desbloqueo-vehiculo',
+      'INSPECCION': '/inicio/inspeccion-rtv/registrar',
+    };
 
-  tramiteDisponible(servicioId?: number): boolean {
-    return servicioId != null && servicioId in RUTAS_TRAMITE;
-  }
+    const ruta = rutas[t.tipoTramite] ?? rutas['INSPECCION'];
 
-  getIconoServicio(servicioId?: number): string {
-    const iconos: { [id: number]: string } = { 9: 'lock', 10: 'lock_open', 12: 'remove_circle' };
-    return servicioId && iconos[servicioId] ? iconos[servicioId] : 'assignment';
-  }
-
-  getEstadoBadgeClass(estado?: string): string {
-    switch (estado?.toUpperCase()) {
-      case 'GENERADO':   return 'badge-generado';
-      case 'CONFIRMADO': return 'badge-confirmado';
-      case 'ATENDIDO':   return 'badge-atendido';
-      case 'CANCELADO':  return 'badge-cancelado';
-      default:           return '';
-    }
-  }
-
-  // =============================================
-  // MODAL DE CONFIRMACIÓN
-  // =============================================
-  abrirConfirmacion(turno: Turnos): void {
-    if (!this.tramiteDisponible(turno.servicioId)) return;
-    this.turnoAAtender = turno;
-    this.errorConfirmacion = '';
-    this.mostrarModalConfirmacion = true;
-    this.cdr.detectChanges();
-  }
-
-  cerrarConfirmacion(): void {
-    this.mostrarModalConfirmacion = false;
-    this.turnoAAtender = null;
-    this.errorConfirmacion = '';
-    this.confirmando = false;
-  }
-
-  confirmarAtencion(): void {
-    if (!this.turnoAAtender?.turnoId) return;
-
-    this.confirmando = true;
-    this.errorConfirmacion = '';
-
-    // 1. Cambiar estado a CONFIRMADO
-    this.turnosService.cambiarEstado(this.turnoAAtender.turnoId, 'CONFIRMADO').subscribe({
-      next: () => {
-        const turno = this.turnoAAtender!;
-        this.cerrarConfirmacion();
-
-        // 2. Navegar al formulario del trámite con los datos del turno
-        const ruta = RUTAS_TRAMITE[turno.servicioId!];
-        this.router.navigate([ruta], {
-          queryParams: {
-            turnoId:      turno.turnoId,
-            vehiculoId:   turno.vehiculoId,
-            propietarioId: turno.propietarioId
-          }
-        });
-      },
-      error: () => {
-        this.confirmando = false;
-        this.errorConfirmacion = 'Error al actualizar el estado del turno. Intente nuevamente.';
-        this.cdr.detectChanges();
+    this.router.navigate([ruta], {
+      queryParams: {
+        turnoId:       t.turnoId,
+        tramiteId:     t.tramiteId     ?? '',
+        vehiculoId:    t.vehiculoId,
+        propietarioId: t.propietarioId,
+        servicioId:    t.servicioId,
+        numeroTurno:   `TRN-${t.turnoId}`,
+        fromRecepcion: 'true'
       }
     });
+  }
+
+  /* ══════════════════════════════════════════════════════
+     UI HELPERS
+  ══════════════════════════════════════════════════════ */
+  getTramiteIcon(tipo: string): string {
+    if (tipo === 'BAJA')       return 'remove_circle';
+    if (tipo === 'DESBLOQUEO') return 'lock_open';
+    if (tipo === 'BLOQUEO')    return 'lock';
+    return 'fact_check';
+  }
+
+  getTramiteClass(tipo: string): string {
+    if (tipo === 'BAJA')       return 'tipo-baja';
+    if (tipo === 'DESBLOQUEO') return 'tipo-desbloqueo';
+    if (tipo === 'BLOQUEO')    return 'tipo-bloqueo';
+    return 'tipo-inspeccion';
+  }
+
+  getEstadoBadge(estado: string): string {
+    if (estado === 'PAGADO')     return 'badge-pagado';
+    if (estado === 'EN_PROCESO') return 'badge-proceso';
+    if (estado === 'FINALIZADO') return 'badge-finalizado';
+    return 'badge-pagado';
   }
 }

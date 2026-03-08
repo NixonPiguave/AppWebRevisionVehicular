@@ -3,11 +3,13 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BajaVehiculoService, BajaVehiculo } from '../../../services/rtv/BajaVehiculo.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { CloudinaryService } from '../../../services/cloudinary.service';
 import { NotificationService } from '../../../services/notification.service';
+import { TurnoRecepcionService } from '../../../services/administracion/turno-recepcion.service';
 
 const BAJA_VACIA: BajaVehiculo = {
   idBaja: null,
@@ -85,16 +87,45 @@ export class BajaVehiculoComponent implements OnInit {
   constanciaPolicialUrl = '';
   uploadingDoc = false;
 
+  // ── Flujo desde Recepción ──────────────────────────────
+  fromRecepcion = false;
+  turnoId: number | null = null;
+  finalizando = false;
+
   constructor(
     private service: BajaVehiculoService,
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
     private cloudinaryService: CloudinaryService,
     private cdr: ChangeDetectorRef,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private turnoRecepcionService: TurnoRecepcionService
   ) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.cargar();
+
+    // Detectar si viene de Recepción con un turno
+    this.route.queryParams.subscribe(params => {
+      if (params['fromRecepcion'] === 'true') {
+        this.fromRecepcion = true;
+        this.turnoId = params['turnoId'] ? +params['turnoId'] : null;
+
+        // Pre-cargar datos del turno y abrir modal de creación
+        this.abrirModalCrear();
+        this.editando.tramiteId     = params['tramiteId']     ? +params['tramiteId']     : null;
+        this.editando.vehiculoId    = params['vehiculoId']    ? +params['vehiculoId']    : null;
+        this.editando.propietarioId = params['propietarioId'] ? +params['propietarioId'] : null;
+        this.editando.numeroTramite = params['numeroTurno']   || '';
+        this.editando.fechaSolicitud = new Date().toISOString().slice(0, 16);
+
+        if (this.editando.vehiculoId)    this.cargarVehiculoPorId(this.editando.vehiculoId);
+        if (this.editando.propietarioId) this.cargarPropietarioPorId(this.editando.propietarioId);
+      }
+    });
+  }
 
   cargar(): void {
     this.cargando = true;
@@ -152,6 +183,12 @@ export class BajaVehiculoComponent implements OnInit {
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
     this.resetDocumentos();
+    // Si vino de recepción y cierra sin guardar, regresa
+    if (this.fromRecepcion) {
+      this.fromRecepcion = false;
+      this.turnoId = null;
+      this.router.navigate(['/inicio/operaciones/recepcion']);
+    }
   }
 
   private resetDocumentos(): void {
@@ -161,6 +198,18 @@ export class BajaVehiculoComponent implements OnInit {
     this.ordenJudicialFile = null;
     this.constanciaPolicialUrl = '';
     this.constanciaPolicialFile = null;
+  }
+
+  // Texto dinámico del botón según contexto
+  get textoBotonGuardar(): string {
+    if (this.guardando || this.finalizando) return 'Procesando...';
+    if (this.fromRecepcion) return 'Registrar Baja y Finalizar Turno';
+    return this.modoEdicion ? 'Guardar Cambios' : 'Registrar Baja';
+  }
+
+  get iconoBotonGuardar(): string {
+    if (this.fromRecepcion) return 'task_alt';
+    return this.modoEdicion ? 'save' : 'remove_circle';
   }
 
   guardar(): void {
@@ -180,15 +229,17 @@ export class BajaVehiculoComponent implements OnInit {
       this.notification.error('Debe adjuntar la constancia policial.');
       return;
     }
+
     this.guardando = true;
-    const id = this.editando.idBaja;
-    const op = this.modoEdicion && id
-      ? this.service.actualizar(id, this.editando)
-      : this.service.crear(this.editando);
 
     if (!this.modoEdicion && !this.editando.numeroTramite) {
       this.editando.numeroTramite = 'BAJ-' + Date.now();
     }
+
+    const id = this.editando.idBaja;
+    const op = this.modoEdicion && id
+      ? this.service.actualizar(id, this.editando)
+      : this.service.crear(this.editando);
 
     const subirYGuardar = () => {
       if (this.requiereChatarrizado()) {
@@ -198,10 +249,7 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.certChatarrizadoFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.certChatarrizadoFile, 'documentos');
           upload$.subscribe({
-            next: (res) => {
-              this.editando.certChatarrizado = res.url;
-              subirOrdenYConstanciaYGuardar(op);
-            },
+            next: (res) => { this.editando.certChatarrizado = res.url; subirOrdenYConstanciaYGuardar(op); },
             error: () => { this.guardando = false; this.notification.error('Error al subir certificado.'); }
           });
         } else {
@@ -221,10 +269,7 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.ordenJudicialFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.ordenJudicialFile, 'documentos');
           upload$.subscribe({
-            next: (res) => {
-              this.editando.ordenJudicial = res.url;
-              subirConstanciaYGuardar(operacion);
-            },
+            next: (res) => { this.editando.ordenJudicial = res.url; subirConstanciaYGuardar(operacion); },
             error: () => { this.guardando = false; this.notification.error('Error al subir orden judicial.'); }
           });
         } else {
@@ -244,10 +289,7 @@ export class BajaVehiculoComponent implements OnInit {
             ? this.cloudinaryService.uploadPdf(this.constanciaPolicialFile, 'documentos')
             : this.cloudinaryService.uploadImage(this.constanciaPolicialFile, 'documentos');
           upload$.subscribe({
-            next: (res) => {
-              this.editando.constanciaPolicial = res.url;
-              this.ejecutarGuardado(operacion);
-            },
+            next: (res) => { this.editando.constanciaPolicial = res.url; this.ejecutarGuardado(operacion); },
             error: () => { this.guardando = false; this.notification.error('Error al subir constancia policial.'); }
           });
         } else {
@@ -264,8 +306,44 @@ export class BajaVehiculoComponent implements OnInit {
 
   private ejecutarGuardado(op: ReturnType<BajaVehiculoService['crear']> | ReturnType<BajaVehiculoService['actualizar']>): void {
     op.subscribe({
-      next: () => { this.cargar(); this.cerrarModalForm(); this.guardando = false; },
-      error: () => { this.guardando = false; this.notification.error('Error al guardar la baja del vehículo.'); }
+      next: () => {
+        this.guardando = false;
+        this.cargar();
+        this.resetDocumentos();
+
+        if (this.fromRecepcion && this.turnoId) {
+          // Viene de Recepción: finalizar el turno y regresar
+          this.mostrarModalForm = false;
+          this.finalizarTurnoYRegresar();
+        } else {
+          // Flujo normal
+          this.cerrarModalForm();
+        }
+      },
+      error: () => {
+        this.guardando = false;
+        this.notification.error('Error al guardar la baja del vehículo.');
+      }
+    });
+  }
+
+  private finalizarTurnoYRegresar(): void {
+    if (!this.turnoId) return;
+    this.finalizando = true;
+    this.turnoRecepcionService.finalizarTurno(this.turnoId).subscribe({
+      next: () => {
+        this.finalizando = false;
+        this.fromRecepcion = false;
+        this.turnoId = null;
+        this.router.navigate(['/inicio/operaciones/recepcion']);
+      },
+      error: () => {
+        this.finalizando = false;
+        this.notification.error('Baja guardada, pero no se pudo finalizar el turno.');
+        this.fromRecepcion = false;
+        this.turnoId = null;
+        this.router.navigate(['/inicio/operaciones/recepcion']);
+      }
     });
   }
 
@@ -304,7 +382,7 @@ export class BajaVehiculoComponent implements OnInit {
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
-      next: (v) => (this.vehiculoSeleccionadoInfo = v),
+      next: (v) => { this.vehiculoSeleccionadoInfo = v; this.cdr.detectChanges(); },
       error: () => console.warn('No se pudo cargar vehículo por ID')
     });
   }
@@ -344,7 +422,7 @@ export class BajaVehiculoComponent implements OnInit {
   private cargarPropietarioPorId(id: number): void {
     if (!id || id <= 0) return;
     this.propietarioService.obtenerPorId(id).subscribe({
-      next: (p) => (this.propietarioSeleccionadoInfo = p),
+      next: (p) => { this.propietarioSeleccionadoInfo = p; this.cdr.detectChanges(); },
       error: () => console.warn('No se pudo cargar propietario por ID')
     });
   }
@@ -418,7 +496,7 @@ export class BajaVehiculoComponent implements OnInit {
   getEstadoBadge(estado: string): string {
     if (estado === 'CONCLUIDO') return 'badge-concluido';
     if (estado === 'PENDIENTE') return 'badge-pendiente';
-    if (estado === 'ANULADO') return 'badge-anulado';
+    if (estado === 'ANULADO')   return 'badge-anulado';
     return '';
   }
 

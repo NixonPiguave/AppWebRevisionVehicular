@@ -212,3 +212,57 @@ textarea.form-input { resize: vertical; min-height: 60px; }
 }
 .notif-si  { background: #d4edda; color: #155724; }
 .notif-no  { background: #f8d7da; color: #721c24; }
+
+.banner-recepcion {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #795548;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  flex: 1;
+}
+.banner-recepcion mat-icon { color: #f57f17; font-size: 18px; flex-shrink: 0; }
+.banner-recepcion strong { color: #c62828; }
+
+.footer-botones {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn-finalizar-recepcion {
+  background: #b71c1c !important;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 7px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.btn-finalizar-recepcion:hover:not(:disabled) {
+  background: #7f0000 !important;
+  box-shadow: 0 4px 14px rgba(183,28,28,0.35);
+}
+.btn-finalizar-recepcion:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-finalizar-recepcion mat-icon { font-size: 20px; }
+
+.spinner-btn-small {
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
