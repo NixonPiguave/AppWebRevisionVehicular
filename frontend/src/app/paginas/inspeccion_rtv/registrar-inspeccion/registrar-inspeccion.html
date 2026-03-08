@@ -10,8 +10,40 @@
     <div class="header-info" *ngIf="vehiculoInfo">
       <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
       <span class="badge-turno" *ngIf="turnoId">Turno #{{ turnoId }}</span>
+
+      <!-- Badge de validación de fábrica -->
+      <span
+        class="badge-fabrica"
+        [class.fab-ok]="estadoFabrica === 'coincide'"
+        [class.fab-warn]="estadoFabrica === 'discrepancia'"
+        [class.fab-neutro]="estadoFabrica === 'no-encontrado'"
+        *ngIf="estadoFabrica !== 'sin-datos'"
+      >
+        <mat-icon>{{ estadoFabrica === 'coincide' ? 'verified' : estadoFabrica === 'discrepancia' ? 'warning_amber' : 'help_outline' }}</mat-icon>
+        {{ estadoFabrica === 'coincide' ? 'Datos fábrica OK' : estadoFabrica === 'discrepancia' ? 'Discrepancia fábrica' : 'No registrado' }}
+      </span>
     </div>
   </header>
+
+  <!-- Detalle de discrepancias de fábrica -->
+  <div class="fabrica-detalle" *ngIf="estadoFabrica === 'discrepancia'">
+    <mat-icon class="fabrica-icono">warning_amber</mat-icon>
+    <div class="fabrica-contenido">
+      <span class="fabrica-titulo">Discrepancias con datos de fabricación</span>
+      <div class="fabrica-fila" *ngFor="let campo of camposConDiscrepancia">
+        <span class="fab-campo-nombre">{{ campo.etiqueta }}</span>
+        <span class="fab-chip rtv">
+          <span class="fab-chip-label">Registrado</span>
+          {{ campo.valorVehiculo }}
+        </span>
+        <mat-icon class="fab-arrow">east</mat-icon>
+        <span class="fab-chip fab">
+          <span class="fab-chip-label">Fábrica</span>
+          {{ campo.valorFabrica }}
+        </span>
+      </div>
+    </div>
+  </div>
 
   <!-- Mensajes -->
   <div class="mensaje-error" *ngIf="error">
@@ -35,20 +67,8 @@
         <h3>Ubicaciones para revisión visual</h3>
         <p class="subtitulo">Seleccione las zonas inspeccionadas</p>
 
-        <!--
-          Layout de posiciones sobre la imagen cenital:
-
-                    [ Delantera ]
-          [R.D.Izq]   IMAGEN    [R.D.Der]
-          [Lat. Izq]  IMAGEN    [Lat. Der]
-          [R.T.Izq]   IMAGEN    [R.T.Der]
-                    [  Trasera  ]
-
-          + Habitáculo y Parte Inferior debajo del diagrama
-        -->
         <div class="vehiculo-svg-wrapper">
 
-          <!-- Imagen cenital del vehículo -->
           <img
             class="vehiculo-img"
             src="autoInspeccion.jpg"
@@ -56,10 +76,8 @@
             draggable="false"
           />
 
-          <!-- Checkboxes: posición absoluta en desktop, grid en móvil -->
           <div class="ub-checkboxes-overlay">
 
-            <!-- ── TOP CENTER: Delantera ── -->
             <div class="ub-check ub-delantera" [class.seleccionada]="ubicaciones.delantera">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.delantera" name="delantera"/>
@@ -68,7 +86,6 @@
               </label>
             </div>
 
-            <!-- ── TOP LEFT: Rueda Delantera Izquierda ── -->
             <div class="ub-check ub-rdi" [class.seleccionada]="ubicaciones.ruedaDelIzq">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.ruedaDelIzq" name="rdi"/>
@@ -77,7 +94,6 @@
               </label>
             </div>
 
-            <!-- ── TOP RIGHT: Rueda Delantera Derecha ── -->
             <div class="ub-check ub-rdd" [class.seleccionada]="ubicaciones.ruedaDelDer">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.ruedaDelDer" name="rdd"/>
@@ -86,7 +102,6 @@
               </label>
             </div>
 
-            <!-- ── MIDDLE LEFT: Lateral Izquierdo ── -->
             <div class="ub-check ub-lat-izq" [class.seleccionada]="ubicaciones.lateralIzquierdo">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.lateralIzquierdo" name="latIzq"/>
@@ -95,7 +110,6 @@
               </label>
             </div>
 
-            <!-- ── MIDDLE RIGHT: Lateral Derecho ── -->
             <div class="ub-check ub-lat-der" [class.seleccionada]="ubicaciones.lateralDerecho">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.lateralDerecho" name="latDer"/>
@@ -104,7 +118,6 @@
               </label>
             </div>
 
-            <!-- ── BOTTOM LEFT: Rueda Trasera Izquierda ── -->
             <div class="ub-check ub-rti" [class.seleccionada]="ubicaciones.ruedaTraIzq">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.ruedaTraIzq" name="rti"/>
@@ -113,7 +126,6 @@
               </label>
             </div>
 
-            <!-- ── BOTTOM RIGHT: Rueda Trasera Derecha ── -->
             <div class="ub-check ub-rtd" [class.seleccionada]="ubicaciones.ruedaTraDer">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.ruedaTraDer" name="rtd"/>
@@ -122,7 +134,6 @@
               </label>
             </div>
 
-            <!-- ── BOTTOM CENTER: Trasera ── -->
             <div class="ub-check ub-trasera" [class.seleccionada]="ubicaciones.trasera">
               <label class="ub-label">
                 <input type="checkbox" [(ngModel)]="ubicaciones.trasera" name="trasera"/>
@@ -135,7 +146,6 @@
 
         </div><!-- /vehiculo-svg-wrapper -->
 
-        <!-- ── Ubicaciones que no tienen representación cenital ── -->
         <div class="ubicaciones-extra">
           <div class="ub-extra" [class.seleccionada]="ubicaciones.habitaculo">
             <label class="ub-label">
@@ -159,7 +169,6 @@
           </div>
         </div>
 
-        <!-- Contador de ubicaciones seleccionadas -->
         <p class="ub-contador" *ngIf="totalUbicaciones > 0">
           <mat-icon>check_circle</mat-icon>
           {{ totalUbicaciones }} zona(s) seleccionada(s)

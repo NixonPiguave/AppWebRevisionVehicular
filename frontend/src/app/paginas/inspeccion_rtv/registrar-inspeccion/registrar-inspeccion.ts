@@ -30,9 +30,34 @@ interface UbicacionesRevisadas {
 }
 
 interface VehiculoInfo {
-  matricula?: string;
-  chasis?: string;
-  id?: number;
+  matricula?:       string;
+  chasis?:          string;
+  id?:              number;
+  // ── campos extra que llegan del backend ──
+  color?:           string;
+  marca?:           string;
+  modelo?:          string;
+  anioFabricacion?: number;
+  vin?:             string;
+}
+
+// ── Estructura del registro de fábrica simulado ──────────────
+interface DatosFabrica {
+  matricula:        string;   // clave de búsqueda
+  chasis:           string;
+  vin:              string;
+  marca:            string;
+  modelo:           string;
+  color:            string;
+  anioFabricacion:  number;
+}
+
+// ── Resultado de comparar un campo ──────────────────────────
+interface CampoComparado {
+  etiqueta: string;
+  valorVehiculo: string;
+  valorFabrica:  string;
+  coincide:      boolean;
 }
 
 @Component({
@@ -76,6 +101,74 @@ export class RegistrarInspeccionComponent implements OnInit {
   guardando = false;
   error = '';
   sinTurnoSeleccionado = false;
+
+  // ════════════════════════════════════════════════════════════
+  //  BASE DE DATOS DE FÁBRICA SIMULADA
+  //  Agrega aquí todos los vehículos que uses en pruebas.
+  //  La clave de búsqueda es la matrícula (case-insensitive).
+  // ════════════════════════════════════════════════════════════
+  private readonly datosFabrica: DatosFabrica[] = [
+    {
+      matricula:       'HC-2LIA',
+      chasis:          'ABC123456789',
+      vin:             'VIN001ABC2024',
+      marca:           'Toyota',
+      modelo:          'Corolla',
+      color:           'Blanco',
+      anioFabricacion: 2020
+    },
+    {
+      matricula:       'GXK-0234',
+      chasis:          'DEF987654321',
+      vin:             'VIN002DEF2022',
+      marca:           'Chevrolet',
+      modelo:          'Aveo',
+      color:           'Rojo',
+      anioFabricacion: 2022
+    },
+    {
+      matricula:       'PBG-1122',
+      chasis:          'GHI112233445',
+      vin:             'VIN003GHI2019',
+      marca:           'Hyundai',
+      modelo:          'Tucson',
+      color:           'Gris',
+      anioFabricacion: 2019
+    },
+    {
+      matricula:       'AAA-0001',
+      chasis:          'JKL556677889',
+      vin:             'VIN004JKL2023',
+      marca:           'Kia',
+      modelo:          'Sportage',
+      color:           'Negro',
+      anioFabricacion: 2023
+    },
+    {
+      matricula:       'BBB-0002',
+      chasis:          'MNO998877665',
+      vin:             'VIN005MNO2021',
+      marca:           'Nissan',
+      modelo:          'Sentra',
+      color:           'Azul',
+      anioFabricacion: 2021
+    }
+  ];
+
+  // ── Resultado de la comparación (se llena en cargarVehiculoInfo) ──
+  camposComparados: CampoComparado[] = [];
+
+  get estadoFabrica(): 'coincide' | 'discrepancia' | 'no-encontrado' | 'sin-datos' {
+    if (!this.vehiculoInfo) return 'sin-datos';
+    if (this.camposComparados.length === 0) return 'no-encontrado';
+    return this.camposComparados.every(c => c.coincide) ? 'coincide' : 'discrepancia';
+  }
+
+  get camposConDiscrepancia(): CampoComparado[] {
+    return this.camposComparados.filter(c => !c.coincide);
+  }
+
+  // ════════════════════════════════════════════════════════════
 
   constructor(
     private router: Router,
@@ -152,13 +245,77 @@ export class RegistrarInspeccionComponent implements OnInit {
   cargarVehiculoInfo(id: number): void {
     this.vehiculoService.obtenerPorId(id).subscribe({
       next: (v: any) => {
-        this.vehiculoInfo = { id: v.id, matricula: v.matricula || v.placa, chasis: v.chasis };
+        this.vehiculoInfo = {
+          id:              v.id,
+          matricula:       v.matricula || v.placa,
+          chasis:          v.chasis,
+          vin:             v.vin,
+          marca:           v.marcaNombre  || v.marca?.nombre  || v.marca  || '',
+          modelo:          v.modeloNombre || v.modelo?.nombre || v.modelo || '',
+          color:           v.color,
+          anioFabricacion: v.anioFabricacion
+        };
+        // ── Comparar contra datos de fábrica ──
+        this.compararConFabrica();
       },
       error: () => {
         this.vehiculoInfo = { id, matricula: `Veh #${id}` };
+        this.camposComparados = [];
       }
     });
   }
+
+  // ── Busca la matrícula en datosFabrica y compara campo por campo ──
+  private compararConFabrica(): void {
+    if (!this.vehiculoInfo?.matricula) {
+      this.camposComparados = [];
+      return;
+    }
+
+    const matricula = (this.vehiculoInfo.matricula ?? '').trim().toUpperCase();
+    const fabrica = this.datosFabrica.find(
+      f => f.matricula.toUpperCase() === matricula
+    );
+
+    if (!fabrica) {
+      this.camposComparados = [];
+      return;
+    }
+
+    const cmp = (a: string | number | undefined, b: string | number) =>
+      String(a ?? '').trim().toLowerCase() === String(b).trim().toLowerCase();
+
+    this.camposComparados = [
+      {
+        etiqueta:      'VIN',
+        valorVehiculo: this.vehiculoInfo.vin   ?? '—',
+        valorFabrica:  fabrica.vin,
+        coincide:      cmp(this.vehiculoInfo.vin, fabrica.vin)
+      },
+      {
+        etiqueta:      'Marca',
+        valorVehiculo: this.vehiculoInfo.marca ?? '—',
+        valorFabrica:  fabrica.marca,
+        coincide:      cmp(this.vehiculoInfo.marca, fabrica.marca)
+      },
+      {
+        etiqueta:      'Modelo',
+        valorVehiculo: this.vehiculoInfo.modelo ?? '—',
+        valorFabrica:  fabrica.modelo,
+        coincide:      cmp(this.vehiculoInfo.modelo, fabrica.modelo)
+      },
+      {
+        etiqueta:      'Color',
+        valorVehiculo: this.vehiculoInfo.color ?? '—',
+        valorFabrica:  fabrica.color,
+        coincide:      cmp(this.vehiculoInfo.color, fabrica.color)
+      }
+    ];
+  }
+
+  // ════════════════════════════════════════════════════════════
+  //  El resto del componente permanece igual
+  // ════════════════════════════════════════════════════════════
 
   get defectosFiltrados(): Defectos[] {
     if (!this.filtroDefectos.trim()) return this.defectos;
@@ -195,7 +352,6 @@ export class RegistrarInspeccionComponent implements OnInit {
     else           this.defectosSeleccionados.push(defecto);
   }
 
-  // Convierte el objeto de ubicaciones a array de strings para el payload
   getUbicacionesArray(): string[] {
     const map: [keyof UbicacionesRevisadas, string][] = [
       ['delantera',        'Delantera'],
@@ -212,7 +368,6 @@ export class RegistrarInspeccionComponent implements OnInit {
     return map.filter(([key]) => this.ubicaciones[key]).map(([, val]) => val);
   }
 
-  // Número total de ubicaciones seleccionadas (para mostrar en UI)
   get totalUbicaciones(): number {
     return this.getUbicacionesArray().length;
   }
