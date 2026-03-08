@@ -11,25 +11,7 @@ import { EmpresaService } from '../../../services/administracion/empresa.service
 import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
 import { VehiculoService, Vehiculo } from '../../../services/gestion_vehicular/vehiculo.service';
 import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
-
-const SERVICIOS: { id: number; nombre: string }[] = [
-  { id: 1,  nombre: 'Emisión de matrícula por Primera Vez.' },
-  { id: 2,  nombre: 'Emisión de Documento Anual de Circulación' },
-  { id: 3,  nombre: 'Duplicado de Documento de Matrícula.' },
-  { id: 4,  nombre: 'Duplicado del Documento Anual de Circulación.' },
-  { id: 5,  nombre: 'Transferencia de Dominio.' },
-  { id: 6,  nombre: 'Cambio de Servicio.' },
-  { id: 7,  nombre: 'Matriculación de Unidades de Carga' },
-  { id: 8,  nombre: 'Cambio de Características' },
-  { id: 9,  nombre: 'Bloqueo de vehículo' },
-  { id: 10, nombre: 'Desbloqueo de vehículo' },
-  { id: 11, nombre: 'Registro de Observaciones' },
-  { id: 12, nombre: 'Baja de vehículos' },
-  { id: 13, nombre: 'Registro de Incidentes' },
-  { id: 14, nombre: 'Anulación de Trámites' },
-  { id: 15, nombre: 'Registro en Base Única Nacional' },
-  { id: 16, nombre: 'Casos especiales' }
-];
+import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
 
 @Component({
   selector: 'app-pagos',
@@ -46,6 +28,7 @@ export class PagosComponent implements OnInit {
   montoPagado: number | null = null;
   cargandoTarifa = false;
   sinTarifa = false;
+  servicios: Servicio[] = [];
 
   mostrarModalTurno = false;
   busquedaTurno = '';
@@ -56,6 +39,7 @@ export class PagosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
+    private servicioService: ServicioService,
     private propietarioService: PropietarioService,
     private empresaService: EmpresaService,
     private ticketService: TicketPagoService,
@@ -69,8 +53,16 @@ export class PagosComponent implements OnInit {
   marcas: Marca[] = [];
 
   ngOnInit(): void {
+    this.cargarServicios();
     this.cargarTurnos();
     this.cargarModelosYMarcas();
+  }
+
+  cargarServicios(): void {
+    this.servicioService.listar().subscribe({
+      next: (data) => { this.servicios = data ?? []; this.cdr.detectChanges(); },
+      error: () => { this.servicios = []; this.cdr.detectChanges(); }
+    });
   }
 
   cargarTurnos(): void {
@@ -165,7 +157,7 @@ export class PagosComponent implements OnInit {
 
   obtenerNombreServicio(servicioId?: number): string {
     if (!servicioId) return '-';
-    return SERVICIOS.find(x => x.id === servicioId)?.nombre ?? String(servicioId);
+    return this.servicios.find(x => x.idTipoTramite === servicioId)?.nombre ?? String(servicioId);
   }
 
   montoValido(): boolean {

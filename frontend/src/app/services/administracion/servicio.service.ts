@@ -6,7 +6,7 @@ export interface Servicio {
   idTipoTramite: number;
   nombre: string;
   descripcion?: string;
-  requiereRevision?: string;
+  requiereRevision?: string | boolean;
   generaMulta?: boolean;
   estado?: string;
 }

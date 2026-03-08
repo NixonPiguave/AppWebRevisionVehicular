@@ -37,12 +37,13 @@
     <nav class="menu">
 
       <!-- Dashboard -->
-      <div class="menu-item">
+      <a *ngIf="puedeVer('menu_dashboard')" class="menu-item" routerLink="/inicio/dashboard" routerLinkActive="active">
         <mat-icon class="menu-icon">dashboard</mat-icon>
         <span *ngIf="!sidebarCollapsed">Dashboard</span>
-      </div>
+      </a>
 
       <a
+        *ngIf="puedeVer('menu_registro_tramite')"
         class="menu-item"
         routerLink="/inicio/administracion/turnos"
         [queryParams]="{ nuevo: 1 }"
@@ -54,12 +55,12 @@
       <!-- ========================================
            GESTIÓN VEHICULAR
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_gestion_vehicular','menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision','menu_tramites_legales','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
         </span>
 
-        <div class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_gestion_vehicular','menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleGestionVehicular()"
@@ -75,15 +76,15 @@
           </div>
 
           <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/gestion_vehicular/vehiculo" routerLinkActive="active" class="submenu-item">Vehículos</a>
-            <a routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
-            <a class="submenu-item">Revisiones</a>
-            <a class="submenu-item">Resultados de Revisión</a>
+            <a *ngIf="puedeVer('menu_vehiculos')" routerLink="/inicio/gestion_vehicular/vehiculo" routerLinkActive="active" class="submenu-item">Vehículos</a>
+            <a *ngIf="puedeVer('menu_propietario')" routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
+            <a *ngIf="puedeVer('menu_revisiones')" class="submenu-item">Revisiones</a>
+            <a *ngIf="puedeVer('menu_resultados_revision')" class="submenu-item">Resultados de Revisión</a>
           </div>
         </div>
 
         <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
-        <div class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_tramites_legales','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleAccesosRapidos()"
@@ -99,15 +100,15 @@
           </div>
 
           <div class="submenu" [class.open]="accesosRapidosOpen && !sidebarCollapsed">
-            <a class="submenu-item" (click)="irATramiteRapido(9)">
+            <a *ngIf="puedeVer('menu_bloqueo')" class="submenu-item" (click)="irATramiteRapido(9)">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock</mat-icon>
               Bloqueo
             </a>
-            <a class="submenu-item" (click)="irATramiteRapido(10)">
+            <a *ngIf="puedeVer('menu_desbloqueo')" class="submenu-item" (click)="irATramiteRapido(10)">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock_open</mat-icon>
               Desbloqueo
             </a>
-            <a class="submenu-item" (click)="irATramiteRapido(12)">
+            <a *ngIf="puedeVer('menu_baja')" class="submenu-item" (click)="irATramiteRapido(12)">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">remove_circle_outline</mat-icon>
               Baja
             </a>
@@ -118,7 +119,7 @@
       <!-- ========================================
            OPERACIONES
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_operaciones','menu_pagos','menu_recepcion','menu_certificados')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Operaciones
         </span>
@@ -139,11 +140,11 @@
           </div>
 
           <div class="submenu" [class.open]="operacionesOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/operaciones/pagos" routerLinkActive="active" class="submenu-item">Pagos</a>
-            <a routerLink="/inicio/operaciones/recepcion" routerLinkActive="active" class="submenu-item">
+            <a *ngIf="puedeVer('menu_pagos')" routerLink="/inicio/operaciones/pagos" routerLinkActive="active" class="submenu-item">Pagos</a>
+            <a *ngIf="puedeVer('menu_recepcion')" routerLink="/inicio/operaciones/recepcion" routerLinkActive="active" class="submenu-item">
               Recepción
             </a>
-            <a class="submenu-item">Certificados</a>
+            <a *ngIf="puedeVer('menu_certificados')" class="submenu-item">Certificados</a>
           </div>
         </div>
       </div>
@@ -151,7 +152,7 @@
       <!-- ========================================
            CATÁLOGO DE VEHÍCULOS
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_catalogo_vehiculos','menu_catalogo_marcas','menu_catalogo_modelos','menu_catalogo_tipo_vehiculo','menu_catalogo_clases','menu_catalogo_categorias','menu_catalogo_subcategorias','menu_catalogo_tipo_combustible','menu_catalogo_tipo_matricula','menu_catalogo_traccion','menu_catalogo_ejes','menu_catalogo_capacidad','menu_catalogo_ambito')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Catálogo de Vehículos
         </span>
@@ -172,18 +173,18 @@
           </div>
 
           <div class="submenu" [class.open]="catalogoVehiculosOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/catalogo-vehiculos/marcas" routerLinkActive="active" class="submenu-item">Marcas</a>
-            <a routerLink="/inicio/catalogo-vehiculos/modelos" routerLinkActive="active" class="submenu-item">Modelos</a>
-            <a routerLink="/inicio/catalogo-vehiculos/tipo-vehiculo" routerLinkActive="active" class="submenu-item">Tipos de Vehículo</a>
-            <a routerLink="/inicio/catalogo-vehiculos/clases" routerLinkActive="active" class="submenu-item">Clases</a>
-            <a routerLink="/inicio/catalogo-vehiculos/categorias" routerLinkActive="active" class="submenu-item">Categorías</a>
-            <a routerLink="/inicio/catalogo-vehiculos/subcategorias" routerLinkActive="active" class="submenu-item">Subcategorías</a>
-            <a routerLink="/inicio/catalogo-vehiculos/tipo-combustible" routerLinkActive="active" class="submenu-item">Tipos de Combustible</a>
-            <a routerLink="/inicio/catalogo-vehiculos/tipo-matricula" routerLinkActive="active" class="submenu-item">Tipos de Matrícula</a>
-            <a routerLink="/inicio/catalogo-vehiculos/traccion" routerLinkActive="active" class="submenu-item">Tracción</a>
-            <a routerLink="/inicio/catalogo-vehiculos/ejes" routerLinkActive="active" class="submenu-item">Ejes</a>
-            <a routerLink="/inicio/catalogo-vehiculos/capacidad-carga" routerLinkActive="active" class="submenu-item">Capacidad de Carga</a>
-            <a routerLink="/inicio/catalogo-vehiculos/ambito-operacional" routerLinkActive="active" class="submenu-item">Ámbito Operacional</a>
+            <a *ngIf="puedeVer('menu_catalogo_marcas')" routerLink="/inicio/catalogo-vehiculos/marcas" routerLinkActive="active" class="submenu-item">Marcas</a>
+            <a *ngIf="puedeVer('menu_catalogo_modelos')" routerLink="/inicio/catalogo-vehiculos/modelos" routerLinkActive="active" class="submenu-item">Modelos</a>
+            <a *ngIf="puedeVer('menu_catalogo_tipo_vehiculo')" routerLink="/inicio/catalogo-vehiculos/tipo-vehiculo" routerLinkActive="active" class="submenu-item">Tipos de Vehículo</a>
+            <a *ngIf="puedeVer('menu_catalogo_clases')" routerLink="/inicio/catalogo-vehiculos/clases" routerLinkActive="active" class="submenu-item">Clases</a>
+            <a *ngIf="puedeVer('menu_catalogo_categorias')" routerLink="/inicio/catalogo-vehiculos/categorias" routerLinkActive="active" class="submenu-item">Categorías</a>
+            <a *ngIf="puedeVer('menu_catalogo_subcategorias')" routerLink="/inicio/catalogo-vehiculos/subcategorias" routerLinkActive="active" class="submenu-item">Subcategorías</a>
+            <a *ngIf="puedeVer('menu_catalogo_tipo_combustible')" routerLink="/inicio/catalogo-vehiculos/tipo-combustible" routerLinkActive="active" class="submenu-item">Tipos de Combustible</a>
+            <a *ngIf="puedeVer('menu_catalogo_tipo_matricula')" routerLink="/inicio/catalogo-vehiculos/tipo-matricula" routerLinkActive="active" class="submenu-item">Tipos de Matrícula</a>
+            <a *ngIf="puedeVer('menu_catalogo_traccion')" routerLink="/inicio/catalogo-vehiculos/traccion" routerLinkActive="active" class="submenu-item">Tracción</a>
+            <a *ngIf="puedeVer('menu_catalogo_ejes')" routerLink="/inicio/catalogo-vehiculos/ejes" routerLinkActive="active" class="submenu-item">Ejes</a>
+            <a *ngIf="puedeVer('menu_catalogo_capacidad')" routerLink="/inicio/catalogo-vehiculos/capacidad-carga" routerLinkActive="active" class="submenu-item">Capacidad de Carga</a>
+            <a *ngIf="puedeVer('menu_catalogo_ambito')" routerLink="/inicio/catalogo-vehiculos/ambito-operacional" routerLinkActive="active" class="submenu-item">Ámbito Operacional</a>
           </div>
         </div>
       </div>
@@ -191,7 +192,7 @@
       <!-- ========================================
            INSPECCIÓN RTV
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_inspeccion_rtv','menu_inspeccion_turnos_pagados','menu_inspeccion_lineas','menu_inspeccion_metodos','menu_inspeccion_equipos')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Inspección RTV
         </span>
@@ -212,10 +213,10 @@
           </div>
 
           <div class="submenu" [class.open]="inspeccionRtvOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/inspeccion-rtv/turnos-pagados" routerLinkActive="active" class="submenu-item">Registrar Inspección</a>
-            <a routerLink="/inicio/inspeccion-rtv/lineas-inspeccion" routerLinkActive="active" class="submenu-item">Líneas de Inspección</a>
-            <a routerLink="/inicio/inspeccion-rtv/metodo-inspeccion" routerLinkActive="active" class="submenu-item">Métodos de Inspección</a>
-            <a routerLink="/inicio/inspeccion-rtv/equipos" routerLinkActive="active" class="submenu-item">Equipos</a>
+            <a *ngIf="puedeVer('menu_inspeccion_turnos_pagados')" routerLink="/inicio/inspeccion-rtv/turnos-pagados" routerLinkActive="active" class="submenu-item">Registrar Inspección</a>
+            <a *ngIf="puedeVer('menu_inspeccion_lineas')" routerLink="/inicio/inspeccion-rtv/lineas-inspeccion" routerLinkActive="active" class="submenu-item">Líneas de Inspección</a>
+            <a *ngIf="puedeVer('menu_inspeccion_metodos')" routerLink="/inicio/inspeccion-rtv/metodo-inspeccion" routerLinkActive="active" class="submenu-item">Métodos de Inspección</a>
+            <a *ngIf="puedeVer('menu_inspeccion_equipos')" routerLink="/inicio/inspeccion-rtv/equipos" routerLinkActive="active" class="submenu-item">Equipos</a>
           </div>
         </div>
       </div>
@@ -223,7 +224,7 @@
       <!-- ========================================
            DEFECTOS DE INSPECCIÓN
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_defectos_inspeccion','menu_defectos_familia','menu_defectos_subfamilia','menu_defectos_categoria','menu_defectos_tipos','menu_defectos')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Defectos de Inspección
         </span>
@@ -244,11 +245,11 @@
           </div>
 
           <div class="submenu" [class.open]="defectosInspeccionOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/defectos-inspeccion/familia-defecto" routerLinkActive="active" class="submenu-item">Familias de Defectos</a>
-            <a routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
-            <a routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
-            <a routerLink="/inicio/defectos-inspeccion/tipos-defectos" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
-            <a routerLink="/inicio/defectos-inspeccion/defectos" routerLinkActive="active" class="submenu-item">Defectos</a>
+            <a *ngIf="puedeVer('menu_defectos_familia')" routerLink="/inicio/defectos-inspeccion/familia-defecto" routerLinkActive="active" class="submenu-item">Familias de Defectos</a>
+            <a *ngIf="puedeVer('menu_defectos_subfamilia')" routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
+            <a *ngIf="puedeVer('menu_defectos_categoria')" routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
+            <a *ngIf="puedeVer('menu_defectos_tipos')" routerLink="/inicio/defectos-inspeccion/tipos-defectos" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
+            <a *ngIf="puedeVer('menu_defectos')" routerLink="/inicio/defectos-inspeccion/defectos" routerLinkActive="active" class="submenu-item">Defectos</a>
           </div>
         </div>
       </div>
@@ -256,7 +257,7 @@
       <!-- ========================================
            ANT / TRÁMITES
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVer('menu_ant')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           ANT / Trámites
         </span>
@@ -287,7 +288,7 @@
       <!-- ========================================
            CONFIGURACIÓN UMBRAL
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_configuracion_umbral','menu_umbral_unidades','menu_umbral_descripcion','menu_umbral')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Configuración Umbral
         </span>
@@ -308,9 +309,9 @@
           </div>
 
           <div class="submenu" [class.open]="configuracionUmbralOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
-            <a routerLink="/inicio/configuracion-umbral/descripcion-umbral" routerLinkActive="active" class="submenu-item">Descripción de Umbral</a>
-            <a routerLink="/inicio/configuracion-umbral/umbral" routerLinkActive="active" class="submenu-item">Umbral</a>
+            <a *ngIf="puedeVer('menu_umbral_unidades')" routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
+            <a *ngIf="puedeVer('menu_umbral_descripcion')" routerLink="/inicio/configuracion-umbral/descripcion-umbral" routerLinkActive="active" class="submenu-item">Descripción de Umbral</a>
+            <a *ngIf="puedeVer('menu_umbral')" routerLink="/inicio/configuracion-umbral/umbral" routerLinkActive="active" class="submenu-item">Umbral</a>
           </div>
         </div>
       </div>
@@ -318,7 +319,7 @@
       <!-- ========================================
            ADMINISTRACIÓN
            ======================================== -->
-      <div class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_administracion','menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Administración
         </span>
@@ -339,12 +340,13 @@
           </div>
 
           <div class="submenu" [class.open]="administracionOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/administracion/usuarios" routerLinkActive="active" class="submenu-item">Usuarios</a>
-            <a routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
-            <a routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
-            <a routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
-            <a routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
-            <a routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
+            <a *ngIf="puedeVer('menu_usuarios')" routerLink="/inicio/administracion/usuarios" routerLinkActive="active" class="submenu-item">Usuarios</a>
+            <a *ngIf="puedeVer('menu_roles')" routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
+            <a *ngIf="puedeVer('menu_areas')" routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
+            <a *ngIf="puedeVer('menu_empresa')" routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
+            <a *ngIf="puedeVer('menu_turnos')" routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
+            <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
+            <a *ngIf="puedeVer('menu_accesos_rol')" routerLink="/inicio/administracion/accesos-rol" routerLinkActive="active" class="submenu-item">Accesos por rol</a>
           </div>
         </div>
       </div>

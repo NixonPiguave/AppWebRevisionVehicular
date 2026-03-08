@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
+import { ServicioService } from '../../../services/administracion/servicio.service';
 import { catchError, map } from 'rxjs/operators';
 
 /* ─── Estructura real que devuelve el backend ─────────────── */
@@ -31,20 +32,6 @@ export interface TurnoEnriquecido extends TurnoRaw {
   tipoTramite: string;   // derivado del servicioId
 }
 
-/* Mapeo servicioId → tipo de trámite y nombre
-   Ajusta estos IDs según tu catálogo de servicios */
-const MAPA_SERVICIOS: Record<number, { nombre: string; tipo: string }> = {
-  1: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
-  2: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
-  3: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
-  4: { nombre: 'Inspección RTV',       tipo: 'INSPECCION'  },
-  5: { nombre: 'Desbloqueo Vehículo',  tipo: 'DESBLOQUEO'  },
-  6: { nombre: 'Bloqueo Vehículo',     tipo: 'BLOQUEO'     },
-  7: { nombre: 'Baja Vehículo',        tipo: 'BAJA'        },
-  8: { nombre: 'Baja Vehículo',        tipo: 'BAJA'        },
-  9: { nombre: 'Trámite Especial',     tipo: 'INSPECCION'  },
-};
-
 const API = 'http://localhost:8080/api';
 
 @Component({
@@ -62,14 +49,37 @@ export class RecepcionComponent implements OnInit {
   filtro = '';
   registrosPorPagina = 10;
   paginaActual = 1;
+  private mapaServicios: Record<number, { nombre: string; tipo: string }> = {};
 
   constructor(
     private http: HttpClient,
+    private servicioService: ServicioService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void { this.cargar(); }
+  ngOnInit(): void {
+    this.servicioService.listar().subscribe({
+      next: (data) => {
+        this.mapaServicios = {};
+        (data ?? []).forEach(s => {
+          const tipo = this.derivarTipoTramite(s.nombre);
+          this.mapaServicios[s.idTipoTramite] = { nombre: s.nombre, tipo };
+        });
+        this.cargar();
+      },
+      error: () => this.cargar()
+    });
+  }
+
+  private derivarTipoTramite(nombre: string): string {
+    if (!nombre) return 'INSPECCION';
+    const n = nombre.toUpperCase();
+    if (n.includes('BLOQUEO') && !n.includes('DES')) return 'BLOQUEO';
+    if (n.includes('DESBLOQUEO')) return 'DESBLOQUEO';
+    if (n.includes('BAJA')) return 'BAJA';
+    return 'INSPECCION';
+  }
 
   /* ══════════════════════════════════════════════════════
      CARGA Y ENRIQUECIMIENTO
@@ -134,7 +144,7 @@ export class RecepcionComponent implements OnInit {
           this.turnos = activos.map(t => {
             const prop = propMap.get(t.propietarioId);
             const veh  = vehMap.get(t.vehiculoId);
-            const svc  = MAPA_SERVICIOS[t.servicioId];
+            const svc  = this.mapaServicios[t.servicioId];
 
             return {
               ...t,
@@ -154,8 +164,8 @@ export class RecepcionComponent implements OnInit {
             ...t,
             propietarioNombre:   `Propietario #${t.propietarioId}`,
             vehiculoDescripcion: `Vehículo #${t.vehiculoId}`,
-            servicioNombre:      MAPA_SERVICIOS[t.servicioId]?.nombre ?? `Servicio #${t.servicioId}`,
-            tipoTramite:         MAPA_SERVICIOS[t.servicioId]?.tipo    ?? 'INSPECCION',
+            servicioNombre:      this.mapaServicios[t.servicioId]?.nombre ?? `Servicio #${t.servicioId}`,
+            tipoTramite:         this.mapaServicios[t.servicioId]?.tipo ?? 'INSPECCION',
           }));
           this.cargando = false;
           this.cdr.detectChanges();

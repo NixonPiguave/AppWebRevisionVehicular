@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
+import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
 import { NotificationService } from '../../../services/notification.service';
 import { obtenerRutaPorMetodo } from '../../../config/metodo-inspeccion-routes.config';
 
@@ -24,34 +25,26 @@ export class TurnosPagadosComponent implements OnInit {
   metodosPendientes: { id: number; nombre: string }[] = [];
   cargandoMetodos = false;
 
-  servicios: { idTipoTramite: number; nombre: string }[] = [
-    { idTipoTramite: 1, nombre: 'Emisión de matrícula por Primera Vez.' },
-    { idTipoTramite: 2, nombre: 'Emisión de Documento Anual de Circulación' },
-    { idTipoTramite: 3, nombre: 'Duplicado de Documento de Matrícula.' },
-    { idTipoTramite: 4, nombre: 'Duplicado del Documento Anual de Circulación.' },
-    { idTipoTramite: 5, nombre: 'Transferencia de Dominio.' },
-    { idTipoTramite: 6, nombre: 'Cambio de Servicio.' },
-    { idTipoTramite: 7, nombre: 'Matriculación de Unidades de Carga' },
-    { idTipoTramite: 8, nombre: 'Cambio de Características' },
-    { idTipoTramite: 9, nombre: 'Bloqueo de vehículo' },
-    { idTipoTramite: 10, nombre: 'Desbloqueo de vehículo' },
-    { idTipoTramite: 11, nombre: 'Registro de Observaciones' },
-    { idTipoTramite: 12, nombre: 'Baja de vehículos' },
-    { idTipoTramite: 13, nombre: 'Registro de Incidentes' },
-    { idTipoTramite: 14, nombre: 'Anulación de Trámites' },
-    { idTipoTramite: 15, nombre: 'Registro de vehículos en la Base Única Nacional de Datos.' },
-    { idTipoTramite: 16, nombre: 'Casos especiales detectados en procesos de matriculación' }
-  ];
+  servicios: Servicio[] = [];
 
   constructor(
     private turnosService: TurnosService,
+    private servicioService: ServicioService,
     private router: Router,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.cargarServicios();
     this.cargarTurnosPagados();
+  }
+
+  cargarServicios(): void {
+    this.servicioService.listar().subscribe({
+      next: (data) => { this.servicios = data ?? []; this.cdr.detectChanges(); },
+      error: () => { this.servicios = []; this.cdr.detectChanges(); }
+    });
   }
 
   cargarTurnosPagados(): void {
@@ -74,7 +67,7 @@ export class TurnosPagadosComponent implements OnInit {
 
   getNombreServicio(servicioId: number): string {
     const s = this.servicios.find(x => x.idTipoTramite === servicioId);
-    return s ? s.nombre : `Servicio #${servicioId}`;
+    return s?.nombre ?? `Servicio #${servicioId}`;
   }
 
   abrirModalMetodos(turno: Turnos): void {

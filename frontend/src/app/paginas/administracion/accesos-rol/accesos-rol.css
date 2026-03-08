@@ -1,0 +1,171 @@
+.accesos-rol {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a2e1a;
+  margin: 0 0 4px 0;
+}
+
+.subtitle {
+  font-size: 0.9rem;
+  color: #5a6b5a;
+  margin: 0;
+}
+
+.mensaje {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.mensaje.exito {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.mensaje.error {
+  background: #ffebee;
+  color: #b71c1c;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(45, 90, 39, 0.08);
+  border: 1px solid #e8efe8;
+  padding: 20px;
+}
+
+.panel h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1a2e1a;
+  margin: 0 0 16px 0;
+}
+
+.lista-roles {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.rol-item {
+  padding: 12px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 4px;
+  transition: background 0.15s;
+}
+
+.rol-item:hover {
+  background: #f0f7f0;
+}
+
+.rol-item.activo {
+  background: rgba(45, 90, 39, 0.12);
+  color: #2d5a27;
+  font-weight: 500;
+}
+
+.loading, .empty {
+  color: #7a8a7a;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.permisos-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.lista-permisos {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px 0;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.permiso-item {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.permiso-item label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.permiso-item input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+}
+
+.permiso-item .nombre {
+  flex: 1;
+}
+
+.permiso-item .modulo {
+  font-size: 0.85rem;
+  color: #7a8a7a;
+}
+
+.btn {
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-sec {
+  background: #e8efe8;
+  color: #2d5a27;
+}
+
+.btn-sec:hover {
+  background: #dce8dc;
+}
+
+.btn-prim {
+  background: #2d5a27;
+  color: #fff;
+}
+
+.btn-prim:hover:not(:disabled) {
+  background: #24471f;
+}
+
+.btn-prim:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.guardar-wrap {
+  margin-top: 16px;
+}

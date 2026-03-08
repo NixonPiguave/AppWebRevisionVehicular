@@ -1,0 +1,59 @@
+<div class="accesos-rol">
+  <header class="header">
+    <h1>Accesos por rol</h1>
+    <p class="subtitle">Configure qué opciones del menú podrá ver cada rol al iniciar sesión.</p>
+  </header>
+
+  <div class="mensaje exito" *ngIf="tipoMensaje === 'exito'">{{ mensaje }}</div>
+  <div class="mensaje error" *ngIf="tipoMensaje === 'error'">{{ mensaje }}</div>
+
+  <div class="grid">
+    <!-- Lista de roles -->
+    <section class="panel roles">
+      <h2>Roles</h2>
+      <div *ngIf="cargando && !rolSeleccionado" class="loading">Cargando…</div>
+      <ul class="lista-roles" *ngIf="!cargando || rolSeleccionado">
+        <li
+          *ngFor="let r of roles"
+          class="rol-item"
+          [class.activo]="rolSeleccionado?.rolId === r.rolId"
+          (click)="seleccionarRol(r)">
+          {{ r.nombre }}
+        </li>
+      </ul>
+      <p *ngIf="!cargando && roles.length === 0" class="empty">No hay roles.</p>
+    </section>
+
+    <!-- Permisos del rol seleccionado -->
+    <section class="panel permisos">
+      <h2 *ngIf="rolSeleccionado">Opciones visibles para «{{ rolSeleccionado.nombre }}»</h2>
+      <h2 *ngIf="!rolSeleccionado">Seleccione un rol</h2>
+
+      <div *ngIf="rolSeleccionado">
+        <div *ngIf="cargando" class="loading">Cargando accesos…</div>
+        <div *ngIf="!cargando" class="permisos-actions">
+          <button type="button" class="btn btn-sec" (click)="seleccionarTodos()">Marcar todos</button>
+          <button type="button" class="btn btn-sec" (click)="quitarTodos()">Quitar todos</button>
+        </div>
+        <ul class="lista-permisos" *ngIf="!cargando">
+          <li *ngFor="let o of opcionesMenu" class="permiso-item">
+            <label>
+              <input
+                type="checkbox"
+                [checked]="estaSeleccionado(o.opcionMenuId)"
+                (change)="toggleOpcion(o.opcionMenuId)">
+              <span class="nombre">{{ o.nombreVisible || o.clave }}</span>
+              <span class="modulo" *ngIf="o.modulo">({{ o.modulo }})</span>
+            </label>
+          </li>
+        </ul>
+        <p *ngIf="!cargando && opcionesMenu.length === 0" class="empty">No hay opciones de menú. Ejecute el script seed-opciones-menu.sql en la base de datos.</p>
+        <div class="guardar-wrap" *ngIf="!cargando && opcionesMenu.length > 0">
+          <button type="button" class="btn btn-prim" [disabled]="guardando" (click)="guardar()">
+            {{ guardando ? 'Guardando…' : 'Guardar accesos' }}
+          </button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

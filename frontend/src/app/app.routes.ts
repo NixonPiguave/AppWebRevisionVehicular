@@ -47,6 +47,8 @@ import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
+import { AccesosRolComponent } from './paginas/administracion/accesos-rol/accesos-rol';
+import { DashboardComponent } from './paginas/inicio/dashboard/dashboard';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -54,12 +56,16 @@ export const routes: Routes = [
     path: 'inicio',
     component: InicioComponent,
     children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', component: DashboardComponent },
+
       // ADMINISTRACIÓN
       { path: 'administracion/usuarios', component: UsuariosComponent },
       { path: 'administracion/roles', component: RolesComponent },
       { path: 'administracion/areas', component: AreasComponent },
       { path: 'administracion/empresa', component: EmpresaComponent },
       { path: 'administracion/auditoria', component: AuditoriaComponent },
+      { path: 'administracion/accesos-rol', component: AccesosRolComponent },
 
       // CATÁLOGO DE VEHÍCULOS
       { path: 'catalogo-vehiculos/ambito-operacional', component: AmbitoOperacionalComponent },

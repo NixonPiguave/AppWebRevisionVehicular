@@ -128,7 +128,11 @@ export class RolesComponent implements OnInit {
   abrirModalEditar(rol: Rol): void {
     this.modoEdicion = true;
     this.rolEditando = { ...rol };
-    this.permisosFormulario = this.permisosDisponibles.map(p => ({ ...p, seleccionado: false }));
+    const ids = rol.permisoIds ?? [];
+    this.permisosFormulario = this.permisosDisponibles.map(p => ({
+      ...p,
+      seleccionado: ids.includes(p.permisoId)
+    }));
     this.error = '';
     this.mensajeExito = '';
     this.mostrarModalForm = true;

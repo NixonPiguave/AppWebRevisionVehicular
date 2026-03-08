@@ -53,7 +53,7 @@ export class UsuariosService {
   private apiUrl = 'http://localhost:8080/api/usuarios';
   private rolesUrl = 'http://localhost:8080/api/roles';
   private areasUrl = 'http://localhost:8080/api/area';
-  private empresasUrl = 'http://localhost:8080/(api/empresa)';
+  private empresasUrl = 'http://localhost:8080/api/empresa';
 
   constructor(private http: HttpClient) { }
 

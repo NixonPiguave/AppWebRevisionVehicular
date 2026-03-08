@@ -9,7 +9,7 @@ import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { Propietario, PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { Vehiculo, VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
-import { Servicio } from '../../../services/administracion/servicio.service';
+import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
 import { EmpresaService } from '../../../services/administracion/empresa.service';
 import { TicketPagoService, TicketData } from '../../../services/operaciones/ticket-pago.service';
 import { ModeloService, Modelo, Marca } from '../../../services/catalogos_vehiculos/modelos.service';
@@ -28,24 +28,7 @@ export class TurnosComponent implements OnInit {
   modoEdicion = false;
   mostrarFormulario = false;
 
-  servicios: Servicio[] = [
-    { idTipoTramite: 1,  nombre: 'Emisión de matrícula por Primera Vez.' },
-    { idTipoTramite: 2,  nombre: 'Emisión de Documento Anual de Circulación a renovación anual de matrícula.' },
-    { idTipoTramite: 3,  nombre: 'Duplicado de Documento de Matrícula.' },
-    { idTipoTramite: 4,  nombre: 'Duplicado del Documento Anual de Circulación.' },
-    { idTipoTramite: 5,  nombre: 'Transferencia de Dominio.' },
-    { idTipoTramite: 6,  nombre: 'Cambio de Servicio.' },
-    { idTipoTramite: 7,  nombre: 'Matriculación de Unidades de Carga' },
-    { idTipoTramite: 8,  nombre: 'Cambio de Características' },
-    { idTipoTramite: 9,  nombre: 'Bloqueo de vehículo' },
-    { idTipoTramite: 10, nombre: 'Desbloqueo de vehículo' },
-    { idTipoTramite: 11, nombre: 'Registro de Observaciones' },
-    { idTipoTramite: 12, nombre: 'Baja de vehículos' },
-    { idTipoTramite: 13, nombre: 'Registro de Incidentes' },
-    { idTipoTramite: 14, nombre: 'Anulación de Trámites' },
-    { idTipoTramite: 15, nombre: 'Registro de vehículos en la Base Única Nacional de Datos.' },
-    { idTipoTramite: 16, nombre: 'Casos especiales detectados en procesos de matriculación' }
-  ];
+  servicios: Servicio[] = [];
 
   mostrarModalPropietario = false;
   cargandoPropietarios = false;
@@ -73,6 +56,7 @@ export class TurnosComponent implements OnInit {
 
   constructor(
     private turnosService: TurnosService,
+    private servicioService: ServicioService,
     private propietarioService: PropietarioService,
     private vehiculoService: VehiculoService,
     private empresaService: EmpresaService,
@@ -85,6 +69,7 @@ export class TurnosComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.cargarServicios();
     this.cargarTurnos();
     this.cargarReferenciasPropietarios();
     this.cargarReferenciasVehiculos();
@@ -102,6 +87,16 @@ export class TurnosComponent implements OnInit {
         }
         if (params['servicioId']) this.turnoForm.servicioId = Number(params['servicioId']);
       }
+    });
+  }
+
+  cargarServicios(): void {
+    this.servicioService.listar().subscribe({
+      next: (data) => {
+        this.servicios = data ?? [];
+        this.cdr.detectChanges();
+      },
+      error: () => { this.servicios = []; this.cdr.detectChanges(); }
     });
   }
 

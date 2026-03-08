@@ -30,6 +30,11 @@ export class AuthService {
         } else {
           localStorage.removeItem('rol');
         }
+        if (response.permisos && Array.isArray(response.permisos)) {
+          localStorage.setItem('permisos', JSON.stringify(response.permisos));
+        } else {
+          localStorage.removeItem('permisos');
+        }
       })
     );
   }
@@ -43,8 +48,21 @@ export class AuthService {
         localStorage.removeItem('nombre');
         localStorage.removeItem('usuarioId');
         localStorage.removeItem('rol');
+        localStorage.removeItem('permisos');
       })
     );
+  }
+
+  /** Lista de claves de permisos (menú) del usuario. Si es null o vacío, se muestran todas las opciones. */
+  getPermisos(): string[] | null {
+    const raw = localStorage.getItem('permisos');
+    if (!raw) return null;
+    try {
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : null;
+    } catch {
+      return null;
+    }
   }
 
   getToken(): string | null {

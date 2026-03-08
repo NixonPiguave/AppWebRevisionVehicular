@@ -5,6 +5,7 @@ import com.revisionvehicular.backend.entities.srtv.UsuarioRoles;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRolesRepository;
 import com.revisionvehicular.backend.security.JwtUtil;
+import com.revisionvehicular.backend.service.srtv.IOpcionMenuService;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,7 @@ public class AuthController {
 
     private final IUsuarioRepository usuarioRepository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
+    private final IOpcionMenuService opcionMenuService;
     private final JwtUtil jwtUtil;
     private final AuditoriaService auditoriaService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -29,11 +31,13 @@ public class AuthController {
     public AuthController(
             IUsuarioRepository usuarioRepository,
             IUsuarioRolesRepository usuarioRolesRepository,
+            IOpcionMenuService opcionMenuService,
             JwtUtil jwtUtil,
             AuditoriaService auditoriaService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioRolesRepository = usuarioRolesRepository;
+        this.opcionMenuService = opcionMenuService;
         this.jwtUtil = jwtUtil;
         this.auditoriaService = auditoriaService;
     }
@@ -66,12 +70,15 @@ public class AuthController {
                 user.getContrasenaBaseDatos()
         );
 
+        List<String> permisos = opcionMenuService.getOpcionMenuClavesByUsuario(user);
+
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
         response.put("usuario", user.getUsuario());
         response.put("nombre", user.getNombre() + " " + user.getApellido());
         response.put("usuarioId", user.getUsuarioId());
         response.put("rol", obtenerNombreRol(user));
+        response.put("permisos", permisos != null ? permisos : List.of());
 
         return ResponseEntity.ok(response);
     }

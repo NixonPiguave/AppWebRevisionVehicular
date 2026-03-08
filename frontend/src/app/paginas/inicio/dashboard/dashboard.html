@@ -1,0 +1,63 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h1>Dashboard</h1>
+    <p class="subtitle">Resumen de turnos y actividad reciente</p>
+  </header>
+
+  <div *ngIf="cargando" class="loading">
+    <div class="spinner"></div>
+    <span>Cargando datos…</span>
+  </div>
+
+  <ng-container *ngIf="!cargando">
+    <!-- Tarjetas por estado -->
+    <section class="section turnos-estado">
+      <h2>
+        <mat-icon>assignment</mat-icon>
+        Turnos por estado
+      </h2>
+      <div class="total-card">
+        <mat-icon>event_available</mat-icon>
+        <div>
+          <span class="total-num">{{ totalTurnos }}</span>
+          <span class="total-label">Total turnos</span>
+        </div>
+      </div>
+      <div class="estados-grid">
+        <div *ngFor="let c of conteos" class="estado-card" [attr.data-estado]="c.estado">
+          <div class="estado-header">
+            <mat-icon>{{ iconoEstado(c.estado) }}</mat-icon>
+            <span class="estado-label">{{ c.label }}</span>
+            <span class="estado-num">{{ c.cantidad }}</span>
+          </div>
+          <div class="estado-bar-wrap">
+            <div class="estado-bar" [style.width.%]="porcentaje(c.cantidad)"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Actividad reciente (auditoría) -->
+    <section class="section auditoria">
+      <h2>
+        <mat-icon>history</mat-icon>
+        Actividad reciente
+      </h2>
+      <div class="auditoria-list" *ngIf="recientesAuditoria.length; else sinAuditoria">
+        <div *ngFor="let a of recientesAuditoria" class="auditoria-item">
+          <span class="auditoria-accion" [attr.data-tipo]="a.tipoAccion">{{ a.tipoAccion }}</span>
+          <span class="auditoria-entidad">{{ a.entidad }}</span>
+          <span class="auditoria-usuario">{{ a.nombreCompleto || a.nombreUsuario }}</span>
+          <span class="auditoria-fecha">{{ formatearFecha(a.fecha) }}</span>
+        </div>
+      </div>
+      <ng-template #sinAuditoria>
+        <p class="empty">No hay registros de auditoría recientes.</p>
+      </ng-template>
+      <a routerLink="/inicio/administracion/auditoria" class="link-reporte">
+        Ver reporte completo de auditoría
+        <mat-icon>arrow_forward</mat-icon>
+      </a>
+    </section>
+  </ng-container>
+</div>

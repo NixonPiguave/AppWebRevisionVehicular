@@ -52,6 +52,23 @@ export class InicioComponent implements OnInit {
     this.rolUsuario = this.authService.getRol() ?? '';
   }
 
+  /**
+   * Indica si el usuario puede ver la opción de menú con la clave dada.
+   * Si no hay permisos configurados (null o []), se muestran todas las opciones.
+   */
+  puedeVer(permisoKey: string): boolean {
+    const permisos = this.authService.getPermisos();
+    if (!permisos || permisos.length === 0) return true;
+    return permisos.includes(permisoKey);
+  }
+
+  /** Muestra la sección si el usuario tiene al menos uno de los permisos. */
+  puedeVerCualquiera(...keys: string[]): boolean {
+    const permisos = this.authService.getPermisos();
+    if (!permisos || permisos.length === 0) return true;
+    return keys.some(k => permisos.includes(k));
+  }
+
    // Cargar ícono de empresa para sidebar
   cargarIconoEmpresa(): void {
     this.empresaService.listarEmpresas().subscribe({
