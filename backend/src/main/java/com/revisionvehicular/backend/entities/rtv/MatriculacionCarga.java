@@ -32,7 +32,7 @@ public class MatriculacionCarga {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     /** → cv_vehiculo (tipo_vehiculo = CARGA). Art.40. */
@@ -54,12 +54,12 @@ public class MatriculacionCarga {
 
     /** → rtv_inspeccion. RTV con parámetros para carga pesada. Art.4(3). */
     @ManyToOne
-    @JoinColumn(name = "inspeccion_id", nullable = false)
+    @JoinColumn(name = "inspeccion_id")
     private Inspeccion inspeccion;
 
     /** → ant_calendarizacion_matriculacion. Art.12. */
     @ManyToOne
-    @JoinColumn(name = "id_calendarizacion", nullable = false)
+    @JoinColumn(name = "id_calendarizacion")
     private CalendarizacionMatriculacion calendarizacion;
 
     // ── Datos de carga (Art.40-42) ────────────────────────────────────────────

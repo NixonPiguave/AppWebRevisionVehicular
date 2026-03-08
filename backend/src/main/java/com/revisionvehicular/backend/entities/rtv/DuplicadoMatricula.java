@@ -32,7 +32,7 @@ public class DuplicadoMatricula {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
@@ -72,12 +72,12 @@ public class DuplicadoMatricula {
 
     /** → ant_placa. Placa que se da de baja (estado = BAJA). Art.128. */
     @ManyToOne
-    @JoinColumn(name = "placa_anterior_id", nullable = false)
+    @JoinColumn(name = "placa_anterior_id")
     private Placa placaAnterior;
 
     /** → ant_placa. Nueva placa emitida con es_duplicado = SI. Art.128. */
     @ManyToOne
-    @JoinColumn(name = "placa_nueva_id", nullable = false)
+    @JoinColumn(name = "placa_nueva_id")
     private Placa placaNueva;
 
     /** Monto cobrado por el duplicado. Art.128. */

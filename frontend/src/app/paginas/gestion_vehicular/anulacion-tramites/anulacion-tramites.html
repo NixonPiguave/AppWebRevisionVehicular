@@ -1,0 +1,167 @@
+<div class="rtv-container">
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido"><mat-icon>error_outline</mat-icon><span>{{ error }}</span></div>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando anulaciones...</span>
+  </div>
+  <div *ngIf="!cargando || error">
+    <div class="rtv-header">
+      <div class="header-titulo">
+        <mat-icon class="header-icono">cancel</mat-icon>
+        <div><h2>Anulación de Trámites</h2></div>
+      </div>
+      <button class="btn-agregar" (click)="abrirModalCrear()"><mat-icon>add</mat-icon> Nueva Anulación</button>
+    </div>
+    <div class="rtv-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" placeholder="N° trámite anulado, motivo..." class="input-filtro" />
+      </div>
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="rtv-tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>N° Trámite Anulado</th>
+            <th>Estado al anular</th>
+            <th>Motivo</th>
+            <th>Fecha Anulación</th>
+            <th class="th-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of paginados">
+            <td>{{ r.idAnulacionSrv }}</td>
+            <td class="txt-resaltado">{{ r.numeroTramiteAnulado }}</td>
+            <td>{{ r.estadoTramiteAlAnular }}</td>
+            <td class="td-truncar">{{ r.motivoAnulacion }}</td>
+            <td>{{ r.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="td-acciones">
+              <button class="btn-accion btn-ver" (click)="verDetalle(r)" title="Ver"><mat-icon>visibility</mat-icon></button>
+              <button class="btn-accion btn-editar" (click)="abrirModalEditar(r)" title="Editar"><mat-icon>edit</mat-icon></button>
+            </td>
+          </tr>
+          <tr *ngIf="paginados.length === 0 && !error && !cargando">
+            <td colspan="6" class="sin-registros">No hay anulaciones registradas</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="filtrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }} de {{ filtrados.length }} registros
+      </div>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1"><mat-icon>chevron_left</mat-icon></button>
+        <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal formulario -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-titulo">
+        <mat-icon>{{ modoEdicion ? 'edit' : 'add' }}</mat-icon>
+        <h3>{{ modoEdicion ? 'Editar Anulación' : 'Nueva Anulación de Trámite' }}</h3>
+      </div>
+      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Datos de la anulación</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>ID Trámite a anular *</label>
+            <input type="number" [(ngModel)]="editando.tramiteAnuladoId" class="form-input" placeholder="ID del trámite" min="1" />
+          </div>
+          <div class="form-grupo">
+            <label>N° Trámite (auditoría)</label>
+            <input type="text" [(ngModel)]="editando.numeroTramiteAnulado" class="form-input" placeholder="Se copia del trámite si existe" />
+          </div>
+          <div class="form-grupo">
+            <label>Entidad de tránsito *</label>
+            <select [(ngModel)]="editando.entidadId" class="form-select">
+              <option [ngValue]="null">-- Seleccione entidad --</option>
+              <option *ngFor="let e of entidadesTransito" [ngValue]="e.idEntidad">{{ e.codigo }} - {{ e.nombre }}</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label>Estado del trámite al anular</label>
+            <select [(ngModel)]="editando.estadoTramiteAlAnular" class="form-select">
+              <option value="INICIADO">INICIADO</option>
+              <option value="EN_PROCESO">EN_PROCESO</option>
+            </select>
+          </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Motivo de la anulación *</label>
+            <textarea [(ngModel)]="editando.motivoAnulacion" class="form-input" rows="3" placeholder="Descripción del motivo" maxlength="500"></textarea>
+          </div>
+          <div class="form-grupo">
+            <label>Documentos soporte (URL)</label>
+            <input type="text" [(ngModel)]="editando.documentosSoporte" class="form-input" />
+          </div>
+          <div class="form-grupo">
+            <label>Pagos revertidos</label>
+            <select [(ngModel)]="editando.pagosRevertidos" class="form-select">
+              <option value="SI">Sí</option>
+              <option value="NO">No</option>
+            </select>
+          </div>
+          <div class="form-grupo">
+            <label>Multas devueltas</label>
+            <select [(ngModel)]="editando.multasDevueltas" class="form-select">
+              <option value="SI">Sí</option>
+              <option value="NO">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Anular trámite') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-titulo"><mat-icon>visibility</mat-icon><h3>Detalle de la anulación</h3></div>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body" *ngIf="detalle">
+      <div class="detalle-grid">
+        <div class="detalle-item"><span class="detalle-label">ID</span><span class="detalle-valor">#{{ detalle.idAnulacionSrv }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">N° Trámite anulado</span><span class="detalle-valor resaltado">{{ detalle.numeroTramiteAnulado }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Entidad</span><span class="detalle-valor">{{ detalleEntidadNombre }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Estado al anular</span><span class="detalle-valor">{{ detalle.estadoTramiteAlAnular }}</span></div>
+        <div class="detalle-item detalle-full"><span class="detalle-label">Motivo</span><span class="detalle-valor">{{ detalle.motivoAnulacion }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Pagos revertidos</span><span class="detalle-valor">{{ detalle.pagosRevertidos }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Multas devueltas</span><span class="detalle-valor">{{ detalle.multasDevueltas }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Fecha anulación</span><span class="detalle-valor">{{ detalle.fechaAnulacion | date:'dd/MM/yyyy HH:mm' }}</span></div>
+      </div>
+    </div>
+  </div>
+</div>

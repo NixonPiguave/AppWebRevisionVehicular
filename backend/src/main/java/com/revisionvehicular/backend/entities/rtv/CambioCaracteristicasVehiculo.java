@@ -36,7 +36,7 @@ public class CambioCaracteristicasVehiculo {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
@@ -65,7 +65,7 @@ public class CambioCaracteristicasVehiculo {
      * Observación registrada automáticamente al concluir el cambio. Art.48.
      */
     @ManyToOne
-    @JoinColumn(name = "observacion_vehiculo_id", nullable = false)
+    @JoinColumn(name = "observacion_vehiculo_id")
     private ObservacionVehiculo observacionVehiculo;
 
     // ── Datos del cambio (Art.44-47) ──────────────────────────────────────────

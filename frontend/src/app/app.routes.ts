@@ -45,6 +45,9 @@ import { BloqueoVehiculoComponent } from './paginas/gestion_vehicular/bloqueo-ve
 import { DesbloqueoVehiculoComponent } from './paginas/gestion_vehicular/desbloqueo-vehiculo/desbloqueo-vehiculo';
 import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo/baja-vehiculo';
 import { RegistroObservacionesComponent } from './paginas/gestion_vehicular/registro-observaciones/registro-observaciones';
+import { RegistroIncidentesComponent } from './paginas/gestion_vehicular/registro-incidentes/registro-incidentes';
+import { AnulacionTramitesComponent } from './paginas/gestion_vehicular/anulacion-tramites/anulacion-tramites';
+import { RegistroBaseUnicaComponent } from './paginas/gestion_vehicular/registro-base-unica/registro-base-unica';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
@@ -110,6 +113,9 @@ export const routes: Routes = [
       { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
       { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },
       { path: 'gestion_vehicular/registro-observaciones', component: RegistroObservacionesComponent },
+      { path: 'gestion_vehicular/registro-incidentes', component: RegistroIncidentesComponent },
+      { path: 'gestion_vehicular/anulacion-tramites', component: AnulacionTramitesComponent },
+      { path: 'gestion_vehicular/registro-base-unica', component: RegistroBaseUnicaComponent },
 
       // ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },

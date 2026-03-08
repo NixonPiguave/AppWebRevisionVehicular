@@ -28,7 +28,7 @@ public class PrimeraMatriculacion {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
@@ -49,12 +49,12 @@ public class PrimeraMatriculacion {
 
     /** → rtv_inspeccion. Inspección RTV aprobada. Art.4(3). */
     @ManyToOne
-    @JoinColumn(name = "inspeccion_id", nullable = false)
+    @JoinColumn(name = "inspeccion_id")
     private Inspeccion inspeccion;
 
     /** → ant_calendarizacion_matriculacion. Período asignado. Art.12. */
     @ManyToOne
-    @JoinColumn(name = "id_calendarizacion", nullable = false)
+    @JoinColumn(name = "id_calendarizacion")
     private CalendarizacionMatriculacion calendarizacion;
 
     // ── Identificación del trámite ────────────────────────────────────────────

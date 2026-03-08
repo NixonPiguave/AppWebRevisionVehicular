@@ -31,7 +31,7 @@ public class DuplicadoDocCirculacion {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
@@ -67,7 +67,7 @@ public class DuplicadoDocCirculacion {
 
     /** → rtv_documento_circulacion. Original que pasa a estado DUPLICADO. Art.29. */
     @ManyToOne
-    @JoinColumn(name = "documento_original_id", nullable = false)
+    @JoinColumn(name = "documento_original_id")
     private DocumentoCirculacion documentoOriginal;
 
     /**
@@ -75,7 +75,7 @@ public class DuplicadoDocCirculacion {
      * la misma fecha de caducidad del original. Art.29.
      */
     @ManyToOne
-    @JoinColumn(name = "documento_nuevo_id", nullable = false)
+    @JoinColumn(name = "documento_nuevo_id")
     private DocumentoCirculacion documentoNuevo;
 
     /** Monto cobrado. Art.29. */

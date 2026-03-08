@@ -1,0 +1,203 @@
+<div class="rtv-container">
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido"><mat-icon>error_outline</mat-icon><span>{{ error }}</span></div>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando incidentes...</span>
+  </div>
+  <div *ngIf="!cargando || error">
+    <div class="rtv-header">
+      <div class="header-titulo">
+        <mat-icon class="header-icono">report_problem</mat-icon>
+        <div><h2>Registro de Incidentes</h2></div>
+      </div>
+      <button class="btn-agregar" (click)="abrirModalCrear()"><mat-icon>add</mat-icon> Nuevo Incidente</button>
+    </div>
+    <div class="rtv-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()" placeholder="N° incidente, tipo, descripción..." class="input-filtro" />
+      </div>
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+    <div class="tabla-contenedor">
+      <table class="rtv-tabla">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>N° Incidente</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th class="th-acciones">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of paginados">
+            <td>{{ r.idIncidente }}</td>
+            <td class="txt-resaltado">{{ r.numeroIncidente }}</td>
+            <td>{{ r.tipoIncidente }}</td>
+            <td class="td-truncar">{{ r.descripcion }}</td>
+            <td><span class="estado-badge" [ngClass]="getEstadoBadge(r.estado)">{{ r.estado }}</span></td>
+            <td>{{ r.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td class="td-acciones">
+              <button class="btn-accion btn-ver" (click)="verDetalle(r)" title="Ver"><mat-icon>visibility</mat-icon></button>
+              <button class="btn-accion btn-editar" (click)="abrirModalEditar(r)" title="Editar"><mat-icon>edit</mat-icon></button>
+            </td>
+          </tr>
+          <tr *ngIf="paginados.length === 0 && !error && !cargando">
+            <td colspan="7" class="sin-registros">No hay incidentes registrados</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="filtrados.length > 0">
+        Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }}
+        de {{ filtrados.length }} registros
+      </div>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1"><mat-icon>chevron_left</mat-icon></button>
+        <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"><mat-icon>chevron_right</mat-icon></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal formulario -->
+<div class="modal-overlay" *ngIf="mostrarModalForm" (click)="cerrarModalForm()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-titulo">
+        <mat-icon>{{ modoEdicion ? 'edit' : 'add' }}</mat-icon>
+        <h3>{{ modoEdicion ? 'Editar Incidente' : 'Nuevo Incidente' }}</h3>
+      </div>
+      <button class="btn-cerrar" (click)="cerrarModalForm()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>link</mat-icon> Referencias</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo form-grupo-full">
+            <label>Vehículo (opcional)</label>
+            <div class="input-accion">
+              <input type="text"
+                     [value]="vehiculoSeleccionadoInfo ? (vehiculoSeleccionadoInfo.matricula + ' - ' + vehiculoSeleccionadoInfo.chasis) : ''"
+                     class="form-input" placeholder="Seleccione un vehículo" readonly />
+              <button type="button" class="btn-buscar" (click)="abrirSelectorVehiculo()"><mat-icon>search</mat-icon> Buscar</button>
+              <button type="button" class="btn-quitar" (click)="limpiarVehiculo()" [disabled]="!editando.vehiculoId">Quitar</button>
+            </div>
+          </div>
+          <div class="form-grupo">
+            <label>Entidad de tránsito *</label>
+            <select [(ngModel)]="editando.entidadId" class="form-select">
+              <option [ngValue]="null">-- Seleccione entidad --</option>
+              <option *ngFor="let e of entidadesTransito" [ngValue]="e.idEntidad">{{ e.codigo }} - {{ e.nombre }}</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="form-seccion">
+        <h4 class="seccion-titulo"><mat-icon>article</mat-icon> Datos del incidente</h4>
+        <div class="form-grid-2">
+          <div class="form-grupo">
+            <label>Tipo incidente</label>
+            <input type="text" [(ngModel)]="editando.tipoIncidente" class="form-input" placeholder="Ej: GENERAL" />
+          </div>
+          <div class="form-grupo">
+            <label>Estado *</label>
+            <select [(ngModel)]="editando.estado" class="form-select">
+              <option *ngFor="let e of estadosOpciones" [value]="e">{{ e }}</option>
+            </select>
+          </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Descripción *</label>
+            <textarea [(ngModel)]="editando.descripcion" class="form-input" rows="3" placeholder="Descripción del incidente" maxlength="255"></textarea>
+          </div>
+          <div class="form-grupo form-grupo-full">
+            <label>Documentos soporte (URL)</label>
+            <input type="text" [(ngModel)]="editando.documentosSoporte" class="form-input" placeholder="URL o referencia" />
+          </div>
+          <div class="form-grupo">
+            <label>Área responsable</label>
+            <input type="text" [(ngModel)]="editando.areaResponsable" class="form-input" />
+          </div>
+          <div class="form-grupo">
+            <label>Resolución</label>
+            <input type="text" [(ngModel)]="editando.resolucion" class="form-input" />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModalForm()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar cambios' : 'Registrar') }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal detalle -->
+<div class="modal-overlay" *ngIf="mostrarModalDetalle" (click)="cerrarModalDetalle()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-header-titulo"><mat-icon>visibility</mat-icon><h3>Detalle del incidente</h3></div>
+      <button class="btn-cerrar" (click)="cerrarModalDetalle()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body" *ngIf="detalle">
+      <div class="detalle-grid">
+        <div class="detalle-item"><span class="detalle-label">ID</span><span class="detalle-valor">#{{ detalle.idIncidente }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">N° Incidente</span><span class="detalle-valor resaltado">{{ detalle.numeroIncidente }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Vehículo</span><span class="detalle-valor">{{ detalleVehiculo ? (detalleVehiculo.matricula + ' - ' + detalleVehiculo.chasis) : (detalle.vehiculoId || '—') }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Entidad</span><span class="detalle-valor">{{ detalleEntidadNombre || detalle.entidadId }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Tipo</span><span class="detalle-valor">{{ detalle.tipoIncidente }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Estado</span><span class="detalle-valor">{{ detalle.estado }}</span></div>
+        <div class="detalle-item detalle-full"><span class="detalle-label">Descripción</span><span class="detalle-valor">{{ detalle.descripcion }}</span></div>
+        <div class="detalle-item"><span class="detalle-label">Fecha registro</span><span class="detalle-valor">{{ detalle.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal selector vehículo -->
+<div class="modal-overlay" *ngIf="mostrarModalVehiculo" (click)="cerrarSelectorVehiculo()">
+  <div class="modal-contenido modal-grande" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h4>Seleccionar vehículo</h4>
+      <button class="btn-cerrar" (click)="cerrarSelectorVehiculo()"><mat-icon>close</mat-icon></button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-filtros">
+        <input type="text" [(ngModel)]="busquedaPlaca" (keyup.enter)="buscarVehiculos()" placeholder="Placa" class="form-input" />
+        <button type="button" class="btn-buscar" (click)="buscarVehiculos()">Buscar</button>
+      </div>
+      <div class="modal-cargando" *ngIf="cargandoVehiculos"><div class="spinner"></div> Buscando...</div>
+      <table class="rtv-tabla" *ngIf="!cargandoVehiculos && vehiculosEncontrados.length > 0">
+        <thead><tr><th>Placa</th><th>Chasis</th><th>Acción</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let v of vehiculosEncontrados">
+            <td>{{ v.matricula }}</td>
+            <td>{{ v.chasis }}</td>
+            <td><button type="button" class="btn-accion btn-ver btn-elegir" (click)="seleccionarVehiculo(v)">Elegir</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <p *ngIf="!cargandoVehiculos && vehiculosEncontrados.length === 0 && busquedaPlaca" class="sin-registros">No se encontraron vehículos.</p>
+    </div>
+  </div>
+</div>

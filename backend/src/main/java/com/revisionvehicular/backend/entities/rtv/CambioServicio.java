@@ -35,7 +35,7 @@ public class CambioServicio {
     // ── Referencias a entidades existentes ───────────────────────────────────
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
@@ -82,12 +82,12 @@ public class CambioServicio {
 
     /** → ant_placa. Placa anterior dada de baja. Art.121. */
     @ManyToOne
-    @JoinColumn(name = "placa_baja_id", nullable = false)
+    @JoinColumn(name = "placa_baja_id")
     private Placa placaBaja;
 
     /** → ant_placa. Nueva placa con color correcto emitida. Art.121. */
     @ManyToOne
-    @JoinColumn(name = "placa_nueva_id", nullable = false)
+    @JoinColumn(name = "placa_nueva_id")
     private Placa placaNueva;
 
     /**

@@ -19,7 +19,7 @@ public class RegistroBaseUnicaVehiculo {
     private Long idRegistroBaseUnica;
 
     @ManyToOne
-    @JoinColumn(name = "id_tramite", nullable = false)
+    @JoinColumn(name = "id_tramite")
     private TramiteMatriculacion tramite;
 
     @ManyToOne
