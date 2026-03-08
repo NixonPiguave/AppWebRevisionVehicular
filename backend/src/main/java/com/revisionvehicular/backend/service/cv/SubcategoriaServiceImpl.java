@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.SubcategoriaDTO;
 import com.revisionvehicular.backend.entities.cv.Subcategoria;
 import com.revisionvehicular.backend.repositories.cv.ISubcategoriaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import java.util.stream.Collectors;
 public class SubcategoriaServiceImpl implements ISubcategoriaService {
 
     private final ISubcategoriaRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public SubcategoriaServiceImpl(ISubcategoriaRepository repository) {
+    public SubcategoriaServiceImpl(ISubcategoriaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Transactional
@@ -33,7 +36,7 @@ public class SubcategoriaServiceImpl implements ISubcategoriaService {
 
         Subcategoria subcategoria = repository.findByCodigo(dto.getCodigoSubcategoria())
                 .orElseThrow(() -> new EntityNotFoundException("Error al crear subcategoría"));
-
+        auditoriaService.registrar("INSERT", "Subcategoria", "Creó la subcategoría \"" + dto.getNombre() + "\"");
         return toDTO(subcategoria);
     }
 
@@ -56,7 +59,7 @@ public class SubcategoriaServiceImpl implements ISubcategoriaService {
 
         Subcategoria actualizada = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Error al recuperar subcategoría actualizada"));
-
+        auditoriaService.registrar("UPDATE", "Subcategoria", "Actualizó la subcategoría \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizada);
     }
 
@@ -80,7 +83,10 @@ public class SubcategoriaServiceImpl implements ISubcategoriaService {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Subcategoría no encontrada con ID: " + id);
         }
+        Subcategoria s = repository.findById(id).orElse(null);
+        String nombre = s != null ? s.getNombre() : "ID " + id;
         repository.deleteById(id);
+        auditoriaService.registrar("DELETE", "Subcategoria", "Eliminó la subcategoría \"" + nombre + "\" (ID: " + id + ")");
     }
 
     private SubcategoriaDTO toDTO(Subcategoria subcategoria) {

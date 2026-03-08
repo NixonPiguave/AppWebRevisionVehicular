@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 public class DefectoServiceImpl implements IDefectoService {
 
     private final IDefectoRepository repository;
+    private final com.revisionvehicular.backend.service.srtv.AuditoriaService auditoriaService;
 
-    public DefectoServiceImpl(IDefectoRepository repository) {
+    public DefectoServiceImpl(IDefectoRepository repository, com.revisionvehicular.backend.service.srtv.AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private DefectoDTO toDTO(Defecto entity) {
@@ -65,7 +67,7 @@ public class DefectoServiceImpl implements IDefectoService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar defecto")
                 );
-
+        auditoriaService.registrar("INSERT", "Defecto", "Creó defecto \"" + dto.getCodigo() + "\"");
         return toDTO(defecto);
     }
 
@@ -96,7 +98,7 @@ public class DefectoServiceImpl implements IDefectoService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar defecto")
                 );
-
+        auditoriaService.registrar("UPDATE", "Defecto", "Actualizó defecto \"" + dto.getCodigo() + "\" (ID: " + id + ")");
         return toDTO(actualizado);
     }
 
@@ -104,7 +106,10 @@ public class DefectoServiceImpl implements IDefectoService {
     public void delete(Long id) {
 
         if (repository.existsById(id)) {
+            Defecto d = repository.findById(id).orElse(null);
+            String cod = d != null ? d.getCodigo() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Defecto", "Eliminó defecto \"" + cod + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("El defecto no existe");
         }

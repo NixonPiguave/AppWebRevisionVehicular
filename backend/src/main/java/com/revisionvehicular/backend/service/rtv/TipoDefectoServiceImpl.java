@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.TipoDefectoDTO;
 import com.revisionvehicular.backend.entities.rtv.TipoDefecto;
 import com.revisionvehicular.backend.repositories.rtv.ITipoDefectoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import java.util.stream.Collectors;
 public class TipoDefectoServiceImpl implements ITipoDefectoService {
 
     private final ITipoDefectoRepository tipoDefectoRepository;
+    private final AuditoriaService auditoriaService;
 
-    public TipoDefectoServiceImpl(ITipoDefectoRepository tipoDefectoRepository) {
+    public TipoDefectoServiceImpl(ITipoDefectoRepository tipoDefectoRepository, AuditoriaService auditoriaService) {
         this.tipoDefectoRepository = tipoDefectoRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -33,8 +36,7 @@ public class TipoDefectoServiceImpl implements ITipoDefectoService {
         // Buscar el registro recién creado por código (que debe ser único)
         TipoDefecto creado = tipoDefectoRepository.findByCodigo(tipoDefectoDTO.getCodigo())
                 .orElseThrow(() -> new RuntimeException("Error al crear tipo de defecto"));
-
-        // Convertir Entity a DTO y retornar
+        auditoriaService.registrar("INSERT", "TipoDefecto", "Creó tipo de defecto \"" + tipoDefectoDTO.getNombre() + "\" " + tipoDefectoDTO.getCodigo());
         return convertirADTO(creado);
     }
 
@@ -53,8 +55,7 @@ public class TipoDefectoServiceImpl implements ITipoDefectoService {
         // Buscar el registro actualizado
         TipoDefecto modificado = tipoDefectoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tipo de defecto no encontrado"));
-
-        // Convertir Entity a DTO y retornar
+        auditoriaService.registrar("UPDATE", "TipoDefecto", "Actualizó tipo de defecto \"" + tipoDefectoDTO.getNombre() + "\" (ID: " + id + ")");
         return convertirADTO(modificado);
     }
 

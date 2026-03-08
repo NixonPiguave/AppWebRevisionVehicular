@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.FamiliaDTO;
 import com.revisionvehicular.backend.entities.rtv.Familia;
 import com.revisionvehicular.backend.repositories.rtv.IFamiliaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class FamiliaServiceImpl implements IFamiliaService {
 
     private final IFamiliaRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public FamiliaServiceImpl(IFamiliaRepository repository) {
+    public FamiliaServiceImpl(IFamiliaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private FamiliaDTO toDTO(Familia entity) {
@@ -42,7 +45,7 @@ public class FamiliaServiceImpl implements IFamiliaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar familia")
                 );
-
+        auditoriaService.registrar("INSERT", "Familia", "Creó la familia de defectos \"" + dto.getNombre() + "\"");
         return toDTO(familia);
     }
 
@@ -65,14 +68,17 @@ public class FamiliaServiceImpl implements IFamiliaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar familia")
                 );
-
+        auditoriaService.registrar("UPDATE", "Familia", "Actualizó la familia \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizada);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Familia f = repository.findById(id).orElse(null);
+            String nombre = f != null ? f.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Familia", "Eliminó la familia \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La familia no existe");
         }

@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.entities.rtv.MetodoInspeccion;
 import com.revisionvehicular.backend.repositories.rtv.IMetodoInspeccionRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class MetodoInspeccionServiceImpl implements IMetodoInspeccionService {
 
     private final IMetodoInspeccionRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public MetodoInspeccionServiceImpl(IMetodoInspeccionRepository repository) {
+    public MetodoInspeccionServiceImpl(IMetodoInspeccionRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private MetodoInspeccionDTO toDTO(MetodoInspeccion entity) {
@@ -42,7 +45,7 @@ public class MetodoInspeccionServiceImpl implements IMetodoInspeccionService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar método de inspección")
                 );
-
+        auditoriaService.registrar("INSERT", "MetodoInspeccion", "Creó método de inspección \"" + dto.getNombre() + "\"");
         return toDTO(metodo);
     }
 
@@ -65,14 +68,17 @@ public class MetodoInspeccionServiceImpl implements IMetodoInspeccionService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar método de inspección")
                 );
-
+        auditoriaService.registrar("UPDATE", "MetodoInspeccion", "Actualizó método de inspección \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizado);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            MetodoInspeccion m = repository.findById(id).orElse(null);
+            String nombre = m != null ? m.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "MetodoInspeccion", "Eliminó método de inspección \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("El método de inspección no existe");
         }

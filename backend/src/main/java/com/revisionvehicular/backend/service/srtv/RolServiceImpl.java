@@ -12,9 +12,12 @@ import java.util.stream.Collectors;
 @Service
 public class RolServiceImpl implements IRolService{
     private final IRolRepository repository;
+    private final AuditoriaService auditoriaService;
+
     @Autowired
-    public RolServiceImpl(IRolRepository repository) {
+    public RolServiceImpl(IRolRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     @Override
     public RolDTO save(RolDTO dto) {
@@ -25,6 +28,7 @@ public class RolServiceImpl implements IRolService{
         );
         Rol rol = repository.getRolByNombre(dto.getNombre())
                 .orElseThrow(() -> new RuntimeException("Error al crear rol"));
+        auditoriaService.registrar("INSERT", "Rol", "Creó el rol \"" + dto.getNombre() + "\"");
         return toDTO(rol);
     }
     @Override
@@ -56,13 +60,17 @@ public class RolServiceImpl implements IRolService{
         repository.spActualizarRol(id, dto.getNombre(), dto.getEstado(), dto.getPermisosJson());
         Rol rolActualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el rol actualizado"));
+        auditoriaService.registrar("UPDATE", "Rol", "Actualizó el rol \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(rolActualizado);
     }
 
     @Override
     public void delete(Long id) {
         if(repository.existsById(id)){
+            Rol r = repository.findById(id).orElse(null);
+            String nombre = r != null ? r.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Rol", "Eliminó el rol \"" + nombre + "\" (ID: " + id + ")");
         }
         else{
             throw new RuntimeException("El rol no existe");

@@ -18,8 +18,17 @@ public class Auditoria {
     @Column(name = "auditoria_id")
     private Long auditoriaId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 500)
     private String accion;
+
+    @Column(name = "tipo_accion", length = 20)
+    private String tipoAccion; // INSERT, UPDATE, DELETE, INICIO_SESION, CIERRE_SESION
+
+    @Column(name = "entidad", length = 100)
+    private String entidad; // Ej: Usuario, Marca, Rol, Área
+
+    @Column(name = "detalle", length = 1000)
+    private String detalle; // Descripción legible del cambio
 
     @Column(nullable = false)
     private LocalDateTime fecha;

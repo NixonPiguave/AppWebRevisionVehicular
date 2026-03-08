@@ -27,18 +27,21 @@ public class TurnosServiceImpl implements ITurnosService {
     private final IDetalleInspeccionRepository detalleInspeccionRepository;
     private final IInspeccionRepository inspeccionRepository;
     private final IMetodoInspeccionRepository metodoInspeccionRepository;
+    private final AuditoriaService auditoriaService;
 
     @Autowired
     public TurnosServiceImpl(ITurnosRepository repository,
                              ITarifarioTramiteRepository tarifarioRepository,
                              IDetalleInspeccionRepository detalleInspeccionRepository,
                              IInspeccionRepository inspeccionRepository,
-                             IMetodoInspeccionRepository metodoInspeccionRepository) {
+                             IMetodoInspeccionRepository metodoInspeccionRepository,
+                             AuditoriaService auditoriaService) {
         this.repository = repository;
         this.tarifarioRepository = tarifarioRepository;
         this.detalleInspeccionRepository = detalleInspeccionRepository;
         this.inspeccionRepository = inspeccionRepository;
         this.metodoInspeccionRepository = metodoInspeccionRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -59,6 +62,7 @@ public class TurnosServiceImpl implements ITurnosService {
         if (ultimo == null) {
             throw new RuntimeException("Error al crear turno");
         }
+        auditoriaService.registrar("INSERT", "Turnos", "Creó turno ID " + ultimo.getTurnoId());
         return toDTO(ultimo);
     }
 
@@ -96,6 +100,7 @@ public class TurnosServiceImpl implements ITurnosService {
                 dto.getEstado()
         );
 
+        auditoriaService.registrar("UPDATE", "Turnos", "Actualizó turno ID " + id);
         return toDTO(repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el turno actualizado")));
     }
@@ -104,6 +109,7 @@ public class TurnosServiceImpl implements ITurnosService {
     public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Turnos", "Eliminó turno ID " + id);
         } else {
             throw new RuntimeException("El turno no existe");
         }

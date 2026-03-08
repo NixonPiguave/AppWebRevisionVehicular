@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.ClaseDTO;
 import com.revisionvehicular.backend.entities.cv.Clase;
 import com.revisionvehicular.backend.repositories.cv.IClaseRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,12 @@ import java.util.stream.Collectors;
 public class ClaseServiceImpl implements IClaseService {
 
     private final IClaseRepository repository;
+    private final AuditoriaService auditoriaService;
 
     @Autowired
-    public ClaseServiceImpl(IClaseRepository repository) {
+    public ClaseServiceImpl(IClaseRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private ClaseDTO toDTO(Clase clase) {
@@ -41,7 +44,7 @@ public class ClaseServiceImpl implements IClaseService {
                 .orElseThrow(() ->
                         new RuntimeException("Clase no encontrada")
                 );
-
+        auditoriaService.registrar("INSERT", "Clase", "Creó la clase \"" + dto.getClase() + "\"");
         return toDTO(clase);
     }
 
@@ -72,14 +75,17 @@ public class ClaseServiceImpl implements IClaseService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar la clase")
                 );
-
+        auditoriaService.registrar("UPDATE", "Clase", "Actualizó la clase \"" + dto.getClase() + "\" (ID: " + id + ")");
         return toDTO(updated);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Clase c = repository.findById(id).orElse(null);
+            String nombre = c != null ? c.getClase() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Clase", "Eliminó la clase \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La clase no existe");
         }

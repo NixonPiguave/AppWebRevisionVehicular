@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.BajaVehiculoDTO;
 import com.revisionvehicular.backend.entities.rtv.BajaVehiculo;
 import com.revisionvehicular.backend.repositories.rtv.IBajaVehiculoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class BajaVehiculoServiceImpl implements IBajaVehiculoService {
 
     private final IBajaVehiculoRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public BajaVehiculoServiceImpl(IBajaVehiculoRepository repository) {
+    public BajaVehiculoServiceImpl(IBajaVehiculoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private BajaVehiculoDTO toDTO(BajaVehiculo entity) {
@@ -92,7 +95,7 @@ public class BajaVehiculoServiceImpl implements IBajaVehiculoService {
                 .filter(b -> b.getNumeroTramite().equals(dto.getNumeroTramite()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error al insertar baja de vehículo"));
-
+        auditoriaService.registrar("INSERT", "BajaVehiculo", "Registró baja de vehículo trámite " + dto.getNumeroTramite());
         return toDTO(creado);
     }
 
@@ -128,7 +131,7 @@ public class BajaVehiculoServiceImpl implements IBajaVehiculoService {
 
         BajaVehiculo actualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al actualizar baja de vehículo"));
-
+        auditoriaService.registrar("UPDATE", "BajaVehiculo", "Actualizó baja de vehículo ID " + id);
         return toDTO(actualizado);
     }
 
@@ -136,6 +139,7 @@ public class BajaVehiculoServiceImpl implements IBajaVehiculoService {
     public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "BajaVehiculo", "Eliminó baja de vehículo ID " + id);
         } else {
             throw new RuntimeException("La baja de vehículo no existe");
         }

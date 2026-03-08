@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.ModeloVehiculoDTO;
 import com.revisionvehicular.backend.entities.cv.ModeloVehiculo;
 import com.revisionvehicular.backend.repositories.cv.IModeloVehiculoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ import java.util.stream.Collectors;
 public class ModeloVehiculoServiceImpl implements IModeloVehiculoService {
 
     private final IModeloVehiculoRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public ModeloVehiculoServiceImpl(IModeloVehiculoRepository repository) {
+    public ModeloVehiculoServiceImpl(IModeloVehiculoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Transactional
@@ -34,7 +37,7 @@ public class ModeloVehiculoServiceImpl implements IModeloVehiculoService {
         ModeloVehiculo modelo = repository
                 .findByNombreAndMarca_IdMarca(dto.getNombre(), dto.getMarcaId())
                 .orElseThrow(() -> new EntityNotFoundException("Error al crear modelo vehículo"));
-
+        auditoriaService.registrar("INSERT", "Modelo", "Creó el modelo \"" + dto.getNombre() + "\"");
         return toDTO(modelo);
     }
 
@@ -57,7 +60,7 @@ public class ModeloVehiculoServiceImpl implements IModeloVehiculoService {
 
         ModeloVehiculo actualizado = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Error al recuperar modelo actualizado"));
-
+        auditoriaService.registrar("UPDATE", "Modelo", "Actualizó el modelo \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizado);
     }
 
@@ -89,7 +92,10 @@ public class ModeloVehiculoServiceImpl implements IModeloVehiculoService {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Modelo no encontrado con ID: " + id);
         }
+        ModeloVehiculo m = repository.findById(id).orElse(null);
+        String nombre = m != null ? m.getNombre() : "ID " + id;
         repository.deleteById(id);
+        auditoriaService.registrar("DELETE", "Modelo", "Eliminó el modelo \"" + nombre + "\" (ID: " + id + ")");
     }
 
     private ModeloVehiculoDTO toDTO(ModeloVehiculo modelo) {

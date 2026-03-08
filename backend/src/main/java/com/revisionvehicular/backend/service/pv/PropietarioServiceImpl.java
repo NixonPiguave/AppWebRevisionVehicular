@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.pv;
 import com.revisionvehicular.backend.dtos.pv.PropietarioDTO;
 import com.revisionvehicular.backend.entities.pv.Propietario;
 import com.revisionvehicular.backend.repositories.pv.IPropietarioRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class PropietarioServiceImpl implements IPropietarioService {
 
     private final IPropietarioRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public PropietarioServiceImpl(IPropietarioRepository repository) {
+    public PropietarioServiceImpl(IPropietarioRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private PropietarioDTO toDTO(Propietario propietario) {
@@ -50,7 +53,7 @@ public class PropietarioServiceImpl implements IPropietarioService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar propietario")
                 );
-
+        auditoriaService.registrar("INSERT", "Propietario", "Creó propietario \"" + dto.getNombre() + "\" " + dto.getDocumentoIdentidad());
         return toDTO(propietario);
     }
 
@@ -76,14 +79,17 @@ public class PropietarioServiceImpl implements IPropietarioService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar propietario")
                 );
-
+        auditoriaService.registrar("UPDATE", "Propietario", "Actualizó propietario \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizado);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Propietario p = repository.findById(id).orElse(null);
+            String nombre = p != null ? p.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Propietario", "Eliminó propietario \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("El propietario no existe");
         }

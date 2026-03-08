@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.DesbloqueoVehiculoDTO;
 import com.revisionvehicular.backend.entities.rtv.DesbloqueoVehiculo;
 import com.revisionvehicular.backend.repositories.rtv.IDesbloqueoVehiculoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService {
 
     private final IDesbloqueoVehiculoRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public DesbloqueoVehiculoServiceImpl(IDesbloqueoVehiculoRepository repository) {
+    public DesbloqueoVehiculoServiceImpl(IDesbloqueoVehiculoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private DesbloqueoVehiculoDTO toDTO(DesbloqueoVehiculo entity) {
@@ -64,7 +67,7 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
                 .filter(d -> d.getNumeroTramite().equals(dto.getNumeroTramite()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error al insertar desbloqueo de vehículo"));
-
+        auditoriaService.registrar("INSERT", "DesbloqueoVehiculo", "Registró desbloqueo trámite " + dto.getNumeroTramite());
         return toDTO(creado);
     }
 
@@ -89,7 +92,7 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
 
         DesbloqueoVehiculo actualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al actualizar desbloqueo de vehículo"));
-
+        auditoriaService.registrar("UPDATE", "DesbloqueoVehiculo", "Actualizó desbloqueo ID " + id);
         return toDTO(actualizado);
     }
 
@@ -97,6 +100,7 @@ public class DesbloqueoVehiculoServiceImpl implements IDesbloqueoVehiculoService
     public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "DesbloqueoVehiculo", "Eliminó desbloqueo ID " + id);
         } else {
             throw new RuntimeException("El desbloqueo de vehículo no existe");
         }

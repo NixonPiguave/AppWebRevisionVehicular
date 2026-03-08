@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.SubfamiliaDTO;
 import com.revisionvehicular.backend.entities.rtv.Subfamilia;
 import com.revisionvehicular.backend.repositories.rtv.ISubFamiliaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class SubFamiliaServiceImpl implements ISubFamiliaService {
 
     private final ISubFamiliaRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public SubFamiliaServiceImpl(ISubFamiliaRepository repository) {
+    public SubFamiliaServiceImpl(ISubFamiliaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private SubfamiliaDTO toDTO(Subfamilia entity) {
@@ -44,7 +47,7 @@ public class SubFamiliaServiceImpl implements ISubFamiliaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar subfamilia")
                 );
-
+        auditoriaService.registrar("INSERT", "Subfamilia", "Creó la subfamilia \"" + dto.getNombre() + "\"");
         return toDTO(sub);
     }
 
@@ -68,7 +71,7 @@ public class SubFamiliaServiceImpl implements ISubFamiliaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar subfamilia")
                 );
-
+        auditoriaService.registrar("UPDATE", "Subfamilia", "Actualizó la subfamilia \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizada);
     }
 
@@ -76,7 +79,10 @@ public class SubFamiliaServiceImpl implements ISubFamiliaService {
     public void delete(Long id) {
 
         if (repository.existsById(id)) {
+            Subfamilia s = repository.findById(id).orElse(null);
+            String nombre = s != null ? s.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Subfamilia", "Eliminó la subfamilia \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La subfamilia no existe");
         }

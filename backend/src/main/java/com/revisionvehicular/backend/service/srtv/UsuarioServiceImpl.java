@@ -19,12 +19,15 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
     private final IUsuarioRepository repository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
+    private final AuditoriaService auditoriaService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UsuarioServiceImpl(IUsuarioRepository repository,
-                              IUsuarioRolesRepository usuarioRolesRepository) {
+                              IUsuarioRolesRepository usuarioRolesRepository,
+                              AuditoriaService auditoriaService) {
         this.repository = repository;
         this.usuarioRolesRepository = usuarioRolesRepository;
+        this.auditoriaService = auditoriaService;
     }
     private UsuarioDTO toDTO(Usuario usuario) {
         UsuarioDTO dto = new UsuarioDTO();
@@ -119,6 +122,8 @@ public class UsuarioServiceImpl implements IUsuarioService {
 
         Usuario usuario = repository.findByUsuario(dto.getUsuario())
                 .orElseThrow(() -> new RuntimeException("Error al crear usuario"));
+        auditoriaService.registrar("INSERT", "Usuario",
+                "Creó el usuario \"" + dto.getNombre() + " " + dto.getApellido() + "\" (login: " + dto.getUsuario() + ")");
         return toDTO(usuario);
     }
     @Override
@@ -141,14 +146,20 @@ public class UsuarioServiceImpl implements IUsuarioService {
                 dto.getEstado(),
                 rolesJson
         );
+        auditoriaService.registrar("UPDATE", "Usuario",
+                "Actualizó el usuario \"" + dto.getNombre() + " " + dto.getApellido() + "\" (ID: " + id + ")");
         return findById(id);
     }
     @Override
     public void delete(Long id) {
-        if (repository.existsById(id))
+        if (repository.existsById(id)) {
+            Usuario u = repository.findById(id).orElse(null);
+            String detalle = u != null ? "Eliminó el usuario \"" + u.getNombre() + " " + u.getApellido() + "\" (login: " + u.getUsuario() + ", ID: " + id + ")" : "Eliminó el usuario con ID " + id;
             repository.deleteById(id);
-        else
+            auditoriaService.registrar("DELETE", "Usuario", detalle);
+        } else {
             throw new RuntimeException("No existe el usuario con el id " + id);
+        }
     }
     public String generarContrasenaDB(String usuario) {
         SecureRandom random = new SecureRandom();

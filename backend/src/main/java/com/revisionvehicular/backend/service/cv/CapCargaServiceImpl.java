@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.CapCargaDTO;
 import com.revisionvehicular.backend.entities.cv.CapCarga;
 import com.revisionvehicular.backend.repositories.cv.ICapCargaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,9 +14,12 @@ import java.util.stream.Collectors;
 public class CapCargaServiceImpl implements ICapCargaService {
 
     private final ICapCargaRepository repository;
+    private final AuditoriaService auditoriaService;
+
     @Autowired
-    public CapCargaServiceImpl(ICapCargaRepository repository) {
+    public CapCargaServiceImpl(ICapCargaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     private CapCargaDTO toDTO(CapCarga capCarga) {
         CapCargaDTO dto = new CapCargaDTO();
@@ -40,7 +44,7 @@ public class CapCargaServiceImpl implements ICapCargaService {
                 .orElseThrow(() ->
                         new RuntimeException("Capacidad de carga no encontrada")
                 );
-
+        auditoriaService.registrar("INSERT", "CapacidadCarga", "Creó capacidad de carga \"" + dto.getCapacidad() + " " + (dto.getUnidad() != null ? dto.getUnidad() : "") + "\"");
         return toDTO(capCarga);
     }
     @Override
@@ -68,13 +72,16 @@ public class CapCargaServiceImpl implements ICapCargaService {
         CapCarga updated = repository.findById(id).orElseThrow(() ->
                         new RuntimeException("Error al actualizar la capacidad de carga")
                 );
-
+        auditoriaService.registrar("UPDATE", "CapacidadCarga", "Actualizó capacidad de carga (ID: " + id + ")");
         return toDTO(updated);
     }
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            CapCarga c = repository.findById(id).orElse(null);
+            String detalle = c != null ? c.getCapacidad() + " " + (c.getUnidad() != null ? c.getUnidad() : "") : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "CapacidadCarga", "Eliminó capacidad de carga \"" + detalle + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La capacidad de carga no existe");
         }

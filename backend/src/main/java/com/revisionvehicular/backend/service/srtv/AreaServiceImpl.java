@@ -11,9 +11,12 @@ import java.util.stream.Collectors;
 @Service
 public class AreaServiceImpl implements IAreaService {
     private final IAreaRepository repository;
+    private final AuditoriaService auditoriaService;
+
     @Autowired
-    public AreaServiceImpl(IAreaRepository repository) {
+    public AreaServiceImpl(IAreaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -21,6 +24,7 @@ public class AreaServiceImpl implements IAreaService {
         repository.spAreaInsertar(dto.getNombre(), dto.getEstado());
         Area area = repository.getByNombre(dto.getNombre()).
                 orElseThrow(()-> new RuntimeException("Area no encontrada"));
+        auditoriaService.registrar("INSERT", "Área", "Creó el área \"" + dto.getNombre() + "\"");
         return toDTO(area);
     }
 
@@ -48,12 +52,16 @@ public class AreaServiceImpl implements IAreaService {
         repository.spActualizarArea(id, dto.getNombre(), dto.getEstado());
         Area AreaActualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el Area actualizado"));
+        auditoriaService.registrar("UPDATE", "Área", "Actualizó el área \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(AreaActualizado);
     }
 
     public void delete(Long id) {
         if(repository.existsById(id)){
+            Area a = repository.findById(id).orElse(null);
+            String nombre = a != null ? a.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Área", "Eliminó el área \"" + nombre + "\" (ID: " + id + ")");
         }
         else {
             throw new RuntimeException("No existe el area");

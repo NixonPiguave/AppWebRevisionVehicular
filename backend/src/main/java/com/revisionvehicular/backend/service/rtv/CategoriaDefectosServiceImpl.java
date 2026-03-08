@@ -12,9 +12,11 @@ import java.util.stream.Collectors;
 public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
 
     private final ICategoriaDefectosRepository repository;
+    private final com.revisionvehicular.backend.service.srtv.AuditoriaService auditoriaService;
 
-    public CategoriaDefectosServiceImpl(ICategoriaDefectosRepository repository) {
+    public CategoriaDefectosServiceImpl(ICategoriaDefectosRepository repository, com.revisionvehicular.backend.service.srtv.AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private CategoriaDTO toDTO(RTVCategoria entity) {
@@ -48,7 +50,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar categoria")
                 );
-
+        auditoriaService.registrar("INSERT", "CategoriaDefecto", "Creó categoría de defectos \"" + dto.getNombre() + "\"");
         return toDTO(cat);
     }
 
@@ -73,7 +75,7 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar categoria")
                 );
-
+        auditoriaService.registrar("UPDATE", "CategoriaDefecto", "Actualizó categoría \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizada);
     }
 
@@ -81,7 +83,10 @@ public class CategoriaDefectosServiceImpl implements ICategoriaDefectosService {
     public void delete(Long id) {
 
         if (repository.existsById(id)) {
+            RTVCategoria c = repository.findById(id).orElse(null);
+            String nombre = c != null ? c.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "CategoriaDefecto", "Eliminó categoría \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La categoria no existe");
         }

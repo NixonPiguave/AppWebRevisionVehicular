@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.ant;
 import com.revisionvehicular.backend.dtos.ant.CalendarizacionMatriculacionDTO;
 import com.revisionvehicular.backend.entities.ant.CalendarizacionMatriculacion;
 import com.revisionvehicular.backend.repositories.ant.ICalendarizacionRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,10 +13,12 @@ import java.util.stream.Collectors;
 @Service
 public class CalendarizacionServiceImpl implements ICalendarizacionService {
     private final ICalendarizacionRepository repository;
+    private final AuditoriaService auditoriaService;
 
     @Autowired
-    public CalendarizacionServiceImpl(ICalendarizacionRepository repository) {
+    public CalendarizacionServiceImpl(ICalendarizacionRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -25,6 +28,7 @@ public class CalendarizacionServiceImpl implements ICalendarizacionService {
                 .filter(c -> c.getUltimoDigitoPlaca().equals(dto.getUltimoDigitoPlaca()) && c.getMes().equals(dto.getMes()) && c.getTipo().equals(dto.getTipo()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error al crear calendarización"));
+        auditoriaService.registrar("INSERT", "CalendarizacionMatriculacion", "Creó calendarización placa " + dto.getUltimoDigitoPlaca() + " mes " + dto.getMes());
         return toDTO(calendarizacion);
     }
 
@@ -50,6 +54,7 @@ public class CalendarizacionServiceImpl implements ICalendarizacionService {
         repository.actualizarCalendarizacionMatriculacion(id, dto.getUltimoDigitoPlaca(), dto.getMes(), dto.getTipo(), dto.getEstado());
         CalendarizacionMatriculacion calendarizacionActualizada = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar la calendarización actualizada"));
+        auditoriaService.registrar("UPDATE", "CalendarizacionMatriculacion", "Actualizó calendarización (ID: " + id + ")");
         return toDTO(calendarizacionActualizada);
     }
 
@@ -57,6 +62,7 @@ public class CalendarizacionServiceImpl implements ICalendarizacionService {
     public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "CalendarizacionMatriculacion", "Eliminó calendarización ID " + id);
         } else {
             throw new RuntimeException("La calendarización no existe");
         }

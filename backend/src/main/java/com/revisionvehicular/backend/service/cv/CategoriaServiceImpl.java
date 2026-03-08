@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.CategoriaDTO;
 import com.revisionvehicular.backend.entities.cv.Categoria;
 import com.revisionvehicular.backend.repositories.cv.ICategoriaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -11,9 +12,12 @@ import java.util.stream.Collectors;
 @Service
 public class CategoriaServiceImpl implements ICategoriaService {
     private final ICategoriaRepository repository;
+    private final AuditoriaService auditoriaService;
+
     @Autowired
-    public CategoriaServiceImpl(ICategoriaRepository repository) {
+    public CategoriaServiceImpl(ICategoriaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     private CategoriaDTO toDTO(Categoria categoria) {
         CategoriaDTO dto = new CategoriaDTO();
@@ -34,6 +38,7 @@ public class CategoriaServiceImpl implements ICategoriaService {
         );
         Categoria cate = repository.getByNombre(dto.getNombre()).
                 orElseThrow(()-> new RuntimeException("Categoria no encontrada"));
+        auditoriaService.registrar("INSERT", "Categoria", "Creó la categoría \"" + dto.getNombre() + "\"");
         return toDTO(cate);
     }
 
@@ -52,12 +57,16 @@ public class CategoriaServiceImpl implements ICategoriaService {
         cate.setDescripcion(dto.getDescripcion());
         cate.setCodigo(dto.getCodigo());
         Categoria updated= repository.save(cate);
+        auditoriaService.registrar("UPDATE", "Categoria", "Actualizó la categoría \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(updated);
     }
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Categoria c = repository.findById(id).orElse(null);
+            String nombre = c != null ? c.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Categoria", "Eliminó la categoría \"" + nombre + "\" (ID: " + id + ")");
         }
         else
             throw new RuntimeException("El categoria no existe");

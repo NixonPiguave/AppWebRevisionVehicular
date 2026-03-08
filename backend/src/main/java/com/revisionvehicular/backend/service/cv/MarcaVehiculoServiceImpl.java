@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.cv;
 import com.revisionvehicular.backend.dtos.cv.MarcaVehiculoDTO;
 import com.revisionvehicular.backend.entities.cv.MarcaVehiculo;
 import com.revisionvehicular.backend.repositories.cv.IMarcaVehiculoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,12 @@ import java.util.stream.Collectors;
 public class MarcaVehiculoServiceImpl implements IMarcaVehiculoService {
 
     private final IMarcaVehiculoRepository repository;
+    private final AuditoriaService auditoriaService;
 
     @Autowired
-    public MarcaVehiculoServiceImpl(IMarcaVehiculoRepository repository) {
+    public MarcaVehiculoServiceImpl(IMarcaVehiculoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private MarcaVehiculoDTO toDTO(MarcaVehiculo marca) {
@@ -51,7 +54,7 @@ public class MarcaVehiculoServiceImpl implements IMarcaVehiculoService {
                 .orElseThrow(() ->
                         new RuntimeException("Marca de vehículo no encontrada")
                 );
-
+        auditoriaService.registrar("INSERT", "Marca", "Creó la marca \"" + dto.getNombre() + "\"");
         return toDTO(marca);
     }
 
@@ -87,14 +90,17 @@ public class MarcaVehiculoServiceImpl implements IMarcaVehiculoService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar la marca de vehículo")
                 );
-
+        auditoriaService.registrar("UPDATE", "Marca", "Actualizó la marca \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(updated);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            MarcaVehiculo m = repository.findById(id).orElse(null);
+            String nombre = m != null ? m.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Marca", "Eliminó la marca \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La marca de vehículo no existe");
         }

@@ -13,13 +13,17 @@ import java.util.stream.Collectors;
 public class EmpresaServiceImpl implements IEmpresaService {
 
     private final IEmpresaRepository repository;
+    private final AuditoriaService auditoriaService;
+
     @Autowired
-    public EmpresaServiceImpl(IEmpresaRepository repository) {
+    public EmpresaServiceImpl(IEmpresaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     public EmpresaDTO save(EmpresaDTO dto) {
         repository.insertar(dto.getNombre(), dto.getRuc(), dto.getDireccion(), dto.getTelefono(), dto.getCorreo(), dto.getLogoempresa(),dto.getIconoempresa());
         Empresa empresa=repository.getEmpresaByNombre(dto.getNombre()).orElseThrow(() -> new RuntimeException("Error al crear empresa"));
+        auditoriaService.registrar("INSERT", "Empresa", "Creó la empresa \"" + dto.getNombre() + "\"");
         return toDTO(empresa);
     }
 
@@ -59,13 +63,17 @@ public class EmpresaServiceImpl implements IEmpresaService {
         );
         Empresa EmpresaActualizada = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar la empresa actualizada"));
+        auditoriaService.registrar("UPDATE", "Empresa", "Actualizó la empresa \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(EmpresaActualizada);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Empresa e = repository.findById(id).orElse(null);
+            String nombre = e != null ? e.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Empresa", "Eliminó la empresa \"" + nombre + "\" (ID: " + id + ")");
         }
         else
             throw new RuntimeException("Error al eliminar empresa");

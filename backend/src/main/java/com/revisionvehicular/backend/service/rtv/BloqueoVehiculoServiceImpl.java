@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.BloqueoVehiculoDTO;
 import com.revisionvehicular.backend.entities.rtv.BloqueoVehiculo;
 import com.revisionvehicular.backend.repositories.rtv.IBloqueoVehiculoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +13,11 @@ import java.util.stream.Collectors;
 public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
 
     private final IBloqueoVehiculoRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public BloqueoVehiculoServiceImpl(IBloqueoVehiculoRepository repository) {
+    public BloqueoVehiculoServiceImpl(IBloqueoVehiculoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private BloqueoVehiculoDTO toDTO(BloqueoVehiculo entity) {
@@ -70,7 +73,7 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
                 .filter(b -> b.getNumeroTramite().equals(dto.getNumeroTramite()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Error al insertar bloqueo de vehículo"));
-
+        auditoriaService.registrar("INSERT", "BloqueoVehiculo", "Registró bloqueo trámite " + dto.getNumeroTramite());
         return toDTO(creado);
     }
 
@@ -98,7 +101,7 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
 
         BloqueoVehiculo actualizado = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al actualizar bloqueo de vehículo"));
-
+        auditoriaService.registrar("UPDATE", "BloqueoVehiculo", "Actualizó bloqueo ID " + id);
         return toDTO(actualizado);
     }
 
@@ -106,6 +109,7 @@ public class BloqueoVehiculoServiceImpl implements IBloqueoVehiculoService {
     public void delete(Long id) {
         if (repository.existsById(id)) {
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "BloqueoVehiculo", "Eliminó bloqueo ID " + id);
         } else {
             throw new RuntimeException("El bloqueo de vehículo no existe");
         }

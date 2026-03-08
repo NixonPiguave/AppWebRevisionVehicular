@@ -1,0 +1,420 @@
+/* ============================================
+   CONTENEDOR
+   ============================================ */
+.auditoria-container {
+  padding: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+}
+
+.auditoria-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.auditoria-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.btn-reporte {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #2d5a27;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.btn-reporte:hover {
+  background: #234a1e;
+}
+
+.auditoria-descripcion {
+  color: #555;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.auditoria-controles {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.auditoria-controles label {
+  font-size: 13px;
+  color: #4a4a4a;
+  font-weight: 500;
+}
+
+.input-buscar {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 280px;
+}
+
+.input-buscar:focus {
+  outline: none;
+  border-color: #2d5a27;
+}
+
+/* ============================================
+   TABLA USUARIOS
+   ============================================ */
+.tabla-contenedor {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: white;
+}
+
+.tabla-usuarios {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-usuarios th,
+.tabla-usuarios td {
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.tabla-usuarios th {
+  background: #1a2e1a;
+  color: white;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tabla-usuarios tbody tr.fila-clickeable {
+  cursor: pointer;
+  border-bottom: 1px solid #e8e8e8;
+  transition: background 0.15s ease;
+}
+
+.tabla-usuarios tbody tr.fila-clickeable:hover {
+  background: #f5f9f5;
+}
+
+.btn-ver-auditoria {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #e8f5e9;
+  color: #2d5a27;
+  border: 1px solid #c8e6c9;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-ver-auditoria:hover {
+  background: #c8e6c9;
+}
+
+.sin-registros {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 32px 16px;
+}
+
+.cargando {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-size: 14px;
+}
+
+.mensaje-error {
+  background: #fee2e2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  padding: 14px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ============================================
+   MODAL
+   ============================================ */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-contenido {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.modal-auditoria .modal-body {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a2e1a;
+}
+
+.btn-cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+}
+
+.btn-cerrar:hover {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 1px solid #e8e8e8;
+  background: #fafafa;
+  border-radius: 0 0 12px 12px;
+}
+
+.btn-cancelar {
+  padding: 10px 20px;
+  border: 1px solid #d0d0d0;
+  background: white;
+  color: #333;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-cancelar:hover {
+  background: #f5f5f5;
+}
+
+.btn-guardar {
+  padding: 10px 24px;
+  border: none;
+  background: #2d5a27;
+  color: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-guardar:hover:not(:disabled) {
+  background: #234a1e;
+}
+
+.btn-guardar:disabled {
+  background: #7a9e76;
+  cursor: not-allowed;
+}
+
+/* ============================================
+   TABLA AUDITORÍA EN MODAL
+   ============================================ */
+/* Filtros en modal de auditoría */
+.filtros-auditoria {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filtros-auditoria label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+}
+
+.select-filtro-tipo {
+  padding: 8px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 13px;
+  min-width: 220px;
+  background: white;
+}
+
+.select-filtro-tipo:focus {
+  outline: none;
+  border-color: #2d5a27;
+}
+
+.filtro-contador {
+  font-size: 12px;
+  color: #666;
+}
+
+.sin-registros-filtro {
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  padding: 20px;
+}
+
+.tabla-auditoria-contenedor {
+  overflow-x: auto;
+}
+
+.tabla-auditoria {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.tabla-auditoria th,
+.tabla-auditoria td {
+  padding: 10px 12px;
+  border: 1px solid #e8e8e8;
+  text-align: left;
+}
+
+.tabla-auditoria th {
+  background: #1a2e1a;
+  color: white;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tabla-auditoria tbody tr:nth-child(even) {
+  background: #f5f9f5;
+}
+
+.detalle-celda {
+  max-width: 320px;
+  word-wrap: break-word;
+}
+
+.badge-tipo {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge-tipo.tipo-insert,
+.tipo-insert .badge-tipo {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.badge-tipo.tipo-update,
+.tipo-update .badge-tipo {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.badge-tipo.tipo-delete,
+.tipo-delete .badge-tipo {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.badge-tipo.tipo-sesion,
+.tipo-sesion .badge-tipo {
+  background: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.sin-registros-modal {
+  text-align: center;
+  color: #888;
+  padding: 32px;
+  font-style: italic;
+}
+
+/* ============================================
+   MODAL REPORTE (formulario)
+   ============================================ */
+.modal-reporte .modal-body {
+  padding: 24px;
+}
+
+.form-grupo {
+  margin-bottom: 18px;
+}
+
+.form-grupo label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.form-select {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 6px;
+  font-size: 14px;
+  background: white;
+}
+
+.form-select:focus {
+  outline: none;
+  border-color: #2d5a27;
+}

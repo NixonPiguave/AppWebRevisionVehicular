@@ -56,7 +56,6 @@ public class ServicioServiceImpl implements IServicioService {
 
         Servicio actualizado = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Error al recuperar servicio actualizado"));
-
         return toDTO(actualizado);
     }
 

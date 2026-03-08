@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rc;
 import com.revisionvehicular.backend.dtos.rc.UnidadesMedidaDTO;
 import com.revisionvehicular.backend.entities.rc.UnidadMedida;
 import com.revisionvehicular.backend.repositories.rc.IUnidadesMedidaRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,9 +12,11 @@ import java.util.stream.Collectors;
 public class UnidadMedidaServiceImpl implements IUnidadMedidaService {
 
     private final IUnidadesMedidaRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public UnidadMedidaServiceImpl(IUnidadesMedidaRepository repository) {
+    public UnidadMedidaServiceImpl(IUnidadesMedidaRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     private UnidadesMedidaDTO toDTO(UnidadMedida entity) {
@@ -43,7 +46,7 @@ public class UnidadMedidaServiceImpl implements IUnidadMedidaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar unidad de medida")
                 );
-
+        auditoriaService.registrar("INSERT", "UnidadMedida", "Creó unidad de medida \"" + dto.getNombre() + "\"");
         return toDTO(unidad);
     }
 
@@ -67,14 +70,17 @@ public class UnidadMedidaServiceImpl implements IUnidadMedidaService {
                 .orElseThrow(() ->
                         new RuntimeException("Error al actualizar unidad de medida")
                 );
-
+        auditoriaService.registrar("UPDATE", "UnidadMedida", "Actualizó unidad de medida \"" + dto.getNombre() + "\" (ID: " + id + ")");
         return toDTO(actualizada);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            UnidadMedida u = repository.findById(id).orElse(null);
+            String nombre = u != null ? u.getNombre() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "UnidadMedida", "Eliminó unidad de medida \"" + nombre + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("La unidad de medida no existe");
         }

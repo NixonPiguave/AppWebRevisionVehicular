@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.EquipoDTO;
 import com.revisionvehicular.backend.entities.rtv.Equipos;
 import com.revisionvehicular.backend.repositories.rtv.IEquipoRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,12 @@ import java.util.stream.Collectors;
 public class EquiposServiceImpl implements IEquiposService {
 
     private final IEquipoRepository repository;
+    private final AuditoriaService auditoriaService;
 
     @Autowired
-    public EquiposServiceImpl(IEquipoRepository repository) {
+    public EquiposServiceImpl(IEquipoRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -44,9 +47,9 @@ public class EquiposServiceImpl implements IEquiposService {
                 dto.getSerialEquipo()
         );
 
-        Equipos equipo = repository.findById(dto.getEquipoid())
+        Equipos equipo = repository.findAll().stream().filter(e -> e.getSerialEquipo().equals(dto.getSerialEquipo())).findFirst()
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el equipo creado"));
-
+        auditoriaService.registrar("INSERT", "Equipo", "Creó equipo \"" + dto.getEquipo() + "\" serial " + dto.getSerialEquipo());
         return toDTO(equipo);
     }
 
@@ -87,14 +90,17 @@ public class EquiposServiceImpl implements IEquiposService {
 
         Equipos equipo = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Error al recuperar el equipo actualizado"));
-
+        auditoriaService.registrar("UPDATE", "Equipo", "Actualizó equipo \"" + dto.getEquipo() + "\" (ID: " + id + ")");
         return toDTO(equipo);
     }
 
     @Override
     public void delete(Long id) {
         if (repository.existsById(id)) {
+            Equipos e = repository.findById(id).orElse(null);
+            String detalle = e != null ? e.getEquipo() + " " + e.getSerialEquipo() : "ID " + id;
             repository.deleteById(id);
+            auditoriaService.registrar("DELETE", "Equipo", "Eliminó equipo \"" + detalle + "\" (ID: " + id + ")");
         } else {
             throw new RuntimeException("El equipo no existe");
         }

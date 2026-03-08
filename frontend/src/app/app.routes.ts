@@ -46,6 +46,7 @@ import { DesbloqueoVehiculoComponent } from './paginas/gestion_vehicular/desbloq
 import { BajaVehiculoComponent } from './paginas/gestion_vehicular/baja-vehiculo/baja-vehiculo';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
+import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -58,6 +59,7 @@ export const routes: Routes = [
       { path: 'administracion/roles', component: RolesComponent },
       { path: 'administracion/areas', component: AreasComponent },
       { path: 'administracion/empresa', component: EmpresaComponent },
+      { path: 'administracion/auditoria', component: AuditoriaComponent },
 
       // CATÁLOGO DE VEHÍCULOS
       { path: 'catalogo-vehiculos/ambito-operacional', component: AmbitoOperacionalComponent },

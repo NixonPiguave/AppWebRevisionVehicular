@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rc;
 import com.revisionvehicular.backend.dtos.rc.DescripcionUmbralDTO;
 import com.revisionvehicular.backend.entities.rc.DescripcionUmbral;
 import com.revisionvehicular.backend.repositories.rc.IDescripcionUmbralRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -13,10 +14,13 @@ public class DescripcionUmbralServiceImpl
         implements IDescripcionUmbralService {
 
     private final IDescripcionUmbralRepository repository;
+    private final AuditoriaService auditoriaService;
 
     public DescripcionUmbralServiceImpl(
-            IDescripcionUmbralRepository repository) {
+            IDescripcionUmbralRepository repository,
+            AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     @Transactional
     @Override
@@ -32,7 +36,7 @@ public class DescripcionUmbralServiceImpl
                 .findFirst()
                 .orElseThrow(() ->
                         new RuntimeException("Error al insertar descripción"));
-
+        auditoriaService.registrar("INSERT", "DescripcionUmbral", "Creó descripción de umbral \"" + dto.getDescripcion() + "\"");
         return toDTO(entity);
     }
     @Transactional
@@ -48,7 +52,7 @@ public class DescripcionUmbralServiceImpl
                 dto.getDescripcion(),
                 dto.getEstado()
         );
-
+        auditoriaService.registrar("UPDATE", "DescripcionUmbral", "Actualizó descripción de umbral \"" + dto.getDescripcion() + "\" (ID: " + id + ")");
         return findById(id);
     }
     @Override
@@ -74,8 +78,10 @@ public class DescripcionUmbralServiceImpl
             throw new EntityNotFoundException(
                     "Descripción no encontrada con ID: " + id);
         }
-
+        DescripcionUmbral d = repository.findById(id).orElse(null);
+        String nombre = d != null ? d.getDescripcion() : "ID " + id;
         repository.deleteById(id);
+        auditoriaService.registrar("DELETE", "DescripcionUmbral", "Eliminó descripción de umbral \"" + nombre + "\" (ID: " + id + ")");
     }
     private DescripcionUmbralDTO toDTO(DescripcionUmbral entity) {
 

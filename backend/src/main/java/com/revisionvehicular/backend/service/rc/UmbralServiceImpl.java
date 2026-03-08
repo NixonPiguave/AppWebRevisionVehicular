@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.service.rc;
 import com.revisionvehicular.backend.dtos.rc.UmbralDTO;
 import com.revisionvehicular.backend.entities.rc.Umbral;
 import com.revisionvehicular.backend.repositories.rc.IUmbralRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -15,9 +16,11 @@ import java.util.stream.Collectors;
 public class UmbralServiceImpl implements IUmbralService {
 
     private final IUmbralRepository repository;
+    private final AuditoriaService auditoriaService;
 
-    public UmbralServiceImpl(IUmbralRepository repository) {
+    public UmbralServiceImpl(IUmbralRepository repository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.auditoriaService = auditoriaService;
     }
     private void validarUmbral(UmbralDTO dto) {
 
@@ -58,7 +61,7 @@ public class UmbralServiceImpl implements IUmbralService {
                         dto.getCalificacion()
                 )
                 .orElseThrow(() -> new RuntimeException("Error al insertar umbral"));
-
+        auditoriaService.registrar("INSERT", "Umbral", "Creó umbral " + dto.getValorMin() + "-" + dto.getValorMax() + " " + dto.getCalificacion());
         return toDTO(umbral);
     }
 
@@ -84,7 +87,7 @@ public class UmbralServiceImpl implements IUmbralService {
 
         Umbral actualizado = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Error al recuperar umbral actualizado"));
-
+        auditoriaService.registrar("UPDATE", "Umbral", "Actualizó umbral (ID: " + id + ")");
         return toDTO(actualizado);
     }
 
@@ -112,8 +115,8 @@ public class UmbralServiceImpl implements IUmbralService {
         if (!repository.existsById(id)) {
             throw new EntityNotFoundException("Umbral no encontrado con ID: " + id);
         }
-
         repository.deleteById(id);
+        auditoriaService.registrar("DELETE", "Umbral", "Eliminó umbral ID " + id);
     }
 
     private UmbralDTO toDTO(Umbral umbral) {

@@ -1,0 +1,164 @@
+<div class="auditoria-container">
+  <div class="mensaje-error" *ngIf="mensajeError">
+    <mat-icon>error</mat-icon>
+    {{ mensajeError }}
+  </div>
+
+  <div class="auditoria-header">
+    <h2>Auditoría de movimientos</h2>
+    <button type="button" class="btn-reporte" (click)="abrirModalReporte()">
+      <mat-icon>description</mat-icon>
+      Generar reporte
+    </button>
+  </div>
+
+  <p class="auditoria-descripcion">
+    Seleccione un usuario para ver el historial de acciones (altas, modificaciones, bajas e inicio/cierre de sesión).
+  </p>
+
+  <div class="auditoria-controles">
+    <label for="buscar">Buscar:</label>
+    <input
+      id="buscar"
+      type="text"
+      [(ngModel)]="terminoBusqueda"
+      (ngModelChange)="filtrarUsuarios()"
+      placeholder="Nombre, usuario o email..."
+      class="input-buscar"
+    />
+  </div>
+
+  <div class="cargando" *ngIf="cargando">Cargando usuarios...</div>
+
+  <div *ngIf="!cargando" class="tabla-contenedor">
+    <table class="tabla-usuarios">
+      <thead>
+        <tr>
+          <th>Usuario (login)</th>
+          <th>Nombre completo</th>
+          <th>Email</th>
+          <th>Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuariosFiltrados" (click)="abrirModalAuditoria(u)" class="fila-clickeable">
+          <td>{{ u.usuario }}</td>
+          <td>{{ u.nombre }} {{ u.apellido }}</td>
+          <td>{{ u.email }}</td>
+          <td>
+            <button type="button" class="btn-ver-auditoria" (click)="abrirModalAuditoria(u); $event.stopPropagation()">
+              <mat-icon>history</mat-icon>
+              Ver auditoría
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="usuariosFiltrados.length === 0 && !cargando">
+          <td colspan="4" class="sin-registros">No hay usuarios para mostrar</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: Auditoría del usuario -->
+<div class="modal-overlay" *ngIf="mostrarModalAuditoria" (click)="cerrarModalAuditoria()">
+  <div class="modal-contenido modal-auditoria" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Auditoría: {{ usuarioSeleccionado?.nombre }} {{ usuarioSeleccionado?.apellido }} ({{ usuarioSeleccionado?.usuario }})</h3>
+      <button type="button" class="btn-cerrar" (click)="cerrarModalAuditoria()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="cargando" *ngIf="cargandoAuditoria">Cargando movimientos...</div>
+      <div *ngIf="!cargandoAuditoria && registrosAuditoria.length === 0" class="sin-registros-modal">
+        Este usuario no tiene registros de auditoría.
+      </div>
+      <div *ngIf="!cargandoAuditoria && registrosAuditoria.length > 0">
+        <div class="filtros-auditoria">
+          <label>Filtrar por tipo:</label>
+          <select [(ngModel)]="filtroTipo" class="select-filtro-tipo">
+            <option value="todos">Todo (general)</option>
+            <option value="operaciones">Solo operaciones (Insert / Update / Delete)</option>
+            <option value="INSERT">Solo inserciones</option>
+            <option value="UPDATE">Solo actualizaciones</option>
+            <option value="DELETE">Solo eliminaciones</option>
+            <option value="INICIO_SESION">Solo inicios de sesión</option>
+            <option value="CIERRE_SESION">Solo cierres de sesión</option>
+          </select>
+          <span class="filtro-contador">{{ registrosAuditoriaFiltrados.length }} de {{ registrosAuditoria.length }}</span>
+        </div>
+        <div class="tabla-auditoria-contenedor">
+          <table class="tabla-auditoria">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Hora</th>
+                <th>Tipo</th>
+                <th>Entidad</th>
+                <th>Detalle</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of registrosAuditoriaFiltrados" [class]="claseTipo(r.tipoAccion)">
+              <td>{{ formatearFecha(r.fecha) }}</td>
+              <td>{{ formatearHora(r.fecha) }}</td>
+              <td><span class="badge-tipo" [ngClass]="claseTipo(r.tipoAccion)">{{ r.tipoAccion || '—' }}</span></td>
+              <td>{{ r.entidad || '—' }}</td>
+              <td class="detalle-celda">{{ r.detalle || r.accion || '—' }}</td>
+            </tr>
+            <tr *ngIf="registrosAuditoriaFiltrados.length === 0 && registrosAuditoria.length > 0">
+              <td colspan="5" class="sin-registros-filtro">Ningún registro coincide con el filtro.</td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancelar" (click)="cerrarModalAuditoria()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Opciones de reporte -->
+<div class="modal-overlay" *ngIf="mostrarModalReporte" (click)="cerrarModalReporte()">
+  <div class="modal-contenido modal-reporte" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Generar reporte de auditoría</h3>
+      <button type="button" class="btn-cerrar" (click)="cerrarModalReporte()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grupo">
+        <label>Tipo de reporte</label>
+        <select [(ngModel)]="tipoReporte" class="form-select">
+          <option value="general">General (todos los usuarios y cambios)</option>
+          <option value="usuario">Por usuario</option>
+          <option value="rol">Por rol</option>
+        </select>
+      </div>
+      <div class="form-grupo" *ngIf="tipoReporte === 'usuario'">
+        <label>Usuario</label>
+        <select [(ngModel)]="usuarioReporte" class="form-select">
+          <option [ngValue]="null" disabled>Seleccione un usuario</option>
+          <option *ngFor="let u of usuarios" [ngValue]="u.usuarioId">{{ u.nombre }} {{ u.apellido }} ({{ u.usuario }})</option>
+        </select>
+      </div>
+      <div class="form-grupo" *ngIf="tipoReporte === 'rol'">
+        <label>Rol</label>
+        <select [(ngModel)]="rolReporte" class="form-select">
+          <option [ngValue]="null" disabled>Seleccione un rol</option>
+          <option *ngFor="let r of roles" [ngValue]="r.rolId">{{ r.nombre }}</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn-cancelar" (click)="cerrarModalReporte()">Cancelar</button>
+      <button type="button" class="btn-guardar" (click)="generarReporte()" [disabled]="cargandoReporte || (tipoReporte === 'usuario' && !usuarioReporte) || (tipoReporte === 'rol' && !rolReporte)">
+        {{ cargandoReporte ? 'Generando...' : 'Generar e imprimir' }}
+      </button>
+    </div>
+  </div>
+</div>
