@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 @Service
 public class InspeccionServiceImpl implements IInspeccionService {
 
-    private static final Long ID_CALENDARIZACION_DEFAULT = 1L;
     private static final Long UMBRAL_DEFAULT = 1L;
     private static final String ESTADO_ACTIVO = "A";
     private static final String RESULTADO_PENDIENTE = "PENDIENTE";
@@ -51,11 +50,9 @@ public class InspeccionServiceImpl implements IInspeccionService {
                 RESULTADO_PENDIENTE,
                 request.getObservaciones(),
                 request.getVehiculoId(),
-                request.getMetodoInspeccionId(),
                 lineaId,
                 request.getUsuarioId(),
-                ESTADO_ACTIVO,
-                ID_CALENDARIZACION_DEFAULT
+                ESTADO_ACTIVO
         );
 
         Inspeccion inspeccion = inspeccionRepository.findUltimaPorVehiculo(request.getVehiculoId());
@@ -109,6 +106,10 @@ public class InspeccionServiceImpl implements IInspeccionService {
         }
         if (entity.getLinea() != null) {
             dto.setLineaId(entity.getLinea().getLineaid());
+        }
+        if (entity.getDetalles() != null && !entity.getDetalles().isEmpty()
+                && entity.getDetalles().get(0).getMetodoInspeccion() != null) {
+            dto.setMetodoInspeccionId(entity.getDetalles().get(0).getMetodoInspeccion().getMetodoinspeccionid());
         }
         if (entity.getUsuario() != null) {
             dto.setUsuarioId(entity.getUsuario().getUsuarioId());

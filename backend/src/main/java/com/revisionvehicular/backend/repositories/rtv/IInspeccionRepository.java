@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
@@ -24,11 +25,9 @@ public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
             @Param("p_resultado") String resultado,
             @Param("p_observaciones") String observaciones,
             @Param("p_vehiculo_id") Long vehiculoId,
-            @Param("p_metodo_inspeccion_id") Long metodoInspeccionId,
             @Param("p_linea_id") Long lineaId,
             @Param("p_usuario_id") Long usuarioId,
-            @Param("p_estado") String estado,
-            @Param("p_id_calendarizacion") Long idCalendarizacion
+            @Param("p_estado") String estado
     );
 
     @Procedure(procedureName = "sp_actualizar_inspeccion")
