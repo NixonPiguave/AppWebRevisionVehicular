@@ -2,7 +2,7 @@
   <div class="header">
     <h2>Gestión de Turnos</h2>
     <button class="btn btn-primary" (click)="nuevoTurno()">
-      <i class="icon-plus"></i> Nuevo Turno
+      <mat-icon>add</mat-icon> Nuevo Turno
     </button>
   </div>
 
@@ -74,16 +74,20 @@
           </select>
         </div>
 
+        <!-- ✅ Fecha Inicio: Solo lectura, muestra la fecha de hoy -->
         <div class="form-group">
           <label for="fechaInicio">Fecha Inicio *</label>
           <input
-            type="date"
+            type="text"
             id="fechaInicio"
-            [(ngModel)]="turnoForm.fechaInicio"
-            name="fechaInicio"
-            required
+            [value]="turnoForm.fechaInicio | date: 'dd/MM/yyyy'"
             class="form-control"
+            readonly
           />
+          <small class="form-hint">
+            <mat-icon>info</mat-icon>
+            Fecha actual
+          </small>
         </div>
 
         <!-- Estado: solo visible al editar; al crear queda fijo en GENERADO -->
@@ -97,9 +101,6 @@
             class="form-control"
           >
             <option value="GENERADO">GENERADO</option>
-            <option value="CONFIRMADO">CONFIRMADO</option>
-            <option value="PAGADO">PAGADO</option>
-            <option value="ATENDIDO">ATENDIDO</option>
             <option value="CANCELADO">CANCELADO</option>
           </select>
         </div>
@@ -174,6 +175,7 @@
 
   <!-- ============================
        Modal Vehículos (placa)
+       ✅ Con filtro por propietario
        ============================ -->
   <div class="modal-overlay" *ngIf="mostrarModalVehiculo" (click)="cerrarSelectorVehiculo()">
     <div class="modal" (click)="$event.stopPropagation()">
@@ -183,6 +185,15 @@
       </div>
 
       <div class="modal-body">
+        <!-- ✅ Mostrar propietario seleccionado -->
+        <div class="modal-info-propietario" *ngIf="propietarioSeleccionadoInfo">
+          <mat-icon>person</mat-icon>
+          <span>
+            Propietario: <strong>{{ propietarioSeleccionadoInfo.nombre }}</strong>
+            ({{ propietarioSeleccionadoInfo.documentoIdentidad }})
+          </span>
+        </div>
+
         <div class="modal-filtros">
           <input
             type="text"
@@ -219,26 +230,29 @@
             </td>
           </tr>
           <tr *ngIf="vehiculosEncontrados.length === 0">
-            <td colspan="4" class="text-center">No hay vehículos registrados</td>
+            <td colspan="4" class="text-center">
+              Este propietario no tiene vehículos registrados
+            </td>
           </tr>
           </tbody>
         </table>
+
         <div class="modal-ayuda">
-          Solo se muestran vehículos <strong>ya registrados</strong> (búsqueda por placa).
+          Solo se muestran vehículos <strong>del propietario seleccionado</strong>.
         </div>
       </div>
     </div>
   </div>
 
+  <!-- ✅ Tabla corregida: sin entidad, muestra nombre propietario, placa y servicio -->
   <div class="tabla-container">
     <table class="tabla-turnos">
       <thead>
       <tr>
         <th>ID</th>
         <th>Propietario</th>
-        <th>Vehículo</th>
+        <th>Vehículo (Placa)</th>
         <th>Servicio</th>
-        <th>Entidad</th>
         <th>Fecha Inicio</th>
         <th>Fecha Fin</th>
         <th>Estado</th>
@@ -248,10 +262,9 @@
       <tbody>
       <tr *ngFor="let turno of turnos">
         <td>{{ turno.turnoId }}</td>
-        <td>{{ turno.propietarioId }}</td>
-        <td>{{ turno.vehiculoId }}</td>
-        <td>{{ turno.servicioId }}</td>
-        <td>{{ turno.entidadId }}</td>
+        <td>{{ obtenerNombrePropietario(turno.propietarioId) }}</td>
+        <td>{{ obtenerPlacaVehiculo(turno.vehiculoId) }}</td>
+        <td>{{ obtenerNombreServicio(turno.servicioId) }}</td>
         <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
         <td>{{ turno.fechaFin ? (turno.fechaFin | date: 'dd/MM/yyyy') : '-' }}</td>
         <td>
@@ -269,7 +282,7 @@
         </td>
       </tr>
       <tr *ngIf="turnos.length === 0">
-        <td colspan="9" class="text-center">No hay turnos registrados</td>
+        <td colspan="8" class="text-center">No hay turnos registrados</td>
       </tr>
       </tbody>
     </table>

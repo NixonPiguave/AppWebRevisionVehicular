@@ -153,13 +153,16 @@ export class TurnosComponent implements OnInit {
 
   guardarTurno(): void {
     if (!this.turnoForm.propietarioId || this.turnoForm.propietarioId <= 0) {
-      this.notification.error('Debe seleccionar un propietario por cédula'); return;
+      this.notification.error('Debe seleccionar un propietario por cédula');
+      return;
     }
     if (!this.turnoForm.vehiculoId || this.turnoForm.vehiculoId <= 0) {
-      this.notification.error('Debe seleccionar un vehículo por placa'); return;
+      this.notification.error('Debe seleccionar un vehículo por placa');
+      return;
     }
     if (!this.turnoForm.servicioId || this.turnoForm.servicioId <= 0) {
-      this.notification.error('Debe seleccionar un servicio'); return;
+      this.notification.error('Debe seleccionar un servicio');
+      return;
     }
     // Si por alguna razón viene sin fecha, la rellenamos con hoy
     if (!this.turnoForm.fechaInicio) {
@@ -172,8 +175,15 @@ export class TurnosComponent implements OnInit {
 
     if (this.modoEdicion && this.turnoSeleccionado?.turnoId) {
       this.turnosService.update(this.turnoSeleccionado.turnoId, this.turnoForm).subscribe({
-        next: () => { this.cargarTurnos(); this.cancelar(); },
-        error: (err) => console.error('Error al actualizar turno:', err)
+        next: () => {
+          this.notification.success('Turno actualizado correctamente');
+          this.cargarTurnos();
+          this.cancelar();
+        },
+        error: (err) => {
+          console.error('Error al actualizar turno:', err);
+          this.notification.error('Error al actualizar el turno');
+        }
       });
     } else {
       // Capturar snapshots antes de crear
@@ -183,6 +193,7 @@ export class TurnosComponent implements OnInit {
 
       this.turnosService.create(this.turnoForm).subscribe({
         next: (turnoCreado) => {
+          this.notification.success('Turno creado correctamente');
           this.cargarTurnos();
           this.cancelar();
 
@@ -197,7 +208,10 @@ export class TurnosComponent implements OnInit {
             );
           });
         },
-        error: (err) => console.error('Error al crear turno:', err)
+        error: (err) => {
+          console.error('Error al crear turno:', err);
+          this.notification.error('Error al crear el turno');
+        }
       });
     }
   }
@@ -247,7 +261,10 @@ export class TurnosComponent implements OnInit {
   }
 
   abrirInspeccion(turno: Turnos): void {
-    if (!turno.turnoId || !turno.vehiculoId) { this.notification.error('Este turno no tiene vehículo asociado.'); return; }
+    if (!turno.turnoId || !turno.vehiculoId) {
+      this.notification.error('Este turno no tiene vehículo asociado.');
+      return;
+    }
     this.router.navigate(['/inicio/inspeccion-rtv/registrar'], {
       queryParams: { turnoId: turno.turnoId, vehiculoId: turno.vehiculoId }
     });
@@ -260,8 +277,14 @@ export class TurnosComponent implements OnInit {
   eliminarTurno(id: number): void {
     if (confirm('¿Está seguro de eliminar este turno?')) {
       this.turnosService.delete(id).subscribe({
-        next: () => this.cargarTurnos(),
-        error: (err) => console.error('Error al eliminar turno:', err)
+        next: () => {
+          this.notification.success('Turno eliminado correctamente');
+          this.cargarTurnos();
+        },
+        error: (err) => {
+          console.error('Error al eliminar turno:', err);
+          this.notification.error('Error al eliminar el turno');
+        }
       });
     }
   }
@@ -279,10 +302,12 @@ export class TurnosComponent implements OnInit {
     this.buscarPropietariosElegibles();
     this.cdr.detectChanges();
   }
+
   cerrarSelectorPropietario(): void {
     this.mostrarModalPropietario = false;
     this.cdr.detectChanges();
   }
+
   buscarPropietariosElegibles(): void {
     this.cargandoPropietarios = true;
     this.propietariosElegibles = [];
@@ -302,6 +327,7 @@ export class TurnosComponent implements OnInit {
       }
     });
   }
+
   seleccionarPropietario(p: Propietario): void {
     this.propietarioSeleccionadoInfo = p;
     this.turnoForm.propietarioId = (p.idPropietario ?? 0) as number;
@@ -309,11 +335,13 @@ export class TurnosComponent implements OnInit {
     if (p.idPropietario != null) this.propietariosMapa.set(p.idPropietario, p);
     this.cdr.detectChanges();
   }
+
   limpiarPropietario(): void {
     this.propietarioSeleccionadoInfo = null;
     this.turnoForm.propietarioId = 0;
     this.cdr.detectChanges();
   }
+
   private cargarPropietarioPorId(id: number): void {
     if (!id || id <= 0) return;
     this.propietarioService.obtenerPorId(id).subscribe({
@@ -336,20 +364,39 @@ export class TurnosComponent implements OnInit {
     this.buscarVehiculos();
     this.cdr.detectChanges();
   }
+
   cerrarSelectorVehiculo(): void {
     this.mostrarModalVehiculo = false;
     this.cdr.detectChanges();
   }
+
+  /**
+   * ✅ Buscar vehículos filtrando solo los del propietario seleccionado
+   */
   buscarVehiculos(): void {
+    // Validar que haya un propietario seleccionado primero
+    if (!this.turnoForm.propietarioId || this.turnoForm.propietarioId <= 0) {
+      this.notification.error('Primero debe seleccionar un propietario');
+      this.cerrarSelectorVehiculo();
+      return;
+    }
+
     this.cargandoVehiculos = true;
     this.vehiculosEncontrados = [];
+
     this.vehiculoService.buscarPorPlaca(this.busquedaPlaca).subscribe({
       next: (data) => {
-        this.vehiculosEncontrados = data ?? [];
+        // ✅ Filtrar solo los vehículos que pertenecen al propietario seleccionado
+        this.vehiculosEncontrados = (data ?? []).filter(
+          v => v.propietarioId === this.turnoForm.propietarioId
+        );
+
         this.cargandoVehiculos = false;
+
         (data ?? []).forEach(v => {
           if (v.id != null) this.vehiculosMapa.set(v.id, v);
         });
+
         this.cdr.detectChanges();
       },
       error: (err)  => {
@@ -359,6 +406,7 @@ export class TurnosComponent implements OnInit {
       }
     });
   }
+
   seleccionarVehiculo(v: Vehiculo): void {
     this.vehiculoSeleccionadoInfo = v;
     this.turnoForm.vehiculoId = (v.id ?? 0) as number;
@@ -366,11 +414,13 @@ export class TurnosComponent implements OnInit {
     if (v.id != null) this.vehiculosMapa.set(v.id, v);
     this.cdr.detectChanges();
   }
+
   limpiarVehiculo(): void {
     this.vehiculoSeleccionadoInfo = null;
     this.turnoForm.vehiculoId = 0;
     this.cdr.detectChanges();
   }
+
   private cargarVehiculoPorId(id: number): void {
     if (!id || id <= 0) return;
     this.vehiculoService.obtenerPorId(id).subscribe({
@@ -422,6 +472,15 @@ export class TurnosComponent implements OnInit {
     if (!id) return '-';
     const v = this.vehiculosMapa.get(id);
     return v ? v.matricula : id.toString();
+  }
+
+  /**
+   * ✅ Obtener nombre del servicio por ID
+   */
+  obtenerNombreServicio(id?: number): string {
+    if (!id) return '-';
+    const servicio = this.servicios.find(s => s.idTipoTramite === id);
+    return servicio ? servicio.nombre : id.toString();
   }
 
   // ── Modelos / marcas para tickets ────────────────────────────────

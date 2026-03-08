@@ -115,6 +115,24 @@
   margin-top: 20px;
 }
 
+/* ✅ Hint informativo para fecha inicio */
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+}
+
+.form-hint mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: #999;
+}
+
 .tabla-container {
   background: white;
   padding: 20px;
@@ -283,6 +301,30 @@
 
 .modal-body {
   padding: 16px;
+}
+
+/* ✅ Indicador de propietario en modal de vehículos */
+.modal-info-propietario {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  background: #e8f5e9;
+  border: 1px solid #a5d6a7;
+  border-radius: 6px;
+  color: #2e7d32;
+  font-size: 14px;
+}
+
+.modal-info-propietario mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.modal-info-propietario strong {
+  color: #1b5e20;
 }
 
 .modal-filtros {
