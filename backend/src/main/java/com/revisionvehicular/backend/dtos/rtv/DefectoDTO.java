@@ -18,4 +18,5 @@ public class DefectoDTO {
     private Long tipoDefectoId;
     private Long subfamiliaId;
     private Long categoriaId;
+    private String nombreSubfamilia;
 }

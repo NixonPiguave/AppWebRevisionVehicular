@@ -34,3 +34,263 @@
   font-size: 14px;
   color: #666;
 }
+
+.header-info {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.badge-vehiculo, .badge-datos, .badge-turno {
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.mensaje-error, .cargando {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-reintentar {
+  margin-left: 12px;
+  padding: 6px 12px;
+  background: #1976d2;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #ddd;
+  border-top-color: #1976d2;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.contenido {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.panel-parametros, .panel-equipos, .panel-resultado, .panel-observaciones {
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.panel-parametros h3, .panel-equipos h3, .panel-resultado h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.parametros-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 700px) {
+  .parametros-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.param-grupo {
+  min-width: 0;
+}
+
+.param-grupo h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.param-fila {
+  margin-bottom: 14px;
+}
+
+.param-fila:last-child {
+  margin-bottom: 0;
+}
+
+.param-fila > label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 6px;
+}
+
+.param-fila input[type="number"],
+.param-fila input[type="text"] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background: #fff;
+}
+
+.param-fila input:focus {
+  outline: none;
+  border-color: #1976d2;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+.checkbox-fila {
+  margin-top: 8px;
+}
+
+.checkbox-fila label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.checkbox-fila input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.equipos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.equipo-item {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.equipo-item:hover {
+  border-color: #1976d2;
+  background: #f5f9ff;
+}
+
+.equipo-item.seleccionado {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.eq-nombre { font-weight: 500; }
+.eq-serial { font-size: 12px; color: #666; }
+
+.resultado-opciones {
+  display: flex;
+  gap: 24px;
+}
+
+.resultado-opciones label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.opcion-aprobado mat-icon { color: #2e7d32; }
+.opcion-noaprobado mat-icon { color: #c62828; }
+
+.defectos-no-aprobado {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+.input-busqueda {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.defectos-lista {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.defecto-item {
+  padding: 10px 12px;
+  border: 1px solid #eee;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  cursor: pointer;
+}
+
+.defecto-item:hover { background: #f5f5f5; }
+.defecto-item.seleccionado {
+  border-color: #c62828;
+  background: #ffebee;
+}
+
+.def-codigo { font-weight: 500; margin-right: 8px; }
+.def-desc { font-size: 13px; color: #555; }
+
+.panel-observaciones textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  resize: vertical;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 0;
+}
+
+.btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+}
+
+.btn-primary {
+  background: #1976d2;
+  color: white;
+  border: none;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

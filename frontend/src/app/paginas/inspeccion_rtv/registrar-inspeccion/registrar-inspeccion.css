@@ -229,6 +229,19 @@
   font-size: 13px;
   color: #666;
 }
+.subtitulo.filtro-ubicacion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  color: #2d5a27;
+}
+.subtitulo.filtro-ubicacion mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
 .vehiculo-svg-wrapper {
   position: relative;
   padding: 90px 140px;

@@ -1,7 +1,128 @@
 <div class="revision-gases">
   <header class="header">
-    <button class="btn-volver" (click)="volver()">← Volver</button>
+    <button class="btn-volver" (click)="volver()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
     <h1>Revisión de Gases</h1>
-    <p class="subtitulo">Componente en desarrollo. Aquí irá el formulario de inspección de gases.</p>
+    <p class="subtitulo">Control de emisiones — RTE INEN 017 (RTV Ecuador)</p>
+    <div class="header-info" *ngIf="vehiculoInfo">
+      <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
+      <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
+        {{ vehiculoInfo.marca }}{{ vehiculoInfo.marca && vehiculoInfo.modelo ? ' · ' : '' }}{{ vehiculoInfo.modelo }}
+      </span>
+      <span class="badge-turno" *ngIf="turnoId">Turno #{{ turnoId }}</span>
+    </div>
   </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button class="btn-reintentar" (click)="cargarDatos()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <div class="contenido" *ngIf="!cargando && !error">
+    <section class="panel-combustible">
+      <h3>Tipo de combustible</h3>
+      <div class="combustible-opciones">
+        <label>
+          <input type="radio" [(ngModel)]="tipoCombustible" value="GASOLINA" name="combustible" />
+          Gasolina
+        </label>
+        <label>
+          <input type="radio" [(ngModel)]="tipoCombustible" value="DIESEL" name="combustible" />
+          Diesel
+        </label>
+      </div>
+    </section>
+
+    <section class="panel-parametros">
+      <h3>Valores medidos</h3>
+      <p class="param-descripcion" *ngIf="tipoCombustible === 'GASOLINA'">
+        Parámetros según NTE INEN 2204 / RTE INEN 017
+      </p>
+      <div class="parametros-gasolina" *ngIf="tipoCombustible === 'GASOLINA'">
+        <div class="param-fila">
+          <label>CO (%)</label>
+          <span class="param-hint">Monóxido de carbono. Límite típico &lt; 0,5% con catalizador</span>
+          <input type="number" [(ngModel)]="co" placeholder="0.3" min="0" step="0.01" />
+        </div>
+        <div class="param-fila">
+          <label>HC (ppm)</label>
+          <span class="param-hint">Hidrocarburos no quemados</span>
+          <input type="number" [(ngModel)]="hc" placeholder="80" min="0" step="1" />
+        </div>
+        <div class="param-fila">
+          <label>Lambda (λ)</label>
+          <span class="param-hint">Relación aire-combustible. Rango 0,97–1,03</span>
+          <input type="text" [(ngModel)]="lambda" placeholder="0.98" />
+        </div>
+        <div class="param-fila">
+          <label>O₂ (%)</label>
+          <span class="param-hint">Oxígeno en gases de escape (opcional)</span>
+          <input type="number" [(ngModel)]="o2" placeholder="0.5" min="0" max="25" step="0.1" />
+        </div>
+      </div>
+      <p class="param-descripcion" *ngIf="tipoCombustible === 'DIESEL'">
+        Parámetros según RTE INEN 017 — vehículos diesel
+      </p>
+      <div class="parametros-diesel" *ngIf="tipoCombustible === 'DIESEL'">
+        <div class="param-fila">
+          <label>Opacidad (%)</label>
+          <span class="param-hint">Humo negro en escape</span>
+          <input type="number" [(ngModel)]="opacidad" placeholder="25" min="0" max="100" step="0.1" />
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-resultado">
+      <h3>Resultado</h3>
+      <div class="resultado-opciones">
+        <label class="opcion-aprobado">
+          <input type="radio" [(ngModel)]="resultado" value="APROBADO" name="resultado" />
+          <mat-icon>check_circle</mat-icon>
+          Aprobado
+        </label>
+        <label class="opcion-noaprobado">
+          <input type="radio" [(ngModel)]="resultado" value="NO_APROBADO" name="resultado" />
+          <mat-icon>cancel</mat-icon>
+          No aprobado
+        </label>
+      </div>
+
+      <div class="defectos-no-aprobado" *ngIf="resultado === 'NO_APROBADO'">
+        <h4>Defectos detectados</h4>
+        <input type="text" [(ngModel)]="filtroDefectos" placeholder="Buscar defectos..." class="input-busqueda" />
+        <div class="defectos-lista">
+          <div
+            class="defecto-item"
+            *ngFor="let d of defectosFiltrados"
+            [class.seleccionado]="estaDefectoSeleccionado(d.id)"
+            (click)="toggleDefecto(d)"
+          >
+            <span class="def-codigo">{{ d.codigo }}</span>
+            <span class="def-desc">{{ d.descripcion }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-observaciones">
+      <label>Observaciones</label>
+      <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+    </section>
+
+    <footer class="footer">
+      <button class="btn btn-secondary" (click)="volver()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarInspeccion()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar Revisión' }}
+      </button>
+    </footer>
+  </div>
 </div>

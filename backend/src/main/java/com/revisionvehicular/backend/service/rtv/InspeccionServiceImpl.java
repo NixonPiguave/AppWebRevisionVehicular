@@ -3,15 +3,21 @@ package com.revisionvehicular.backend.service.rtv;
 import com.revisionvehicular.backend.dtos.rtv.CrearInspeccionRequest;
 import com.revisionvehicular.backend.dtos.rtv.DetalleInspeccionDTO;
 import com.revisionvehicular.backend.dtos.rtv.InspeccionDTO;
+import com.revisionvehicular.backend.entities.rc.Umbral;
+import com.revisionvehicular.backend.entities.rtv.Defecto;
 import com.revisionvehicular.backend.entities.rtv.Inspeccion;
+import com.revisionvehicular.backend.repositories.rc.IUmbralRepository;
+import com.revisionvehicular.backend.repositories.rtv.IDefectoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IDetalleInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.IInspeccionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,13 +27,48 @@ public class InspeccionServiceImpl implements IInspeccionService {
     private static final String ESTADO_ACTIVO = "A";
     private static final String RESULTADO_PENDIENTE = "PENDIENTE";
 
+    private static final String CODIGO_DEFECTO_APROBADO = "SIN_DEFECTO";
+
+    private static final String[] PARAMETROS_UMBRAL_ORDEN = {"CO", "HC", "LAMBDA", "OPACIDAD", "FRENOS_EFICACIA", "SUSPENSION_EFICACIA"};
+
     private final IInspeccionRepository inspeccionRepository;
     private final IDetalleInspeccionRepository detalleRepository;
+    private final IDefectoRepository defectoRepository;
+    private final IUmbralRepository umbralRepository;
 
     public InspeccionServiceImpl(IInspeccionRepository inspeccionRepository,
-                                 IDetalleInspeccionRepository detalleRepository) {
+                                 IDetalleInspeccionRepository detalleRepository,
+                                 IDefectoRepository defectoRepository,
+                                 IUmbralRepository umbralRepository) {
         this.inspeccionRepository = inspeccionRepository;
         this.detalleRepository = detalleRepository;
+        this.defectoRepository = defectoRepository;
+        this.umbralRepository = umbralRepository;
+    }
+
+    /**
+     * Resuelve el umbral según valores medidos. Usa el "peor" umbral (mayor calificación).
+     */
+    private Long resolverUmbralId(Map<String, Object> valoresMedidos) {
+        if (valoresMedidos == null || valoresMedidos.isEmpty()) {
+            return UMBRAL_DEFAULT;
+        }
+        Umbral peor = null;
+        for (String param : PARAMETROS_UMBRAL_ORDEN) {
+            Object v = valoresMedidos.get(param);
+            if (v == null) continue;
+            BigDecimal valor = v instanceof Number ? BigDecimal.valueOf(((Number) v).doubleValue()) : null;
+            if (valor == null) continue;
+            List<Umbral> umbrales = umbralRepository.findUmbralesPorParametroYValor(param, valor);
+            for (Umbral u : umbrales) {
+                int cal = u.getCalificacion() != null ? u.getCalificacion() : 0;
+                int calPeor = peor != null && peor.getCalificacion() != null ? peor.getCalificacion() : 0;
+                if (peor == null || cal > calPeor) {
+                    peor = u;
+                }
+            }
+        }
+        return peor != null ? peor.getUmbralid() : UMBRAL_DEFAULT;
     }
 
     @Override
@@ -61,8 +102,10 @@ public class InspeccionServiceImpl implements IInspeccionService {
         }
 
         List<Long> defectosIds = request.getDefectosIds();
+        Long metodoId = request.getMetodoInspeccionId();
+        Long umbralId = resolverUmbralId(request.getValoresMedidos());
+
         if (defectosIds != null && !defectosIds.isEmpty()) {
-            Long umbralId = UMBRAL_DEFAULT;
             for (Long defectoId : defectosIds) {
                 if (defectoId != null && defectoId > 0) {
                     detalleRepository.insertarDetalleInspeccion(
@@ -71,10 +114,22 @@ public class InspeccionServiceImpl implements IInspeccionService {
                             null,
                             ESTADO_ACTIVO,
                             umbralId,
-                            request.getMetodoInspeccionId()
+                            metodoId
                     );
                 }
             }
+        } else if (metodoId != null) {
+            // Mecatrónica/Gases APROBADOS: registrar método con defecto SIN_DEFECTO
+            defectoRepository.findByCodigo(CODIGO_DEFECTO_APROBADO).ifPresent(defecto ->
+                detalleRepository.insertarDetalleInspeccion(
+                        inspeccion.getInspeccion_id(),
+                        defecto.getDefectoid(),
+                        request.getObservaciones(),
+                        ESTADO_ACTIVO,
+                        umbralId,
+                        metodoId
+                )
+            );
         }
 
         return toDTO(inspeccion);

@@ -1,7 +1,136 @@
 <div class="revision-mecatronica">
   <header class="header">
-    <button class="btn-volver" (click)="volver()">← Volver</button>
+    <button class="btn-volver" (click)="volver()">
+      <mat-icon>arrow_back</mat-icon>
+      Volver
+    </button>
     <h1>Revisión Mecatrónica</h1>
-    <p class="subtitulo">Componente en desarrollo. Aquí irá el formulario de inspección mecatrónica.</p>
+    <p class="subtitulo">Frenos, suspensión y alineación — RTV Ecuador (RTE INEN 034)</p>
+    <div class="header-info" *ngIf="vehiculoInfo">
+      <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
+      <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
+        {{ vehiculoInfo.marca }}{{ vehiculoInfo.marca && vehiculoInfo.modelo ? ' · ' : '' }}{{ vehiculoInfo.modelo }}
+      </span>
+      <span class="badge-turno" *ngIf="turnoId">Turno #{{ turnoId }}</span>
+    </div>
   </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button class="btn-reintentar" (click)="cargarDatos()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <div class="contenido" *ngIf="!cargando && !error">
+    <section class="panel-parametros">
+      <h3>Parámetros de inspección</h3>
+      <div class="parametros-grid">
+        <div class="param-grupo">
+          <h4>Frenos</h4>
+          <div class="param-fila">
+            <label>Eficacia (%)</label>
+            <input type="number" [(ngModel)]="frenosEficacia" placeholder="Ej: 85" min="0" max="100" step="0.1" />
+          </div>
+          <div class="param-fila">
+            <label>Desequilibrio (%)</label>
+            <input type="number" [(ngModel)]="frenosDesequilibrio" placeholder="Ej: 3" min="0" max="100" step="0.1" />
+          </div>
+        </div>
+        <div class="param-grupo">
+          <h4>Suspensión</h4>
+          <div class="param-fila">
+            <label>Eficacia (%)</label>
+            <input type="number" [(ngModel)]="suspensionEficacia" placeholder="Ej: 90" min="0" max="100" step="0.1" />
+          </div>
+          <div class="param-fila">
+            <label>Desequilibrio (%)</label>
+            <input type="number" [(ngModel)]="suspensionDesequilibrio" placeholder="Ej: 2" min="0" max="100" step="0.1" />
+          </div>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="amortiguadoresOk" />
+              Amortiguadores sin fugas
+            </label>
+          </div>
+        </div>
+        <div class="param-grupo">
+          <h4>Alineación (eje delantero)</h4>
+          <div class="param-fila">
+            <label>Convergencia (mm)</label>
+            <input type="text" [(ngModel)]="alineacionConvergencia" placeholder="Ej: 0.5" />
+          </div>
+          <div class="param-fila">
+            <label>Divergencia (mm)</label>
+            <input type="text" [(ngModel)]="alineacionDivergencia" placeholder="Ej: 0" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-equipos">
+      <h3>Equipos utilizados</h3>
+      <div class="equipos-lista">
+        <div
+          class="equipo-item"
+          *ngFor="let eq of equipos"
+          [class.seleccionado]="equiposSeleccionados.includes(eq.equipoid ?? 0)"
+          (click)="toggleEquipo(eq.equipoid ?? 0)"
+        >
+          <span class="eq-nombre">{{ eq.equipo }}</span>
+          <span class="eq-serial">{{ eq.serialEquipo }}</span>
+        </div>
+        <p class="sin-datos" *ngIf="equipos.length === 0">No hay equipos registrados</p>
+      </div>
+    </section>
+
+    <section class="panel-resultado">
+      <h3>Resultado</h3>
+      <div class="resultado-opciones">
+        <label class="opcion-aprobado">
+          <input type="radio" [(ngModel)]="resultado" value="APROBADO" name="resultado" />
+          <mat-icon>check_circle</mat-icon>
+          Aprobado
+        </label>
+        <label class="opcion-noaprobado">
+          <input type="radio" [(ngModel)]="resultado" value="NO_APROBADO" name="resultado" />
+          <mat-icon>cancel</mat-icon>
+          No aprobado
+        </label>
+      </div>
+
+      <div class="defectos-no-aprobado" *ngIf="resultado === 'NO_APROBADO'">
+        <h4>Defectos detectados</h4>
+        <input type="text" [(ngModel)]="filtroDefectos" placeholder="Buscar defectos..." class="input-busqueda" />
+        <div class="defectos-lista">
+          <div
+            class="defecto-item"
+            *ngFor="let d of defectosFiltrados"
+            [class.seleccionado]="estaDefectoSeleccionado(d.id)"
+            (click)="toggleDefecto(d)"
+          >
+            <span class="def-codigo">{{ d.codigo }}</span>
+            <span class="def-desc">{{ d.descripcion }}</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel-observaciones">
+      <label>Observaciones</label>
+      <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+    </section>
+
+    <footer class="footer">
+      <button class="btn btn-secondary" (click)="volver()">Cancelar</button>
+      <button class="btn btn-primary" (click)="guardarInspeccion()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar Revisión' }}
+      </button>
+    </footer>
+  </div>
 </div>

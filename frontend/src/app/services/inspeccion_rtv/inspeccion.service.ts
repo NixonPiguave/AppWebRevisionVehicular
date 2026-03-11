@@ -10,6 +10,8 @@ export interface InspeccionCrear {
   observaciones?: string;
   ubicacionesRevisadas?: string[];
   defectosIds: number[];
+  /** Valores medidos para umbrales (CO, HC, LAMBDA, OPACIDAD). Claves según normativa. */
+  valoresMedidos?: Record<string, number>;
 }
 
 export interface Inspeccion {

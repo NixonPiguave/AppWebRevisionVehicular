@@ -6,8 +6,12 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface IDefectoRepository extends JpaRepository<Defecto, Long> {
+
+    Optional<Defecto> findByCodigo(String codigo);
 
     @Procedure(procedureName = "sp_insertar_defecto")
     void insertarDefecto(

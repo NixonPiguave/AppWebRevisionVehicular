@@ -102,11 +102,7 @@ export class RegistrarInspeccionComponent implements OnInit {
   error = '';
   sinTurnoSeleccionado = false;
 
-  // ════════════════════════════════════════════════════════════
-  //  BASE DE DATOS DE FÁBRICA SIMULADA
-  //  Agrega aquí todos los vehículos que uses en pruebas.
-  //  La clave de búsqueda es la matrícula (case-insensitive).
-  // ════════════════════════════════════════════════════════════
+
   private readonly datosFabrica: DatosFabrica[] = [
     {
       matricula:       'HC-2LIA',
@@ -155,7 +151,6 @@ export class RegistrarInspeccionComponent implements OnInit {
     }
   ];
 
-  // ── Resultado de la comparación (se llena en cargarVehiculoInfo) ──
   camposComparados: CampoComparado[] = [];
 
   get estadoFabrica(): 'coincide' | 'discrepancia' | 'no-encontrado' | 'sin-datos' {
@@ -168,7 +163,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     return this.camposComparados.filter(c => !c.coincide);
   }
 
-  // ════════════════════════════════════════════════════════════
+
 
   constructor(
     private router: Router,
@@ -324,15 +319,58 @@ export class RegistrarInspeccionComponent implements OnInit {
   //  El resto del componente permanece igual
   // ════════════════════════════════════════════════════════════
 
+  /** Palabras clave por ubicación para filtrar defectos */
+  private readonly UBICACION_KEYWORDS: Record<keyof UbicacionesRevisadas, string[]> = {
+    delantera:        ['delantera', 'frontal', 'frente', 'delantero'],
+    ruedaDelIzq:      ['rueda delantera', 'del izq', 'izquierda', 'delantera izq'],
+    ruedaDelDer:      ['rueda delantera', 'del der', 'derecha', 'delantera der'],
+    lateralIzquierdo: ['lateral', 'izquierdo', 'lateral izq'],
+    lateralDerecho:   ['lateral', 'derecho', 'lateral der'],
+    ruedaTraIzq:      ['rueda trasera', 'tra izq', 'trasera izq', 'posterior izq'],
+    ruedaTraDer:      ['rueda trasera', 'tra der', 'trasera der', 'posterior der'],
+    trasera:          ['trasera', 'posterior', 'retaguardia'],
+    habitaculo:       ['habitaculo', 'habitáculo', 'interior', 'cabina', 'tablero'],
+    parteInferior:    ['inferior', 'chasis', 'fosa', 'subsuelo', 'piso', 'parte inferior']
+  };
+
+  /** Obtiene todas las palabras clave de las ubicaciones seleccionadas */
+  private getKeywordsUbicacionesSeleccionadas(): string[] {
+    const keys = (Object.keys(this.ubicaciones) as (keyof UbicacionesRevisadas)[])
+      .filter(k => this.ubicaciones[k]);
+    const keywords = new Set<string>();
+    keys.forEach(k => (this.UBICACION_KEYWORDS[k] || []).forEach(w => keywords.add(w)));
+    return Array.from(keywords);
+  }
+
+  /** Indica si un defecto coincide con alguna ubicación seleccionada */
+  private defectoCoincideUbicacion(d: Defectos): boolean {
+    const keywords = this.getKeywordsUbicacionesSeleccionadas();
+    if (keywords.length === 0) return true; // Sin ubicaciones → mostrar todos
+    const texto = [
+      d.puntoDeTrabajo || '',
+      d.descripcion || '',
+      d.nombreSubfamilia || '',
+      d.maquinaria || ''
+    ].join(' ').toLowerCase();
+    return keywords.some(kw => texto.includes(kw.toLowerCase()));
+  }
+
   get defectosFiltrados(): Defectos[] {
-    if (!this.filtroDefectos.trim()) return this.defectos;
-    const f = this.filtroDefectos.toLowerCase();
-    return this.defectos.filter(d =>
-      (d.codigo || '').toLowerCase().includes(f) ||
-      (d.descripcion || '').toLowerCase().includes(f) ||
-      (d.puntoDeTrabajo || '').toLowerCase().includes(f) ||
-      (d.maquinaria || '').toLowerCase().includes(f)
-    );
+    let lista = this.defectos;
+    // Filtrar por ubicaciones seleccionadas
+    lista = lista.filter(d => this.defectoCoincideUbicacion(d));
+    // Filtrar por búsqueda de texto
+    if (this.filtroDefectos.trim()) {
+      const f = this.filtroDefectos.toLowerCase();
+      lista = lista.filter(d =>
+        (d.codigo || '').toLowerCase().includes(f) ||
+        (d.descripcion || '').toLowerCase().includes(f) ||
+        (d.puntoDeTrabajo || '').toLowerCase().includes(f) ||
+        (d.maquinaria || '').toLowerCase().includes(f) ||
+        (d.nombreSubfamilia || '').toLowerCase().includes(f)
+      );
+    }
+    return lista;
   }
 
   get defectosFiltradosPaginados(): Defectos[] {

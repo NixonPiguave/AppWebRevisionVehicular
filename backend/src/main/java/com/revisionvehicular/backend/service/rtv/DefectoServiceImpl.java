@@ -35,6 +35,7 @@ public class DefectoServiceImpl implements IDefectoService {
         }
         if (entity.getSubfamilia() != null) {
             dto.setSubfamiliaId(entity.getSubfamilia().getSubfamilia_id());
+            dto.setNombreSubfamilia(entity.getSubfamilia().getNombre());
         }
         if (entity.getRtvCategoria() != null) {
             dto.setCategoriaId(entity.getRtvCategoria().getRtvcategoriaid());
