@@ -25,9 +25,16 @@ public class JwtUtil {
     }
 
     public String generateToken(String usuario, String usuarioDB, String contrasenaDB) {
+        return generateToken(usuario, usuarioDB, contrasenaDB, null);
+    }
+
+    public String generateToken(String usuario, String usuarioDB, String contrasenaDB, Long sesionId) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("usuarioDB", usuarioDB);
         claims.put("contrasenaDB", contrasenaDB);
+        if (sesionId != null) {
+            claims.put("sid", sesionId);
+        }
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -64,6 +71,16 @@ public class JwtUtil {
             return extractClaims(token).getExpiration().after(new Date());
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    public Long extractSesionId(String token) {
+        try {
+            Object sid = extractClaims(token).get("sid");
+            if (sid instanceof Number) return ((Number) sid).longValue();
+            return null;
+        } catch (Exception e) {
+            return null;
         }
     }
 }

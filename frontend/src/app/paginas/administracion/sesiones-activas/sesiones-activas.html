@@ -1,0 +1,47 @@
+<div class="sesiones-activas">
+  <header class="header">
+    <h1>Sesiones activas</h1>
+    <p class="subtitle">Usuarios con sesión iniciada. Al desconectar, su sesión se cierra de inmediato.</p>
+  </header>
+
+  <div class="error" *ngIf="error">{{ error }}</div>
+
+  <div *ngIf="cargando" class="loading">Cargando…</div>
+
+  <div *ngIf="!cargando && sesiones.length === 0" class="empty">
+    No hay sesiones activas.
+  </div>
+
+  <table *ngIf="!cargando && sesiones.length > 0" class="tabla">
+    <thead>
+      <tr>
+        <th>Usuario</th>
+        <th>Nombre</th>
+        <th>Rol</th>
+        <th>Fecha de inicio</th>
+        <th>Última actividad</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of sesiones">
+        <td>{{ s.usuario }}</td>
+        <td>{{ s.nombreCompleto }}</td>
+        <td>{{ s.rol || '-' }}</td>
+        <td>{{ formatearFecha(s.fechaLogin) }}</td>
+        <td>{{ formatearFecha(s.ultimaActividad) }}</td>
+        <td>
+          <button
+            type="button"
+            class="btn-desconectar"
+            [disabled]="cerrandoId === s.sesionId"
+            (click)="desconectar(s)">
+            {{ cerrandoId === s.sesionId ? 'Desconectando…' : 'Desconectar' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <button *ngIf="!cargando" type="button" class="btn-refresh" (click)="cargar()">Actualizar lista</button>
+</div>

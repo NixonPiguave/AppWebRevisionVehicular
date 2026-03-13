@@ -40,8 +40,10 @@ export class AuthService {
   }
 
   logout(): Observable<any> {
-    const usuarioId = localStorage.getItem('usuarioId');
-    return this.http.post<any>(`${this.apiUrl}/logout`, { usuarioId: Number(usuarioId) }).pipe(
+    const token = this.getToken();
+    const headers: { [key: string]: string } = {};
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return this.http.post<any>(`${this.apiUrl}/logout`, {}, { headers }).pipe(
       tap(() => {
         localStorage.removeItem('token');
         localStorage.removeItem('usuario');
@@ -87,5 +89,13 @@ export class AuthService {
 
   getRol(): string | null {
     return localStorage.getItem('rol');
+  }
+
+  /**
+   * Comprueba si la sesión sigue activa. Si el backend devuelve 401 (sesión cerrada por admin o nuevo login),
+   * el interceptor redirige a login. Usar en un intervalo para que la pantalla se cierre automáticamente al ser desconectado.
+   */
+  checkSession(): Observable<unknown> {
+    return this.http.get(`${this.apiUrl}/check-session`);
   }
 }

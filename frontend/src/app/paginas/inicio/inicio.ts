@@ -1,9 +1,14 @@
-import { Component, HostListener, OnInit, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import { Component, HostListener, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { Subscription, timer } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { EmpresaService } from '../../services/administracion/empresa.service';
 import { MatIconModule } from '@angular/material/icon';
+
+const PRIMER_CHECK_SESION_MS = 5000;
+const INTERVALO_CHECK_SESION_MS = 15000;
 
 @Component({
   selector: 'app-inicio',
@@ -12,7 +17,7 @@ import { MatIconModule } from '@angular/material/icon';
   templateUrl: './inicio.html',
   styleUrl: './inicio.css'
 })
-export class InicioComponent implements OnInit {
+export class InicioComponent implements OnInit, OnDestroy {
 
   sidebarCollapsed = false;
   sidebarOpen = false;
@@ -38,6 +43,8 @@ export class InicioComponent implements OnInit {
   administracionOpen = false;
   accesosRapidosOpen = false;
 
+  private checkSesionSubscription: Subscription | null = null;
+
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
@@ -50,6 +57,16 @@ export class InicioComponent implements OnInit {
     this.cargarIconoEmpresa();
     this.nombreUsuario = this.authService.getNombre() ?? this.authService.getUsuario() ?? 'Usuario';
     this.rolUsuario = this.authService.getRol() ?? '';
+    if (this.authService.getToken()) {
+      this.checkSesionSubscription = timer(PRIMER_CHECK_SESION_MS, INTERVALO_CHECK_SESION_MS).pipe(
+        switchMap(() => this.authService.checkSession())
+      ).subscribe();
+    }
+  }
+
+  ngOnDestroy() {
+    this.checkSesionSubscription?.unsubscribe();
+    this.checkSesionSubscription = null;
   }
 
   /**

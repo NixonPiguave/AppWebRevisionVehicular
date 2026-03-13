@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.security;
 
+import com.revisionvehicular.backend.service.srtv.ISesionUsuarioService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,9 +17,11 @@ import java.util.ArrayList;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+    private final ISesionUsuarioService sesionUsuarioService;
 
-    public JwtFilter(JwtUtil jwtUtil) {
+    public JwtFilter(JwtUtil jwtUtil, ISesionUsuarioService sesionUsuarioService) {
         this.jwtUtil = jwtUtil;
+        this.sesionUsuarioService = sesionUsuarioService;
     }
 
     @Override
@@ -33,6 +36,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 String token = authHeader.substring(7);
 
                 if (jwtUtil.isTokenValid(token)) {
+                    Long sid = jwtUtil.extractSesionId(token);
+                    if (sid != null && !sesionUsuarioService.isSesionActiva(sid)) {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response.getWriter().write("{\"error\":\"Sesión cerrada\"}");
+                        return;
+                    }
                     String username = jwtUtil.extractUsername(token);
                     String usuarioDB = jwtUtil.extractUsuarioDB(token);
                     String contrasenaDB = jwtUtil.extractContrasenaDB(token);

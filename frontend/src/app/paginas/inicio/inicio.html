@@ -55,12 +55,12 @@
       <!-- ========================================
            GESTIÓN VEHICULAR
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_gestion_vehicular','menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision','menu_tramites_legales','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
         </span>
 
-        <div *ngIf="puedeVerCualquiera('menu_gestion_vehicular','menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision')" class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleGestionVehicular()"
@@ -84,7 +84,7 @@
         </div>
 
         <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
-        <div *ngIf="puedeVerCualquiera('menu_tramites_legales','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleAccesosRapidos()"
@@ -135,7 +135,7 @@
       <!-- ========================================
            OPERACIONES
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_operaciones','menu_pagos','menu_recepcion','menu_certificados')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_pagos','menu_recepcion','menu_certificados')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Operaciones
         </span>
@@ -168,7 +168,7 @@
       <!-- ========================================
            CATÁLOGO DE VEHÍCULOS
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_catalogo_vehiculos','menu_catalogo_marcas','menu_catalogo_modelos','menu_catalogo_tipo_vehiculo','menu_catalogo_clases','menu_catalogo_categorias','menu_catalogo_subcategorias','menu_catalogo_tipo_combustible','menu_catalogo_tipo_matricula','menu_catalogo_traccion','menu_catalogo_ejes','menu_catalogo_capacidad','menu_catalogo_ambito')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_catalogo_marcas','menu_catalogo_modelos','menu_catalogo_tipo_vehiculo','menu_catalogo_clases','menu_catalogo_categorias','menu_catalogo_subcategorias','menu_catalogo_tipo_combustible','menu_catalogo_tipo_matricula','menu_catalogo_traccion','menu_catalogo_ejes','menu_catalogo_capacidad','menu_catalogo_ambito')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Catálogo de Vehículos
         </span>
@@ -208,7 +208,7 @@
       <!-- ========================================
            INSPECCIÓN RTV
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_inspeccion_rtv','menu_inspeccion_turnos_pagados','menu_inspeccion_lineas','menu_inspeccion_metodos','menu_inspeccion_equipos')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_inspeccion_turnos_pagados','menu_inspeccion_lineas','menu_inspeccion_metodos','menu_inspeccion_equipos')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Inspección RTV
         </span>
@@ -240,7 +240,7 @@
       <!-- ========================================
            DEFECTOS DE INSPECCIÓN
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_defectos_inspeccion','menu_defectos_familia','menu_defectos_subfamilia','menu_defectos_categoria','menu_defectos_tipos','menu_defectos')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_defectos_familia','menu_defectos_subfamilia','menu_defectos_categoria','menu_defectos_tipos','menu_defectos')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Defectos de Inspección
         </span>
@@ -304,7 +304,7 @@
       <!-- ========================================
            CONFIGURACIÓN UMBRAL
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_configuracion_umbral','menu_umbral_unidades','menu_umbral_descripcion','menu_umbral')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_umbral_unidades','menu_umbral_descripcion','menu_umbral')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Configuración Umbral
         </span>
@@ -335,7 +335,7 @@
       <!-- ========================================
            ADMINISTRACIÓN
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_administracion','menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Administración
         </span>
@@ -363,6 +363,7 @@
             <a *ngIf="puedeVer('menu_turnos')" routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
             <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
             <a *ngIf="puedeVer('menu_accesos_rol')" routerLink="/inicio/administracion/accesos-rol" routerLinkActive="active" class="submenu-item">Accesos por rol</a>
+            <a *ngIf="puedeVer('menu_sesiones_activas')" routerLink="/inicio/administracion/sesiones-activas" routerLinkActive="active" class="submenu-item">Sesiones activas</a>
           </div>
         </div>
       </div>

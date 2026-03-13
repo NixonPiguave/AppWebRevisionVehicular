@@ -52,6 +52,7 @@ import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
 import { AccesosRolComponent } from './paginas/administracion/accesos-rol/accesos-rol';
+import { SesionesActivasComponent } from './paginas/administracion/sesiones-activas/sesiones-activas';
 import { DashboardComponent } from './paginas/inicio/dashboard/dashboard';
 
 export const routes: Routes = [
@@ -70,6 +71,7 @@ export const routes: Routes = [
       { path: 'administracion/empresa', component: EmpresaComponent },
       { path: 'administracion/auditoria', component: AuditoriaComponent },
       { path: 'administracion/accesos-rol', component: AccesosRolComponent },
+      { path: 'administracion/sesiones-activas', component: SesionesActivasComponent },
 
       // CATÁLOGO DE VEHÍCULOS
       { path: 'catalogo-vehiculos/ambito-operacional', component: AmbitoOperacionalComponent },

@@ -6,6 +6,8 @@ import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRolesRepository;
 import com.revisionvehicular.backend.security.JwtUtil;
 import com.revisionvehicular.backend.service.srtv.IOpcionMenuService;
+import com.revisionvehicular.backend.service.srtv.ISesionUsuarioService;
+import com.revisionvehicular.backend.dtos.srtv.SesionUsuarioDTO;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ public class AuthController {
     private final IUsuarioRepository usuarioRepository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
     private final IOpcionMenuService opcionMenuService;
+    private final ISesionUsuarioService sesionUsuarioService;
     private final JwtUtil jwtUtil;
     private final AuditoriaService auditoriaService;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -32,14 +35,21 @@ public class AuthController {
             IUsuarioRepository usuarioRepository,
             IUsuarioRolesRepository usuarioRolesRepository,
             IOpcionMenuService opcionMenuService,
+            ISesionUsuarioService sesionUsuarioService,
             JwtUtil jwtUtil,
             AuditoriaService auditoriaService
     ) {
         this.usuarioRepository = usuarioRepository;
         this.usuarioRolesRepository = usuarioRolesRepository;
         this.opcionMenuService = opcionMenuService;
+        this.sesionUsuarioService = sesionUsuarioService;
         this.jwtUtil = jwtUtil;
         this.auditoriaService = auditoriaService;
+    }
+
+    @GetMapping("/check-session")
+    public ResponseEntity<Void> checkSession() {
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/login")
@@ -64,10 +74,12 @@ public class AuthController {
 
         auditoriaService.registrarAccion(user, "INICIO_SESION");
 
+        SesionUsuarioDTO sesion = sesionUsuarioService.crearSesion(user);
         String token = jwtUtil.generateToken(
                 user.getUsuario(),
                 user.getUsuarioBaseDatos(),
-                user.getContrasenaBaseDatos()
+                user.getContrasenaBaseDatos(),
+                sesion.getSesionId()
         );
 
         List<String> permisos = opcionMenuService.getOpcionMenuClavesByUsuario(user);
@@ -84,18 +96,21 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody Map<String, Long> request) {
-        Long usuarioId = request.get("usuarioId");
-
-        if (usuarioId != null) {
-            Optional<Usuario> optionalUser = usuarioRepository.findById(usuarioId);
-            if (optionalUser.isPresent()) {
-                Usuario user = optionalUser.get();
-                UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
-                auditoriaService.registrarAccion(user, "CIERRE_SESION");
-            }
+    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            sesionUsuarioService.cerrarSesionPorToken(token);
+            Long usuarioId = null;
+            try {
+                String username = jwtUtil.extractUsername(token);
+                Optional<Usuario> optionalUser = usuarioRepository.findByUsuario(username);
+                if (optionalUser.isPresent()) {
+                    Usuario user = optionalUser.get();
+                    UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
+                    auditoriaService.registrarAccion(user, "CIERRE_SESION");
+                }
+            } catch (Exception ignored) {}
         }
-
         return ResponseEntity.ok("Sesión cerrada");
     }
 
