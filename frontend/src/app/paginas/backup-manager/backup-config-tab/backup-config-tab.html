@@ -1,0 +1,127 @@
+<div class="config-container">
+
+  <div class="mensaje-exito" *ngIf="mensajeExito">
+    <mat-icon>check_circle</mat-icon> {{ mensajeExito }}
+  </div>
+  <div class="mensaje-error" *ngIf="mensajeError">
+    <mat-icon>error</mat-icon> {{ mensajeError }}
+  </div>
+
+  <div class="cargando" *ngIf="cargando">Cargando configuración...</div>
+
+  <div *ngIf="!cargando">
+
+    <!-- Sección: Almacenamiento local -->
+    <div class="seccion">
+      <div class="seccion-header">
+        <mat-icon>folder</mat-icon>
+        <h3>Almacenamiento en servidor</h3>
+      </div>
+      <div class="form-grupo">
+        <label>Ruta de almacenamiento en el servidor <span class="requerido">*</span></label>
+        <input type="text" [(ngModel)]="config.rutaServidor" class="form-input"
+               placeholder="Ej: C:\backups\rtv" />
+        <span class="hint">Carpeta donde se guardarán los archivos de respaldo en el servidor.</span>
+      </div>
+    </div>
+
+    <!-- Sección: Google Drive -->
+    <div class="seccion">
+      <div class="seccion-header">
+        <mat-icon>cloud</mat-icon>
+        <h3>Google Drive</h3>
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="config.driveHabilitado" />
+          <span class="toggle-text">{{ config.driveHabilitado ? 'Habilitado' : 'Deshabilitado' }}</span>
+        </label>
+      </div>
+
+      <div *ngIf="config.driveHabilitado" class="form-grid">
+        <div class="form-grupo">
+          <label>ID de carpeta en Drive</label>
+          <input type="text" [(ngModel)]="config.driveFolderId" class="form-input"
+                 placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUq..." />
+          <span class="hint">ID de la carpeta de Google Drive donde se subirán los respaldos.</span>
+        </div>
+        <div class="form-grupo">
+          <label>Ruta del archivo de credenciales</label>
+          <input type="text" [(ngModel)]="config.driveCredentialsPath" class="form-input"
+                 placeholder="C:\secrets\drive-credentials.json" />
+          <span class="hint">Ruta al archivo JSON de Service Account descargado de Google Cloud.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección: Notificaciones -->
+    <div class="seccion">
+      <div class="seccion-header">
+        <mat-icon>email</mat-icon>
+        <h3>Notificaciones por correo</h3>
+      </div>
+      <div class="form-grupo">
+        <label>Correo del administrador</label>
+        <input type="email" [(ngModel)]="config.emailNotificacion" class="form-input"
+               placeholder="admin@empresa.com" />
+        <span class="hint">Se enviará un correo al finalizar cada respaldo automático.</span>
+      </div>
+    </div>
+
+    <!-- Sección: Scheduler -->
+    <div class="seccion">
+      <div class="seccion-header">
+        <mat-icon>schedule</mat-icon>
+        <h3>Respaldos automáticos</h3>
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="config.schedulerActivo" />
+          <span class="toggle-text">{{ config.schedulerActivo ? 'Activo' : 'Inactivo' }}</span>
+        </label>
+      </div>
+
+      <div *ngIf="config.schedulerActivo">
+        <div class="cron-hint">
+          <mat-icon>info</mat-icon>
+          <span>Ejemplos de expresiones cron:</span>
+          <span *ngFor="let ej of ejemplosCron" class="cron-ejemplo" (click)="aplicarCron('cronFull', ej.valor)"
+                matTooltip="Click para copiar al campo">
+            {{ ej.label }}: <code>{{ ej.valor }}</code>
+          </span>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-grupo">
+            <label>
+              <mat-icon class="label-icon icono-verde">storage</mat-icon>
+              Cron — Respaldo Completo
+            </label>
+            <input type="text" [(ngModel)]="config.cronFull" class="form-input"
+                   placeholder="0 0 2 ? * SUN" />
+          </div>
+          <div class="form-grupo">
+            <label>
+              <mat-icon class="label-icon icono-azul">difference</mat-icon>
+              Cron — Respaldo Diferencial
+            </label>
+            <input type="text" [(ngModel)]="config.cronDiferencial" class="form-input"
+                   placeholder="0 0 3 ? * MON-SAT" />
+          </div>
+          <div class="form-grupo">
+            <label>
+              <mat-icon class="label-icon icono-naranja">add_circle</mat-icon>
+              Cron — Respaldo Incremental
+            </label>
+            <input type="text" [(ngModel)]="config.cronIncremental" class="form-input"
+                   placeholder="0 0 1 * * ?" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="config-footer">
+      <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
+        <mat-icon>save</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar configuración' }}
+      </button>
+    </div>
+  </div>
+</div>

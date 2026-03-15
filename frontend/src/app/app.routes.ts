@@ -17,6 +17,7 @@ import {TipoCombustibleComponent} from './paginas/catalogos_vehiculos/tipo-combu
 import {TipoMatriculaComponent} from './paginas/catalogos_vehiculos/tipo-matricula/tipo-matricula';
 import {TraccionComponent} from './paginas/catalogos_vehiculos/traccion/traccion';
 import {SubcategoriasComponent} from './paginas/catalogos_vehiculos/subcategorias/subcategorias';
+import { BackupManagerComponent } from './paginas/backup-manager/backup-manager';
 // Importaciones de Defectos Inspección
 import { SubfamiliaDefectoComponent } from './paginas/defectos_inspeccion/subfamilia-defecto/subfamilia-defecto';
 import { TiposDefectosComponent } from './paginas/defectos_inspeccion/tipos-defectos/tipos-defectos';
@@ -128,6 +129,7 @@ export const routes: Routes = [
       // OPERACIONES
       { path: 'operaciones/pagos', component: PagosComponent },
       { path: 'operaciones/recepcion', component: RecepcionComponent },
+      { path: 'backup/manager', component: BackupManagerComponent },
     ]
   },
   { path: '**', redirectTo: '' }

@@ -1,0 +1,64 @@
+<!-- paginas/backup-manager/backup-jobs-tab/backup-jobs-tab.html -->
+<div class="jobs-container">
+
+  <div class="mensaje-exito" *ngIf="mensajeExito">
+    <mat-icon>check_circle</mat-icon> {{ mensajeExito }}
+  </div>
+  <div class="mensaje-error" *ngIf="mensajeError">
+    <mat-icon>error</mat-icon> {{ mensajeError }}
+  </div>
+
+  <p class="jobs-descripcion">
+    Seleccione el tipo de respaldo a ejecutar. Se le pedirá elegir una carpeta
+    en su equipo donde se guardará el archivo.
+  </p>
+
+  <div class="tipos-grid">
+    <div class="tipo-card" *ngFor="let tipo of tipos"
+         [class.ejecutando]="ejecutando"
+         (click)="ejecutarBackup(tipo.id)">
+      <div class="tipo-icono" [class]="'icono-' + tipo.color">
+        <mat-icon>{{ tipo.icono }}</mat-icon>
+      </div>
+      <div class="tipo-info">
+        <h3>{{ tipo.label }}</h3>
+        <p>{{ tipo.descripcion }}</p>
+      </div>
+      <mat-icon class="tipo-flecha">chevron_right</mat-icon>
+    </div>
+  </div>
+
+  <!-- Spinner mientras ejecuta -->
+  <div class="ejecutando-estado" *ngIf="ejecutando">
+    <div class="spinner"></div>
+    <p>Ejecutando respaldo, por favor espere...</p>
+  </div>
+
+  <!-- Resultado del último backup -->
+  <div class="resultado-card" *ngIf="ultimoResultado && !ejecutando">
+    <div class="resultado-header"
+         [class.resultado-exito]="ultimoResultado.estado === 'EXITOSO'"
+         [class.resultado-error]="ultimoResultado.estado !== 'EXITOSO'">
+      <mat-icon>{{ ultimoResultado.estado === 'EXITOSO' ? 'check_circle' : 'error' }}</mat-icon>
+      <span>Último respaldo: {{ ultimoResultado.estado }}</span>
+    </div>
+    <div class="resultado-body">
+      <div class="resultado-fila">
+        <span class="resultado-label">Archivo:</span>
+        <span>{{ ultimoResultado.nombreArchivo }}</span>
+      </div>
+      <div class="resultado-fila">
+        <span class="resultado-label">Tipo:</span>
+        <span>{{ ultimoResultado.tipo }}</span>
+      </div>
+      <div class="resultado-fila">
+        <span class="resultado-label">Tamaño:</span>
+        <span>{{ ultimoResultado.tamanoFormateado }}</span>
+      </div>
+      <div class="resultado-fila">
+        <span class="resultado-label">Fecha:</span>
+        <span>{{ ultimoResultado.creadoEn | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+      </div>
+    </div>
+  </div>
+</div>

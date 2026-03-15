@@ -1,0 +1,92 @@
+/* paginas/backup-manager/backup-jobs-tab/backup-jobs-tab.css */
+.jobs-container { padding: 8px 0; }
+
+.jobs-descripcion { color: #666; font-size: 14px; margin-bottom: 24px; }
+
+.tipos-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+
+.tipo-card {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 20px; background: white;
+  border: 1px solid #e0e0e0; border-radius: 10px;
+  cursor: pointer; transition: all 0.2s ease;
+}
+
+.tipo-card:hover:not(.ejecutando) {
+  border-color: #2d5a27;
+  box-shadow: 0 2px 8px rgba(45,90,39,0.12);
+  transform: translateX(4px);
+}
+
+.tipo-card.ejecutando { opacity: 0.6; cursor: not-allowed; }
+
+.tipo-icono {
+  width: 48px; height: 48px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.tipo-icono mat-icon { font-size: 24px; }
+
+.icono-verde { background: #e8f5e9; }
+.icono-verde mat-icon { color: #2d5a27; }
+.icono-azul { background: #e3f2fd; }
+.icono-azul mat-icon { color: #1565c0; }
+.icono-naranja { background: #fff3e0; }
+.icono-naranja mat-icon { color: #e65100; }
+
+.tipo-info { flex: 1; }
+.tipo-info h3 { margin: 0 0 4px; font-size: 15px; font-weight: 600; color: #1a2e1a; }
+.tipo-info p { margin: 0; font-size: 13px; color: #666; }
+
+.tipo-flecha { color: #bbb; font-size: 20px; }
+
+.ejecutando-estado {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px; gap: 16px; color: #555;
+}
+
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid #e0e0e0;
+  border-top-color: #2d5a27;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.resultado-card {
+  border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden;
+}
+
+.resultado-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; font-weight: 600; font-size: 14px;
+}
+
+.resultado-exito { background: #d4edda; color: #155724; }
+.resultado-error { background: #fee2e2; color: #991b1b; }
+
+.resultado-body { padding: 16px; }
+
+.resultado-fila {
+  display: flex; gap: 12px; padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0; font-size: 13px;
+}
+
+.resultado-fila:last-child { border-bottom: none; }
+
+.resultado-label { font-weight: 600; color: #555; min-width: 80px; }
+
+.mensaje-exito {
+  background: #d4edda; border: 1px solid #c3e6cb; color: #155724;
+  padding: 14px 20px; border-radius: 8px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}
+
+.mensaje-error {
+  background: #fee2e2; border: 1px solid #fecaca; color: #991b1b;
+  padding: 14px 20px; border-radius: 8px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 10px;
+}

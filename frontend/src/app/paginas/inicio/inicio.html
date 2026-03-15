@@ -333,12 +333,12 @@
       </div>
 
       <!-- ========================================
-           ADMINISTRACIÓN
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Administración
-        </span>
+     ADMINISTRACIÓN
+     ======================================== -->
+      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas','menu_backup')" class="menu-section">
+  <span *ngIf="!sidebarCollapsed" class="section-title">
+    Administración
+  </span>
 
         <div class="menu-item-expandable">
           <div
@@ -364,6 +364,7 @@
             <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
             <a *ngIf="puedeVer('menu_accesos_rol')" routerLink="/inicio/administracion/accesos-rol" routerLinkActive="active" class="submenu-item">Accesos por rol</a>
             <a *ngIf="puedeVer('menu_sesiones_activas')" routerLink="/inicio/administracion/sesiones-activas" routerLinkActive="active" class="submenu-item">Sesiones activas</a>
+            <a *ngIf="puedeVer('menu_backup')" routerLink="/inicio/backup/manager" routerLinkActive="active" class="submenu-item">Respaldos</a>
           </div>
         </div>
       </div>
