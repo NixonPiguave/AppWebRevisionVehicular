@@ -13,4 +13,6 @@ public class SesionUsuarioDTO {
     private String rol;
     private Instant fechaLogin;
     private Instant ultimaActividad;
+    /** Solo en creación: true si se cerró al menos una sesión anterior del mismo usuario. */
+    private Boolean sesionesAnterioresCerradas;
 }

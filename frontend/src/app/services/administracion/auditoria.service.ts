@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface AuditoriaRegistro {
@@ -22,15 +22,21 @@ export class AuditoriaService {
 
   constructor(private http: HttpClient) {}
 
-  listarTodas(): Observable<AuditoriaRegistro[]> {
-    return this.http.get<AuditoriaRegistro[]>(this.apiUrl);
+  listarTodas(tipoAccion?: string): Observable<AuditoriaRegistro[]> {
+    let params = new HttpParams();
+    if (tipoAccion?.trim()) params = params.set('tipoAccion', tipoAccion.trim());
+    return this.http.get<AuditoriaRegistro[]>(this.apiUrl, { params });
   }
 
-  listarPorUsuario(usuarioId: number): Observable<AuditoriaRegistro[]> {
-    return this.http.get<AuditoriaRegistro[]>(`${this.apiUrl}/usuario/${usuarioId}`);
+  listarPorUsuario(usuarioId: number, tipoAccion?: string): Observable<AuditoriaRegistro[]> {
+    let params = new HttpParams();
+    if (tipoAccion?.trim()) params = params.set('tipoAccion', tipoAccion.trim());
+    return this.http.get<AuditoriaRegistro[]>(`${this.apiUrl}/usuario/${usuarioId}`, { params });
   }
 
-  listarPorRol(rolId: number): Observable<AuditoriaRegistro[]> {
-    return this.http.get<AuditoriaRegistro[]>(`${this.apiUrl}/rol/${rolId}`);
+  listarPorRol(rolId: number, tipoAccion?: string): Observable<AuditoriaRegistro[]> {
+    let params = new HttpParams();
+    if (tipoAccion?.trim()) params = params.set('tipoAccion', tipoAccion.trim());
+    return this.http.get<AuditoriaRegistro[]>(`${this.apiUrl}/rol/${rolId}`, { params });
   }
 }

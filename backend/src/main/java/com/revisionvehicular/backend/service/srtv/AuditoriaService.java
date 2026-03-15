@@ -87,23 +87,38 @@ public class AuditoriaService {
         return dto;
     }
 
-    public List<AuditoriaDTO> listarTodas() {
+    public List<AuditoriaDTO> listarTodas(String tipoAccion) {
+        if (tipoAccion != null && !tipoAccion.isBlank()) {
+            return auditoriaRepository.findAllByTipoAccionOrderByFechaDesc(tipoAccion.trim()).stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
         return auditoriaRepository.findAllByOrderByFechaDesc().stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AuditoriaDTO> listarPorUsuario(Long usuarioId) {
+    public List<AuditoriaDTO> listarPorUsuario(Long usuarioId, String tipoAccion) {
+        if (tipoAccion != null && !tipoAccion.isBlank()) {
+            return auditoriaRepository.findByUsuario_UsuarioIdAndTipoAccionOrderByFechaDesc(usuarioId, tipoAccion.trim()).stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
         return auditoriaRepository.findByUsuario_UsuarioIdOrderByFechaDesc(usuarioId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public List<AuditoriaDTO> listarPorRol(Long rolId) {
+    public List<AuditoriaDTO> listarPorRol(Long rolId, String tipoAccion) {
         List<Long> usuarioIds = usuarioRolesRepository.findByRol_RolId(rolId).stream()
                 .map(ur -> ur.getUsuario().getUsuarioId())
                 .collect(Collectors.toList());
         if (usuarioIds.isEmpty()) return List.of();
+        if (tipoAccion != null && !tipoAccion.isBlank()) {
+            return auditoriaRepository.findByUsuario_UsuarioIdInAndTipoAccionOrderByFechaDesc(usuarioIds, tipoAccion.trim()).stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
         return auditoriaRepository.findByUsuario_UsuarioIdInOrderByFechaDesc(usuarioIds).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());

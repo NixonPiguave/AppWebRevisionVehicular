@@ -18,17 +18,22 @@ public class AuditoriaController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AuditoriaDTO>> listarTodas() {
-        return ResponseEntity.ok(auditoriaService.listarTodas());
+    public ResponseEntity<List<AuditoriaDTO>> listarTodas(
+            @RequestParam(required = false) String tipoAccion) {
+        return ResponseEntity.ok(auditoriaService.listarTodas(tipoAccion));
     }
 
     @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<AuditoriaDTO>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(auditoriaService.listarPorUsuario(usuarioId));
+    public ResponseEntity<List<AuditoriaDTO>> listarPorUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(required = false) String tipoAccion) {
+        return ResponseEntity.ok(auditoriaService.listarPorUsuario(usuarioId, tipoAccion));
     }
 
     @GetMapping("/rol/{rolId}")
-    public ResponseEntity<List<AuditoriaDTO>> listarPorRol(@PathVariable Long rolId) {
-        return ResponseEntity.ok(auditoriaService.listarPorRol(rolId));
+    public ResponseEntity<List<AuditoriaDTO>> listarPorRol(
+            @PathVariable Long rolId,
+            @RequestParam(required = false) String tipoAccion) {
+        return ResponseEntity.ok(auditoriaService.listarPorRol(rolId, tipoAccion));
     }
 }

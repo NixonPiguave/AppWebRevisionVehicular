@@ -1,5 +1,6 @@
 // Tema personalizado para Sistema RTV
 // Colores verdes profesionales que coinciden con tu diseño actual
+@use 'sass:string';
 @use '@angular/material' as mat;
 
 // Define tu paleta de colores verde personalizada
@@ -110,8 +111,8 @@ html {
       error: $verde-error,
     ),
     typography: (
-      brand-family: unquote("-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"),
-      plain-family: unquote("-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"),
+      brand-family: string.unquote("-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"),
+      plain-family: string.unquote("-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"),
     ),
     density: 0,
   ));

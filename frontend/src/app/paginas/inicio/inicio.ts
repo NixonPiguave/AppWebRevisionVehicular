@@ -44,6 +44,9 @@ export class InicioComponent implements OnInit, OnDestroy {
   accesosRapidosOpen = false;
 
   private checkSesionSubscription: Subscription | null = null;
+  /** Mensaje informativo (ej. "Has iniciado sesión desde otro dispositivo") que se oculta solo. */
+  mensajeInfo = '';
+  private mensajeInfoTimeout: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private authService: AuthService,
@@ -62,11 +65,34 @@ export class InicioComponent implements OnInit, OnDestroy {
         switchMap(() => this.authService.checkSession())
       ).subscribe();
     }
+    const infoMsg = sessionStorage.getItem('authInfoMessage');
+    if (infoMsg) {
+      sessionStorage.removeItem('authInfoMessage');
+      this.mensajeInfo = infoMsg;
+      this.mensajeInfoTimeout = setTimeout(() => {
+        this.mensajeInfo = '';
+        this.mensajeInfoTimeout = null;
+        this.cdr.detectChanges();
+      }, 6000);
+    }
   }
 
   ngOnDestroy() {
     this.checkSesionSubscription?.unsubscribe();
     this.checkSesionSubscription = null;
+    if (this.mensajeInfoTimeout) {
+      clearTimeout(this.mensajeInfoTimeout);
+      this.mensajeInfoTimeout = null;
+    }
+  }
+
+  cerrarMensajeInfo(): void {
+    this.mensajeInfo = '';
+    if (this.mensajeInfoTimeout) {
+      clearTimeout(this.mensajeInfoTimeout);
+      this.mensajeInfoTimeout = null;
+    }
+    this.cdr.detectChanges();
   }
 
   /**

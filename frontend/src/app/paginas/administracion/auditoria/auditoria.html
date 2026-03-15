@@ -153,6 +153,17 @@
           <option *ngFor="let r of roles" [ngValue]="r.rolId">{{ r.nombre }}</option>
         </select>
       </div>
+      <div class="form-grupo">
+        <label>Filtrar por operación</label>
+        <select [(ngModel)]="filtroOperacionReporte" class="form-select">
+          <option value="">Todas las operaciones</option>
+          <option value="INSERT">INSERT</option>
+          <option value="UPDATE">UPDATE</option>
+          <option value="DELETE">DELETE</option>
+          <option value="INICIO_SESION">Inicio de sesión</option>
+          <option value="CIERRE_SESION">Cierre de sesión</option>
+        </select>
+      </div>
     </div>
     <div class="modal-footer">
       <button type="button" class="btn-cancelar" (click)="cerrarModalReporte()">Cancelar</button>

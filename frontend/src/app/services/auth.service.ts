@@ -35,6 +35,9 @@ export class AuthService {
         } else {
           localStorage.removeItem('permisos');
         }
+        if (response.sesionAnteriorCerrada) {
+          sessionStorage.setItem('authInfoMessage', 'Has iniciado sesión desde otro dispositivo. La sesión anterior en este navegador fue cerrada.');
+        }
       })
     );
   }

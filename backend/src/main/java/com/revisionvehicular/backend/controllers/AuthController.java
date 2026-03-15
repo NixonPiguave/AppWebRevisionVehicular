@@ -91,6 +91,7 @@ public class AuthController {
         response.put("usuarioId", user.getUsuarioId());
         response.put("rol", obtenerNombreRol(user));
         response.put("permisos", permisos != null ? permisos : List.of());
+        response.put("sesionAnteriorCerrada", Boolean.TRUE.equals(sesion.getSesionesAnterioresCerradas()));
 
         return ResponseEntity.ok(response);
     }

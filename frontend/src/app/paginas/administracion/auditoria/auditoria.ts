@@ -30,6 +30,8 @@ export class AuditoriaComponent implements OnInit {
 
   mostrarModalReporte = false;
   tipoReporte: 'general' | 'usuario' | 'rol' = 'general';
+  /** Filtro por tipo de operación en el reporte. Vacío = todas. */
+  filtroOperacionReporte: string = '';
   usuarioReporte: number | null = null;
   rolReporte: number | null = null;
   datosReporte: AuditoriaRegistro[] = [];
@@ -128,6 +130,7 @@ export class AuditoriaComponent implements OnInit {
 
   abrirModalReporte(): void {
     this.tipoReporte = 'general';
+    this.filtroOperacionReporte = '';
     this.usuarioReporte = null;
     this.rolReporte = null;
     this.datosReporte = [];
@@ -143,10 +146,11 @@ export class AuditoriaComponent implements OnInit {
     if (this.tipoReporte === 'rol' && !this.rolReporte) return;
 
     this.cargandoReporte = true;
+    const tipoOp = this.filtroOperacionReporte?.trim() || undefined;
     const req =
-      this.tipoReporte === 'general' ? this.auditoriaService.listarTodas() :
-      this.tipoReporte === 'usuario' ? this.auditoriaService.listarPorUsuario(this.usuarioReporte!) :
-      this.auditoriaService.listarPorRol(this.rolReporte!);
+      this.tipoReporte === 'general' ? this.auditoriaService.listarTodas(tipoOp) :
+      this.tipoReporte === 'usuario' ? this.auditoriaService.listarPorUsuario(this.usuarioReporte!, tipoOp) :
+      this.auditoriaService.listarPorRol(this.rolReporte!, tipoOp);
 
     req.subscribe({
       next: (data) => {

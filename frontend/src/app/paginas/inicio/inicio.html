@@ -428,6 +428,14 @@
 
     <!-- CONTENIDO DINÁMICO -->
     <main class="content">
+      <!-- Mensaje informativo (ej. sesión desde otro dispositivo) -->
+      <div *ngIf="mensajeInfo" class="mensaje-info-banner">
+        <mat-icon>info</mat-icon>
+        <span>{{ mensajeInfo }}</span>
+        <button type="button" class="cerrar-mensaje" (click)="cerrarMensajeInfo()" aria-label="Cerrar">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
       <router-outlet></router-outlet>
     </main>
 

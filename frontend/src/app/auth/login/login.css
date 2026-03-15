@@ -178,6 +178,25 @@
   75% { transform: translateX(4px); }
 }
 
+.mensaje-sesion-cerrada {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fef3c7;
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.mensaje-sesion-cerrada mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 /* ============================================
    BOTÓN MINIMALISTA
    ============================================ */

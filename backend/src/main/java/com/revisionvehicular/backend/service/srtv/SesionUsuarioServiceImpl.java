@@ -32,6 +32,8 @@ public class SesionUsuarioServiceImpl implements ISesionUsuarioService {
     @Override
     @Transactional
     public SesionUsuarioDTO crearSesion(Usuario usuario) {
+        List<SesionUsuario> activas = sesionRepository.findByUsuario_UsuarioIdAndActivoTrue(usuario.getUsuarioId());
+        boolean sesionesAnterioresCerradas = !activas.isEmpty();
         cerrarSesionesDeUsuario(usuario.getUsuarioId());
         SesionUsuario s = new SesionUsuario();
         s.setUsuario(usuario);
@@ -39,7 +41,9 @@ public class SesionUsuarioServiceImpl implements ISesionUsuarioService {
         s.setUltimaActividad(Instant.now());
         s.setActivo(true);
         s = sesionRepository.save(s);
-        return toDTO(s);
+        SesionUsuarioDTO dto = toDTO(s);
+        dto.setSesionesAnterioresCerradas(sesionesAnterioresCerradas);
+        return dto;
     }
 
     @Override

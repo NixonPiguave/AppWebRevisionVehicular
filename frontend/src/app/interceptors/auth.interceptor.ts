@@ -21,6 +21,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         localStorage.removeItem('usuarioId');
         localStorage.removeItem('rol');
         localStorage.removeItem('permisos');
+        sessionStorage.setItem('authMessage', 'Tu sesión ha sido cerrada. Inicie sesión nuevamente.');
         router.navigate(['/']);
       }
       return throwError(() => err);

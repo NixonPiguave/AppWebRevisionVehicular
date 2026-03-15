@@ -128,7 +128,7 @@
             <td>{{ obtenerNombreServicio(t.servicioId) }}</td>
             <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
             <td>
-                <span class="badge" [ngClass]="'badge-' + (t.estado?.toLowerCase() || '')">
+                <span class="badge" [ngClass]="'badge-' + (t.estado.toLowerCase() || '')">
                   {{ t.estado }}
                 </span>
             </td>

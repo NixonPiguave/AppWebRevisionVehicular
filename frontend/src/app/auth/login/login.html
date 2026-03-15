@@ -10,6 +10,14 @@
         <p>Ingresa tus credenciales</p>
       </div>
 
+      <!-- Mensaje sesión cerrada -->
+      @if (mensajeSesionCerrada) {
+        <div class="mensaje-sesion-cerrada">
+          <mat-icon>info</mat-icon>
+          <span>{{ mensajeSesionCerrada }}</span>
+        </div>
+      }
+
       <form (ngSubmit)="login()" class="form-minimal" autocomplete="off">
 
         <!-- Campo Usuario -->

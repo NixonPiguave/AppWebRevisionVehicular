@@ -21,6 +21,8 @@ export class LoginComponent implements OnInit {
   password = '';
   hidePassword = true;
   error = '';
+  /** Mensaje cuando la sesión fue cerrada por admin o por inicio en otro dispositivo. */
+  mensajeSesionCerrada = '';
 
   //  Variables para el logo
   empresaLogo: string | null = null;
@@ -36,6 +38,11 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    const msg = sessionStorage.getItem('authMessage');
+    if (msg) {
+      this.mensajeSesionCerrada = msg;
+      sessionStorage.removeItem('authMessage');
+    }
     this.cargarLogoEmpresa();
   }
 
