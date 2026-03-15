@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
+import { LineasService, Linea } from '../../../services/inspeccion_rtv/lineas.service';
 import { NotificationService } from '../../../services/notification.service';
 import { obtenerRutaPorMetodo } from '../../../config/metodo-inspeccion-routes.config';
 
@@ -20,6 +21,10 @@ export class TurnosPagadosComponent implements OnInit {
   cargando = false;
   error = '';
 
+  lineas: Linea[] = [];
+  lineaSeleccionada: Linea | null = null;
+  cargandoLineas = false;
+
   mostrarModal = false;
   turnoSeleccionado: Turnos | null = null;
   metodosPendientes: { id: number; nombre: string }[] = [];
@@ -30,6 +35,7 @@ export class TurnosPagadosComponent implements OnInit {
   constructor(
     private turnosService: TurnosService,
     private servicioService: ServicioService,
+    private lineasService: LineasService,
     private router: Router,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef
@@ -37,7 +43,7 @@ export class TurnosPagadosComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarServicios();
-    this.cargarTurnosPagados();
+    this.cargarLineas();
   }
 
   cargarServicios(): void {
@@ -47,10 +53,37 @@ export class TurnosPagadosComponent implements OnInit {
     });
   }
 
+  cargarLineas(): void {
+    this.cargandoLineas = true;
+    this.lineasService.listarRoles().subscribe({
+      next: (data) => {
+        this.lineas = data ?? [];
+        this.cargandoLineas = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.lineas = [];
+        this.cargandoLineas = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  seleccionarLinea(linea: Linea): void {
+    this.lineaSeleccionada = linea;
+    this.cargarTurnosPagados();
+    this.cdr.detectChanges();
+  }
+
   cargarTurnosPagados(): void {
+    if (!this.lineaSeleccionada?.id) {
+      this.turnos = [];
+      this.cdr.detectChanges();
+      return;
+    }
     this.cargando = true;
     this.error = '';
-    this.turnosService.getPagados().subscribe({
+    this.turnosService.getPagados(undefined, this.lineaSeleccionada.id).subscribe({
       next: (data: Turnos[]) => {
         this.turnos = data;
         this.cargando = false;
@@ -105,6 +138,7 @@ export class TurnosPagadosComponent implements OnInit {
     if (!this.turnoSeleccionado) return;
     const vehiculoId = (this.turnoSeleccionado as any).vehiculoId ?? (this.turnoSeleccionado as any).vehiculo?.id;
     const turnoId = this.turnoSeleccionado.turnoId;
+    const lineaId = this.lineaSeleccionada?.id;
 
     const ruta = obtenerRutaPorMetodo(metodo.nombre) ?? '/inicio/inspeccion-rtv/registrar';
 
@@ -115,6 +149,7 @@ export class TurnosPagadosComponent implements OnInit {
       vehiculoId: String(vehiculoId),
       metodoInspeccionId: String(metodo.id)
     });
+    if (lineaId != null) params.set('lineaId', String(lineaId));
     this.router.navigateByUrl(`${ruta}?${params.toString()}`);
   }
 

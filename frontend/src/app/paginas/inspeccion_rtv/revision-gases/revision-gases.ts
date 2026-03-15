@@ -23,16 +23,24 @@ import { forkJoin } from 'rxjs';
 })
 export class RevisionGases implements OnInit {
 
+  /** Línea Motos = 1, Carros = 2 (según orden en BD) */
+  readonly LINEA_MOTOS_ID = 1;
+
   turnoId: number | null = null;
   vehiculoId: number | null = null;
   metodoInspeccionId: number | null = null;
+  lineaIdParam: number | null = null;
   vehiculoInfo: { matricula?: string; marca?: string; modelo?: string } | null = null;
 
   defectos: Defectos[] = [];
   defectosSeleccionados: Defectos[] = [];
   filtroDefectos = '';
 
-  // Parámetros según RTE INEN 017 / NTE INEN 2204
+  get esMoto(): boolean {
+    return this.lineaIdParam === this.LINEA_MOTOS_ID;
+  }
+
+  // Parámetros según RTE INEN 017 / NTE INEN 2204 (carros) | RTE INEN 136 (motos)
   tipoCombustible: 'GASOLINA' | 'DIESEL' = 'GASOLINA';
   co = '';        // % CO — Monóxido de carbono
   hc = '';        // ppm HC — Hidrocarburos no quemados
@@ -62,6 +70,8 @@ export class RevisionGases implements OnInit {
       this.turnoId = params['turnoId'] ? +params['turnoId'] : null;
       this.vehiculoId = params['vehiculoId'] ? +params['vehiculoId'] : null;
       this.metodoInspeccionId = params['metodoInspeccionId'] ? +params['metodoInspeccionId'] : null;
+      this.lineaIdParam = params['lineaId'] ? +params['lineaId'] : null;
+      if (this.lineaIdParam === this.LINEA_MOTOS_ID) this.tipoCombustible = 'GASOLINA';
     });
     if (this.turnoId || this.vehiculoId) {
       setTimeout(() => this.cargarDatos(), 200);
@@ -137,9 +147,11 @@ export class RevisionGases implements OnInit {
       this.notification.error('Faltan datos del turno o vehículo.');
       return;
     }
-    const vals = this.tipoCombustible === 'GASOLINA'
-      ? `CO: ${this.co || 'N/A'}%, HC: ${this.hc || 'N/A'} ppm${this.lambda ? `, λ: ${this.lambda}` : ''}${this.o2 ? `, O2: ${this.o2}%` : ''}`
-      : `Opacidad: ${this.opacidad || 'N/A'}%`;
+    const vals = this.esMoto
+      ? `CO: ${this.co || 'N/A'}%, HC: ${this.hc || 'N/A'} ppm (RTE INEN 136)`
+      : this.tipoCombustible === 'GASOLINA'
+        ? `CO: ${this.co || 'N/A'}%, HC: ${this.hc || 'N/A'} ppm${this.lambda ? `, λ: ${this.lambda}` : ''}${this.o2 ? `, O2: ${this.o2}%` : ''}`
+        : `Opacidad: ${this.opacidad || 'N/A'}%`;
     const observacionesCompletas = [`${this.tipoCombustible}. ${vals}`, this.observaciones].filter(Boolean).join(' | ');
 
     const defectosIds = this.resultado === 'NO_APROBADO' && this.defectosSeleccionados.length > 0
@@ -147,13 +159,15 @@ export class RevisionGases implements OnInit {
       : [];
 
     const valoresMedidos: Record<string, number> = {};
-    if (this.tipoCombustible === 'GASOLINA') {
+    if (this.esMoto || this.tipoCombustible === 'GASOLINA') {
       const coVal = parseFloat(this.co);
       if (!isNaN(coVal)) valoresMedidos['CO'] = coVal;
       const hcVal = parseFloat(this.hc);
       if (!isNaN(hcVal)) valoresMedidos['HC'] = hcVal;
-      const lambdaVal = parseFloat(this.lambda);
-      if (!isNaN(lambdaVal)) valoresMedidos['LAMBDA'] = lambdaVal;
+      if (!this.esMoto) {
+        const lambdaVal = parseFloat(this.lambda);
+        if (!isNaN(lambdaVal)) valoresMedidos['LAMBDA'] = lambdaVal;
+      }
     } else {
       const opVal = parseFloat(this.opacidad);
       if (!isNaN(opVal)) valoresMedidos['OPACIDAD'] = opVal;
@@ -162,7 +176,7 @@ export class RevisionGases implements OnInit {
     const payload = {
       vehiculoId: this.vehiculoId,
       metodoInspeccionId: this.metodoInspeccionId,
-      lineaId: 1,
+      lineaId: this.lineaIdParam ?? 1,
       usuarioId: 1,
       observaciones: observacionesCompletas,
       defectosIds,

@@ -14,6 +14,7 @@ public interface ITurnosService {
     List<TurnosDTO> findAll();
     List<TurnosDTO> findTurnosPagados();
     List<TurnosDTO> findTurnosPagadosPorServicio(Long servicioId);
+    List<TurnosDTO> findTurnosPagadosPorServicioYLinea(Long servicioId, Long lineaId);
     TurnosDTO actualizarMontoPagado(Long turnoId, BigDecimal montoPagado);
     BigDecimal obtenerTarifaPorTurno(Long turnoId);
     TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado);

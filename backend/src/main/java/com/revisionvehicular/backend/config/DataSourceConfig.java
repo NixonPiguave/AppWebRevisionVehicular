@@ -11,6 +11,7 @@ import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import javax.sql.DataSource;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Configuration
 public class DataSourceConfig {
@@ -24,9 +25,19 @@ public class DataSourceConfig {
     @Value("${spring.datasource.password}")
     private String defaultPassword;
 
+    /**
+     * Cache de DataSources por usuario para evitar crear un nuevo pool Hikari en cada petición.
+     * Sin caché, cada request creaba un nuevo pool y se superaba el límite de conexiones de PostgreSQL.
+     */
+    private final Map<String, DataSource> dataSourceCache = new ConcurrentHashMap<>();
+
+    private static final String DEFAULT_KEY = "default";
+
     @Bean
     @Primary
     public DataSource dataSource() {
+        DataSource defaultDataSource = getOrCreateDataSource(DEFAULT_KEY, defaultUsername, defaultPassword);
+
         AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
 
             @Override
@@ -40,20 +51,28 @@ public class DataSourceConfig {
                 String password = UserDatabaseContext.getPassword();
 
                 if (user != null && password != null) {
-                    return createDataSource(user, password);
+                    return getOrCreateDataSource(user, user, password);
                 }
                 return super.determineTargetDataSource();
             }
         };
 
         Map<Object, Object> dataSources = new HashMap<>();
-        dataSources.put("default", createDataSource(defaultUsername, defaultPassword));
+        dataSources.put("default", defaultDataSource);
 
         routingDataSource.setTargetDataSources(dataSources);
-        routingDataSource.setDefaultTargetDataSource(createDataSource(defaultUsername, defaultPassword));
+        routingDataSource.setDefaultTargetDataSource(defaultDataSource);
         routingDataSource.afterPropertiesSet();
 
         return routingDataSource;
+    }
+
+    /**
+     * Obtiene un DataSource del caché o lo crea si no existe.
+     * Evita crear cientos de pools Hikari que superan el límite de conexiones de PostgreSQL.
+     */
+    private DataSource getOrCreateDataSource(String cacheKey, String username, String password) {
+        return dataSourceCache.computeIfAbsent(cacheKey, k -> createDataSource(username, password));
     }
 
     private DataSource createDataSource(String username, String password) {

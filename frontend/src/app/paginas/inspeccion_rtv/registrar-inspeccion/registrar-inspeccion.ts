@@ -11,11 +11,11 @@ import { MetodoInspeccionService, MetodoInspeccion } from '../../../services/ins
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.service';
 import { UmbralService } from '../../../services/configuracion_umbral/umbral.service';
-import { LineasService } from '../../../services/inspeccion_rtv/lineas.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { NotificationService } from '../../../services/notification.service';
 import { forkJoin } from 'rxjs';
 
+/** Ubicaciones para línea Carros */
 interface UbicacionesRevisadas {
   delantera:         boolean;
   ruedaDelIzq:       boolean;
@@ -27,6 +27,17 @@ interface UbicacionesRevisadas {
   trasera:           boolean;
   habitaculo:        boolean;
   parteInferior:     boolean;
+}
+
+/** Ubicaciones para línea Motos (RTV Ecuador) */
+interface UbicacionesMoto {
+  delantera:         boolean;  // faros, manillar
+  ruedaDelantera:    boolean;
+  lateralIzquierdo:  boolean;
+  lateralDerecho:    boolean;
+  ruedaTrasera:      boolean;
+  trasera:           boolean;  // luces, placa
+  chasis:            boolean;  // parte inferior
 }
 
 interface VehiculoInfo {
@@ -76,7 +87,9 @@ export class RegistrarInspeccionComponent implements OnInit {
   defectos: Defectos[] = [];
   metodosInspeccion: MetodoInspeccion[] = [];
   umbrales: { idUmbral: number }[] = [];
-  lineas: { id: number }[] = [];
+
+  /** Línea Motos = 1, Carros = 2 (según orden en BD) */
+  readonly LINEA_MOTOS_ID = 1;
 
   ubicaciones: UbicacionesRevisadas = {
     delantera:        false,
@@ -90,6 +103,20 @@ export class RegistrarInspeccionComponent implements OnInit {
     habitaculo:       false,
     parteInferior:    false
   };
+
+  ubicacionesMoto: UbicacionesMoto = {
+    delantera:        false,
+    ruedaDelantera:   false,
+    lateralIzquierdo: false,
+    lateralDerecho:   false,
+    ruedaTrasera:     false,
+    trasera:          false,
+    chasis:           false
+  };
+
+  get esMoto(): boolean {
+    return this.lineaIdParam === this.LINEA_MOTOS_ID;
+  }
 
   defectosSeleccionados: Defectos[] = [];
   filtroDefectos = '';
@@ -173,19 +200,20 @@ export class RegistrarInspeccionComponent implements OnInit {
     private turnosService: TurnosService,
     private inspeccionService: InspeccionService,
     private umbralService: UmbralService,
-    private lineasService: LineasService,
     private vehiculoService: VehiculoService,
     private notification: NotificationService,
     private cdr: ChangeDetectorRef
   ) {}
 
   metodoInspeccionIdParam: number | null = null;
+  lineaIdParam: number | null = null;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       this.turnoId = params['turnoId'] ? +params['turnoId'] : null;
       this.vehiculoId = params['vehiculoId'] ? +params['vehiculoId'] : null;
       this.metodoInspeccionIdParam = params['metodoInspeccionId'] ? +params['metodoInspeccionId'] : null;
+      this.lineaIdParam = params['lineaId'] ? +params['lineaId'] : null;
     });
 
     setTimeout(() => {
@@ -203,14 +231,12 @@ export class RegistrarInspeccionComponent implements OnInit {
       defectos?: ReturnType<DefectosService['listar']>;
       metodos?: ReturnType<MetodoInspeccionService['listarMetodosInspeccion']>;
       umbrales?: ReturnType<UmbralService['listar']>;
-      lineas?: ReturnType<LineasService['listarRoles']>;
       turno?: ReturnType<TurnosService['getById']>;
     } = {};
 
     observables.defectos = this.defectosService.listar();
     observables.metodos = this.metodoInspeccionService.listarMetodosInspeccion();
     observables.umbrales = this.umbralService.listar();
-    observables.lineas = this.lineasService.listarRoles();
 
     if (this.turnoId) {
       observables.turno = this.turnosService.getById(this.turnoId);
@@ -221,7 +247,6 @@ export class RegistrarInspeccionComponent implements OnInit {
         this.defectos = res.defectos || [];
         this.metodosInspeccion = res.metodos || [];
         this.umbrales = (res.umbrales || []).map((u: any) => ({ idUmbral: u.idUmbral ?? u.id }));
-        this.lineas = (res.lineas || []).map((l: any) => ({ id: l.id }));
 
         if (res.turno) {
           const vid = (res.turno as any).vehiculoId ?? (res.turno as any).vehiculo?.id ?? null;
@@ -319,7 +344,7 @@ export class RegistrarInspeccionComponent implements OnInit {
   //  El resto del componente permanece igual
   // ════════════════════════════════════════════════════════════
 
-  /** Palabras clave por ubicación para filtrar defectos */
+  /** Palabras clave por ubicación (carros) para filtrar defectos */
   private readonly UBICACION_KEYWORDS: Record<keyof UbicacionesRevisadas, string[]> = {
     delantera:        ['delantera', 'frontal', 'frente', 'delantero'],
     ruedaDelIzq:      ['rueda delantera', 'del izq', 'izquierda', 'delantera izq'],
@@ -333,12 +358,29 @@ export class RegistrarInspeccionComponent implements OnInit {
     parteInferior:    ['inferior', 'chasis', 'fosa', 'subsuelo', 'piso', 'parte inferior']
   };
 
+  /** Palabras clave por ubicación (motos) para filtrar defectos */
+  private readonly UBICACION_KEYWORDS_MOTO: Record<keyof UbicacionesMoto, string[]> = {
+    delantera:        ['delantera', 'frontal', 'frente', 'faros', 'manillar'],
+    ruedaDelantera:   ['rueda delantera', 'delantera'],
+    lateralIzquierdo: ['lateral', 'izquierdo', 'lateral izq'],
+    lateralDerecho:   ['lateral', 'derecho', 'lateral der'],
+    ruedaTrasera:     ['rueda trasera', 'trasera'],
+    trasera:          ['trasera', 'posterior', 'luces', 'placa'],
+    chasis:           ['chasis', 'inferior', 'parte inferior']
+  };
+
   /** Obtiene todas las palabras clave de las ubicaciones seleccionadas */
   private getKeywordsUbicacionesSeleccionadas(): string[] {
-    const keys = (Object.keys(this.ubicaciones) as (keyof UbicacionesRevisadas)[])
-      .filter(k => this.ubicaciones[k]);
     const keywords = new Set<string>();
-    keys.forEach(k => (this.UBICACION_KEYWORDS[k] || []).forEach(w => keywords.add(w)));
+    if (this.esMoto) {
+      const keys = (Object.keys(this.ubicacionesMoto) as (keyof UbicacionesMoto)[])
+        .filter(k => this.ubicacionesMoto[k]);
+      keys.forEach(k => (this.UBICACION_KEYWORDS_MOTO[k] || []).forEach(w => keywords.add(w)));
+    } else {
+      const keys = (Object.keys(this.ubicaciones) as (keyof UbicacionesRevisadas)[])
+        .filter(k => this.ubicaciones[k]);
+      keys.forEach(k => (this.UBICACION_KEYWORDS[k] || []).forEach(w => keywords.add(w)));
+    }
     return Array.from(keywords);
   }
 
@@ -398,6 +440,18 @@ export class RegistrarInspeccionComponent implements OnInit {
   }
 
   getUbicacionesArray(): string[] {
+    if (this.esMoto) {
+      const map: [keyof UbicacionesMoto, string][] = [
+        ['delantera',        'Delantera'],
+        ['ruedaDelantera',   'Rueda_Delantera'],
+        ['lateralIzquierdo', 'Lateral_Izquierdo'],
+        ['lateralDerecho',   'Lateral_Derecho'],
+        ['ruedaTrasera',     'Rueda_Trasera'],
+        ['trasera',          'Trasera'],
+        ['chasis',           'Chasis'],
+      ];
+      return map.filter(([key]) => this.ubicacionesMoto[key]).map(([, val]) => val);
+    }
     const map: [keyof UbicacionesRevisadas, string][] = [
       ['delantera',        'Delantera'],
       ['ruedaDelIzq',      'Rueda_Delantera_Izq'],
@@ -428,7 +482,6 @@ export class RegistrarInspeccionComponent implements OnInit {
       ?? this.metodosInspeccion[0]?.id
       ?? 1;
     const umbralId  = this.umbrales[0]?.idUmbral ?? 1;
-    const lineaId   = this.lineas[0]?.id ?? 1;
 
     const defectosIds = this.defectosSeleccionados
       .map(d => d.id)
@@ -437,7 +490,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     const payload = {
       vehiculoId: this.vehiculoId,
       metodoInspeccionId: metodoId,
-      lineaId,
+      lineaId: this.lineaIdParam ?? 1,
       usuarioId: 1,
       observaciones: this.observaciones.trim() || undefined,
       ubicacionesRevisadas: this.getUbicacionesArray(),

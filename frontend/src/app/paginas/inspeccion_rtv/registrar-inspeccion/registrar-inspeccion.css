@@ -288,6 +288,20 @@
 .ub-rtd       { bottom: 22%; right: 52px; }
 .ub-trasera   { bottom: 6px; left: 50%; transform: translateX(-50%); }
 
+/* Ubicaciones MOTOS (diagrama cenital moto) */
+.vehiculo-svg-wrapper.moto-layout .vehiculo-img {
+  transform: none; /* moto sin rotar si la imagen ya está orientada */
+}
+.ub-moto .ub-check {
+  position: absolute;
+}
+.ub-moto-delantera  { top: 8px; left: 50%; transform: translateX(-50%); }
+.ub-moto-rueda-del  { top: 28%; left: 50%; transform: translateX(-50%); }
+.ub-moto-lat-izq    { top: 50%; left: 24px; transform: translateY(-50%); }
+.ub-moto-lat-der    { top: 50%; right: 24px; transform: translateY(-50%); }
+.ub-moto-rueda-tra  { bottom: 28%; left: 50%; transform: translateX(-50%); }
+.ub-moto-trasera    { bottom: 8px; left: 50%; transform: translateX(-50%); }
+
 .ub-label {
   display: flex;
   align-items: center;
