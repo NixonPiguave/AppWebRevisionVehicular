@@ -100,4 +100,14 @@ export class BackupHistoryTabComponent implements OnInit {
       }
     });
   }
+
+  marcarComoFallido(record: BackupRecord): void {
+    this.backupService.marcarComoFallido(record.recordId).subscribe({
+      next: () => this.cargarHistorial(),
+      error: (err) => {
+        this.mensajeError = err?.error?.message || 'Error al marcar como fallido';
+        this.cdr.detectChanges();
+      }
+    });
+  }
 }

@@ -4,7 +4,9 @@ import com.revisionvehicular.backend.dtos.backup.BackupRecordDTO;
 import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import com.revisionvehicular.backend.repositories.backup.IBackupRecordRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,20 @@ public class BackupRecordServiceImpl implements IBackupRecordService {
     @Override
     public boolean hayBackupEnProceso() {
         return repository.existsByEstado("EN_PROCESO");
+    }
+
+    @Override
+    @Transactional
+    public void marcarComoFallido(Long recordId) {
+        BackupRecord record = repository.findById(recordId)
+                .orElseThrow(() -> new RuntimeException("Backup no encontrado con id: " + recordId));
+        if (!"EN_PROCESO".equals(record.getEstado())) {
+            throw new RuntimeException("Solo se puede marcar como fallido un respaldo que está en proceso.");
+        }
+        record.setEstado("FALLIDO");
+        record.setMensajeError("Marcado como fallido manualmente (interrumpido o no finalizó).");
+        record.setFinalizadoEn(LocalDateTime.now());
+        repository.save(record);
     }
 
     private BackupRecordDTO toDTO(BackupRecord record) {

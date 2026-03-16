@@ -67,7 +67,17 @@ public class BackupServiceImpl implements IBackupService {
                 .orElseThrow(() -> new RuntimeException(
                         "No existe configuración de backup. Configure primero la ruta y credenciales."));
 
-        // Verificar que no haya otro backup en proceso
+        // Marcar como fallidos los registros EN_PROCESO con más de 30 min (interrumpidos/obsoletos)
+        LocalDateTime limiteObsoleto = LocalDateTime.now().minusMinutes(30);
+        List<BackupRecord> obsoletos = recordRepository.findByEstadoAndCreadoEnBefore("EN_PROCESO", limiteObsoleto);
+        for (BackupRecord r : obsoletos) {
+            r.setEstado("FALLIDO");
+            r.setMensajeError("Interrumpido o expirado. El respaldo no se completó en 30 minutos.");
+            r.setFinalizadoEn(LocalDateTime.now());
+            recordRepository.save(r);
+        }
+
+        // Verificar que no haya otro backup en proceso (realmente en curso)
         if (recordRepository.existsByEstado("EN_PROCESO")) {
             throw new RuntimeException("Ya hay un respaldo en proceso. Espere a que termine.");
         }
@@ -82,16 +92,17 @@ public class BackupServiceImpl implements IBackupService {
                 ? usuario.getNombre() + " " + usuario.getApellido()
                 : "SCHEDULER");
         record = recordRepository.save(record);
-        record.setNombreArchivo("pendiente_" + System.currentTimeMillis());
 
+        String timestamp = LocalDateTime.now()
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String extension = tipo.equals("INCREMENTAL") ? ".tar" : ".backup";
+        String nombreArchivo = String.format("backup_%s_%s%s",
+                tipo.toLowerCase(), timestamp, extension);
+        record.setNombreArchivo(nombreArchivo);
+        recordRepository.save(record);
+
+        Path rutaCompleta = Paths.get(config.getRutaServidor(), nombreArchivo);
         try {
-            String timestamp = LocalDateTime.now()
-                    .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String extension = tipo.equals("INCREMENTAL") ? ".tar" : ".backup";
-            String nombreArchivo = String.format("backup_%s_%s%s",
-                    tipo.toLowerCase(), timestamp, extension);
-
-            Path rutaCompleta = Paths.get(config.getRutaServidor(), nombreArchivo);
             Files.createDirectories(rutaCompleta.getParent());
 
             switch (tipo) {
@@ -158,11 +169,9 @@ public class BackupServiceImpl implements IBackupService {
     }
 
     // -------------------------------------------------------
-    // DIFERENCIAL: exporta solo esquema + datos desde el
-    // último backup FULL exitoso usando --exclude-table-data
-    // para tablas de auditoría y datos históricos pesados.
-    // Nota: pg_dump no tiene diferencial nativo — esta es
-    // la aproximación más práctica sin herramientas externas.
+    // DIFERENCIAL: exporta esquema + datos. No se excluye
+    // srtv_auditoria para que, al restaurar, la tabla exista
+    // y la aplicación pueda registrar auditoría.
     // -------------------------------------------------------
     private void ejecutarDiferencial(String rutaSalida) throws Exception {
         recordRepository.findTopByTipoAndEstadoOrderByCreadoEnDesc("FULL", "EXITOSO")
@@ -178,8 +187,6 @@ public class BackupServiceImpl implements IBackupService {
         comando.add("-F"); comando.add("c");
         comando.add("-Z"); comando.add("9");
         comando.add("-f"); comando.add(rutaSalida);
-
-        comando.add("--exclude-table=srtv_auditoria");
 
         ejecutarProceso(comando, dbPassword);
     }

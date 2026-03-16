@@ -62,6 +62,10 @@
                   (click)="descargar(r)" matTooltip="Descargar backup">
             <mat-icon>download</mat-icon>
           </button>
+          <button class="btn-accion btn-marcar-fallido" *ngIf="r.estado === 'EN_PROCESO'"
+                  (click)="marcarComoFallido(r)" matTooltip="Marcar como fallido (desbloquear)">
+            <mat-icon>cancel</mat-icon>
+          </button>
         </td>
       </tr>
       <tr *ngIf="registrosPaginados.length === 0 && !cargando">

@@ -28,6 +28,11 @@
       <mat-icon>history</mat-icon>
       Historial
     </button>
+    <button class="tab-btn" [class.activa]="tabActiva === 'restaurar'"
+            (click)="cambiarTab('restaurar')">
+      <mat-icon>restore</mat-icon>
+      Restaurar Respaldo
+    </button>
     <button class="tab-btn" [class.activa]="tabActiva === 'config'"
             (click)="cambiarTab('config')">
       <mat-icon>settings</mat-icon>
@@ -39,6 +44,7 @@
   <div class="backup-content">
     <app-backup-jobs-tab *ngIf="tabActiva === 'ejecutar'"></app-backup-jobs-tab>
     <app-backup-history-tab *ngIf="tabActiva === 'historial'"></app-backup-history-tab>
+    <app-backup-restore-tab *ngIf="tabActiva === 'restaurar'"></app-backup-restore-tab>
     <app-backup-config-tab *ngIf="tabActiva === 'config'"></app-backup-config-tab>
   </div>
 </div>

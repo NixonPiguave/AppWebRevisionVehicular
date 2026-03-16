@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.controllers.rtv;
 import com.revisionvehicular.backend.dtos.rtv.CrearInspeccionRequest;
 import com.revisionvehicular.backend.dtos.rtv.InspeccionDTO;
 import com.revisionvehicular.backend.service.rtv.IInspeccionService;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,14 +15,20 @@ import java.util.List;
 public class InspeccionController {
 
     private final IInspeccionService service;
+    private final AuditoriaService auditoriaService;
 
-    public InspeccionController(IInspeccionService service) {
+    public InspeccionController(IInspeccionService service, AuditoriaService auditoriaService) {
         this.service = service;
+        this.auditoriaService = auditoriaService;
     }
 
     @PostMapping
     public ResponseEntity<InspeccionDTO> crear(@RequestBody CrearInspeccionRequest request) {
         InspeccionDTO creado = service.crear(request);
+        String detalle = "vehículo " + request.getVehiculoId()
+                + (request.getMetodoInspeccionId() != null ? ", método inspección id " + request.getMetodoInspeccionId() : "")
+                + (creado.getId() != null ? " → inspección id " + creado.getId() : "");
+        auditoriaService.registrar("INSERT", "Inspección (revisión)", detalle);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }
 

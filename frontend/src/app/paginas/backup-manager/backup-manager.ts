@@ -5,6 +5,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { BackupConfigTabComponent } from './backup-config-tab/backup-config-tab';
 import { BackupHistoryTabComponent } from './backup-history-tab/backup-history-tab';
 import { BackupJobsTabComponent } from './backup-jobs-tab/backup-jobs-tab';
+import { BackupRestoreTabComponent } from './backup-restore-tab/backup-restore-tab';
 import { BackupService, BackupNotification } from '../../services/backup/backup.service';
 
 @Component({
@@ -16,7 +17,8 @@ import { BackupService, BackupNotification } from '../../services/backup/backup.
     MatTooltipModule,
     BackupConfigTabComponent,
     BackupHistoryTabComponent,
-    BackupJobsTabComponent
+    BackupJobsTabComponent,
+    BackupRestoreTabComponent
   ],
   templateUrl: './backup-manager.html',
   styleUrls: ['./backup-manager.css']

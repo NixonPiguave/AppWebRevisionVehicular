@@ -8,4 +8,6 @@ public interface IBackupRecordService {
     List<BackupRecordDTO> obtenerHistorialPorTipo(String tipo);
     BackupRecordDTO obtenerPorId(Long id);
     boolean hayBackupEnProceso();
+    /** Marca un registro EN_PROCESO como FALLIDO (para desbloquear respaldos colgados). */
+    void marcarComoFallido(Long recordId);
 }

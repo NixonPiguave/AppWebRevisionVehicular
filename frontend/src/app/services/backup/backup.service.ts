@@ -95,6 +95,11 @@ export class BackupService {
     });
   }
 
+  /** Marca un registro "En proceso" como fallido (para desbloquear). */
+  marcarComoFallido(recordId: number): Observable<void> {
+    return this.http.put<void>(`${this.base}/historial/${recordId}/marcar-fallido`, null);
+  }
+
   // Notificaciones
   obtenerNotificaciones(): Observable<BackupNotification[]> {
     return this.http.get<BackupNotification[]>(`${this.base}/notificaciones`);
@@ -115,4 +120,20 @@ export class BackupService {
   probarCorreo(config: BackupConfig): Observable<void> {
     return this.http.post<void>(`${this.base}/config/probar-correo`, config);
   }
+
+  // Restaurar (archivos locales)
+  listarArchivosLocales(): Observable<BackupLocalFile[]> {
+    return this.http.get<BackupLocalFile[]>(`${this.base}/restore/archivos-locales`);
+  }
+
+  ejecutarRestore(nombreArchivo: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${this.base}/restore/ejecutar`, { nombreArchivo });
+  }
+}
+
+export interface BackupLocalFile {
+  nombreArchivo: string;
+  tamanoBytes: number;
+  tamanoFormateado: string;
+  fechaModificacion: string;
 }

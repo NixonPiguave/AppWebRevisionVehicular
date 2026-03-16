@@ -1,0 +1,88 @@
+<!-- Restaurar respaldo desde archivos locales -->
+<div class="restore-container">
+
+  <div class="restore-aviso">
+    <mat-icon>info</mat-icon>
+    <p>
+      Se listan los archivos <strong>.backup</strong> de la carpeta local configurada en Respaldo.
+      Solo se pueden restaurar respaldos completos (FULL) o diferenciales en formato custom.
+    </p>
+  </div>
+
+  <div class="restore-controles">
+    <button class="btn-refrescar" (click)="cargarArchivos()">
+      <mat-icon>refresh</mat-icon> Actualizar lista
+    </button>
+  </div>
+
+  <div class="mensaje-error" *ngIf="mensajeError">
+    <mat-icon>error</mat-icon> {{ mensajeError }}
+  </div>
+  <div class="mensaje-exito" *ngIf="mensajeExito">
+    <mat-icon>check_circle</mat-icon> {{ mensajeExito }}
+  </div>
+
+  <div class="cargando" *ngIf="cargando">Cargando archivos locales...</div>
+
+  <div class="tabla-contenedor" *ngIf="!cargando && archivos.length > 0">
+    <table class="restore-tabla">
+      <thead>
+        <tr>
+          <th>Archivo</th>
+          <th>Tamaño</th>
+          <th>Última modificación</th>
+          <th class="th-acciones">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of archivos">
+          <td class="td-archivo">
+            <mat-icon class="icono-archivo">description</mat-icon>
+            {{ f.nombreArchivo }}
+          </td>
+          <td>{{ f.tamanoFormateado }}</td>
+          <td>{{ f.fechaModificacion | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td class="td-acciones">
+            <button type="button" class="btn-restaurar" (click)="confirmarRestaurar(f)"
+                    matTooltip="Restaurar base de datos desde este respaldo">
+              <mat-icon>restore</mat-icon> Restaurar
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="sin-archivos" *ngIf="!cargando && archivos.length === 0 && !mensajeError">
+    <mat-icon>folder_off</mat-icon>
+    <p>No hay archivos .backup en la carpeta local configurada.</p>
+    <p class="hint">Configure la ruta en la pestaña Configuración y ejecute al menos un respaldo completo.</p>
+  </div>
+
+  <!-- Modal confirmación -->
+  <div class="modal-overlay" *ngIf="mostrarConfirmacion" (click)="cerrarConfirmacion()">
+    <div class="modal-restore" (click)="$event.stopPropagation()">
+      <div class="modal-header modal-header-peligro">
+        <mat-icon>warning</mat-icon>
+        <h3>Confirmar restauración</h3>
+      </div>
+      <div class="modal-body">
+        <p>
+          <strong>Esta acción reemplazará toda la base de datos</strong> con el contenido del respaldo seleccionado.
+          Los datos actuales se perderán. Esta operación no se puede deshacer.
+        </p>
+        <p class="archivo-seleccionado" *ngIf="archivoSeleccionado">
+          Archivo: <strong>{{ archivoSeleccionado.nombreArchivo }}</strong>
+        </p>
+        <p class="pregunta">¿Está seguro de que desea continuar?</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancelar" (click)="cerrarConfirmacion()">Cancelar</button>
+        <button type="button" class="btn-confirmar-peligro" (click)="ejecutarRestore()"
+                [disabled]="restaurando">
+          <mat-icon>restore</mat-icon> {{ restaurando ? 'Restaurando...' : 'Sí, restaurar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

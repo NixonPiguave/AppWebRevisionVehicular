@@ -6,6 +6,7 @@ import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.backup.IBackupRecordRepository;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 import com.revisionvehicular.backend.service.backup.IBackupService;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -25,13 +26,16 @@ public class BackupController {
     private final IBackupService backupService;
     private final IUsuarioRepository usuarioRepository;
     private final IBackupRecordRepository recordRepository;
+    private final AuditoriaService auditoriaService;
 
     public BackupController(IBackupService backupService,
                             IUsuarioRepository usuarioRepository,
-                            IBackupRecordRepository recordRepository) {
+                            IBackupRecordRepository recordRepository,
+                            AuditoriaService auditoriaService) {
         this.backupService = backupService;
         this.usuarioRepository = usuarioRepository;
         this.recordRepository = recordRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     // Ejecutar backup manual
@@ -39,6 +43,7 @@ public class BackupController {
     public ResponseEntity<BackupRecordDTO> ejecutar(@RequestParam String tipo) {
         Usuario usuario = obtenerUsuarioActual();
         BackupRecordDTO result = backupService.ejecutarBackup(tipo, "MANUAL", usuario);
+        auditoriaService.registrar("INSERT", "Respaldo", "Ejecución manual tipo " + tipo + (result.getEstado() != null ? " - " + result.getEstado() : ""));
         return ResponseEntity.ok(result);
     }
 

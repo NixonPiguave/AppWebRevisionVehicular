@@ -36,4 +36,10 @@ public class BackupRecordController {
     public ResponseEntity<Boolean> hayEnProceso() {
         return ResponseEntity.ok(service.hayBackupEnProceso());
     }
+
+    @PutMapping("/{id}/marcar-fallido")
+    public ResponseEntity<Void> marcarComoFallido(@PathVariable Long id) {
+        service.marcarComoFallido(id);
+        return ResponseEntity.noContent().build();
+    }
 }

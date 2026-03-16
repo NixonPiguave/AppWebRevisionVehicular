@@ -1,6 +1,7 @@
 package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.UsuarioDTO;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import com.revisionvehicular.backend.service.srtv.IUsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +13,17 @@ import java.util.List;
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
     private final IUsuarioService service;
-    public UsuarioController(IUsuarioService service) {
+    private final AuditoriaService auditoriaService;
+
+    public UsuarioController(IUsuarioService service, AuditoriaService auditoriaService) {
         this.service = service;
+        this.auditoriaService = auditoriaService;
     }
+
     @PostMapping
     public ResponseEntity<UsuarioDTO> crear(@RequestBody UsuarioDTO dto) {
         UsuarioDTO created = service.save(dto);
+        auditoriaService.registrar("INSERT", "Usuario", dto.getUsuario() != null ? dto.getUsuario() : "id " + created.getUsuarioId());
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
@@ -43,12 +49,15 @@ public class UsuarioController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UsuarioDTO> actualizar(@PathVariable Long id, @RequestBody UsuarioDTO dto) {
-        return ResponseEntity.ok(service.update(id, dto));
+        UsuarioDTO updated = service.update(id, dto);
+        auditoriaService.registrar("UPDATE", "Usuario", "id " + id + (dto.getUsuario() != null ? " - " + dto.getUsuario() : ""));
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         service.delete(id);
+        auditoriaService.registrar("DELETE", "Usuario", "id " + id);
         return ResponseEntity.noContent().build();
     }
 
