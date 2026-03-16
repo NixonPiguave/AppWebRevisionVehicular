@@ -42,7 +42,7 @@ public class BackupNotificationServiceImpl implements IBackupNotificationService
         repository.save(notif);
 
         configRepository.findTopByOrderByConfigIdAsc().ifPresent(config -> {
-            mailService.enviarNotificacion(record, config.getEmailNotificacion());
+            mailService.enviarNotificacion(record, config);
         });
     }
 

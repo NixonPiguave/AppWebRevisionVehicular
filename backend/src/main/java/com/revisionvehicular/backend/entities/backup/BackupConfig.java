@@ -51,6 +51,27 @@ public class BackupConfig {
     @Column(name = "actualizado_en")
     private LocalDateTime actualizadoEn;
 
+    @Column(name = "mail_host", length = 200)
+    private String mailHost;
+
+    @Column(name = "mail_port")
+    private Integer mailPort = 587;
+
+    @Column(name = "mail_username", length = 200)
+    private String mailUsername;
+
+    @Column(name = "mail_password", length = 300)
+    private String mailPassword;
+
+    @Column(name = "mail_from", length = 200)
+    private String mailFrom;
+
+    @Column(name = "mail_starttls")
+    private Boolean mailStarttls = true;
+
+    @Column(name = "mail_habilitado")
+    private Boolean mailHabilitado = false;
+
     @PrePersist
     @PreUpdate
     public void actualizarFecha() {

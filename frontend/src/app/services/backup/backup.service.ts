@@ -15,6 +15,14 @@ export interface BackupConfig {
   emailNotificacion?: string;
   usuarioId?: number;
   nombreUsuario?: string;
+  // Campos de correo
+  mailHost?: string;
+  mailPort?: number;
+  mailUsername?: string;
+  mailPassword?: string;
+  mailFrom?: string;
+  mailStarttls?: boolean;
+  mailHabilitado?: boolean;
 }
 
 export interface BackupRecord {
@@ -102,5 +110,9 @@ export class BackupService {
 
   marcarTodasComoLeidas(): Observable<void> {
     return this.http.put<void>(`${this.base}/notificaciones/marcar-leidas`, null);
+  }
+
+  probarCorreo(config: BackupConfig): Observable<void> {
+    return this.http.post<void>(`${this.base}/config/probar-correo`, config);
   }
 }

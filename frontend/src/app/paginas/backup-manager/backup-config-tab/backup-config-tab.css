@@ -95,3 +95,19 @@
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
 }
+.btn-probar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border: 1px solid #1565c0; background: #e3f2fd;
+  color: #1565c0; border-radius: 8px; font-size: 13px;
+  font-weight: 500; cursor: pointer; transition: all 0.2s;
+}
+
+.btn-probar:hover:not(:disabled) {
+  background: #bbdefb;
+}
+.btn-probar:disabled {
+  opacity: 0.6; cursor: not-allowed;
+}
+.btn-probar mat-icon {
+  font-size: 16px;
+}

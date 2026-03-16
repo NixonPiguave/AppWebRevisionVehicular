@@ -1,30 +1,34 @@
 package com.revisionvehicular.backend.service.backup;
 
+import com.revisionvehicular.backend.entities.backup.BackupConfig;
 import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import java.util.Properties;
 
 @Service
 public class BackupMailService {
 
-    private final JavaMailSender mailSender;
-
-    public BackupMailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
-
-    public void enviarNotificacion(BackupRecord record, String emailDestino) {
-        if (emailDestino == null || emailDestino.isBlank()) return;
+    public void enviarNotificacion(BackupRecord record, BackupConfig config) {
+        if (!Boolean.TRUE.equals(config.getMailHabilitado())) return;
+        if (config.getMailHost() == null || config.getMailHost().isBlank()) return;
+        if (config.getEmailNotificacion() == null || config.getEmailNotificacion().isBlank()) return;
 
         try {
+            JavaMailSenderImpl mailSender = construirMailSender(config);
+
             MimeMessage mensaje = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
 
             boolean exitoso = "EXITOSO".equals(record.getEstado());
 
-            helper.setTo(emailDestino);
+            helper.setFrom(config.getMailFrom() != null
+                    ? config.getMailFrom()
+                    : config.getMailUsername());
+            helper.setTo(config.getEmailNotificacion());
             helper.setSubject(exitoso
                     ? "✅ Respaldo completado: " + record.getTipo()
                     : "❌ Respaldo fallido: " + record.getTipo());
@@ -33,9 +37,28 @@ public class BackupMailService {
             mailSender.send(mensaje);
 
         } catch (Exception e) {
-            // No interrumpir el flujo si el correo falla
             System.err.println("Error al enviar correo de notificación: " + e.getMessage());
         }
+    }
+
+    private JavaMailSenderImpl construirMailSender(BackupConfig config) {
+        JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+        mailSender.setHost(config.getMailHost());
+        mailSender.setPort(config.getMailPort() != null ? config.getMailPort() : 587);
+        mailSender.setUsername(config.getMailUsername());
+        mailSender.setPassword(config.getMailPassword());
+        mailSender.setDefaultEncoding("UTF-8");
+
+        Properties props = mailSender.getJavaMailProperties();
+        props.put("mail.transport.protocol", "smtp");
+        props.put("mail.smtp.auth", "true");
+        props.put("mail.smtp.starttls.enable",
+                Boolean.TRUE.equals(config.getMailStarttls()) ? "true" : "false");
+        props.put("mail.smtp.starttls.required",
+                Boolean.TRUE.equals(config.getMailStarttls()) ? "true" : "false");
+        props.put("mail.debug", "false");
+
+        return mailSender;
     }
 
     private String construirCuerpo(BackupRecord record, boolean exitoso) {
@@ -45,55 +68,45 @@ public class BackupMailService {
 
         StringBuilder html = new StringBuilder();
         html.append("<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>");
-
-        // Encabezado
         html.append("<div style='background-color: ").append(color)
                 .append("; padding: 20px; border-radius: 8px 8px 0 0;'>")
                 .append("<h2 style='color: white; margin: 0;'>")
                 .append(icono).append(" Respaldo ").append(estado)
                 .append("</h2></div>");
-
-        // Cuerpo
         html.append("<div style='background-color: #f5f5f5; padding: 24px; border-radius: 0 0 8px 8px;'>");
         html.append("<table style='width: 100%; border-collapse: collapse;'>");
 
         agregarFila(html, "Tipo de respaldo", record.getTipo());
         agregarFila(html, "Origen", record.getOrigen());
-        agregarFila(html, "Ejecutado por", record.getEjecutadoPor() != null
-                ? record.getEjecutadoPor() : "SCHEDULER");
-        agregarFila(html, "Fecha inicio",
-                record.getCreadoEn() != null ? record.getCreadoEn().toString() : "—");
-        agregarFila(html, "Fecha fin",
-                record.getFinalizadoEn() != null ? record.getFinalizadoEn().toString() : "—");
+        agregarFila(html, "Ejecutado por", record.getEjecutadoPor() != null ? record.getEjecutadoPor() : "SCHEDULER");
+        agregarFila(html, "Fecha inicio", record.getCreadoEn() != null ? record.getCreadoEn().toString() : "—");
+        agregarFila(html, "Fecha fin", record.getFinalizadoEn() != null ? record.getFinalizadoEn().toString() : "—");
 
         if (exitoso) {
             agregarFila(html, "Archivo", record.getNombreArchivo());
             agregarFila(html, "Tamaño", formatearTamano(record.getTamanoBytes()));
             agregarFila(html, "Ruta servidor", record.getRutaServidor());
-            agregarFila(html, "Google Drive",
-                    record.getDriveFileId() != null ? "✅ Subido correctamente" : "No configurado");
+            agregarFila(html, "Google Drive", record.getDriveFileId() != null
+                    ? "✅ Subido correctamente" : "No configurado");
         } else {
-            agregarFila(html, "Error", "<span style='color: #c62828;'>"
+            agregarFila(html, "Error", "<span style='color:#c62828;'>"
                     + record.getMensajeError() + "</span>");
         }
 
         html.append("</table>");
-        html.append("<p style='color: #666; font-size: 12px; margin-top: 20px;'>")
+        html.append("<p style='color:#666;font-size:12px;margin-top:20px;'>")
                 .append("Este mensaje fue generado automáticamente por el sistema RTV.")
                 .append("</p>");
         html.append("</div></div>");
-
         return html.toString();
     }
 
     private void agregarFila(StringBuilder html, String label, String valor) {
         html.append("<tr>")
-                .append("<td style='padding: 8px 12px; font-weight: bold; ")
-                .append("background-color: #eeeeee; width: 40%; border-bottom: 1px solid #ddd;'>")
-                .append(label).append("</td>")
-                .append("<td style='padding: 8px 12px; border-bottom: 1px solid #ddd;'>")
-                .append(valor != null ? valor : "—")
-                .append("</td></tr>");
+                .append("<td style='padding:8px 12px;font-weight:bold;background-color:#eeeeee;")
+                .append("width:40%;border-bottom:1px solid #ddd;'>").append(label).append("</td>")
+                .append("<td style='padding:8px 12px;border-bottom:1px solid #ddd;'>")
+                .append(valor != null ? valor : "—").append("</td></tr>");
     }
 
     private String formatearTamano(Long bytes) {

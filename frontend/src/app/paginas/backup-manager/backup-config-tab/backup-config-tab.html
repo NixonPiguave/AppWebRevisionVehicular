@@ -115,7 +115,92 @@
         </div>
       </div>
     </div>
+    <!-- Sección: Configuración de correo -->
+    <div class="seccion">
+      <div class="seccion-header">
+        <mat-icon>email</mat-icon>
+        <h3>Configuración de correo</h3>
+        <label class="toggle-label">
+          <input type="checkbox" [(ngModel)]="config.mailHabilitado" />
+          <span class="toggle-text">{{ config.mailHabilitado ? 'Habilitado' : 'Deshabilitado' }}</span>
+        </label>
+      </div>
 
+      <div *ngIf="config.mailHabilitado">
+        <div class="form-grid">
+          <div class="form-grupo">
+            <label>Servidor SMTP <span class="requerido">*</span></label>
+            <input type="text" [(ngModel)]="config.mailHost" class="form-input"
+                   placeholder="smtp.gmail.com / smtp.office365.com" />
+            <span class="hint">
+          Gmail: smtp.gmail.com — Outlook: smtp.office365.com — Yahoo: smtp.mail.yahoo.com
+        </span>
+          </div>
+          <div class="form-grupo">
+            <label>Puerto <span class="requerido">*</span></label>
+            <input type="number" [(ngModel)]="config.mailPort" class="form-input"
+                   placeholder="587" />
+            <span class="hint">587 para TLS (recomendado) — 465 para SSL — 25 sin cifrado</span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-grupo">
+            <label>Usuario / correo <span class="requerido">*</span></label>
+            <input type="email" [(ngModel)]="config.mailUsername" class="form-input"
+                   placeholder="tucorreo@gmail.com" />
+          </div>
+          <div class="form-grupo">
+            <label>Contraseña / App Password <span class="requerido">*</span></label>
+            <input type="password" [(ngModel)]="config.mailPassword" class="form-input"
+                   placeholder="Contraseña o App Password" />
+            <span class="hint">
+          Gmail requiere App Password. Genérala en: Google Account → Seguridad → Contraseñas de aplicaciones
+        </span>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-grupo">
+            <label>Correo remitente (From)</label>
+            <input type="email" [(ngModel)]="config.mailFrom" class="form-input"
+                   placeholder="Sistema RTV <notificaciones@empresa.com>" />
+            <span class="hint">Si se deja vacío se usa el usuario como remitente.</span>
+          </div>
+          <div class="form-grupo">
+            <label>Correo destinatario (administrador)</label>
+            <input type="email" [(ngModel)]="config.emailNotificacion" class="form-input"
+                   placeholder="admin@empresa.com" />
+            <span class="hint">Correo que recibirá las notificaciones de cada respaldo.</span>
+          </div>
+        </div>
+
+        <div class="form-grupo">
+          <label class="toggle-label">
+            <input type="checkbox" [(ngModel)]="config.mailStarttls" />
+            <span class="toggle-text">Usar STARTTLS (recomendado para puerto 587)</span>
+          </label>
+        </div>
+
+        <!-- Botón probar conexión -->
+        <div style="margin-top: 8px;">
+          <button class="btn-probar" (click)="probarCorreo()" [disabled]="probandoCorreo">
+            <mat-icon>send</mat-icon>
+            {{ probandoCorreo ? 'Enviando prueba...' : 'Probar conexión de correo' }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Si está deshabilitado solo mostrar el destinatario -->
+      <div *ngIf="!config.mailHabilitado">
+        <div class="form-grupo">
+          <label>Correo destinatario</label>
+          <input type="email" [(ngModel)]="config.emailNotificacion" class="form-input"
+                 placeholder="admin@empresa.com" />
+          <span class="hint">Habilita el correo para configurar el servidor SMTP.</span>
+        </div>
+      </div>
+    </div>
     <!-- Footer -->
     <div class="config-footer">
       <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">

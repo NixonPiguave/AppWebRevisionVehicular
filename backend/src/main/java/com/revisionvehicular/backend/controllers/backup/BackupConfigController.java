@@ -15,6 +15,12 @@ public class BackupConfigController {
         this.service = service;
     }
 
+    @PostMapping("/config/probar-correo")
+    public ResponseEntity<Void> probarCorreo(@RequestBody BackupConfigDTO dto) {
+        service.probarCorreo(dto);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping
     public ResponseEntity<BackupConfigDTO> obtener() {
         return ResponseEntity.ok(service.obtenerConfig());
@@ -24,4 +30,5 @@ public class BackupConfigController {
     public ResponseEntity<BackupConfigDTO> guardar(@RequestBody BackupConfigDTO dto) {
         return ResponseEntity.ok(service.guardarConfig(dto));
     }
+
 }

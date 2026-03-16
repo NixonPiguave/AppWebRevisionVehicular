@@ -19,4 +19,11 @@ public class BackupConfigDTO {
     private String emailNotificacion;
     private Long usuarioId;
     private String nombreUsuario;
+    private String mailHost;
+    private Integer mailPort;
+    private String mailUsername;
+    private String mailPassword;
+    private String mailFrom;
+    private Boolean mailStarttls;
+    private Boolean mailHabilitado;
 }

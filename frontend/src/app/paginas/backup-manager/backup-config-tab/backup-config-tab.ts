@@ -23,6 +23,7 @@ export class BackupConfigTabComponent implements OnInit {
   guardando: boolean = false;
   mensajeExito: string = '';
   mensajeError: string = '';
+  probandoCorreo: boolean = false;
 
   ejemplosCron = [
     { label: 'Cada día a las 2:00 AM',     valor: '0 0 2 * * ?' },
@@ -89,5 +90,26 @@ export class BackupConfigTabComponent implements OnInit {
   mostrarError(msg: string): void {
     this.mensajeError = msg;
     setTimeout(() => { this.mensajeError = ''; this.cdr.detectChanges(); }, 4000);
+  }
+
+  probarCorreo(): void {
+    if (!this.config.mailHost || !this.config.mailUsername || !this.config.mailPassword) {
+      this.mostrarError('Completa el servidor, usuario y contraseña antes de probar');
+      return;
+    }
+
+    this.probandoCorreo = true;
+    this.backupService.probarCorreo(this.config).subscribe({
+      next: () => {
+        this.probandoCorreo = false;
+        this.mostrarExito('Correo de prueba enviado correctamente');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.probandoCorreo = false;
+        this.mostrarError(err?.error?.message || 'Error al enviar correo de prueba');
+        this.cdr.detectChanges();
+      }
+    });
   }
 }
