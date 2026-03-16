@@ -5,7 +5,7 @@
       Volver
     </button>
     <h1>Revisión de Gases</h1>
-    <p class="subtitulo">Control de emisiones — RTE INEN 017 (RTV Ecuador)</p>
+    <p class="subtitulo">{{ esMoto ? 'Control de emisiones — Motos RTE INEN 136' : 'Control de emisiones — RTE INEN 017 (RTV Ecuador)' }}</p>
     <div class="header-info" *ngIf="vehiculoInfo">
       <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
       <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
@@ -27,7 +27,8 @@
   </div>
 
   <div class="contenido" *ngIf="!cargando && !error">
-    <section class="panel-combustible">
+    <!-- Tipo combustible: solo para carros (motos = gasolina) -->
+    <section class="panel-combustible" *ngIf="!esMoto">
       <h3>Tipo de combustible</h3>
       <div class="combustible-opciones">
         <label>
@@ -43,10 +44,27 @@
 
     <section class="panel-parametros">
       <h3>Valores medidos</h3>
-      <p class="param-descripcion" *ngIf="tipoCombustible === 'GASOLINA'">
+
+      <!-- MOTOS: solo CO y HC (RTE INEN 136) -->
+      <div class="parametros-moto" *ngIf="esMoto">
+        <p class="param-descripcion">Parámetros según RTE INEN 136 — Motos. Límites: CO ≤ 4,5% | HC ≤ 2.500–12.500 ppm</p>
+        <div class="param-fila">
+          <label>CO (%)</label>
+          <span class="param-hint">Monóxido de carbono. Límite ≤ 4,5%</span>
+          <input type="number" [(ngModel)]="co" placeholder="Ej: 3.2" min="0" step="0.01" />
+        </div>
+        <div class="param-fila">
+          <label>HC (ppm)</label>
+          <span class="param-hint">Hidrocarburos no quemados. Límite 2.500–12.500 ppm</span>
+          <input type="number" [(ngModel)]="hc" placeholder="Ej: 1500" min="0" step="1" />
+        </div>
+      </div>
+
+      <!-- CARROS: Gasolina -->
+      <p class="param-descripcion" *ngIf="!esMoto && tipoCombustible === 'GASOLINA'">
         Parámetros según NTE INEN 2204 / RTE INEN 017
       </p>
-      <div class="parametros-gasolina" *ngIf="tipoCombustible === 'GASOLINA'">
+      <div class="parametros-gasolina" *ngIf="!esMoto && tipoCombustible === 'GASOLINA'">
         <div class="param-fila">
           <label>CO (%)</label>
           <span class="param-hint">Monóxido de carbono. Límite típico &lt; 0,5% con catalizador</span>
@@ -68,10 +86,11 @@
           <input type="number" [(ngModel)]="o2" placeholder="0.5" min="0" max="25" step="0.1" />
         </div>
       </div>
-      <p class="param-descripcion" *ngIf="tipoCombustible === 'DIESEL'">
+      <!-- CARROS: Diesel -->
+      <p class="param-descripcion" *ngIf="!esMoto && tipoCombustible === 'DIESEL'">
         Parámetros según RTE INEN 017 — vehículos diesel
       </p>
-      <div class="parametros-diesel" *ngIf="tipoCombustible === 'DIESEL'">
+      <div class="parametros-diesel" *ngIf="!esMoto && tipoCombustible === 'DIESEL'">
         <div class="param-fila">
           <label>Opacidad (%)</label>
           <span class="param-hint">Humo negro en escape</span>

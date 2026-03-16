@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
+import com.revisionvehicular.backend.entities.cv.Categoria;
 import com.revisionvehicular.backend.entities.rtv.MetodoInspeccion;
 import com.revisionvehicular.backend.entities.rtv.TarifarioTramite;
 import com.revisionvehicular.backend.entities.srtv.Turnos;
@@ -10,6 +11,7 @@ import com.revisionvehicular.backend.repositories.rtv.IInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.IMetodoInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepository;
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
+import com.revisionvehicular.backend.service.rtv.ILineaService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class TurnosServiceImpl implements ITurnosService {
@@ -27,6 +30,7 @@ public class TurnosServiceImpl implements ITurnosService {
     private final IDetalleInspeccionRepository detalleInspeccionRepository;
     private final IInspeccionRepository inspeccionRepository;
     private final IMetodoInspeccionRepository metodoInspeccionRepository;
+    private final ILineaService lineaService;
     private final AuditoriaService auditoriaService;
 
     @Autowired
@@ -35,12 +39,14 @@ public class TurnosServiceImpl implements ITurnosService {
                              IDetalleInspeccionRepository detalleInspeccionRepository,
                              IInspeccionRepository inspeccionRepository,
                              IMetodoInspeccionRepository metodoInspeccionRepository,
+                             ILineaService lineaService,
                              AuditoriaService auditoriaService) {
         this.repository = repository;
         this.tarifarioRepository = tarifarioRepository;
         this.detalleInspeccionRepository = detalleInspeccionRepository;
         this.inspeccionRepository = inspeccionRepository;
         this.metodoInspeccionRepository = metodoInspeccionRepository;
+        this.lineaService = lineaService;
         this.auditoriaService = auditoriaService;
     }
 
@@ -132,6 +138,38 @@ public class TurnosServiceImpl implements ITurnosService {
         return repository.findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc("PAGADO", servicioId)
                 .stream()
                 .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TurnosDTO> findTurnosPagadosPorServicioYLinea(Long servicioId, Long lineaId) {
+        if (lineaId == null) {
+            return findTurnosPagadosPorServicio(servicioId);
+        }
+        // Determinar categoría según línea: L=motos, M=carros (normativa ANT Ecuador)
+        String nombreLinea = lineaService.findById(lineaId).getNombre();
+        boolean esLineaMoto = nombreLinea != null && nombreLinea.toLowerCase().contains("moto");
+        String codigoCategoriaFiltro = esLineaMoto ? "L" : "M";
+
+        Stream<com.revisionvehicular.backend.entities.srtv.Turnos> stream;
+        if (servicioId == null) {
+            stream = repository.findTurnosPagadosWithVehiculoCategoria("PAGADO").stream();
+        } else {
+            stream = repository.findTurnosPagadosWithVehiculoCategoriaPorServicio("PAGADO", servicioId).stream();
+        }
+
+        return stream
+                .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
+                .filter(t -> {
+                    var v = t.getVehiculo();
+                    if (v == null) return false;
+                    var sub = v.getSubcategoria();
+                    if (sub == null) return false;
+                    Categoria cat = sub.getCategoria();
+                    if (cat == null || cat.getCodigo() == null) return false;
+                    return codigoCategoriaFiltro.equalsIgnoreCase(cat.getCodigo().trim());
+                })
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

@@ -2,19 +2,45 @@
   <header class="header">
     <button class="btn-volver" (click)="volver()">← Volver</button>
     <h1>Turnos pagados – Iniciar inspección</h1>
-    <p class="subtitulo">Seleccione un turno pagado para comenzar la inspección.</p>
+    <p class="subtitulo">Seleccione la línea de inspección (Carros o Motos) para ver los turnos filtrados por categoría de vehículo.</p>
   </header>
+
+  <!-- Selector de línea (primero) - centrado y destacado -->
+  <section class="selector-linea">
+    <h3 class="selector-titulo">Línea de inspección</h3>
+    <p class="selector-descripcion">Los turnos se filtran según la categoría del vehículo (L = motos, M = carros)</p>
+    <div class="cargando" *ngIf="cargandoLineas">
+      <span>Cargando líneas...</span>
+    </div>
+    <div class="linea-opciones" *ngIf="!cargandoLineas && lineas.length > 0">
+      <button
+        *ngFor="let linea of lineas"
+        type="button"
+        class="btn-linea"
+        [class.seleccionada]="lineaSeleccionada?.id === linea.id"
+        (click)="seleccionarLinea(linea)">
+        <span class="linea-imagen">
+          <img *ngIf="linea.nombre.toLowerCase().includes('moto')" src="/linea-moto.png" alt="Moto" />
+          <img *ngIf="!linea.nombre.toLowerCase().includes('moto')" src="/linea-carro.png" alt="Carro" />
+        </span>
+        <span class="linea-nombre">{{ linea.nombre }}</span>
+      </button>
+    </div>
+    <p class="sin-lineas" *ngIf="!cargandoLineas && lineas.length === 0">
+      No hay líneas registradas. Cree las líneas Carros y Motos en el catálogo de líneas.
+    </p>
+  </section>
 
   <div class="mensaje-error" *ngIf="error">
     {{ error }}
     <button class="btn-reintentar" (click)="cargarTurnosPagados()">Reintentar</button>
   </div>
 
-  <div class="cargando" *ngIf="cargando && !error">
+  <div class="cargando" *ngIf="cargando && !error && lineaSeleccionada">
     <span>Cargando turnos pagados...</span>
   </div>
 
-  <div class="tabla-container" *ngIf="!cargando && !error">
+  <div class="tabla-container" *ngIf="!cargando && !error && lineaSeleccionada">
     <table class="tabla-turnos">
       <thead>
         <tr>
@@ -50,7 +76,7 @@
           </td>
         </tr>
         <tr *ngIf="turnos.length === 0">
-          <td colspan="7" class="text-center">No hay turnos con estado PAGADO. Actualice el estado del turno a PAGADO para poder iniciar una inspección.</td>
+          <td colspan="7" class="text-center">No hay turnos pagados para esta línea (línea {{ lineaSeleccionada.nombre }}: vehículos categoría {{ lineaSeleccionada.nombre.toLowerCase().includes('moto') ? 'L' : 'M' }}).</td>
         </tr>
       </tbody>
     </table>

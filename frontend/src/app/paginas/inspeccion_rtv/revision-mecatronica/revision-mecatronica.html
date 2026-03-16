@@ -5,7 +5,7 @@
       Volver
     </button>
     <h1>Revisión Mecatrónica</h1>
-    <p class="subtitulo">Frenos, suspensión y alineación — RTV Ecuador (RTE INEN 034)</p>
+    <p class="subtitulo">{{ esMoto ? 'Frenos, suspensión y dirección — Motos RTV Ecuador' : 'Frenos y suspensión — Alineación — RTV Ecuador (RTE INEN 034)' }}</p>
     <div class="header-info" *ngIf="vehiculoInfo">
       <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
       <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
@@ -29,7 +29,9 @@
   <div class="contenido" *ngIf="!cargando && !error">
     <section class="panel-parametros">
       <h3>Parámetros de inspección</h3>
-      <div class="parametros-grid">
+
+      <!-- CARROS -->
+      <div class="parametros-grid" *ngIf="!esMoto">
         <div class="param-grupo">
           <h4>Frenos</h4>
           <div class="param-fila">
@@ -67,6 +69,49 @@
           <div class="param-fila">
             <label>Divergencia (mm)</label>
             <input type="text" [(ngModel)]="alineacionDivergencia" placeholder="Ej: 0" />
+          </div>
+        </div>
+      </div>
+
+      <!-- MOTOS -->
+      <div class="parametros-grid parametros-moto" *ngIf="esMoto">
+        <div class="param-grupo">
+          <h4>Frenos</h4>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="frenosPastillasOk" />
+              Pastillas en buen estado
+            </label>
+          </div>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="frenosZapatasOk" />
+              Zapatas en buen estado
+            </label>
+          </div>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="frenosLiquidoOk" />
+              Líquido de frenos correcto
+            </label>
+          </div>
+        </div>
+        <div class="param-grupo">
+          <h4>Suspensión</h4>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="amortiguadoresMotoOk" />
+              Amortiguadores sin fugas (delantero/trasero)
+            </label>
+          </div>
+        </div>
+        <div class="param-grupo">
+          <h4>Dirección / Alineación</h4>
+          <div class="param-fila checkbox-fila">
+            <label>
+              <input type="checkbox" [(ngModel)]="alineacionMotoOk" />
+              Dirección y alineación correctas
+            </label>
           </div>
         </div>
       </div>

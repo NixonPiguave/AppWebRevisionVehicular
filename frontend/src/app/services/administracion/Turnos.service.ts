@@ -20,9 +20,13 @@ export class TurnosService {
     return this.http.get<Turnos>(`${this.apiUrl}/${id}`);
   }
 
-  // Devuelve turnos con estado PAGADO (usa endpoint dedicado del backend)
-  getPagados(): Observable<Turnos[]> {
-    return this.http.get<Turnos[]>(`${this.apiUrl}/pagados`);
+  // Devuelve turnos con estado PAGADO. Si lineaId se indica, filtra por categoría del vehículo (L=motos, M=carros).
+  getPagados(servicioId?: number, lineaId?: number): Observable<Turnos[]> {
+    const params = new URLSearchParams();
+    if (servicioId != null) params.set('servicioId', String(servicioId));
+    if (lineaId != null) params.set('lineaId', String(lineaId));
+    const qs = params.toString();
+    return this.http.get<Turnos[]>(`${this.apiUrl}/pagados${qs ? '?' + qs : ''}`);
   }
 
   create(turno: Turnos): Observable<Turnos> {

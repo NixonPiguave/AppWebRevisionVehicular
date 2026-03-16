@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.repositories.srtv;
 
 import com.revisionvehicular.backend.entities.srtv.Turnos;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -16,6 +17,12 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
     List<Turnos> findByEstadoOrderByFechaInicioDesc(String estado);
 
     List<Turnos> findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(String estado, Long idTipoTramite);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado = :estado ORDER BY t.fechaInicio DESC")
+    List<Turnos> findTurnosPagadosWithVehiculoCategoria(@Param("estado") String estado);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado = :estado AND t.servicio.idTipoTramite = :servicioId ORDER BY t.fechaInicio DESC")
+    List<Turnos> findTurnosPagadosWithVehiculoCategoriaPorServicio(@Param("estado") String estado, @Param("servicioId") Long servicioId);
 
     // Último turno insertado (mayor ID)
     Turnos findTopByOrderByTurnoIdDesc();

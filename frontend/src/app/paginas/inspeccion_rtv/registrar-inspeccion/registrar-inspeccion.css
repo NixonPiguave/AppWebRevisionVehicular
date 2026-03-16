@@ -288,6 +288,29 @@
 .ub-rtd       { bottom: 22%; right: 52px; }
 .ub-trasera   { bottom: 6px; left: 50%; transform: translateX(-50%); }
 
+/* Ubicaciones MOTOS — Moto vista lateral izq: frente=derecha, trasera=izquierda */
+.vehiculo-svg-wrapper.moto-layout {
+  padding: 80px 110px;
+}
+.vehiculo-svg-wrapper.moto-layout .vehiculo-img {
+  transform: none;
+}
+.ub-moto .ub-check {
+  position: absolute;
+}
+/* Trasera: arriba de la zona trasera (escape, cola) */
+.ub-moto-trasera    { top: 34%; left: 14%; }
+/* Lat. Izq: arriba del cuerpo (tanque, manillar) — lado visible */
+.ub-moto-lat-izq    { top: 26%; left: 42%; transform: translateX(-50%); }
+/* Delantera: arriba del frente (farol, carenado) */
+.ub-moto-delantera  { top: 34%; right: 14%; }
+/* Rueda Tra.: a la izq de la rueda trasera */
+.ub-moto-rueda-tra  { top: 64%; left: 6%; transform: translateY(-50%); }
+/* Rueda Del.: a la der de la rueda delantera */
+.ub-moto-rueda-del  { top: 64%; right: 6%; transform: translateY(-50%); }
+/* Lat. Der: debajo del motor/cuerpo (costado no visible) */
+.ub-moto-lat-der    { bottom: 22%; left: 50%; transform: translateX(-50%); }
+
 .ub-label {
   display: flex;
   align-items: center;
@@ -350,6 +373,10 @@
   justify-content: center;
   flex-wrap: wrap;
   margin-top: 24px;
+}
+.vehiculo-svg-wrapper.moto-layout + .ubicaciones-extra {
+  margin-top: 28px;
+  gap: 16px;
 }
 
 .ub-extra {
