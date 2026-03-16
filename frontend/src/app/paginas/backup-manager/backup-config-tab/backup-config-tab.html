@@ -12,7 +12,7 @@
   <div *ngIf="!cargando">
 
     <!-- Sección: Almacenamiento local -->
-    <div class="seccion">
+    <div class="seccion" *ngIf="!soloScheduler">
       <div class="seccion-header">
         <mat-icon>folder</mat-icon>
         <h3>Almacenamiento en servidor</h3>
@@ -26,7 +26,7 @@
     </div>
 
     <!-- Sección: Google Drive -->
-    <div class="seccion">
+    <div class="seccion" *ngIf="!soloScheduler">
       <div class="seccion-header">
         <mat-icon>cloud</mat-icon>
         <h3>Google Drive</h3>
@@ -53,7 +53,7 @@
     </div>
 
     <!-- Sección: Notificaciones -->
-    <div class="seccion">
+    <div class="seccion" *ngIf="!soloScheduler">
       <div class="seccion-header">
         <mat-icon>email</mat-icon>
         <h3>Notificaciones por correo</h3>
@@ -66,8 +66,8 @@
       </div>
     </div>
 
-    <!-- Sección: Scheduler -->
-    <div class="seccion">
+    <!-- Sección: Scheduler (solo cuando se usa como bloque independiente) -->
+    <div class="seccion" *ngIf="soloScheduler">
       <div class="seccion-header">
         <mat-icon>schedule</mat-icon>
         <h3>Respaldos automáticos</h3>
@@ -78,45 +78,217 @@
       </div>
 
       <div *ngIf="config.schedulerActivo">
-        <div class="cron-hint">
-          <mat-icon>info</mat-icon>
-          <span>Ejemplos de expresiones cron:</span>
-          <span *ngFor="let ej of ejemplosCron" class="cron-ejemplo" (click)="aplicarCron('cronFull', ej.valor)"
-                matTooltip="Click para copiar al campo">
-            {{ ej.label }}: <code>{{ ej.valor }}</code>
-          </span>
+        <!-- Tarjeta FULL -->
+        <div class="cron-card cron-full">
+          <div class="cron-card-header">
+            <div class="cron-card-title">
+              <mat-icon class="label-icon icono-verde">storage</mat-icon>
+              <div>
+                <div class="cron-card-label">Respaldo Completo</div>
+                <div class="cron-card-sub">Copia total de la base de datos</div>
+              </div>
+            </div>
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="fullActivo" />
+              <span class="toggle-text">{{ fullActivo ? 'Activo' : 'Inactivo' }}</span>
+            </label>
+          </div>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label>Frecuencia</label>
+              <select class="form-input"
+                      [(ngModel)]="fullFrecuencia"
+                      [disabled]="!fullActivo">
+                <option value="DIARIO">Diario</option>
+                <option value="SEMANAL">Semanal (un día)</option>
+                <option value="PERSONALIZADO">Semanal (varios días)</option>
+                <option value="NINGUNO">No programar</option>
+              </select>
+            </div>
+            <div class="form-grupo" *ngIf="fullFrecuencia !== 'NINGUNO' && fullActivo">
+              <label>Hora</label>
+              <input type="time" class="form-input"
+                     [(ngModel)]="fullHora">
+            </div>
+          </div>
+          <div class="form-grupo" *ngIf="fullFrecuencia === 'SEMANAL' && fullActivo">
+            <label>Día de la semana</label>
+            <select class="form-input"
+                    [(ngModel)]="fullDiaSemana">
+              <option value="SUN">Domingo</option>
+              <option value="MON">Lunes</option>
+              <option value="TUE">Martes</option>
+              <option value="WED">Miércoles</option>
+              <option value="THU">Jueves</option>
+              <option value="FRI">Viernes</option>
+              <option value="SAT">Sábado</option>
+            </select>
+          </div>
+          <div class="form-grupo" *ngIf="fullFrecuencia === 'PERSONALIZADO' && fullActivo">
+            <label>Días de la semana</label>
+            <div class="dias-grid">
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('MON')"
+                       (change)="onToggleDia('FULL','MON',$event.target.checked)"> Lu
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('TUE')"
+                       (change)="onToggleDia('FULL','TUE',$event.target.checked)"> Ma
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('WED')"
+                       (change)="onToggleDia('FULL','WED',$event.target.checked)"> Mi
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('THU')"
+                       (change)="onToggleDia('FULL','THU',$event.target.checked)"> Ju
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('FRI')"
+                       (change)="onToggleDia('FULL','FRI',$event.target.checked)"> Vi
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('SAT')"
+                       (change)="onToggleDia('FULL','SAT',$event.target.checked)"> Sá
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="fullDiasSemanaList.includes('SUN')"
+                       (change)="onToggleDia('FULL','SUN',$event.target.checked)"> Do
+              </label>
+            </div>
+          </div>
         </div>
 
-        <div class="form-grid">
-          <div class="form-grupo">
-            <label>
-              <mat-icon class="label-icon icono-verde">storage</mat-icon>
-              Cron — Respaldo Completo
-            </label>
-            <input type="text" [(ngModel)]="config.cronFull" class="form-input"
-                   placeholder="0 0 2 ? * SUN" />
-          </div>
-          <div class="form-grupo">
-            <label>
+        <!-- Tarjeta DIFERENCIAL -->
+        <div class="cron-card cron-diff">
+          <div class="cron-card-header">
+            <div class="cron-card-title">
               <mat-icon class="label-icon icono-azul">difference</mat-icon>
-              Cron — Respaldo Diferencial
+              <div>
+                <div class="cron-card-label">Respaldo Diferencial</div>
+                <div class="cron-card-sub">Cambios desde el último respaldo completo</div>
+              </div>
+            </div>
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="diffActivo" />
+              <span class="toggle-text">{{ diffActivo ? 'Activo' : 'Inactivo' }}</span>
             </label>
-            <input type="text" [(ngModel)]="config.cronDiferencial" class="form-input"
-                   placeholder="0 0 3 ? * MON-SAT" />
           </div>
-          <div class="form-grupo">
-            <label>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label>Frecuencia</label>
+              <select class="form-input"
+                      [(ngModel)]="diffFrecuencia"
+                      [disabled]="!diffActivo">
+                <option value="DIARIO">Diario</option>
+                <option value="SEMANAL">Semanal (rango)</option>
+                <option value="PERSONALIZADO">Semanal (varios días)</option>
+                <option value="NINGUNO">No programar</option>
+              </select>
+            </div>
+            <div class="form-grupo" *ngIf="diffFrecuencia !== 'NINGUNO' && diffActivo">
+              <label>Hora</label>
+              <input type="time" class="form-input"
+                     [(ngModel)]="diffHora">
+            </div>
+          </div>
+          <div class="form-grupo" *ngIf="diffFrecuencia === 'SEMANAL' && diffActivo">
+            <label>Días</label>
+            <select class="form-input"
+                    [(ngModel)]="diffDiasSemana">
+              <option value="MON-SAT">Lunes a sábado</option>
+              <option value="MON-FRI">Lunes a viernes</option>
+              <option value="*">Todos los días</option>
+            </select>
+          </div>
+          <div class="form-grupo" *ngIf="diffFrecuencia === 'PERSONALIZADO' && diffActivo">
+            <label>Días de la semana</label>
+            <div class="dias-grid">
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('MON')"
+                       (change)="onToggleDia('DIFF','MON',$event.target.checked)"> Lu
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('TUE')"
+                       (change)="onToggleDia('DIFF','TUE',$event.target.checked)"> Ma
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('WED')"
+                       (change)="onToggleDia('DIFF','WED',$event.target.checked)"> Mi
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('THU')"
+                       (change)="onToggleDia('DIFF','THU',$event.target.checked)"> Ju
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('FRI')"
+                       (change)="onToggleDia('DIFF','FRI',$event.target.checked)"> Vi
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('SAT')"
+                       (change)="onToggleDia('DIFF','SAT',$event.target.checked)"> Sá
+              </label>
+              <label class="dia-chip">
+                <input type="checkbox"
+                       [checked]="diffDiasSemanaList.includes('SUN')"
+                       (change)="onToggleDia('DIFF','SUN',$event.target.checked)"> Do
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tarjeta INCREMENTAL -->
+        <div class="cron-card cron-incr">
+          <div class="cron-card-header">
+            <div class="cron-card-title">
               <mat-icon class="label-icon icono-naranja">add_circle</mat-icon>
-              Cron — Respaldo Incremental
+              <div>
+                <div class="cron-card-label">Respaldo Incremental</div>
+                <div class="cron-card-sub">Cambios frecuentes desde el último respaldo</div>
+              </div>
+            </div>
+            <label class="toggle-label">
+              <input type="checkbox" [(ngModel)]="incrActivo" />
+              <span class="toggle-text">{{ incrActivo ? 'Activo' : 'Inactivo' }}</span>
             </label>
-            <input type="text" [(ngModel)]="config.cronIncremental" class="form-input"
-                   placeholder="0 0 1 * * ?" />
+          </div>
+          <div class="form-grid">
+            <div class="form-grupo">
+              <label>Frecuencia</label>
+              <select class="form-input"
+                      [(ngModel)]="incrFrecuencia"
+                      [disabled]="!incrActivo">
+                <option value="CADA_15">Cada 15 minutos</option>
+                <option value="CADA_30">Cada 30 minutos</option>
+                <option value="CADA_60">Cada hora</option>
+                <option value="DIARIO">Diario a una hora fija</option>
+                <option value="NINGUNO">No programar</option>
+              </select>
+            </div>
+            <div class="form-grupo" *ngIf="incrFrecuencia === 'DIARIO' && incrActivo">
+              <label>Hora diaria</label>
+              <input type="time" class="form-input"
+                     [(ngModel)]="incrHora">
+            </div>
           </div>
         </div>
       </div>
     </div>
     <!-- Sección: Configuración de correo -->
-    <div class="seccion">
+    <div class="seccion" *ngIf="!soloScheduler">
       <div class="seccion-header">
         <mat-icon>email</mat-icon>
         <h3>Configuración de correo</h3>

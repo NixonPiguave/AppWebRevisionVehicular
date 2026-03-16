@@ -113,10 +113,46 @@ public class BackupServiceImpl implements IBackupService {
                 default -> throw new RuntimeException("Tipo de backup no válido: " + tipo);
             }
 
-            // Verificar que el archivo se creó
-            File archivoGenerado = rutaCompleta.toFile();
-            if (!archivoGenerado.exists()) {
-                throw new RuntimeException("El archivo de backup no fue generado correctamente.");
+            File archivoGenerado;
+            String rutaFinal;
+            String nombreFinal;
+
+            if ("INCREMENTAL".equals(tipo)) {
+                Path rutaExclusiva = Paths.get(
+                        rutaCompleta.getParent().toString(),
+                        nombreArchivo.replace(".tar", "")
+                );
+
+                if (!Files.isDirectory(rutaExclusiva)) {
+                    throw new RuntimeException("El directorio incremental no existe: " + rutaExclusiva);
+                }
+
+                // Preferir base.tar.gz si existe; si no, cualquier .tar.gz
+                Path archivoTarGzPreferido = Files.list(rutaExclusiva)
+                        .filter(p -> Files.isRegularFile(p)
+                                && p.getFileName().toString().equalsIgnoreCase("base.tar.gz"))
+                        .findFirst()
+                        .orElse(null);
+
+                Path archivoTarGz = archivoTarGzPreferido != null
+                        ? archivoTarGzPreferido
+                        : Files.list(rutaExclusiva)
+                                .filter(p -> Files.isRegularFile(p)
+                                        && p.getFileName().toString().toLowerCase().endsWith(".tar.gz"))
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException(
+                                        "El archivo de backup incremental no fue generado correctamente en " + rutaExclusiva));
+
+                archivoGenerado = archivoTarGz.toFile();
+                rutaFinal = archivoTarGz.toString();
+                nombreFinal = archivoTarGz.getFileName().toString();
+            } else {
+                archivoGenerado = rutaCompleta.toFile();
+                if (!archivoGenerado.exists()) {
+                    throw new RuntimeException("El archivo de backup no fue generado correctamente.");
+                }
+                rutaFinal = rutaCompleta.toString();
+                nombreFinal = nombreArchivo;
             }
 
             long tamano = archivoGenerado.length();
@@ -124,12 +160,12 @@ public class BackupServiceImpl implements IBackupService {
             // Subir a Drive si está habilitado
             String driveFileId = null;
             if (Boolean.TRUE.equals(config.getDriveHabilitado())) {
-                driveFileId = driveService.subirArchivo(archivoGenerado, nombreArchivo, config);
+                driveFileId = driveService.subirArchivo(archivoGenerado, nombreFinal, config);
             }
 
             // Actualizar registro como exitoso
-            record.setNombreArchivo(nombreArchivo);
-            record.setRutaServidor(rutaCompleta.toString());
+            record.setNombreArchivo(nombreFinal);
+            record.setRutaServidor(rutaFinal);
             record.setDriveFileId(driveFileId);
             record.setTamanoBytes(tamano);
             record.setEstado("EXITOSO");

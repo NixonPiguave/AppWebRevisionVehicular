@@ -8,10 +8,16 @@
     <mat-icon>error</mat-icon> {{ mensajeError }}
   </div>
 
-  <p class="jobs-descripcion">
-    Seleccione el tipo de respaldo a ejecutar. Se le pedirá elegir una carpeta
-    en su equipo donde se guardará el archivo.
-  </p>
+  <!-- Bloque: Respaldos manuales -->
+  <div class="manuales-header">
+    <h3>
+      <mat-icon>play_circle</mat-icon>
+      Respaldos manuales
+    </h3>
+    <p class="jobs-descripcion">
+      Ejecute un respaldo en este momento y guarde el archivo en una carpeta de su equipo.
+    </p>
+  </div>
 
   <div class="tipos-grid">
     <div class="tipo-card" *ngFor="let tipo of tipos"
@@ -60,5 +66,17 @@
         <span>{{ ultimoResultado.creadoEn | date:'dd/MM/yyyy HH:mm:ss' }}</span>
       </div>
     </div>
+  </div>
+
+  <!-- Configuración rápida de respaldos automáticos -->
+  <div class="auto-scheduler">
+    <h3>
+      <mat-icon>schedule</mat-icon>
+      Respaldos automáticos
+    </h3>
+    <p class="auto-scheduler-descripcion">
+      Programa respaldos completos, diferenciales e incrementales sin salir de esta pantalla.
+    </p>
+    <app-backup-config-tab [soloScheduler]="true"></app-backup-config-tab>
   </div>
 </div>

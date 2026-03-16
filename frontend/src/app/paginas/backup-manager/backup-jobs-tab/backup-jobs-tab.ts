@@ -2,12 +2,13 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { BackupConfigTabComponent } from '../backup-config-tab/backup-config-tab';
 import { BackupService, BackupRecord } from '../../../services/backup/backup.service';
 
 @Component({
   selector: 'app-backup-jobs-tab',
   standalone: true,
-  imports: [CommonModule, MatIconModule, MatTooltipModule],
+  imports: [CommonModule, MatIconModule, MatTooltipModule, BackupConfigTabComponent],
   templateUrl: './backup-jobs-tab.html',
   styleUrls: ['./backup-jobs-tab.css']
 })
