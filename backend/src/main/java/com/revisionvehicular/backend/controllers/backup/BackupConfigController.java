@@ -1,10 +1,14 @@
 package com.revisionvehicular.backend.controllers.backup;
 
 import com.revisionvehicular.backend.dtos.backup.BackupConfigDTO;
+import com.revisionvehicular.backend.dtos.backup.FolderItemDTO;
+import com.revisionvehicular.backend.service.backup.FolderBrowserService;
 import com.revisionvehicular.backend.service.backup.IBackupConfigService;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/backup/config")
@@ -12,14 +16,23 @@ public class BackupConfigController {
 
     private final IBackupConfigService service;
     private final AuditoriaService auditoriaService;
+    private final FolderBrowserService folderBrowserService;
 
     public BackupConfigController(IBackupConfigService service,
-                                  AuditoriaService auditoriaService) {
+                                  AuditoriaService auditoriaService,
+                                  FolderBrowserService folderBrowserService) {
         this.service = service;
         this.auditoriaService = auditoriaService;
+        this.folderBrowserService = folderBrowserService;
     }
 
-    @PostMapping("/config/probar-correo")
+    /** Lista carpetas del servidor: raíces si path vacío, o subcarpetas del path indicado. */
+    @GetMapping("/folders")
+    public ResponseEntity<List<FolderItemDTO>> listarCarpetas(@RequestParam(required = false) String path) {
+        return ResponseEntity.ok(folderBrowserService.listarCarpetas(path));
+    }
+
+    @PostMapping("/probar-correo")
     public ResponseEntity<Void> probarCorreo(@RequestBody BackupConfigDTO dto) {
         service.probarCorreo(dto);
         auditoriaService.registrar("UPDATE", "Configuración respaldo", "Prueba de correo de notificaciones");

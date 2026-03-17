@@ -95,6 +95,7 @@
 @media (max-width: 768px) {
   .form-grid { grid-template-columns: 1fr; }
 }
+
 .btn-probar {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 16px; border: 1px solid #1565c0; background: #e3f2fd;
@@ -102,15 +103,9 @@
   font-weight: 500; cursor: pointer; transition: all 0.2s;
 }
 
-.btn-probar:hover:not(:disabled) {
-  background: #bbdefb;
-}
-.btn-probar:disabled {
-  opacity: 0.6; cursor: not-allowed;
-}
-.btn-probar mat-icon {
-  font-size: 16px;
-}
+.btn-probar:hover:not(:disabled) { background: #bbdefb; }
+.btn-probar:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-probar mat-icon { font-size: 16px; }
 
 /* Tarjetas de cron por tipo de respaldo */
 .cron-card {
@@ -177,4 +172,180 @@
     flex-direction: column;
     align-items: flex-start;
   }
+}
+
+/* Ruta y botón seleccionar carpeta */
+.ruta-carpeta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.ruta-carpeta-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ruta-texto {
+  font-size: 13px;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.ruta-texto:empty,
+.ruta-texto:not([title]) {
+  color: #888;
+}
+
+.nombre-carpeta {
+  font-size: 12px;
+  color: #2d5a27;
+  font-weight: 500;
+}
+
+.btn-seleccionar-carpeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #2d5a27;
+  background: #f0f7f0;
+  color: #2d5a27;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-seleccionar-carpeta:hover {
+  background: #e0efe0;
+}
+
+.btn-seleccionar-carpeta mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.form-input-ruta {
+  margin-top: 4px;
+}
+
+/* Modal explorador de carpetas - compacto */
+.explorador-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.explorador-modal {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 380px;
+  max-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.explorador-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.explorador-titulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.btn-cerrar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #666;
+}
+
+.btn-cerrar:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.explorador-lista {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  min-height: 180px;
+}
+
+.explorador-cargando,
+.explorador-error,
+.explorador-vacio {
+  padding: 12px;
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+}
+
+.explorador-error {
+  color: #c62828;
+}
+
+.carpeta-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 6px;
+  background: white;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.carpeta-item:hover {
+  background: #e8f5e9;
+}
+
+.carpeta-item mat-icon {
+  color: #f9a825;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.carpeta-item span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

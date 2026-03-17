@@ -121,6 +121,12 @@ export class BackupService {
     return this.http.post<void>(`${this.base}/config/probar-correo`, config);
   }
 
+  /** Lista carpetas del servidor: raíces si path no se envía, o subcarpetas del path. */
+  listarCarpetas(path?: string): Observable<FolderItem[]> {
+    const params = path != null && path !== '' ? new HttpParams().set('path', path) : undefined;
+    return this.http.get<FolderItem[]>(`${this.base}/config/folders`, { params: params ?? {} });
+  }
+
   // Restaurar (archivos locales)
   listarArchivosLocales(): Observable<BackupLocalFile[]> {
     return this.http.get<BackupLocalFile[]>(`${this.base}/restore/archivos-locales`);
@@ -136,4 +142,10 @@ export interface BackupLocalFile {
   tamanoBytes: number;
   tamanoFormateado: string;
   fechaModificacion: string;
+}
+
+export interface FolderItem {
+  name: string;
+  path: string;
+  directory: boolean;
 }

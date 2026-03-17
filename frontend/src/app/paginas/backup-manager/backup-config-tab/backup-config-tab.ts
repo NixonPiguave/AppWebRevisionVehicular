@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BackupService, BackupConfig } from '../../../services/backup/backup.service';
+import { BackupService, BackupConfig, FolderItem } from '../../../services/backup/backup.service';
 
 @Component({
   selector: 'app-backup-config-tab',
@@ -24,7 +24,16 @@ export class BackupConfigTabComponent implements OnInit {
   guardando = false;
   mensajeExito = '';
   mensajeError = '';
-  probandoCorreo = false;
+
+  // Selección con explorador nativo (no entrega ruta completa por seguridad)
+  carpetaNativaNombre = '';
+
+  // Explorador de carpetas
+  mostrarExplorador = false;
+  carpetasListadas: FolderItem[] = [];
+  rutaExploradorActual = '';
+  cargandoCarpetas = false;
+  errorCarpetas = '';
 
   // Modelo de UI para programar sin escribir cron
   fullActivo = true;
@@ -110,20 +119,20 @@ export class BackupConfigTabComponent implements OnInit {
   }
 
   probarCorreo(): void {
-    if (!this.config.mailHost || !this.config.mailUsername || !this.config.mailPassword) {
-      this.mostrarError('Completa el servidor, usuario y contraseña antes de probar');
+    if (!this.config.emailNotificacion?.trim()) {
+      this.mostrarError('Ingresa el correo del administrador');
       return;
     }
-
-    this.probandoCorreo = true;
+    if (!this.config.mailUsername?.trim() || !this.config.mailPassword?.trim()) {
+      this.mostrarError('Completa usuario Gmail y App Password');
+      return;
+    }
     this.backupService.probarCorreo(this.config).subscribe({
       next: () => {
-        this.probandoCorreo = false;
         this.mostrarExito('Correo de prueba enviado correctamente');
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.probandoCorreo = false;
         this.mostrarError(err?.error?.message || 'Error al enviar correo de prueba');
         this.cdr.detectChanges();
       }
@@ -273,6 +282,68 @@ export class BackupConfigTabComponent implements OnInit {
       default:
         this.config.cronIncremental = '';
     }
+  }
+
+  get nombreCarpetaSeleccionada(): string {
+    const r = this.config?.rutaServidor?.trim();
+    if (!r) return '';
+    const parts = r.replace(/[/\\]+/g, '/').split('/').filter(Boolean);
+    return parts.length > 0 ? parts[parts.length - 1] : '';
+  }
+
+  /** Igual que en Respaldos manuales: abre el explorador de carpetas. Al seleccionar se asigna y muestra la ruta. */
+  async elegirCarpeta(): Promise<void> {
+    const win = window as any;
+    if (typeof win.showDirectoryPicker === 'function') {
+      try {
+        const dirHandle = await win.showDirectoryPicker({ mode: 'readwrite' });
+        this.carpetaNativaNombre = dirHandle?.name || '';
+        this.cdr.detectChanges();
+      } catch {
+        // Usuario canceló: no hacer nada
+        return;
+      }
+      // No abrir el explorador del servidor después del nativo
+      return;
+    }
+    this.abrirExplorador();
+  }
+
+  abrirExplorador(): void {
+    this.mostrarExplorador = true;
+    // Selector simple: siempre listamos desde la raíz; el usuario elige una carpeta y listo.
+    this.rutaExploradorActual = '';
+    this.cargarCarpetas();
+  }
+
+  cerrarExplorador(): void {
+    this.mostrarExplorador = false;
+    this.errorCarpetas = '';
+  }
+
+  seleccionarCarpeta(item: FolderItem): void {
+    this.config.rutaServidor = item.path;
+    this.cerrarExplorador();
+    this.cdr.detectChanges();
+  }
+
+  private cargarCarpetas(): void {
+    this.cargandoCarpetas = true;
+    this.errorCarpetas = '';
+    const path = this.rutaExploradorActual || undefined;
+    this.backupService.listarCarpetas(path).subscribe({
+      next: (items) => {
+        this.carpetasListadas = items;
+        this.cargandoCarpetas = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.cargandoCarpetas = false;
+        this.errorCarpetas = err?.error?.message || 'No se pudo listar las carpetas';
+        this.carpetasListadas = [];
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   onToggleDia(tipo: 'FULL' | 'DIFF', dia: string, checked: boolean): void {

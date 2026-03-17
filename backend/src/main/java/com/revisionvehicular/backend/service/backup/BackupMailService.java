@@ -11,10 +11,17 @@ import java.util.Properties;
 
 @Service
 public class BackupMailService {
+    private final CryptoService cryptoService;
+
+    public BackupMailService(CryptoService cryptoService) {
+        this.cryptoService = cryptoService;
+    }
 
     public void enviarNotificacion(BackupRecord record, BackupConfig config) {
         if (!Boolean.TRUE.equals(config.getMailHabilitado())) return;
-        if (config.getMailHost() == null || config.getMailHost().isBlank()) return;
+        if (!cryptoService.isEnabled()) return;
+        if (config.getMailUsername() == null || config.getMailUsername().isBlank()) return;
+        if (config.getMailPassword() == null || config.getMailPassword().isBlank()) return;
         if (config.getEmailNotificacion() == null || config.getEmailNotificacion().isBlank()) return;
 
         try {
@@ -25,9 +32,10 @@ public class BackupMailService {
 
             boolean exitoso = "EXITOSO".equals(record.getEstado());
 
-            helper.setFrom(config.getMailFrom() != null
+            String from = (config.getMailFrom() != null && !config.getMailFrom().isBlank())
                     ? config.getMailFrom()
-                    : config.getMailUsername());
+                    : config.getMailUsername();
+            helper.setFrom(from);
             helper.setTo(config.getEmailNotificacion());
             helper.setSubject(exitoso
                     ? "✅ Respaldo completado: " + record.getTipo()
@@ -43,19 +51,18 @@ public class BackupMailService {
 
     private JavaMailSenderImpl construirMailSender(BackupConfig config) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        mailSender.setHost(config.getMailHost());
-        mailSender.setPort(config.getMailPort() != null ? config.getMailPort() : 587);
+        // Gmail SMTP fijo
+        mailSender.setHost("smtp.gmail.com");
+        mailSender.setPort(587);
         mailSender.setUsername(config.getMailUsername());
-        mailSender.setPassword(config.getMailPassword());
+        mailSender.setPassword(cryptoService.decryptOrPlain(config.getMailPassword()));
         mailSender.setDefaultEncoding("UTF-8");
 
         Properties props = mailSender.getJavaMailProperties();
         props.put("mail.transport.protocol", "smtp");
         props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable",
-                Boolean.TRUE.equals(config.getMailStarttls()) ? "true" : "false");
-        props.put("mail.smtp.starttls.required",
-                Boolean.TRUE.equals(config.getMailStarttls()) ? "true" : "false");
+        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.starttls.required", "true");
         props.put("mail.debug", "false");
 
         return mailSender;
