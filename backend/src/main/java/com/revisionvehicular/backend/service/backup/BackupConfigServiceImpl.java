@@ -20,15 +20,18 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
     private final IUsuarioRepository usuarioRepository;
     private final BackupSchedulerService schedulerService;
     private final BackupMailService mailService;
+    private final CryptoService cryptoService;
 
     public BackupConfigServiceImpl(IBackupConfigRepository repository,
                                    IUsuarioRepository usuarioRepository,
                                    BackupSchedulerService schedulerService,
-                                   BackupMailService mailService) {
+                                   BackupMailService mailService,
+                                   CryptoService cryptoService) {
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.schedulerService = schedulerService;
         this.mailService = mailService;
+        this.cryptoService = cryptoService;
     }
 
     @Override
@@ -55,13 +58,13 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         config.setCronIncremental(dto.getCronIncremental());
         config.setSchedulerActivo(dto.getSchedulerActivo() != null && dto.getSchedulerActivo());
         config.setEmailNotificacion(dto.getEmailNotificacion());
-        config.setMailHost(dto.getMailHost());
-        config.setMailPort(dto.getMailPort() != null ? dto.getMailPort() : 587);
-        config.setMailUsername(dto.getMailUsername());
-        config.setMailPassword(dto.getMailPassword());
-        config.setMailFrom(dto.getMailFrom());
-        config.setMailStarttls(dto.getMailStarttls() != null ? dto.getMailStarttls() : true);
         config.setMailHabilitado(dto.getMailHabilitado() != null && dto.getMailHabilitado());
+        config.setMailUsername(dto.getMailUsername());
+        config.setMailFrom(dto.getMailFrom());
+        if (dto.getMailPassword() != null && !dto.getMailPassword().isBlank()) {
+            String pass = dto.getMailPassword();
+            config.setMailPassword(pass.startsWith("v1:") ? pass : cryptoService.encrypt(pass));
+        }
         if (dto.getUsuarioId() != null) {
             Usuario usuario = usuarioRepository.findById(dto.getUsuarioId())
                     .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + dto.getUsuarioId()));
@@ -100,14 +103,13 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
     @Override
     public void probarCorreo(BackupConfigDTO dto) {
         BackupConfig configTemporal = new BackupConfig();
-        configTemporal.setMailHost(dto.getMailHost());
-        configTemporal.setMailPort(dto.getMailPort() != null ? dto.getMailPort() : 587);
-        configTemporal.setMailUsername(dto.getMailUsername());
-        configTemporal.setMailPassword(dto.getMailPassword());
-        configTemporal.setMailFrom(dto.getMailFrom());
-        configTemporal.setMailStarttls(dto.getMailStarttls() != null ? dto.getMailStarttls() : true);
-        configTemporal.setMailHabilitado(true);
         configTemporal.setEmailNotificacion(dto.getEmailNotificacion());
+        configTemporal.setMailHabilitado(true);
+        configTemporal.setMailUsername(dto.getMailUsername());
+        configTemporal.setMailFrom(dto.getMailFrom());
+        configTemporal.setMailPassword(dto.getMailPassword() != null && !dto.getMailPassword().isBlank()
+                ? (dto.getMailPassword().startsWith("v1:") ? dto.getMailPassword() : cryptoService.encrypt(dto.getMailPassword()))
+                : null);
 
         // Crear un record de prueba ficticio
         BackupRecord recordPrueba = new BackupRecord();
@@ -138,12 +140,8 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         dto.setCronIncremental(config.getCronIncremental());
         dto.setSchedulerActivo(config.getSchedulerActivo());
         dto.setEmailNotificacion(config.getEmailNotificacion());
-        dto.setMailHost(config.getMailHost());
-        dto.setMailPort(config.getMailPort());
         dto.setMailUsername(config.getMailUsername());
-        dto.setMailPassword(config.getMailPassword());
         dto.setMailFrom(config.getMailFrom());
-        dto.setMailStarttls(config.getMailStarttls());
         dto.setMailHabilitado(config.getMailHabilitado());
         if (config.getUsuario() != null) {
             dto.setUsuarioId(config.getUsuario().getUsuarioId());
