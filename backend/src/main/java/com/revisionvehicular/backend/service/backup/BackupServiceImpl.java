@@ -95,9 +95,8 @@ public class BackupServiceImpl implements IBackupService {
 
         String timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String extension = tipo.equals("INCREMENTAL") ? ".tar" : ".backup";
-        String nombreArchivo = String.format("backup_%s_%s%s",
-                tipo.toLowerCase(), timestamp, extension);
+        String nombreArchivo = String.format("backup_%s_%s.backup",
+                tipo.toLowerCase(), timestamp);
         record.setNombreArchivo(nombreArchivo);
         recordRepository.save(record);
 
@@ -108,53 +107,16 @@ public class BackupServiceImpl implements IBackupService {
             switch (tipo) {
                 case "FULL" -> ejecutarFull(rutaCompleta.toString());
                 case "DIFFERENTIAL" -> ejecutarDiferencial(rutaCompleta.toString());
-                case "INCREMENTAL" -> ejecutarIncremental(
-                        rutaCompleta.getParent().toString(), nombreArchivo);
+                case "INCREMENTAL" -> ejecutarIncremental(rutaCompleta.toString());
                 default -> throw new RuntimeException("Tipo de backup no válido: " + tipo);
             }
 
-            File archivoGenerado;
-            String rutaFinal;
-            String nombreFinal;
-
-            if ("INCREMENTAL".equals(tipo)) {
-                Path rutaExclusiva = Paths.get(
-                        rutaCompleta.getParent().toString(),
-                        nombreArchivo.replace(".tar", "")
-                );
-
-                if (!Files.isDirectory(rutaExclusiva)) {
-                    throw new RuntimeException("El directorio incremental no existe: " + rutaExclusiva);
-                }
-
-                // Preferir base.tar.gz si existe; si no, cualquier .tar.gz
-                Path archivoTarGzPreferido = Files.list(rutaExclusiva)
-                        .filter(p -> Files.isRegularFile(p)
-                                && p.getFileName().toString().equalsIgnoreCase("base.tar.gz"))
-                        .findFirst()
-                        .orElse(null);
-
-                Path archivoTarGz = archivoTarGzPreferido != null
-                        ? archivoTarGzPreferido
-                        : Files.list(rutaExclusiva)
-                                .filter(p -> Files.isRegularFile(p)
-                                        && p.getFileName().toString().toLowerCase().endsWith(".tar.gz"))
-                                .findFirst()
-                                .orElseThrow(() -> new RuntimeException(
-                                        "El archivo de backup incremental no fue generado correctamente en " + rutaExclusiva));
-
-                archivoGenerado = archivoTarGz.toFile();
-                rutaFinal = archivoTarGz.toString();
-                nombreFinal = archivoTarGz.getFileName().toString();
-            } else {
-                archivoGenerado = rutaCompleta.toFile();
-                if (!archivoGenerado.exists()) {
-                    throw new RuntimeException("El archivo de backup no fue generado correctamente.");
-                }
-                rutaFinal = rutaCompleta.toString();
-                nombreFinal = nombreArchivo;
+            File archivoGenerado = rutaCompleta.toFile();
+            if (!archivoGenerado.exists()) {
+                throw new RuntimeException("El archivo de backup no fue generado correctamente.");
             }
-
+            String rutaFinal = rutaCompleta.toString();
+            String nombreFinal = nombreArchivo;
             long tamano = archivoGenerado.length();
 
             // Subir a Drive si está habilitado
@@ -228,28 +190,24 @@ public class BackupServiceImpl implements IBackupService {
     }
 
     // -------------------------------------------------------
-    // INCREMENTAL: pg_basebackup a nivel de archivos WAL
-    // Requiere que PostgreSQL tenga wal_level = replica
+    // INCREMENTAL: pg_dump en formato custom (comprimido), igual que FULL/Diferencial.
+    // Así el archivo .backup se puede restaurar desde la app con pg_restore.
+    // Requiere un FULL exitoso previo (misma regla que diferencial).
     // -------------------------------------------------------
-    private void ejecutarIncremental(String rutaDirectorio, String nombreArchivo) throws Exception {
-        // Verificar que existe un FULL previo
+    private void ejecutarIncremental(String rutaSalida) throws Exception {
         recordRepository.findTopByTipoAndEstadoOrderByCreadoEnDesc("FULL", "EXITOSO")
                 .orElseThrow(() -> new RuntimeException(
                         "No existe un backup FULL exitoso previo. Ejecute un backup completo primero."));
 
-        String rutaExclusiva = rutaDirectorio + File.separator + nombreArchivo.replace(".tar", "");
-        Files.createDirectories(Paths.get(rutaExclusiva));
-
         List<String> comando = new ArrayList<>();
-        comando.add(pgBaseBackupPath);
+        comando.add(pgDumpPath);
         comando.add("-h"); comando.add(dbHost);
         comando.add("-p"); comando.add(dbPort);
         comando.add("-U"); comando.add(dbUsername);
-        comando.add("-D"); comando.add(rutaExclusiva); // ← usa el subdirectorio vacío
-        comando.add("--checkpoint=fast");
-        comando.add("--wal-method=stream");
+        comando.add("-d"); comando.add(dbName);
+        comando.add("-F"); comando.add("c");
         comando.add("-Z"); comando.add("9");
-        comando.add("-F"); comando.add("t");
+        comando.add("-f"); comando.add(rutaSalida);
 
         ejecutarProceso(comando, dbPassword);
     }

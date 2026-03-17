@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -92,6 +93,49 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
         int codigo = proceso.waitFor();
         if (codigo != 0) {
             throw new RuntimeException("Error al limpiar la base de datos antes de restaurar: " + salida.toString().trim());
+        }
+    }
+
+    /** Crea la tabla srtv_sesion_usuario si no existe (respaldos antiguos pueden no incluirla). */
+    private void asegurarTablaSesionUsuario() throws Exception {
+        String createTable = "CREATE TABLE IF NOT EXISTS srtv_sesion_usuario (" +
+                "sesion_id BIGSERIAL PRIMARY KEY, " +
+                "usuario_id BIGINT NOT NULL REFERENCES srtv_usuario(usuario_id) ON DELETE CASCADE, " +
+                "fecha_login TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                "ultima_actividad TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, " +
+                "activo BOOLEAN NOT NULL DEFAULT TRUE)";
+        ejecutarPsql(createTable);
+
+        String createIndex = "CREATE INDEX IF NOT EXISTS idx_sesion_usuario_activo ON srtv_sesion_usuario(activo) WHERE activo = TRUE";
+        ejecutarPsql(createIndex);
+    }
+
+    private void ejecutarPsql(String sql) throws Exception {
+        List<String> comando = new ArrayList<>();
+        comando.add(getPsqlPath());
+        comando.add("-h"); comando.add(dbHost);
+        comando.add("-p"); comando.add(dbPort);
+        comando.add("-U"); comando.add(dbUsername);
+        comando.add("-d"); comando.add(dbName);
+        comando.add("-v"); comando.add("ON_ERROR_STOP=1");
+        comando.add("-c"); comando.add(sql);
+
+        ProcessBuilder pb = new ProcessBuilder(comando);
+        pb.environment().put("PGPASSWORD", dbPassword != null ? dbPassword : "");
+        pb.redirectErrorStream(true);
+        Process proceso = pb.start();
+
+        StringBuilder salida = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new InputStreamReader(proceso.getInputStream(), StandardCharsets.UTF_8))) {
+            String linea;
+            while ((linea = reader.readLine()) != null) {
+                salida.append(linea).append("\n");
+            }
+        }
+        int codigo = proceso.waitFor();
+        if (codigo != 0) {
+            throw new RuntimeException("Error al crear tabla de sesiones: " + salida.toString().trim());
         }
     }
 
@@ -180,6 +224,9 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
                 throw new RuntimeException("pg_restore finalizó con errores (código " + codigo + "). " +
                         "Algunos avisos son normales. Detalle: " + salida.toString().trim());
             }
+
+            // 3) Asegurar tabla srtv_sesion_usuario (respaldos antiguos pueden no incluirla)
+            asegurarTablaSesionUsuario();
 
             // Si el respaldo estaba "en proceso", marcarlo como EXITOSO (restauración exitosa lo confirma)
             List<BackupRecord> enProceso = recordRepository.findByNombreArchivoAndEstado(nombreArchivo, "EN_PROCESO");
