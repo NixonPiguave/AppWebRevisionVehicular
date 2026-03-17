@@ -35,6 +35,8 @@ export class TurnosComponent implements OnInit {
   propietariosElegibles: Propietario[] = [];
   busquedaCedula = '';
   propietarioSeleccionadoInfo: Propietario | null = null;
+  propietarioPageIndex = 0;
+  propietarioPageSize = 10;
 
   mostrarModalVehiculo = false;
   cargandoVehiculos = false;
@@ -294,6 +296,7 @@ export class TurnosComponent implements OnInit {
   abrirSelectorPropietario(): void {
     this.mostrarModalPropietario = true;
     this.busquedaCedula = this.propietarioSeleccionadoInfo?.documentoIdentidad ?? this.busquedaCedula;
+    this.propietarioPageSize = 10;
     this.buscarPropietariosElegibles();
     this.cdr.detectChanges();
   }
@@ -306,6 +309,7 @@ export class TurnosComponent implements OnInit {
   buscarPropietariosElegibles(): void {
     this.cargandoPropietarios = true;
     this.propietariosElegibles = [];
+    this.propietarioPageIndex = 0;
     this.propietarioService.listarElegibles(this.busquedaCedula).subscribe({
       next: (data) => {
         this.propietariosElegibles = data ?? [];
@@ -321,6 +325,47 @@ export class TurnosComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  get propietariosElegiblesTotal(): number {
+    return this.propietariosElegibles.length;
+  }
+
+  get propietariosElegiblesPageCount(): number {
+    const total = this.propietariosElegiblesTotal;
+    return Math.max(1, Math.ceil(total / this.propietarioPageSize));
+  }
+
+  get propietariosElegiblesPageStart(): number {
+    return this.propietarioPageIndex * this.propietarioPageSize;
+  }
+
+  get propietariosElegiblesPageEnd(): number {
+    return Math.min(this.propietariosElegiblesPageStart + this.propietarioPageSize, this.propietariosElegiblesTotal);
+  }
+
+  get propietariosElegiblesPaginados(): Propietario[] {
+    const start = this.propietariosElegiblesPageStart;
+    return this.propietariosElegibles.slice(start, start + this.propietarioPageSize);
+  }
+
+  propietarioIrPrimeraPagina(): void {
+    this.propietarioPageIndex = 0;
+  }
+
+  propietarioAnteriorPagina(): void {
+    this.propietarioPageIndex = Math.max(0, this.propietarioPageIndex - 1);
+  }
+
+  propietarioSiguientePagina(): void {
+    const lastIndex = this.propietariosElegiblesPageCount - 1;
+    this.propietarioPageIndex = Math.min(lastIndex, this.propietarioPageIndex + 1);
+  }
+
+  propietarioCambiarPageSize(value: string | number): void {
+    const next = Number(value);
+    this.propietarioPageSize = Number.isFinite(next) && next > 0 ? next : 10;
+    this.propietarioIrPrimeraPagina();
   }
 
   seleccionarPropietario(p: Propietario): void {

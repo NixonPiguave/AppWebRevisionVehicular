@@ -283,6 +283,16 @@
   overflow: hidden;
 }
 
+.modal--propietario {
+  max-width: 720px;
+  max-height: 82vh;
+}
+
+.modal--propietario .modal-body {
+  max-height: calc(82vh - 56px);
+  overflow: auto;
+}
+
 .modal-header {
   display: flex;
   align-items: center;
@@ -361,6 +371,96 @@
   color: #666;
 }
 
+/* ===== Paginación (modal propietarios) ===== */
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  flex-wrap: wrap;
+}
+
+.paginacion__right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.paginacion__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.paginacion__select {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.paginacion__text {
+  font-size: 13px;
+  color: #555;
+}
+
+/* ===== Responsive: tarjetas para propietarios ===== */
+.propietarios-cards {
+  display: none;
+  gap: 10px;
+}
+
+.propietario-card {
+  border: 1px solid #eee;
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.propietario-card__main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.propietario-card__row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.propietario-card__label {
+  font-size: 12px;
+  color: #777;
+}
+
+.propietario-card__value {
+  font-size: 14px;
+  color: #222;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.propietario-card__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
 @media (max-width: 768px) {
   .form-grid {
     grid-template-columns: 1fr;
@@ -384,5 +484,13 @@
   .modal-filtros {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .tabla-modal--desktop {
+    display: none;
+  }
+
+  .propietarios-cards {
+    display: grid;
   }
 }

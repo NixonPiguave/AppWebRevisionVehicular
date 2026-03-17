@@ -121,7 +121,7 @@
        Modal Propietarios (cédula)
        ============================ -->
   <div class="modal-overlay" *ngIf="mostrarModalPropietario" (click)="cerrarSelectorPropietario()">
-    <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal modal--propietario" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h4>Seleccionar propietario</h4>
         <button type="button" class="btn-icon" (click)="cerrarSelectorPropietario()" title="Cerrar">✖</button>
@@ -143,7 +143,8 @@
 
         <div class="modal-info" *ngIf="cargandoPropietarios">Cargando...</div>
 
-        <table class="tabla-modal" *ngIf="!cargandoPropietarios">
+        <!-- Desktop/Tablet: tabla -->
+        <table class="tabla-modal tabla-modal--desktop" *ngIf="!cargandoPropietarios">
           <thead>
           <tr>
             <th>Cédula</th>
@@ -152,7 +153,7 @@
           </tr>
           </thead>
           <tbody>
-          <tr *ngFor="let p of propietariosElegibles">
+          <tr *ngFor="let p of propietariosElegiblesPaginados">
             <td>{{ p.documentoIdentidad }}</td>
             <td>{{ p.nombre }}</td>
             <td>
@@ -166,6 +167,80 @@
           </tr>
           </tbody>
         </table>
+
+        <!-- Mobile: tarjetas -->
+        <div class="propietarios-cards" *ngIf="!cargandoPropietarios">
+          <div class="propietario-card" *ngFor="let p of propietariosElegiblesPaginados">
+            <div class="propietario-card__main">
+              <div class="propietario-card__row">
+                <span class="propietario-card__label">Cédula</span>
+                <span class="propietario-card__value">{{ p.documentoIdentidad }}</span>
+              </div>
+              <div class="propietario-card__row">
+                <span class="propietario-card__label">Nombre</span>
+                <span class="propietario-card__value">{{ p.nombre }}</span>
+              </div>
+            </div>
+            <div class="propietario-card__actions">
+              <button type="button" class="btn btn-success btn-inline" (click)="seleccionarPropietario(p)">
+                Elegir
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="paginacion" *ngIf="!cargandoPropietarios && propietariosElegiblesTotal > 0">
+          <div class="paginacion__left">
+            <span class="paginacion__text">
+              Mostrando {{ propietariosElegiblesPageStart + 1 }}–
+              {{ propietariosElegiblesPageEnd }}
+              de {{ propietariosElegiblesTotal }}
+            </span>
+          </div>
+
+          <div class="paginacion__right">
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="propietarioIrPrimeraPagina()"
+              [disabled]="propietarioPageIndex === 0"
+              title="Primera"
+            >
+              «
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="propietarioAnteriorPagina()"
+              [disabled]="propietarioPageIndex === 0"
+              title="Anterior"
+            >
+              Anterior
+            </button>
+            <span class="paginacion__text">
+              Página {{ propietarioPageIndex + 1 }} / {{ propietariosElegiblesPageCount }}
+            </span>
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="propietarioSiguientePagina()"
+              [disabled]="propietarioPageIndex >= propietariosElegiblesPageCount - 1"
+              title="Siguiente"
+            >
+              Siguiente
+            </button>
+            <button
+              type="button"
+              class="btn btn-secondary btn-inline"
+              (click)="propietarioPageIndex = propietariosElegiblesPageCount - 1"
+              [disabled]="propietarioPageIndex >= propietariosElegiblesPageCount - 1"
+              title="Última"
+            >
+              »
+            </button>
+          </div>
+        </div>
+
         <div class="modal-ayuda">
           Solo se muestran propietarios <strong>sin multas</strong> en tablas ANT.
         </div>
