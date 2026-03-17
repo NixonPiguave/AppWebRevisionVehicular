@@ -66,6 +66,9 @@ INSERT INTO srtv_opcion_menu (clave, nombre_visible, modulo, orden) VALUES
 ('menu_turnos', 'Turnos', 'Menú', 42),
 ('menu_auditoria', 'Auditoría', 'Menú', 43),
 ('menu_accesos_rol', 'Accesos por rol', 'Menú', 44),
-('menu_sesiones_activas', 'Sesiones activas', 'Menú', 45);
-
--- Si ya tiene datos, ejecute solo los INSERT que falten o borre contenedores: menu_gestion_vehicular, menu_operaciones, menu_catalogo_vehiculos, menu_inspeccion_rtv, menu_defectos_inspeccion, menu_configuracion_umbral, menu_administracion.
+('menu_sesiones_activas', 'Sesiones activas', 'Menú', 45),
+('menu_registro_observaciones', 'Registro de Observaciones', 'Menú', 46),
+('menu_registro_incidentes', 'Registro de Incidentes', 'Menú', 47),
+('menu_anulacion_tramites', 'Anulación de Trámites', 'Menú', 48),
+('menu_registro_base_unica', 'Registro Base Única', 'Menú', 49),
+('menu_backup', 'Respaldos', 'Menú', 50);

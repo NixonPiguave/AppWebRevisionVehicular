@@ -84,7 +84,7 @@
         </div>
 
         <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
-        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja','menu_registro_observaciones','menu_registro_incidentes','menu_anulacion_tramites','menu_registro_base_unica')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleAccesosRapidos()"
@@ -108,19 +108,19 @@
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock_open</mat-icon>
               Desbloqueo
             </a>
-            <a *ngIf="puedeVer('menu_tramites_legales')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-observaciones">
+            <a *ngIf="puedeVer('menu_registro_observaciones')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-observaciones">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">visibility</mat-icon>
               Registro de Observaciones
             </a>
-            <a *ngIf="puedeVer('menu_tramites_legales')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-incidentes">
+            <a *ngIf="puedeVer('menu_registro_incidentes')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-incidentes">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">report_problem</mat-icon>
               Registro de Incidentes
             </a>
-            <a *ngIf="puedeVer('menu_tramites_legales')" class="submenu-item" routerLink="/inicio/gestion_vehicular/anulacion-tramites">
+            <a *ngIf="puedeVer('menu_anulacion_tramites')" class="submenu-item" routerLink="/inicio/gestion_vehicular/anulacion-tramites">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">cancel</mat-icon>
               Anulación de Trámites
             </a>
-            <a *ngIf="puedeVer('menu_tramites_legales')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-base-unica">
+            <a *ngIf="puedeVer('menu_registro_base_unica')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-base-unica">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">storage</mat-icon>
               Registro Base Única
             </a>
@@ -419,9 +419,9 @@
           </div>
         </div>
 
-        <button class="logout" (click)="cerrarSesion()">
+        <button class="logout" (click)="cerrarSesion()" [disabled]="cerrandoSesion">
           <mat-icon>logout</mat-icon>
-          <span>Salir</span>
+          <span>{{ cerrandoSesion ? 'Cerrando...' : 'Salir' }}</span>
         </button>
       </div>
 

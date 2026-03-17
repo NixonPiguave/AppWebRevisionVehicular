@@ -279,10 +279,20 @@ export class InicioComponent implements OnInit, OnDestroy {
     if (sectionName !== 'accesosRapidos') this.accesosRapidosOpen = false; // ← nueva línea
   }
 
+  cerrandoSesion = false;
+
   cerrarSesion(): void {
+    if (this.cerrandoSesion) return;
+    this.cerrandoSesion = true;
     this.authService.logout().subscribe({
-      next: () => this.limpiarYRedirigir(),
-      error: () => this.limpiarYRedirigir()
+      next: () => {
+        this.cerrandoSesion = false;
+        this.limpiarYRedirigir();
+      },
+      error: () => {
+        this.cerrandoSesion = false;
+        this.limpiarYRedirigir();
+      }
     });
   }
 

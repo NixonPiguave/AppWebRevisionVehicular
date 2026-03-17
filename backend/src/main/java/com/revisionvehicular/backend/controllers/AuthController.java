@@ -101,12 +101,12 @@ public class AuthController {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
             sesionUsuarioService.cerrarSesionPorToken(token);
-            Long usuarioId = null;
             try {
                 String username = jwtUtil.extractUsername(token);
                 Optional<Usuario> optionalUser = usuarioRepository.findByUsuario(username);
                 if (optionalUser.isPresent()) {
                     Usuario user = optionalUser.get();
+                    sesionUsuarioService.cerrarSesionesDeUsuario(user.getUsuarioId());
                     UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
                     auditoriaService.registrarAccion(user, "CIERRE_SESION");
                 }
