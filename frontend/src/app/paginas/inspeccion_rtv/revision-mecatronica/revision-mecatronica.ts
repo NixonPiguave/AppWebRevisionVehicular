@@ -9,6 +9,7 @@ import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { DefectosService, Defectos } from '../../../services/defectos_inspeccion/defectos.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { NotificationService } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
 
 /**
@@ -77,7 +78,8 @@ export class RevisionMecatronica implements OnInit {
     private defectosService: DefectosService,
     private vehiculoService: VehiculoService,
     private cdr: ChangeDetectorRef,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -199,6 +201,12 @@ export class RevisionMecatronica implements OnInit {
       this.notification.error('Faltan datos del turno o vehículo.');
       return;
     }
+
+    const usuarioId = Number(this.authService.getUsuarioId() ?? 0);
+    if (!usuarioId || Number.isNaN(usuarioId)) {
+      this.notification.error('No se pudo obtener el usuario logueado. Vuelva a iniciar sesión.');
+      return;
+    }
     const eqNombres = this.equiposSeleccionados
       .map(id => this.equipos.find(e => (e.equipoid ?? 0) === id)?.equipo)
       .filter(Boolean);
@@ -234,7 +242,7 @@ export class RevisionMecatronica implements OnInit {
       vehiculoId: this.vehiculoId,
       metodoInspeccionId: this.metodoInspeccionId,
       lineaId: this.lineaIdParam ?? 1,
-      usuarioId: 1,
+      usuarioId,
       observaciones: observacionesCompletas,
       defectosIds,
       valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined

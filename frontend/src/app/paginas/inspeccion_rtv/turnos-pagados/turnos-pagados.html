@@ -44,9 +44,9 @@
     <table class="tabla-turnos">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Propietario ID</th>
-          <th>Vehículo ID</th>
+          <th>Nº TURNO</th>
+          <th>Propietario</th>
+          <th>Vehículo (Marca/Modelo)</th>
           <th>Servicio</th>
           <th>Fecha</th>
           <th>Estado</th>
@@ -55,14 +55,14 @@
       </thead>
       <tbody>
         <tr *ngFor="let turno of turnos">
-          <td>{{ turno.turnoId }}</td>
-          <td>{{ turno.propietarioId }}</td>
-          <td>{{ turno.vehiculoId }}</td>
+          <td>TRN-{{ turno.turnoId }}</td>
+          <td>{{ turno.propietarioNombre || ('#' + turno.propietarioId) }}</td>
+          <td>{{ turno.vehiculoDescripcion || ('Vehículo #' + turno.vehiculoId) }}</td>
           <td>{{ getNombreServicio(turno.servicioId) }}</td>
           <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
           <td>
-            <span class="badge" [ngClass]="'badge-' + (turno.estado || '').toLowerCase()">
-              {{ turno.estado }}
+            <span class="badge" [ngClass]="getEstadoBadge(turno.estado)">
+              {{ getEstadoLabel(turno.estado) }}
             </span>
           </td>
           <td class="acciones">
@@ -76,7 +76,7 @@
           </td>
         </tr>
         <tr *ngIf="turnos.length === 0">
-          <td colspan="7" class="text-center">No hay turnos pagados para esta línea (línea {{ lineaSeleccionada.nombre }}: vehículos categoría {{ lineaSeleccionada.nombre.toLowerCase().includes('moto') ? 'L' : 'M' }}).</td>
+          <td colspan="7" class="text-center">No hay turnos en proceso para esta línea (línea {{ lineaSeleccionada.nombre }}: vehículos categoría {{ lineaSeleccionada.nombre.toLowerCase().includes('moto') ? 'L' : 'M' }}).</td>
         </tr>
       </tbody>
     </table>

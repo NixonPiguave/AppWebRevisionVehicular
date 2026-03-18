@@ -2,8 +2,8 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
-import { forkJoin, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of, Observable } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
@@ -36,6 +36,10 @@ export class PagosComponent implements OnInit {
   cargandoTurnos = false;
   guardando = false;
   error = '';
+
+  private modalEnriquecida = false;
+  private propietarioNombrePorId = new Map<number, string>();
+  private vehiculoDescripcionPorId = new Map<number, string>();
 
   constructor(
     private turnosService: TurnosService,
@@ -71,6 +75,10 @@ export class PagosComponent implements OnInit {
     this.turnosService.getAll().subscribe({
       next: (data) => {
         this.turnos = data ?? [];
+        // Al recargar datos (ej. luego de registrar un pago) hay que volver a enriquecer para mostrar nombre y marca/modelo
+        this.modalEnriquecida = false;
+        this.propietarioNombrePorId.clear();
+        this.vehiculoDescripcionPorId.clear();
         this.turnosFiltrados = [...this.turnos];
         this.cargando = false;
         this.cdr.detectChanges();
@@ -86,8 +94,29 @@ export class PagosComponent implements OnInit {
   abrirSelectorTurno(): void {
     this.mostrarModalTurno = true;
     this.busquedaTurno = '';
-    this.filtrarTurnos();
-    this.cdr.detectChanges();
+
+    if (this.modalEnriquecida) {
+      this.filtrarTurnos();
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.cargandoTurnos = true;
+    this.enriquecerTurnosSinPagoParaModal().subscribe({
+      next: () => {
+        this.cargandoTurnos = false;
+        this.modalEnriquecida = true;
+        this.filtrarTurnos();
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Fallback: si falla el enriquecimiento, igual dejamos funcionar el selector
+        this.cargandoTurnos = false;
+        this.modalEnriquecida = true;
+        this.filtrarTurnos();
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   cerrarSelectorTurno(): void { this.mostrarModalTurno = false; }
@@ -97,16 +126,18 @@ export class PagosComponent implements OnInit {
     // Solo turnos sin pago y en estado GENERADO
     const sinPagar = this.turnos.filter(
       t => t.montoPagado == null && (t.estado || '').toUpperCase() === 'GENERADO'
-    );
+    ).sort((a, b) => (b.turnoId ?? 0) - (a.turnoId ?? 0));
+
     if (!f) {
       this.turnosFiltrados = sinPagar;
     } else {
       this.turnosFiltrados = sinPagar.filter(t =>
         (t.turnoId?.toString() || '').includes(f) ||
-        (t.propietarioId?.toString() || '').includes(f) ||
-        (t.vehiculoId?.toString() || '').includes(f) ||
+        (t.propietarioNombre || '').toLowerCase().includes(f) ||
+        (t.vehiculoDescripcion || '').toLowerCase().includes(f) ||
         (t.servicioId?.toString() || '').includes(f) ||
-        (t.estado?.toLowerCase() || '').includes(f) ||
+        (this.obtenerNombreServicio(t.servicioId) || '').toLowerCase().includes(f) ||
+        (this.getEstadoLabel(t.estado).toLowerCase() || '').includes(f) ||
         (t.fechaInicio?.toString() || '').includes(f)
       );
     }
@@ -152,7 +183,9 @@ export class PagosComponent implements OnInit {
   getTurnoDisplay(): string {
     if (!this.turnoSeleccionado) return '';
     const t = this.turnoSeleccionado;
-    return `#${t.turnoId} - Prop: ${t.propietarioId} | Veh: ${t.vehiculoId} | ${this.obtenerNombreServicio(t.servicioId)} | ${t.fechaInicio}`;
+    const propietario = t.propietarioNombre || `Propietario #${t.propietarioId}`;
+    const vehiculo = t.vehiculoDescripcion || `Vehículo #${t.vehiculoId}`;
+    return `TRN-${t.turnoId} - ${propietario} | ${vehiculo} | ${this.obtenerNombreServicio(t.servicioId)} | ${t.fechaInicio}`;
   }
 
   obtenerNombreServicio(servicioId?: number): string {
@@ -210,7 +243,7 @@ export class PagosComponent implements OnInit {
             marca:             marcaNombre,
             modelo:            modeloNombre,
             propietarioNombre: propietario
-              ? `${(propietario as any).nombres ?? ''} ${(propietario as any).apellidos ?? ''}`.trim()
+              ? ((propietario as any)?.nombre ?? '').toString().trim()
               : undefined,
             propietarioCedula: (propietario as any)?.documentoIdentidad ?? undefined,
             logoUrl:           empresa?.logoempresa || undefined,
@@ -265,5 +298,96 @@ export class PagosComponent implements OnInit {
     if (!modelo) return undefined;
     const marca = this.marcas.find(ma => ma.id === modelo.marcaId);
     return marca?.nombre;
+  }
+
+  private enriquecerTurnosSinPagoParaModal(): Observable<void> {
+    const sinPagar = this.turnos.filter(
+      t => t.montoPagado == null && (t.estado || '').toUpperCase() === 'GENERADO'
+    );
+
+    if (sinPagar.length === 0) return of(void 0);
+
+    const propietarioIds = [...new Set(sinPagar.map(t => t.propietarioId))];
+    const vehiculoIds = [...new Set(sinPagar.map(t => t.vehiculoId))];
+
+    const propietarios$ = forkJoin(
+      propietarioIds.map(id =>
+        this.propietarioService.obtenerPorId(id).pipe(
+          catchError(() => of({ idPropietario: id, nombre: `Propietario #${id}` } as any))
+        )
+      )
+    );
+
+    const vehiculos$ = forkJoin(
+      vehiculoIds.map(id =>
+        this.vehiculoService.obtenerPorId(id).pipe(
+          catchError(() => of({ id, matricula: `Vehículo #${id}` } as any))
+        )
+      )
+    );
+
+    return forkJoin({ propietarios: propietarios$, vehiculos: vehiculos$ }).pipe(
+      map(({ propietarios, vehiculos }) => {
+        propietarios.forEach((p: any) => {
+          const id = p?.idPropietario ?? p?.id ?? p?.propietarioId;
+          if (typeof id === 'number') {
+            this.propietarioNombrePorId.set(id, (p?.nombre ?? `Propietario #${id}`));
+          }
+        });
+
+        vehiculos.forEach((v: any) => {
+          const id = v?.id ?? v?.vehiculoId ?? v?.idVehiculo;
+          if (typeof id === 'number') {
+            this.vehiculoDescripcionPorId.set(id, this.construirVehiculoDescripcion(v, id));
+          }
+        });
+
+        this.turnos = this.turnos.map(t => {
+          if (t.montoPagado != null) return t;
+          if ((t.estado || '').toUpperCase() !== 'GENERADO') return t;
+          return {
+            ...t,
+            propietarioNombre: this.propietarioNombrePorId.get(t.propietarioId),
+            vehiculoDescripcion: this.vehiculoDescripcionPorId.get(t.vehiculoId),
+          };
+        });
+      })
+    );
+  }
+
+  private construirVehiculoDescripcion(veh: Vehiculo | any, fallbackId: number): string {
+    if (!veh) return `Vehículo #${fallbackId}`;
+
+    const marca = veh.marcaNombre ?? '';
+    const modelo = veh.modeloNombre ?? '';
+    const placa = veh.matricula ?? '';
+    const anio = veh.anioFabricacion ?? undefined;
+
+    let base = '';
+    if (marca && modelo) base = `${marca} ${modelo}`;
+    else if (marca) base = `${marca}`;
+    else if (modelo) base = `${modelo}`;
+
+    if (!base) base = `Vehículo #${fallbackId}`;
+
+    if (anio != null && anio !== undefined) base = `${base} (${anio})`;
+    if (placa) base = `${base} (${placa})`;
+
+    return base;
+  }
+
+  getEstadoLabel(estado?: string): string {
+    return (estado || '').replace(/_/g, ' ');
+  }
+
+  getBadgeClassEstado(estado?: string): string {
+    const e = (estado || '').toUpperCase();
+    if (e === 'GENERADO') return 'badge-generado';
+    if (e === 'CONFIRMADO') return 'badge-confirmado';
+    if (e === 'ATENDIDO') return 'badge-atendido';
+    if (e === 'CANCELADO') return 'badge-cancelado';
+    if (e === 'PAGADO') return 'badge-pagado';
+    if (e === 'EN_PROCESO') return 'badge-en-proceso';
+    return 'badge-generado';
   }
 }

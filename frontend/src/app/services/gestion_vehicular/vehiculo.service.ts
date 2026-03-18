@@ -9,6 +9,11 @@ export interface Vehiculo {
   chasis: string;
   vin: string;
   modeloVehiculoId: number;
+
+  // Datos ya devueltos por el backend en `VehiculoDTO`
+  marcaNombre?: string;
+  modeloNombre?: string;
+
   anioFabricacion: number;
   color: string;
   estado: string;

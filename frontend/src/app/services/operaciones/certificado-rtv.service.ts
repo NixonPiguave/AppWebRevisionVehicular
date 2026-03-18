@@ -165,6 +165,7 @@ export class CertificadoRtvService {
         <td class="cert-td-nom">${this.escape(p.metodoNombre ?? '-')}</td>
         <td class="cert-td-res">${this.escape(p.resultado ?? '-')}</td>
         <td class="cert-td-obs">${this.escape(p.observaciones ?? '')}</td>
+        <td class="cert-td-ins">${this.escape(p.inspectorNombre ?? '-')}</td>
         <td class="cert-td-fec">${p.fechaInspeccion ? new Date(p.fechaInspeccion).toLocaleString('es') : '-'}</td>
       </tr>
     `).join('');
@@ -202,9 +203,9 @@ export class CertificadoRtvService {
       <div class="cert-section-title">RESULTADOS DE LAS PRUEBAS</div>
       <table class="cert-tabla-pruebas">
         <thead>
-          <tr><th>Prueba</th><th>Resultado</th><th>Observaciones</th><th>Fecha</th></tr>
+          <tr><th>Prueba</th><th>Resultado</th><th>Observaciones</th><th>Inspector</th><th>Fecha</th></tr>
         </thead>
-        <tbody>${pruebasRows || '<tr><td colspan="4">Sin registros</td></tr>'}</tbody>
+        <tbody>${pruebasRows || '<tr><td colspan="5">Sin registros</td></tr>'}</tbody>
       </table>
     `;
   }
@@ -242,6 +243,7 @@ export class CertificadoRtvService {
       .cert-td-nom { font-weight: 600; }
       .cert-td-res { }
       .cert-td-obs { max-width: 180px; word-break: break-word; }
+      .cert-td-ins { max-width: 150px; word-break: break-word; }
       .cert-td-fec { white-space: nowrap; }
     `;
   }

@@ -121,7 +121,7 @@
           <!-- Estado -->
           <td>
               <span class="estado-badge" [ngClass]="getEstadoBadge(t.estado)">
-                {{ t.estado }}
+                {{ (t.estado || '').replace(/_/g, ' ') }}
               </span>
           </td>
 

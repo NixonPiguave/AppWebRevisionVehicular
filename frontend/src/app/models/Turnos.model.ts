@@ -10,4 +10,8 @@ export interface Turnos {
   fechaCancelado?: string;
   estado: string;
   montoPagado?: number;
+
+  // Enriquecido para UI (evita mostrar IDs en tablas)
+  propietarioNombre?: string;
+  vehiculoDescripcion?: string;
 }

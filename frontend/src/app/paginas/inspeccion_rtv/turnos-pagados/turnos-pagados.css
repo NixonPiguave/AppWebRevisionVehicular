@@ -238,6 +238,7 @@
 .badge-atendido { background: #e8f5e9; color: #2e7d32; }
 .badge-cancelado { background: #ffebee; color: #c62828; }
 .badge-pagado { background: #e8f5e9; color: #1b5e20; }
+.badge-proceso { background: #e3f2fd; color: #1565c0; }
 
 .acciones {
   white-space: nowrap;

@@ -14,6 +14,7 @@ import { UmbralService } from '../../../services/configuracion_umbral/umbral.ser
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { DatosFabricaService, DatosFabrica } from '../../../services/gestion_vehicular/datos-fabrica.service';
 import { NotificationService } from '../../../services/notification.service';
+import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
 
 /** Ubicaciones para línea Carros */
@@ -147,6 +148,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     private vehiculoService: VehiculoService,
     private datosFabricaService: DatosFabricaService,
     private notification: NotificationService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -463,6 +465,12 @@ export class RegistrarInspeccionComponent implements OnInit {
       ?? 1;
     const umbralId  = this.umbrales[0]?.idUmbral ?? 1;
 
+    const usuarioId = Number(this.authService.getUsuarioId() ?? 0);
+    if (!usuarioId || Number.isNaN(usuarioId)) {
+      this.notification.error('No se pudo obtener el usuario logueado. Vuelva a iniciar sesión.');
+      return;
+    }
+
     const defectosIds = this.defectosSeleccionados
       .map(d => d.id)
       .filter((id): id is number => id != null && id > 0);
@@ -471,7 +479,7 @@ export class RegistrarInspeccionComponent implements OnInit {
       vehiculoId: this.vehiculoId,
       metodoInspeccionId: metodoId,
       lineaId: this.lineaIdParam ?? 1,
-      usuarioId: 1,
+      usuarioId,
       observaciones: this.observaciones.trim() || undefined,
       ubicacionesRevisadas: this.getUbicacionesArray(),
       defectosIds
