@@ -13,6 +13,9 @@ import java.util.List;
 @Repository
 public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
 
+    @Query("SELECT DISTINCT i FROM Inspeccion i LEFT JOIN FETCH i.usuario u LEFT JOIN FETCH i.detalles d LEFT JOIN FETCH d.metodoInspeccion WHERE i.vehiculo.vehiculoid = :vehiculoId AND i.fechaInspeccion BETWEEN :desde AND :hasta ORDER BY i.fechaInspeccion")
+    List<Inspeccion> findByVehiculoIdAndRangoFechas(@Param("vehiculoId") Long vehiculoId, @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
+
     @Query(
             value = "SELECT * FROM rtv_inspeccion WHERE vehiculo_id = :vehiculoId ORDER BY inspeccion_id DESC LIMIT 1",
             nativeQuery = true

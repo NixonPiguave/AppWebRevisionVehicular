@@ -51,6 +51,7 @@ import { AnulacionTramitesComponent } from './paginas/gestion_vehicular/anulacio
 import { RegistroBaseUnicaComponent } from './paginas/gestion_vehicular/registro-base-unica/registro-base-unica';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
+import { HistorialTurnosComponent } from './paginas/operaciones/historial-turnos/historial-turnos';
 import { AuditoriaComponent } from './paginas/administracion/auditoria/auditoria';
 import { AccesosRolComponent } from './paginas/administracion/accesos-rol/accesos-rol';
 import { SesionesActivasComponent } from './paginas/administracion/sesiones-activas/sesiones-activas';
@@ -129,6 +130,7 @@ export const routes: Routes = [
       // OPERACIONES
       { path: 'operaciones/pagos', component: PagosComponent },
       { path: 'operaciones/recepcion', component: RecepcionComponent },
+      { path: 'operaciones/historial-turnos', component: HistorialTurnosComponent },
       { path: 'backup/manager', component: BackupManagerComponent },
     ]
   },

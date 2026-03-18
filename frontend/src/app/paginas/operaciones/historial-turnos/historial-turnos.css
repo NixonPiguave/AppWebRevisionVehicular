@@ -1,0 +1,75 @@
+.historial-container { padding: 24px; max-width: 1400px; margin: 0 auto; }
+
+.historial-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+.header-titulo { display: flex; align-items: center; gap: 14px; }
+.header-icono { font-size: 32px; width: 32px; height: 32px; color: #2d5a27; }
+.historial-header h2 { margin: 0; font-size: 22px; font-weight: 700; color: #1a2e1a; }
+.header-subtitulo { margin: 2px 0 0; font-size: 12px; color: #7a9474; font-style: italic; }
+
+.btn-actualizar {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px; background: #2d5a27; color: white;
+  border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-actualizar:hover { background: #234a1e; }
+
+.historial-controles { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 16px; }
+.control-grupo { display: flex; align-items: center; gap: 8px; }
+.input-busqueda-wrapper { position: relative; }
+.input-filtro { padding: 9px 36px 9px 14px; border: 1px solid #d0d0d0; border-radius: 7px; font-size: 14px; width: 320px; }
+.input-filtro:focus { outline: none; border-color: #2d5a27; }
+.icon-search { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #aaa; font-size: 20px; }
+.select-registros { padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px; font-size: 14px; cursor: pointer; background: white; }
+.registros-texto { font-size: 14px; color: #4a4a4a; }
+
+.tabla-contenedor { overflow-x: auto; border-radius: 8px; border: 1px solid #e0e0e0; background: white; }
+.historial-tabla { width: 100%; border-collapse: collapse; min-width: 900px; }
+.historial-tabla th, .historial-tabla td { padding: 14px 16px; text-align: left; vertical-align: middle; }
+.historial-tabla th { background: #1a2e1a; color: white; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.historial-tabla tbody tr { border-bottom: 1px solid #eee; }
+.historial-tabla tbody tr:hover { background: #f5f9f5; }
+.td-acciones { text-align: center; }
+
+.numero-turno { display: inline-block; background: #e8f5e9; color: #1b5e20; font-weight: 700; font-size: 13px; padding: 4px 10px; border-radius: 6px; }
+.info-cell { display: flex; align-items: center; gap: 10px; }
+.avatar-icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: #e8f5e9; }
+.avatar-icon mat-icon { font-size: 18px; width: 18px; height: 18px; color: #2d5a27; }
+.avatar-car { background: #e3f2fd; }
+.avatar-car mat-icon { color: #1565c0; }
+.info-texto { font-weight: 500; color: #1a2e1a; }
+.servicio-cell { display: flex; flex-direction: column; gap: 4px; }
+.servicio-nombre { font-size: 11px; color: #888; font-style: italic; }
+.tramite-badge { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.tipo-baja { background: #fce4ec; color: #880e4f; }
+.tipo-bloqueo { background: #fff3e0; color: #e65100; }
+.tipo-desbloqueo { background: #e8f5e9; color: #1b5e20; }
+.tipo-inspeccion { background: #e3f2fd; color: #1565c0; }
+.fecha-cell { color: #555; white-space: nowrap; }
+.monto-cell { font-weight: 700; color: #1a2e1a; white-space: nowrap; }
+
+.btn-ver-certificado {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 16px; background: #1a3d16; color: white;
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-ver-certificado:hover { background: #122b0f; }
+.btn-ver-certificado mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+.sin-registros { text-align: center; padding: 56px 20px !important; }
+.sin-registros-icon { font-size: 52px; width: 52px; height: 52px; color: #ddd; display: block; margin: 0 auto 12px; }
+.sin-registros p { color: #aaa; font-style: italic; margin: 0; }
+
+.footer-tabla { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; flex-wrap: wrap; gap: 8px; }
+.paginacion { display: flex; gap: 6px; }
+.btn-pagina { padding: 7px 12px; border: 1px solid #d0d0d0; background: white; color: #333; border-radius: 6px; font-size: 13px; cursor: pointer; display: flex; align-items: center; }
+.btn-pagina.activa { background: #2d5a27; color: white; border-color: #2d5a27; }
+.btn-pagina:disabled { opacity: 0.35; cursor: not-allowed; }
+.info-registros { font-size: 13px; color: #666; }
+
+.mensaje-error { background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+.btn-reintentar { padding: 7px 14px; background: #991b1b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.cargando { text-align: center; padding: 56px; color: #666; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.spinner { width: 36px; height: 36px; border: 3px solid rgba(45,90,39,0.15); border-top-color: #2d5a27; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }

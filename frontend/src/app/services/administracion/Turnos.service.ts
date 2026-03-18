@@ -29,6 +29,10 @@ export class TurnosService {
     return this.http.get<Turnos[]>(`${this.apiUrl}/pagados${qs ? '?' + qs : ''}`);
   }
 
+  getPorEstado(estado: string): Observable<Turnos[]> {
+    return this.http.get<Turnos[]>(`${this.apiUrl}?estado=${encodeURIComponent(estado)}`);
+  }
+
   create(turno: Turnos): Observable<Turnos> {
     return this.http.post<Turnos>(this.apiUrl, turno);
   }

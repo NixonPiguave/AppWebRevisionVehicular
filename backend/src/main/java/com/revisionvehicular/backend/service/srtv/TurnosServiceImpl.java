@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 @Service
 public class TurnosServiceImpl implements ITurnosService {
 
-    private static final List<String> ESTADOS_PARA_INICIAR_INSPECCION = List.of("PAGADO", "CONFIRMADO");
+    private static final List<String> ESTADOS_PARA_INICIAR_INSPECCION = List.of("PAGADO", "CONFIRMADO", "EN_PROCESO");
 
     private final ITurnosRepository repository;
     private final ITarifarioTramiteRepository tarifarioRepository;
@@ -85,6 +85,16 @@ public class TurnosServiceImpl implements ITurnosService {
     @Override
     public List<TurnosDTO> findAll() {
         return repository.findAll().stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TurnosDTO> findTurnosPorEstado(String estado) {
+        if (estado == null || estado.isBlank()) {
+            return findAll();
+        }
+        return repository.findByEstadoOrderByFechaInicioDesc(estado).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

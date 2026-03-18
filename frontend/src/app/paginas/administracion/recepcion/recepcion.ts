@@ -6,6 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, of } from 'rxjs';
 import { ServicioService } from '../../../services/administracion/servicio.service';
+import { TurnosService } from '../../../services/administracion/Turnos.service';
+import { CertificadoRtvService } from '../../../services/operaciones/certificado-rtv.service';
 import { catchError, map } from 'rxjs/operators';
 
 /* ─── Estructura real que devuelve el backend ─────────────── */
@@ -44,6 +46,8 @@ const API = 'http://localhost:8080/api';
 export class RecepcionComponent implements OnInit {
 
   turnos: TurnoEnriquecido[] = [];
+  /** Para turnos EN_PROCESO: turnoId -> cantidad de métodos de inspección pendientes (0 = listo para certificado) */
+  pendientesPorTurnoId: Record<number, number> = {};
   cargando = false;
   error = '';
   filtro = '';
@@ -54,6 +58,8 @@ export class RecepcionComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private servicioService: ServicioService,
+    private turnosService: TurnosService,
+    private certificadoRtvService: CertificadoRtvService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -155,8 +161,27 @@ export class RecepcionComponent implements OnInit {
             };
           });
 
-          this.cargando = false;
-          this.cdr.detectChanges();
+          this.pendientesPorTurnoId = {};
+          const enProcesoInspeccion = this.turnos.filter(
+            t => (t.estado || '').toUpperCase() === 'EN_PROCESO' && (t.tipoTramite || '') === 'INSPECCION'
+          );
+          if (enProcesoInspeccion.length > 0) {
+            forkJoin(
+              enProcesoInspeccion.map(t =>
+                this.turnosService.getMetodosInspeccionPendientes(t.turnoId).pipe(
+                  map(metodos => ({ turnoId: t.turnoId, count: (metodos ?? []).length })),
+                  catchError(() => of({ turnoId: t.turnoId, count: -1 }))
+                )
+              )
+            ).subscribe(res => {
+              res.forEach(r => { this.pendientesPorTurnoId[r.turnoId] = r.count; });
+              this.cargando = false;
+              this.cdr.detectChanges();
+            });
+          } else {
+            this.cargando = false;
+            this.cdr.detectChanges();
+          }
         },
         error: () => {
           // Si falla el enriquecimiento, muestra con IDs
@@ -167,6 +192,7 @@ export class RecepcionComponent implements OnInit {
             servicioNombre:      this.mapaServicios[t.servicioId]?.nombre ?? `Servicio #${t.servicioId}`,
             tipoTramite:         this.mapaServicios[t.servicioId]?.tipo ?? 'INSPECCION',
           }));
+          this.pendientesPorTurnoId = {};
           this.cargando = false;
           this.cdr.detectChanges();
         }
@@ -240,28 +266,63 @@ export class RecepcionComponent implements OnInit {
   onFiltroChange(): void     { this.paginaActual = 1; }
 
   /* ══════════════════════════════════════════════════════
-     NAVEGACIÓN AL FORMULARIO DE PROCESO
+     ACCIÓN BOTÓN: INICIAR PROCESO / PROCESO EN CURSO / IMPRIMIR CERTIFICADO
   ══════════════════════════════════════════════════════ */
+
+  /** Indica si el turno está listo para imprimir certificado (EN_PROCESO + 0 métodos pendientes) */
+  listoParaCertificado(t: TurnoEnriquecido): boolean {
+    if ((t.estado || '').toUpperCase() !== 'EN_PROCESO' || (t.tipoTramite || '') !== 'INSPECCION') return false;
+    const pend = this.pendientesPorTurnoId[t.turnoId];
+    return pend !== undefined && pend === 0;
+  }
+
+  /** Muestra "Proceso en curso" (sin acción) cuando está EN_PROCESO pero aún hay métodos pendientes */
+  enProcesoEnCurso(t: TurnoEnriquecido): boolean {
+    if ((t.estado || '').toUpperCase() !== 'EN_PROCESO' || (t.tipoTramite || '') !== 'INSPECCION') return false;
+    const pend = this.pendientesPorTurnoId[t.turnoId];
+    return pend === undefined || pend > 0;
+  }
+
+  /** Muestra botón "Iniciar Proceso" para PAGADO/CONFIRMADO en inspección u otro trámite */
+  mostrarIniciarProceso(t: TurnoEnriquecido): boolean {
+    const est = (t.estado || '').toUpperCase();
+    if (t.tipoTramite === 'INSPECCION') {
+      return est === 'PAGADO' || est === 'CONFIRMADO';
+    }
+    return est === 'PAGADO' || est === 'CONFIRMADO';
+  }
+
   iniciarProceso(t: TurnoEnriquecido): void {
+    const est = (t.estado || '').toUpperCase();
+    if (t.tipoTramite === 'INSPECCION' && (est === 'PAGADO' || est === 'CONFIRMADO')) {
+      this.turnosService.cambiarEstado(t.turnoId, 'EN_PROCESO').subscribe({
+        next: () => { this.cargar(); this.cdr.detectChanges(); },
+        error: () => { this.error = 'No se pudo iniciar el proceso.'; this.cdr.detectChanges(); }
+      });
+      return;
+    }
     const rutas: Record<string, string> = {
       'BAJA':       '/inicio/gestion_vehicular/baja-vehiculo',
       'BLOQUEO':    '/inicio/gestion_vehicular/bloqueo-vehiculo',
       'DESBLOQUEO': '/inicio/gestion_vehicular/desbloqueo-vehiculo',
-      'INSPECCION': '/inicio/inspeccion-rtv/registrar',
+      'INSPECCION': '/inicio/inspeccion-rtv/turnos-pagados',
     };
-
-    const ruta = rutas[t.tipoTramite] ?? rutas['INSPECCION'];
-
+    const ruta = rutas[t.tipoTramite] ?? '/inicio/inspeccion-rtv/turnos-pagados';
     this.router.navigate([ruta], {
-      queryParams: {
-        turnoId:       t.turnoId,
-        tramiteId:     t.tramiteId     ?? '',
-        vehiculoId:    t.vehiculoId,
-        propietarioId: t.propietarioId,
-        servicioId:    t.servicioId,
-        numeroTurno:   `TRN-${t.turnoId}`,
-        fromRecepcion: 'true'
-      }
+      queryParams: t.tipoTramite === 'INSPECCION' ? {
+        turnoId: t.turnoId, tramiteId: t.tramiteId ?? '', vehiculoId: t.vehiculoId,
+        propietarioId: t.propietarioId, servicioId: t.servicioId,
+        numeroTurno: `TRN-${t.turnoId}`, fromRecepcion: 'true'
+      } : {}
+    });
+  }
+
+  imprimirCertificado(t: TurnoEnriquecido): void {
+    this.certificadoRtvService.mostrar(t.turnoId, () => {
+      this.turnosService.cambiarEstado(t.turnoId, 'FINALIZADO').subscribe({
+        next: () => { this.cargar(); this.cdr.detectChanges(); },
+        error: () => { this.error = 'No se pudo finalizar el turno.'; this.cdr.detectChanges(); }
+      });
     });
   }
 

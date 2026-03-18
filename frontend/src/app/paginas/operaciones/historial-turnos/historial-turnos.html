@@ -1,0 +1,126 @@
+<div class="historial-container">
+
+  <div class="mensaje-error" *ngIf="error">
+    <div class="error-contenido">
+      <mat-icon>error_outline</mat-icon><span>{{ error }}</span>
+    </div>
+    <button class="btn-reintentar" (click)="cargar()">
+      <mat-icon>refresh</mat-icon> Reintentar
+    </button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando historial de turnos...</span>
+  </div>
+
+  <div *ngIf="!cargando || error">
+    <div class="historial-header">
+      <div class="header-titulo">
+        <mat-icon class="header-icono">history</mat-icon>
+        <div>
+          <h2>Historial de Turnos</h2>
+          <p class="header-subtitulo">Turnos finalizados y realizados</p>
+        </div>
+      </div>
+      <button class="btn-actualizar" (click)="cargar()">
+        <mat-icon>refresh</mat-icon> Actualizar
+      </button>
+    </div>
+
+    <div class="historial-controles">
+      <div class="control-grupo">
+        <label>Buscar:</label>
+        <div class="input-busqueda-wrapper">
+          <input type="text" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()"
+                 placeholder="Propietario, vehículo, servicio..." class="input-filtro" />
+          <mat-icon class="icon-search">search</mat-icon>
+        </div>
+      </div>
+      <div class="control-grupo">
+        <label>Mostrar:</label>
+        <select [(ngModel)]="registrosPorPagina" (ngModelChange)="onFiltroChange()" class="select-registros">
+          <option [value]="10">10</option>
+          <option [value]="25">25</option>
+          <option [value]="50">50</option>
+        </select>
+        <span class="registros-texto">registros</span>
+      </div>
+    </div>
+
+    <div class="tabla-contenedor">
+      <table class="historial-tabla">
+        <thead>
+          <tr>
+            <th>Nº TURNO</th>
+            <th>PROPIETARIO</th>
+            <th>VEHÍCULO</th>
+            <th>SERVICIO / TRÁMITE</th>
+            <th>FECHA</th>
+            <th>MONTO</th>
+            <th>ACCIÓN</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of paginados">
+            <td><span class="numero-turno">TRN-{{ t.turnoId }}</span></td>
+            <td>
+              <div class="info-cell">
+                <span class="avatar-icon"><mat-icon>person</mat-icon></span>
+                <span class="info-texto">{{ t.propietarioNombre }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="info-cell">
+                <span class="avatar-icon avatar-car"><mat-icon>directions_car</mat-icon></span>
+                <span class="info-texto">{{ t.vehiculoDescripcion }}</span>
+              </div>
+            </td>
+            <td>
+              <div class="servicio-cell">
+                <span class="tramite-badge" [ngClass]="getTramiteClass(t.tipoTramite)">
+                  <mat-icon>{{ getTramiteIcon(t.tipoTramite) }}</mat-icon>
+                  {{ t.tipoTramite }}
+                </span>
+                <span class="servicio-nombre">{{ t.servicioNombre }}</span>
+              </div>
+            </td>
+            <td class="fecha-cell">{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td class="monto-cell">$ {{ (t.montoPagado ?? 0) | number:'1.2-2' }}</td>
+            <td class="td-acciones">
+              <button type="button" class="btn-ver-certificado" (click)="verCertificado(t)">
+                <mat-icon>visibility</mat-icon>
+                Ver certificado
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="paginados.length === 0 && !cargando && !error">
+            <td colspan="7" class="sin-registros">
+              <mat-icon class="sin-registros-icon">inbox</mat-icon>
+              <p>No hay turnos finalizados en el historial</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-tabla">
+      <div class="info-registros" *ngIf="filtrados.length > 0">
+        Mostrando
+        {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+        {{ paginaActual * registrosPorPagina > filtrados.length ? filtrados.length : paginaActual * registrosPorPagina }}
+        de {{ filtrados.length }} registros
+      </div>
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button *ngFor="let p of paginas" class="btn-pagina"
+                [class.activa]="p === paginaActual" (click)="irAPagina(p)">{{ p }}</button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

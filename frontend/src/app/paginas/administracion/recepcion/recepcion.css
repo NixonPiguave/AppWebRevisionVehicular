@@ -114,6 +114,29 @@
 .btn-iniciar:active { transform: translateY(0); }
 .btn-iniciar mat-icon { font-size: 20px; width: 20px; height: 20px; }
 
+.btn-proceso-curso {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; background: #e3f2fd; color: #1565c0;
+  border: 1px solid #90caf9; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: not-allowed; white-space: nowrap; opacity: 0.9;
+}
+.btn-proceso-curso mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
+.btn-certificado {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 20px; background: #1a3d16; color: white;
+  border: none; border-radius: 7px; font-size: 13px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.btn-certificado:hover {
+  background: #122b0f;
+  box-shadow: 0 4px 12px rgba(26,61,22,0.35);
+  transform: translateY(-1px);
+}
+.btn-certificado:active { transform: translateY(0); }
+.btn-certificado mat-icon { font-size: 20px; width: 20px; height: 20px; }
+
 /* ── SIN REGISTROS ───────────────────────────────────────── */
 .sin-registros { text-align: center; padding: 56px 20px !important; }
 .sin-registros-icon { font-size: 52px; width: 52px; height: 52px; color: #ddd; display: block; margin: 0 auto 12px; }

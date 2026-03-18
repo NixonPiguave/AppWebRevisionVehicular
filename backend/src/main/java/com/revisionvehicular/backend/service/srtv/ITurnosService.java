@@ -12,6 +12,7 @@ public interface ITurnosService {
     void delete(Long id);
     TurnosDTO findById(Long id);
     List<TurnosDTO> findAll();
+    List<TurnosDTO> findTurnosPorEstado(String estado);
     List<TurnosDTO> findTurnosPagados();
     List<TurnosDTO> findTurnosPagadosPorServicio(Long servicioId);
     List<TurnosDTO> findTurnosPagadosPorServicioYLinea(Long servicioId, Long lineaId);

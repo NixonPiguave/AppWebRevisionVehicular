@@ -127,9 +127,17 @@
 
           <!-- Acción -->
           <td class="td-acciones">
-            <button class="btn-iniciar" (click)="iniciarProceso(t)">
+            <button *ngIf="mostrarIniciarProceso(t)" class="btn-iniciar" (click)="iniciarProceso(t)">
               <mat-icon>play_circle_filled</mat-icon>
               Iniciar Proceso
+            </button>
+            <button *ngIf="enProcesoEnCurso(t)" class="btn-proceso-curso" type="button" disabled>
+              <mat-icon>schedule</mat-icon>
+              Proceso en curso
+            </button>
+            <button *ngIf="listoParaCertificado(t)" class="btn-certificado" (click)="imprimirCertificado(t)">
+              <mat-icon>print</mat-icon>
+              Imprimir certificado
             </button>
           </td>
 

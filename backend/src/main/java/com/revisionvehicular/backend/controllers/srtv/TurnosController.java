@@ -1,7 +1,9 @@
 package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
+import com.revisionvehicular.backend.dtos.srtv.CertificadoRtvDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
+import com.revisionvehicular.backend.service.srtv.ICertificadoRtvService;
 import com.revisionvehicular.backend.service.srtv.ITurnosService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +18,11 @@ import java.util.Map;
 public class TurnosController {
 
     private final ITurnosService service;
+    private final ICertificadoRtvService certificadoRtvService;
 
-    public TurnosController(ITurnosService service) {
+    public TurnosController(ITurnosService service, ICertificadoRtvService certificadoRtvService) {
         this.service = service;
+        this.certificadoRtvService = certificadoRtvService;
     }
 
     @PostMapping
@@ -28,7 +32,12 @@ public class TurnosController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TurnosDTO>> listar() {
+    public ResponseEntity<List<TurnosDTO>> listar(
+            @RequestParam(required = false) String estado
+    ) {
+        if (estado != null && !estado.isBlank()) {
+            return ResponseEntity.ok(service.findTurnosPorEstado(estado));
+        }
         return ResponseEntity.ok(service.findAll());
     }
 
@@ -43,6 +52,11 @@ public class TurnosController {
     @GetMapping("/{id}")
     public ResponseEntity<TurnosDTO> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(service.findById(id));
+    }
+
+    @GetMapping("/{id}/certificado")
+    public ResponseEntity<CertificadoRtvDTO> datosCertificado(@PathVariable Long id) {
+        return ResponseEntity.ok(certificadoRtvService.obtenerDatosCertificado(id));
     }
 
     @GetMapping("/{id}/metodos-inspeccion-pendientes")
