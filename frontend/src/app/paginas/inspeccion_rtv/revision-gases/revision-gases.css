@@ -99,6 +99,41 @@
   color: #333;
 }
 
+.parametros-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.parametros-header h3 {
+  margin: 0;
+}
+
+.btn-rellenar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-rellenar:hover:not(:disabled) {
+  background: #bbdefb;
+}
+
+.btn-rellenar:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
 .combustible-opciones {
   display: flex;
   gap: 24px;

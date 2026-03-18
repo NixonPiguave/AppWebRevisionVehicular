@@ -27,7 +27,6 @@
   </div>
 
   <div class="contenido" *ngIf="!cargando && !error">
-    <!-- Tipo combustible: solo para carros (motos = gasolina) -->
     <section class="panel-combustible" *ngIf="!esMoto">
       <h3>Tipo de combustible</h3>
       <div class="combustible-opciones">
@@ -43,9 +42,14 @@
     </section>
 
     <section class="panel-parametros">
-      <h3>Valores medidos</h3>
+      <div class="parametros-header">
+        <h3>Valores medidos</h3>
+        <button type="button" class="btn-rellenar" (click)="rellenarValoresAleatorios()" [disabled]="rellenando">
+          {{ rellenando ? 'Obteniendo datos...' : 'Leer datos' }}
+        </button>
+      </div>
 
-      <!-- MOTOS: solo CO y HC (RTE INEN 136) -->
+
       <div class="parametros-moto" *ngIf="esMoto">
         <p class="param-descripcion">Parámetros según RTE INEN 136 — Motos. Límites: CO ≤ 4,5% | HC ≤ 2.500–12.500 ppm</p>
         <div class="param-fila">
@@ -60,7 +64,7 @@
         </div>
       </div>
 
-      <!-- CARROS: Gasolina -->
+
       <p class="param-descripcion" *ngIf="!esMoto && tipoCombustible === 'GASOLINA'">
         Parámetros según NTE INEN 2204 / RTE INEN 017
       </p>
@@ -86,7 +90,7 @@
           <input type="number" [(ngModel)]="o2" placeholder="0.5" min="0" max="25" step="0.1" />
         </div>
       </div>
-      <!-- CARROS: Diesel -->
+
       <p class="param-descripcion" *ngIf="!esMoto && tipoCombustible === 'DIESEL'">
         Parámetros según RTE INEN 017 — vehículos diesel
       </p>

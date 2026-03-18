@@ -4,16 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.service';
+import { ValoresgasesService } from '../../../services/inspeccion_rtv/valoresgases.service';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { DefectosService, Defectos } from '../../../services/defectos_inspeccion/defectos.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { NotificationService } from '../../../services/notification.service';
 import { forkJoin } from 'rxjs';
 
-/**
- * Revisión de Gases - Normativa RTV Ecuador (RTE INEN 017)
- * Primera sección: Control de emisiones contaminantes
- */
+
 @Component({
   selector: 'app-revision-gases',
   standalone: true,
@@ -23,7 +21,7 @@ import { forkJoin } from 'rxjs';
 })
 export class RevisionGases implements OnInit {
 
-  /** Línea Motos = 1, Carros = 2 (según orden en BD) */
+
   readonly LINEA_MOTOS_ID = 1;
 
   turnoId: number | null = null;
@@ -40,26 +38,26 @@ export class RevisionGases implements OnInit {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
   }
 
-  // Parámetros según RTE INEN 017 / NTE INEN 2204 (carros) | RTE INEN 136 (motos)
+
   tipoCombustible: 'GASOLINA' | 'DIESEL' = 'GASOLINA';
-  co = '';        // % CO — Monóxido de carbono
-  hc = '';        // ppm HC — Hidrocarburos no quemados
-  lambda = '';    // λ — Relación aire-combustible (0,97–1,03)
-  o2 = '';        // % O2 — Oxígeno (opcional)
-  opacidad = '';  // % Opacidad (diesel)
+  co = '';
+  hc = '';
+  lambda = '';
+  o2 = '';
+  opacidad = '';
   resultado: 'APROBADO' | 'NO_APROBADO' = 'APROBADO';
   observaciones = '';
 
   cargando = false;
   guardando = false;
+  rellenando = false;
   error = '';
-
-  private turnoConfirmadoIntentado = false;
 
   constructor(
     private router: Router,
     private route: ActivatedRoute,
     private inspeccionService: InspeccionService,
+    private valoresGasesService: ValoresgasesService,
     private turnosService: TurnosService,
     private defectosService: DefectosService,
     private vehiculoService: VehiculoService,
@@ -76,10 +74,7 @@ export class RevisionGases implements OnInit {
       if (this.lineaIdParam === this.LINEA_MOTOS_ID) this.tipoCombustible = 'GASOLINA';
     });
     if (this.turnoId || this.vehiculoId) {
-      setTimeout(() => {
-        this.confirmarTurnoDesdeApi();
-        this.cargarDatos();
-      }, 200);
+      setTimeout(() => this.cargarDatos(), 200);
     }
   }
 
@@ -96,7 +91,6 @@ export class RevisionGases implements OnInit {
       next: (res: any) => {
         this.defectos = res.defectos || [];
         if (res.turno) {
-          this.confirmarTurnoSiAplica(res.turno);
           const vid = (res.turno as any).vehiculoId ?? (res.turno as any).vehiculo?.id;
           this.vehiculoId = vid ? Number(vid) : this.vehiculoId;
         }
@@ -109,31 +103,6 @@ export class RevisionGases implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       }
-    });
-  }
-
-  /** Al entrar a una revisión, si el turno está PAGADO lo pasamos a CONFIRMADO */
-  private confirmarTurnoSiAplica(turno: any): void {
-    const id = this.turnoId ?? turno?.turnoId ?? turno?.id;
-    if (!id) return;
-    const estado = String(turno?.estado || '').toUpperCase();
-    if (estado !== 'PAGADO') return;
-
-    this.turnosService.cambiarEstado(Number(id), 'CONFIRMADO').subscribe({
-      next: () => console.log('[RTV] Turno confirmado:', id),
-      error: (e) => console.warn('[RTV] No se pudo confirmar el turno:', id, e)
-    });
-  }
-
-  /** Respaldo: confirma el turno consultándolo por turnoId (aunque no venga en forkJoin) */
-  private confirmarTurnoDesdeApi(): void {
-    if (this.turnoConfirmadoIntentado) return;
-    if (!this.turnoId) return;
-    this.turnoConfirmadoIntentado = true;
-
-    this.turnosService.getById(this.turnoId).subscribe({
-      next: (t: any) => this.confirmarTurnoSiAplica(t),
-      error: (e) => console.warn('[RTV] No se pudo consultar el turno para confirmar:', this.turnoId, e)
     });
   }
 
@@ -225,6 +194,32 @@ export class RevisionGases implements OnInit {
       error: err => {
         this.guardando = false;
         this.notification.error(err?.error?.message || 'Error al guardar.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+
+  rellenarValoresAleatorios(): void {
+    this.rellenando = true;
+    this.valoresGasesService.obtenerValoresAleatorios(this.tipoCombustible).subscribe({
+      next: (vals) => {
+        if (this.tipoCombustible === 'DIESEL') {
+          this.co = this.hc = this.lambda = this.o2 = '';
+          this.opacidad = vals.opacidad ?? '';
+        } else {
+          this.opacidad = '';
+          this.co = vals.co ?? '';
+          this.hc = vals.hc ?? '';
+          this.lambda = vals.lambda ?? '';
+          this.o2 = vals.o2 ?? '';
+        }
+        this.rellenando = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.rellenando = false;
+        this.notification.error('Error al obtener valores aleatorios.');
         this.cdr.detectChanges();
       }
     });
