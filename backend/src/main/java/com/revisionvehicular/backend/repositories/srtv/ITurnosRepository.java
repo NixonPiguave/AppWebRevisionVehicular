@@ -64,6 +64,31 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
     );
 
     @Modifying
-    @Query(value = "UPDATE rtv_turnos SET estado = :estado WHERE turno_id = :turnoId", nativeQuery = true)
-    int actualizarEstado(@Param("turnoId") Long turnoId, @Param("estado") String estado);
+    @Query(value = "UPDATE rtv_turnos " +
+            "SET estado = :estado, " +
+            "    fecha_cancelado = CASE " +
+            "      WHEN UPPER(:estado) = 'CANCELADO' THEN :fechaCancelado " +
+            "      ELSE fecha_cancelado " +
+            "    END " +
+            ",  validador = fn_generar_validador_turno(" +
+            "        turno_id, " +
+            "        propietario_id, " +
+            "        vehiculo_id, " +
+            "        id_tipo_tramite, " +
+            "        id_tramite, " +
+            "        fecha_inicio, " +
+            "        fecha_fin, " +
+            "        CASE " +
+            "          WHEN UPPER(:estado) = 'CANCELADO' THEN :fechaCancelado " +
+            "          ELSE fecha_cancelado " +
+            "        END, " +
+            "        :estado, " +
+            "        monto_pagado" +
+            "    ) " +
+            "WHERE turno_id = :turnoId", nativeQuery = true)
+    int actualizarEstado(
+            @Param("turnoId") Long turnoId,
+            @Param("estado") String estado,
+            @Param("fechaCancelado") LocalDate fechaCancelado
+    );
 }

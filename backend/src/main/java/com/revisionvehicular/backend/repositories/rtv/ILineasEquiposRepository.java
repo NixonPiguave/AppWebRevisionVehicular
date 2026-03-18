@@ -21,4 +21,7 @@ public interface ILineasEquiposRepository extends JpaRepository<LineasEquipo, Lo
             @Param("p_linea_id") Long lineaId,
             @Param("p_equipo_id") Long equipoId
     );
+
+    // Usado por el CRUD de equipos: obtener la línea asociada (si existe)
+    java.util.Optional<LineasEquipo> findFirstByEquipo_Equipoid(Long equipoid);
 }

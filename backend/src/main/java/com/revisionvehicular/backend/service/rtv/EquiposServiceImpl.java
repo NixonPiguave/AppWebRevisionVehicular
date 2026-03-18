@@ -2,7 +2,9 @@ package com.revisionvehicular.backend.service.rtv;
 
 import com.revisionvehicular.backend.dtos.rtv.EquipoDTO;
 import com.revisionvehicular.backend.entities.rtv.Equipos;
+import com.revisionvehicular.backend.entities.rtv.LineasEquipo;
 import com.revisionvehicular.backend.repositories.rtv.IEquipoRepository;
+import com.revisionvehicular.backend.repositories.rtv.ILineasEquiposRepository;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,20 +16,20 @@ import java.util.stream.Collectors;
 public class EquiposServiceImpl implements IEquiposService {
 
     private final IEquipoRepository repository;
+    private final ILineasEquiposRepository lineasEquiposRepository;
     private final AuditoriaService auditoriaService;
 
     @Autowired
-    public EquiposServiceImpl(IEquipoRepository repository, AuditoriaService auditoriaService) {
+    public EquiposServiceImpl(IEquipoRepository repository, ILineasEquiposRepository lineasEquiposRepository, AuditoriaService auditoriaService) {
         this.repository = repository;
+        this.lineasEquiposRepository = lineasEquiposRepository;
         this.auditoriaService = auditoriaService;
     }
 
     @Override
     public EquipoDTO save(EquipoDTO dto) {
-
-        //  VALIDAR SERIAL ÚNICO ANTES DE INSERTAR
-        if (repository.existsBySerialEquipo(dto.getSerialEquipo())) {
-            throw new RuntimeException("El número de serie ya está registrado");
+        if (dto.getLineaId() == null) {
+            throw new RuntimeException("La línea (lineaId) es obligatoria para guardar el equipo.");
         }
 
         //  VALIDAR CÓDIGO INTERNO ÚNICO ANTES DE INSERTAR
@@ -44,7 +46,8 @@ public class EquiposServiceImpl implements IEquiposService {
                 dto.getCodigoInterno(),
                 dto.getEquipo(),
                 dto.getModelo(),
-                dto.getSerialEquipo()
+                dto.getSerialEquipo(),
+                dto.getLineaId()
         );
 
         Equipos equipo = repository.findAll().stream().filter(e -> e.getSerialEquipo().equals(dto.getSerialEquipo())).findFirst()
@@ -55,19 +58,16 @@ public class EquiposServiceImpl implements IEquiposService {
 
     @Override
     public EquipoDTO update(Long id, EquipoDTO dto) {
+        if (dto.getLineaId() == null) {
+            throw new RuntimeException("La línea (lineaId) es obligatoria para actualizar el equipo.");
+        }
+
         if (!repository.existsById(id)) {
             throw new RuntimeException("Equipo no encontrado con ID: " + id);
         }
 
-        //  VALIDAR SERIAL ÚNICO (solo si cambió)
         Equipos equipoActual = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Equipo no encontrado"));
-
-        if (!equipoActual.getSerialEquipo().equals(dto.getSerialEquipo())) {
-            if (repository.existsBySerialEquipo(dto.getSerialEquipo())) {
-                throw new RuntimeException("El número de serie ya está registrado");
-            }
-        }
 
         // VALIDAR CÓDIGO INTERNO ÚNICO (solo si cambió)
         if (!equipoActual.getCodigoInterno().equals(dto.getCodigoInterno())) {
@@ -85,7 +85,8 @@ public class EquiposServiceImpl implements IEquiposService {
                 dto.getCodigoInterno(),
                 dto.getEquipo(),
                 dto.getModelo(),
-                dto.getSerialEquipo()
+                dto.getSerialEquipo(),
+                dto.getLineaId()
         );
 
         Equipos equipo = repository.findById(id)
@@ -132,6 +133,12 @@ public class EquiposServiceImpl implements IEquiposService {
         dto.setCodigoInterno(equipos.getCodigoInterno());
         dto.setUltimaCalibracion(equipos.getUltimaCalibracion());
         dto.setUltimoMantenimiento(equipos.getUltimoMantenimiento());
+
+        LineasEquipo lineaEquipo = lineasEquiposRepository
+                .findFirstByEquipo_Equipoid(equipos.getEquipoid())
+                .orElse(null);
+        dto.setLineaId(lineaEquipo != null && lineaEquipo.getLinea() != null ? lineaEquipo.getLinea().getLineaid() : null);
+
         return dto;
     }
 }

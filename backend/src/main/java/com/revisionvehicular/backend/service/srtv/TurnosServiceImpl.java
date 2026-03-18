@@ -209,11 +209,11 @@ public class TurnosServiceImpl implements ITurnosService {
     @Override
     @Transactional
     public TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado) {
-        // No dependemos de SP (puede no estar instalado o tener firmas distintas)
         if (!repository.existsById(turnoId)) {
             throw new RuntimeException("Turno no encontrado con ID: " + turnoId);
         }
-        int updated = repository.actualizarEstado(turnoId, nuevoEstado);
+        LocalDate fechaCancelado = LocalDate.now();
+        int updated = repository.actualizarEstado(turnoId, nuevoEstado, fechaCancelado);
         if (updated == 0) {
             throw new RuntimeException("No se pudo actualizar el estado del turno con ID: " + turnoId);
         }
@@ -271,6 +271,7 @@ public class TurnosServiceImpl implements ITurnosService {
         dto.setFechaCancelado(turno.getFechaCancelado());
         dto.setEstado(turno.getEstado());
         dto.setMontoPagado(turno.getMontoPagado());
+        dto.setFechaPagado(turno.getFechaPagado());
         dto.setValidador(turno.getValidador());
         return dto;
     }

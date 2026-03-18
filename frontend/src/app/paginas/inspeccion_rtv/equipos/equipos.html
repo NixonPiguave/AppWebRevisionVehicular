@@ -60,6 +60,7 @@
           <th>Modelo</th>
           <th>Serial</th>
           <th>Código Interno</th>
+          <th>Línea</th>
           <th>Estado</th>
           <th class="th-acciones">Acciones</th>
         </tr>
@@ -71,6 +72,7 @@
           <td>{{ equipo.modelo }}</td>
           <td>{{ equipo.serialEquipo }}</td>
           <td>{{ equipo.codigoInterno }}</td>
+          <td>{{ getLineaNombre(equipo.lineaId) }}</td>
           <td>
             <span
               class="estado-badge"
@@ -100,7 +102,7 @@
         </tr>
 
         <tr *ngIf="equiposPaginados.length === 0 && !error && !cargando">
-          <td colspan="7" class="sin-registros">
+          <td colspan="8" class="sin-registros">
             No se encontraron registros
           </td>
         </tr>
@@ -186,19 +188,14 @@
 
           <!-- Serial con validación -->
           <div class="form-grupo">
-            <label for="serialEquipo">Número de Serie * <span class="campo-unico">(único)</span></label>
+            <label for="serialEquipo">Número de Serie *</label>
             <input
               type="text"
               id="serialEquipo"
               [(ngModel)]="equipoEditando.serialEquipo"
               class="form-input"
-              [class.input-error]="erroresValidacion.serialEquipo"
               placeholder="Ingrese el número de serie"
             />
-            <small class="error-mensaje" *ngIf="erroresValidacion.serialEquipo">
-              <mat-icon>error</mat-icon>
-              {{ erroresValidacion.serialEquipo }}
-            </small>
           </div>
 
 
@@ -223,14 +220,29 @@
         <!-- Columna 2 -->
         <div>
           <div class="form-grupo">
+            <label for="lineaId">Línea *</label>
+            <select
+              id="lineaId"
+              [(ngModel)]="equipoEditando.lineaId"
+              class="form-select"
+            >
+              <option [ngValue]="null" disabled>Seleccione la línea</option>
+              <option *ngFor="let l of lineas" [ngValue]="l.id">
+                {{ l.nombre }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-grupo">
             <label for="influencia">Influencia</label>
-            <input
-              type="number"
+            <select
               id="influencia"
               [(ngModel)]="equipoEditando.influencia"
-              class="form-input"
-              placeholder="0"
-            />
+              class="form-select"
+            >
+              <option [ngValue]="1">SI</option>
+              <option [ngValue]="0">NO</option>
+            </select>
           </div>
 
 
@@ -331,8 +343,12 @@
           <span class="detalle-valor">{{ equipoDetalle.codigoInterno }}</span>
         </div>
         <div class="detalle-item">
+          <span class="detalle-label">Línea:</span>
+          <span class="detalle-valor">{{ getLineaNombre(equipoDetalle.lineaId) }}</span>
+        </div>
+        <div class="detalle-item">
           <span class="detalle-label">Influencia:</span>
-          <span class="detalle-valor">{{ equipoDetalle.influencia }}</span>
+          <span class="detalle-valor">{{ getInfluenciaTexto(equipoDetalle.influencia) }}</span>
         </div>
         <div class="detalle-item">
           <span class="detalle-label">Última Calibración:</span>

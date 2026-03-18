@@ -104,6 +104,9 @@ export class RecepcionComponent implements OnInit {
         (t.estado || '').toUpperCase() !== 'GENERADO'
       );
 
+      // Ordenar de mayor a menor por ID (TRN más reciente primero)
+      activos.sort((a, b) => (b.turnoId ?? 0) - (a.turnoId ?? 0));
+
       if (activos.length === 0) {
         this.cargando = false;
         this.cdr.detectChanges();

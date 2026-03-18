@@ -76,6 +76,8 @@ export class TurnosComponent implements OnInit {
     this.cargarReferenciasPropietarios();
     this.cargarReferenciasVehiculos();
     this.cargarModelosYMarcas();
+    // Mantener el formulario visible para seguir creando tickets sin ocultar el "menú".
+    this.nuevoTurno();
     this.route.queryParams.subscribe(params => {
       if (params['nuevo'] === '1' || params['nuevo'] === 'true') {
         this.nuevoTurno();
@@ -192,7 +194,9 @@ export class TurnosComponent implements OnInit {
         next: (turnoCreado) => {
           this.notification.success('Turno creado correctamente');
           this.cargarTurnos();
-          this.cancelar();
+          // No ocultar el formulario al crear un ticket nuevo.
+          // Resetear el formulario para permitir crear otro.
+          this.nuevoTurno();
 
           // Consultar tarifa y logo en paralelo
           forkJoin({
@@ -272,15 +276,15 @@ export class TurnosComponent implements OnInit {
   }
 
   eliminarTurno(id: number): void {
-    if (confirm('¿Está seguro de eliminar este turno?')) {
-      this.turnosService.delete(id).subscribe({
+    if (confirm('¿Está seguro de cancelar este turno?')) {
+      this.turnosService.cambiarEstado(id, 'CANCELADO').subscribe({
         next: () => {
-          this.notification.success('Turno eliminado correctamente');
+          this.notification.success('Turno cancelado correctamente');
           this.cargarTurnos();
         },
         error: (err) => {
-          console.error('Error al eliminar turno:', err);
-          this.notification.error('Error al eliminar el turno');
+          console.error('Error al cancelar turno:', err);
+          this.notification.error('Error al cancelar el turno');
         }
       });
     }

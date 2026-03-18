@@ -8,6 +8,7 @@ export interface Turnos {
   fechaInicio: string;
   fechaFin?: string;
   fechaCancelado?: string;
+  fechaPagado?: string;
   estado: string;
   montoPagado?: number;
 

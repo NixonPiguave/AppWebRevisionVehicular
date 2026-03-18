@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { EquiposService, Equipo } from '../../../services/inspeccion_rtv/equipos.service';
 import { MatIconModule } from '@angular/material/icon';
 import { NotificationService } from '../../../services/notification.service';
+import { LineasService, Linea } from '../../../services/inspeccion_rtv/lineas.service';
 
 @Component({
   selector: 'app-equipos',
@@ -14,6 +15,7 @@ import { NotificationService } from '../../../services/notification.service';
 })
 export class Equipos implements OnInit {
   equipos: Equipo[] = [];
+  lineas: Linea[] = [];
   cargando: boolean = false;
   error: string = '';
 
@@ -31,19 +33,21 @@ export class Equipos implements OnInit {
 
   //  Errores de validación por campo
   erroresValidacion: {
-    serialEquipo?: string;
     codigoInterno?: string;
     ultimaCalibracion?: string;
     ultimoMantenimiento?: string;
+    lineaId?: string;
   } = {};
 
   constructor(
     private equiposService: EquiposService,
     private cdr: ChangeDetectorRef,
-    private notification: NotificationService
+    private notification: NotificationService,
+    private lineasService: LineasService
   ) {}
 
   ngOnInit(): void {
+    this.cargarLineas();
     this.cargarEquipos();
   }
 
@@ -57,8 +61,31 @@ export class Equipos implements OnInit {
       codigoInterno: '',
       equipo: '',
       modelo: '',
-      serialEquipo: ''
+      serialEquipo: '',
+      lineaId: null
     };
+  }
+
+  cargarLineas(): void {
+    // Siempre reiniciar antes de pedir a BD
+    this.lineas = [];
+    this.lineasService.listarRoles().subscribe({
+      next: (data) => {
+        const lista = (data ?? []) as Linea[];
+        this.lineas = Array.isArray(lista) ? lista : [];
+        console.log('[EQUIPOS] Líneas cargadas:', this.lineas);
+        if (this.lineas.length === 0) {
+          this.notification.warn('No se encontraron líneas de inspección en la base de datos.');
+        }
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('[EQUIPOS] Error al cargar líneas:', err);
+        this.lineas = [];
+        this.notification.error('No se pudieron cargar las líneas. Verifica el backend.');
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   cargarEquipos(): void {
@@ -84,17 +111,21 @@ export class Equipos implements OnInit {
 
   get equiposFiltrados(): Equipo[] {
     if (!this.filtro.trim()) {
-      return this.equipos;
+      return [...this.equipos].sort(
+        (a, b) => (a.equipoid ?? 0) - (b.equipoid ?? 0)
+      );
     }
     const filtroLower = this.filtro.toLowerCase();
-    return this.equipos.filter(
+    return this.equipos
+      .filter(
       (equipo) =>
         equipo.equipo.toLowerCase().includes(filtroLower) ||
         equipo.modelo.toLowerCase().includes(filtroLower) ||
         equipo.serialEquipo.toLowerCase().includes(filtroLower) ||
         equipo.codigoInterno.toLowerCase().includes(filtroLower) ||
         this.getEstadoTexto(equipo.estado).toLowerCase().includes(filtroLower)
-    );
+      )
+      .sort((a, b) => (a.equipoid ?? 0) - (b.equipoid ?? 0));
   }
 
   get equiposPaginados(): Equipo[] {
@@ -119,6 +150,15 @@ export class Equipos implements OnInit {
     return estado === 'A' ? 'Activo' : 'Inactivo';
   }
 
+  getInfluenciaTexto(influencia: number): string {
+    return influencia === 1 ? 'SI' : 'NO';
+  }
+
+  getLineaNombre(lineaId?: number | null): string {
+    if (lineaId == null) return '-';
+    return this.lineas.find(l => l.id === lineaId)?.nombre ?? `Línea #${lineaId}`;
+  }
+
   formatearFecha(fecha: Date | null): string {
     if (!fecha) return 'No registrada';
     const fechaObj = new Date(fecha);
@@ -136,6 +176,7 @@ export class Equipos implements OnInit {
   }
 
   abrirModalCrear(): void {
+    if (this.lineas.length === 0) this.cargarLineas();
     this.modoEdicion = false;
     this.equipoEditando = this.getEquipoVacio();
     this.erroresValidacion = {};
@@ -143,6 +184,7 @@ export class Equipos implements OnInit {
   }
 
   abrirModalEditar(equipo: Equipo): void {
+    if (this.lineas.length === 0) this.cargarLineas();
     this.modoEdicion = true;
     this.equipoEditando = { ...equipo };
     this.erroresValidacion = {};
@@ -181,17 +223,9 @@ export class Equipos implements OnInit {
       return false;
     }
 
-    // Validar unicidad de serial (solo si cambió o es nuevo)
-    if (!this.modoEdicion || this.serialCambio()) {
-      const serialDuplicado = this.equipos.find(
-        e => e.serialEquipo.toLowerCase() === this.equipoEditando.serialEquipo.toLowerCase() &&
-          e.equipoid !== this.equipoEditando.equipoid
-      );
-      if (serialDuplicado) {
-        this.erroresValidacion.serialEquipo = 'Este número de serie ya está registrado';
-        this.notification.error('El número de serie ya está registrado en otro equipo');
-        return false;
-      }
+    if (this.equipoEditando.lineaId == null) {
+      this.notification.error('La línea a la que pertenece el equipo es requerida');
+      return false;
     }
 
     // Validar unicidad de código interno (solo si cambió o es nuevo)
@@ -237,13 +271,6 @@ export class Equipos implements OnInit {
   }
 
 
-  // NUEVO: Detectar si cambió el serial
-  private serialCambio(): boolean {
-    const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
-    return !equipoOriginal || equipoOriginal.serialEquipo !== this.equipoEditando.serialEquipo;
-  }
-
-
   //Detectar si cambió el código interno
   private codigoCambio(): boolean {
     const equipoOriginal = this.equipos.find(e => e.equipoid === this.equipoEditando.equipoid);
@@ -271,14 +298,15 @@ export class Equipos implements OnInit {
       this.equiposService.actualizarEquipo(this.equipoEditando.equipoid, this.equipoEditando).subscribe({
         next: () => {
           console.log('[EQUIPOS] Actualizado OK');
-          this.cargarEquipos();
-          this.cerrarModalForm();
           this.guardando = false;
+          this.notification.success('Equipo modificado correctamente.');
+          this.cerrarModalForm();
+          this.cdr.detectChanges();
+          this.cargarEquipos();
         },
         error: (err) => {
           console.error('[EQUIPOS] Error al actualizar:', err);
           this.manejarErrorBackend(err);
-          this.cargarEquipos();
           this.guardando = false;
         }
       });
@@ -287,14 +315,15 @@ export class Equipos implements OnInit {
       this.equiposService.crearEquipo(this.equipoEditando).subscribe({
         next: () => {
           console.log('[EQUIPOS] Creado OK');
-          this.cargarEquipos();
-          this.cerrarModalForm();
           this.guardando = false;
+          this.notification.success('Equipo guardado correctamente.');
+          this.cerrarModalForm();
+          this.cdr.detectChanges();
+          this.cargarEquipos();
         },
         error: (err) => {
           this.guardando = false;
-          this.cerrarModalForm();
-          this.cargarEquipos();
+          this.manejarErrorBackend(err);
         }
       });
     }
@@ -309,10 +338,7 @@ export class Equipos implements OnInit {
     // Detectar tipo de error por palabras clave
     const mensajeLower = mensajeError.toLowerCase();
 
-    if (mensajeLower.includes('serial') || mensajeLower.includes('serie')) {
-      this.erroresValidacion.serialEquipo = 'El número de serie ya está registrado';
-      this.notification.error('Error: El número de serie ya existe en el sistema');
-    } else if (mensajeLower.includes('codigo') || mensajeLower.includes('código')) {
+    if (mensajeLower.includes('codigo') || mensajeLower.includes('código')) {
       this.erroresValidacion.codigoInterno = 'El código interno ya está registrado';
       this.notification.error('Error: El código interno ya existe en el sistema');
     } else if (mensajeLower.includes('unique') || mensajeLower.includes('duplicate') || mensajeLower.includes('duplicado')) {

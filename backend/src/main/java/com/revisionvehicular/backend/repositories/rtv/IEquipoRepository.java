@@ -21,7 +21,8 @@ public interface IEquipoRepository extends JpaRepository<Equipos, Long> {
             @Param("p_codigo_interno") String pCodigoInterno,
             @Param("p_equipo") String pEquipo,
             @Param("p_modelo") String pModelo,
-            @Param("p_serial_equipo") String pSerialEquipo
+            @Param("p_serial_equipo") String pSerialEquipo,
+            @Param("p_linea_id") Long pLineaId
     );
 
     @Procedure(procedureName = "sp_rtv_equipos_actualizar")
@@ -34,7 +35,8 @@ public interface IEquipoRepository extends JpaRepository<Equipos, Long> {
             @Param("p_codigo_interno") String pCodigoInterno,
             @Param("p_equipo") String pEquipo,
             @Param("p_modelo") String pModelo,
-            @Param("p_serial_equipo") String pSerialEquipo
+            @Param("p_serial_equipo") String pSerialEquipo,
+            @Param("p_linea_id") Long pLineaId
     );
 
      // Buscar equipo por serial (único)

@@ -40,7 +40,8 @@ BEGIN
     UPDATE rtv_turnos
     SET monto_pagado = p_monto_pagado,
         validador    = v_validador,
-        estado       = 'PAGADO'
+        estado       = 'PAGADO',
+        fecha_pagado = CURRENT_DATE
     WHERE turno_id = p_turno_id;
 
 EXCEPTION

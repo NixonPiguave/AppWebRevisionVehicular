@@ -18,7 +18,7 @@ public class Equipos {
     private String equipo;
     @Column(nullable = false, length = 100)
     private String modelo;
-    @Column(name="serial_equipo",nullable = false, length = 100, unique = true)
+    @Column(name="serial_equipo",nullable = false, length = 100)
     private String serialEquipo;
     @Column(name="codigo_interno",nullable = false, length = 100, unique = true)
     private String codigoInterno;

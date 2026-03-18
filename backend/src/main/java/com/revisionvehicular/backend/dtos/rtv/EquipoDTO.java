@@ -13,5 +13,6 @@ public class EquipoDTO {
     private LocalDate ultimoMantenimiento;
     private LocalDate ultimaCalibracion;
     private Integer influencia;
+    private Long lineaId;
     private String estado;
 }

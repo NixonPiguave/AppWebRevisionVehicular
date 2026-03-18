@@ -50,6 +50,9 @@ public class Turnos {
     @Column(name = "monto_pagado")
     private BigDecimal montoPagado;
 
+    @Column(name = "fecha_pagado")
+    private LocalDate fechaPagado;
+
     @Column(name = "validador", length = 64)
     private String validador;
 }

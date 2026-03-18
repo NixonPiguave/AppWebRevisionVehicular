@@ -12,6 +12,7 @@ export interface Equipo {
   equipo: string;
   modelo: string;
   serialEquipo: string;
+  lineaId?: number | null;
 }
 
 @Injectable({
