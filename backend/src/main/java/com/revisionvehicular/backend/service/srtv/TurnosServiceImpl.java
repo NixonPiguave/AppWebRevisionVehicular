@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,6 +26,8 @@ import java.util.stream.Stream;
 
 @Service
 public class TurnosServiceImpl implements ITurnosService {
+
+    private static final List<String> ESTADOS_PARA_INICIAR_INSPECCION = List.of("PAGADO", "CONFIRMADO");
 
     private final ITurnosRepository repository;
     private final ITarifarioTramiteRepository tarifarioRepository;
@@ -123,7 +127,7 @@ public class TurnosServiceImpl implements ITurnosService {
 
     @Override
     public List<TurnosDTO> findTurnosPagados() {
-        return repository.findByEstadoOrderByFechaInicioDesc("PAGADO")
+        return repository.findByEstadoInOrderByFechaInicioDesc(ESTADOS_PARA_INICIAR_INSPECCION)
                 .stream()
                 .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
                 .map(this::toDTO)
@@ -135,7 +139,7 @@ public class TurnosServiceImpl implements ITurnosService {
         if (servicioId == null) {
             return findTurnosPagados();
         }
-        return repository.findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc("PAGADO", servicioId)
+        return repository.findByEstadoInAndServicio_IdTipoTramiteOrderByFechaInicioDesc(ESTADOS_PARA_INICIAR_INSPECCION, servicioId)
                 .stream()
                 .filter(t -> !"FINALIZADO".equalsIgnoreCase(t.getEstado()))
                 .map(this::toDTO)
@@ -154,9 +158,9 @@ public class TurnosServiceImpl implements ITurnosService {
 
         Stream<com.revisionvehicular.backend.entities.srtv.Turnos> stream;
         if (servicioId == null) {
-            stream = repository.findTurnosPagadosWithVehiculoCategoria("PAGADO").stream();
+            stream = repository.findTurnosPagadosWithVehiculoCategoria(ESTADOS_PARA_INICIAR_INSPECCION).stream();
         } else {
-            stream = repository.findTurnosPagadosWithVehiculoCategoriaPorServicio("PAGADO", servicioId).stream();
+            stream = repository.findTurnosPagadosWithVehiculoCategoriaPorServicio(ESTADOS_PARA_INICIAR_INSPECCION, servicioId).stream();
         }
 
         return stream
@@ -195,21 +199,15 @@ public class TurnosServiceImpl implements ITurnosService {
     @Override
     @Transactional
     public TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado) {
-        Turnos turno = repository.findById(turnoId)
-                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
-
-        repository.actualizarTurno(
-                turnoId,
-                turno.getPropietario() != null ? turno.getPropietario().getIdPropietario() : null,
-                turno.getVehiculo()    != null ? turno.getVehiculo().getVehiculoid()       : null,
-                turno.getServicio()    != null ? turno.getServicio().getIdTipoTramite()    : null,
-                turno.getTramite()     != null ? turno.getTramite().getIdTramite()         : null,
-                turno.getFechaInicio(),
-                turno.getFechaFin(),
-                turno.getFechaCancelado(),
-                nuevoEstado
-        );
-
+        // No dependemos de SP (puede no estar instalado o tener firmas distintas)
+        if (!repository.existsById(turnoId)) {
+            throw new RuntimeException("Turno no encontrado con ID: " + turnoId);
+        }
+        int updated = repository.actualizarEstado(turnoId, nuevoEstado);
+        if (updated == 0) {
+            throw new RuntimeException("No se pudo actualizar el estado del turno con ID: " + turnoId);
+        }
+        auditoriaService.registrar("UPDATE", "Turnos", "Cambió estado de turno ID " + turnoId + " a " + nuevoEstado);
         return findById(turnoId);
     }
 
@@ -224,9 +222,15 @@ public class TurnosServiceImpl implements ITurnosService {
                     .map(this::toMetodoDTO)
                     .collect(Collectors.toList());
         }
-        // Métodos ya realizados: desde rtv_detalle_inspeccion (el método se guarda en el detalle)
+
+        // Métodos ya realizados: dentro del rango de fechas del turno (evita contaminar con otros turnos del mismo vehículo)
+        LocalDate fi = turno.getFechaInicio();
+        LocalDate ff = turno.getFechaFin();
+        LocalDateTime desde = (fi != null ? fi : LocalDate.now()).atStartOfDay();
+        LocalDateTime hasta = (ff != null ? ff.plusDays(1).atStartOfDay().minusNanos(1) : LocalDateTime.now());
+
         Set<Long> metodoIdsRealizados = detalleInspeccionRepository
-                .findMetodoIdsRealizadosPorVehiculo(vehiculoId)
+                .findMetodoIdsRealizadosPorVehiculoYFecha(vehiculoId, desde, hasta)
                 .stream()
                 .filter(id -> id != null)
                 .collect(Collectors.toSet());

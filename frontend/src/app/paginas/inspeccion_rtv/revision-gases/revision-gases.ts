@@ -54,6 +54,8 @@ export class RevisionGases implements OnInit {
   guardando = false;
   error = '';
 
+  private turnoConfirmadoIntentado = false;
+
   constructor(
     private router: Router,
     private route: ActivatedRoute,
@@ -74,7 +76,10 @@ export class RevisionGases implements OnInit {
       if (this.lineaIdParam === this.LINEA_MOTOS_ID) this.tipoCombustible = 'GASOLINA';
     });
     if (this.turnoId || this.vehiculoId) {
-      setTimeout(() => this.cargarDatos(), 200);
+      setTimeout(() => {
+        this.confirmarTurnoDesdeApi();
+        this.cargarDatos();
+      }, 200);
     }
   }
 
@@ -91,6 +96,7 @@ export class RevisionGases implements OnInit {
       next: (res: any) => {
         this.defectos = res.defectos || [];
         if (res.turno) {
+          this.confirmarTurnoSiAplica(res.turno);
           const vid = (res.turno as any).vehiculoId ?? (res.turno as any).vehiculo?.id;
           this.vehiculoId = vid ? Number(vid) : this.vehiculoId;
         }
@@ -103,6 +109,31 @@ export class RevisionGases implements OnInit {
         this.cargando = false;
         this.cdr.detectChanges();
       }
+    });
+  }
+
+  /** Al entrar a una revisión, si el turno está PAGADO lo pasamos a CONFIRMADO */
+  private confirmarTurnoSiAplica(turno: any): void {
+    const id = this.turnoId ?? turno?.turnoId ?? turno?.id;
+    if (!id) return;
+    const estado = String(turno?.estado || '').toUpperCase();
+    if (estado !== 'PAGADO') return;
+
+    this.turnosService.cambiarEstado(Number(id), 'CONFIRMADO').subscribe({
+      next: () => console.log('[RTV] Turno confirmado:', id),
+      error: (e) => console.warn('[RTV] No se pudo confirmar el turno:', id, e)
+    });
+  }
+
+  /** Respaldo: confirma el turno consultándolo por turnoId (aunque no venga en forkJoin) */
+  private confirmarTurnoDesdeApi(): void {
+    if (this.turnoConfirmadoIntentado) return;
+    if (!this.turnoId) return;
+    this.turnoConfirmadoIntentado = true;
+
+    this.turnosService.getById(this.turnoId).subscribe({
+      next: (t: any) => this.confirmarTurnoSiAplica(t),
+      error: (e) => console.warn('[RTV] No se pudo consultar el turno para confirmar:', this.turnoId, e)
     });
   }
 

@@ -7,6 +7,8 @@ import { Servicio, ServicioService } from '../../../services/administracion/serv
 import { LineasService, Linea } from '../../../services/inspeccion_rtv/lineas.service';
 import { NotificationService } from '../../../services/notification.service';
 import { obtenerRutaPorMetodo } from '../../../config/metodo-inspeccion-routes.config';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-turnos-pagados',
@@ -85,9 +87,39 @@ export class TurnosPagadosComponent implements OnInit {
     this.error = '';
     this.turnosService.getPagados(undefined, this.lineaSeleccionada.id).subscribe({
       next: (data: Turnos[]) => {
-        this.turnos = data;
-        this.cargando = false;
-        this.cdr.detectChanges();
+        const lista = data ?? [];
+        if (lista.length === 0) {
+          this.turnos = [];
+          this.cargando = false;
+          this.cdr.detectChanges();
+          return;
+        }
+
+        // Ocultar turnos que ya NO tienen métodos pendientes (ya se hicieron las 3 inspecciones)
+        forkJoin(
+          lista.map(t =>
+            this.turnosService.getMetodosInspeccionPendientes(t.turnoId as number).pipe(
+              map(metodos => ({ turno: t, pendientes: metodos ?? [] })),
+              // Si falla la consulta, NO ocultamos el turno (mejor mostrarlo que perderlo)
+              catchError(() => of({ turno: t, pendientes: [{ id: -1, nombre: '__error__' }] }))
+            )
+          )
+        ).subscribe({
+          next: (res) => {
+            this.turnos = res
+              .filter(x => (x.pendientes?.length ?? 0) > 0)
+              .map(x => x.turno);
+            this.cargando = false;
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Error filtrando turnos por métodos pendientes:', err);
+            // Fallback: mostrar sin filtrar
+            this.turnos = lista;
+            this.cargando = false;
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: (err) => {
         console.error('Error al cargar turnos pagados:', err);

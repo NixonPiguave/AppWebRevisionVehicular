@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.repositories.srtv;
 
 import com.revisionvehicular.backend.entities.srtv.Turnos;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -18,11 +19,15 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     List<Turnos> findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(String estado, Long idTipoTramite);
 
-    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado = :estado ORDER BY t.fechaInicio DESC")
-    List<Turnos> findTurnosPagadosWithVehiculoCategoria(@Param("estado") String estado);
+    List<Turnos> findByEstadoInOrderByFechaInicioDesc(List<String> estados);
 
-    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado = :estado AND t.servicio.idTipoTramite = :servicioId ORDER BY t.fechaInicio DESC")
-    List<Turnos> findTurnosPagadosWithVehiculoCategoriaPorServicio(@Param("estado") String estado, @Param("servicioId") Long servicioId);
+    List<Turnos> findByEstadoInAndServicio_IdTipoTramiteOrderByFechaInicioDesc(List<String> estados, Long idTipoTramite);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado IN :estados ORDER BY t.fechaInicio DESC")
+    List<Turnos> findTurnosPagadosWithVehiculoCategoria(@Param("estados") List<String> estados);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.subcategoria s LEFT JOIN FETCH s.categoria c WHERE t.estado IN :estados AND t.servicio.idTipoTramite = :servicioId ORDER BY t.fechaInicio DESC")
+    List<Turnos> findTurnosPagadosWithVehiculoCategoriaPorServicio(@Param("estados") List<String> estados, @Param("servicioId") Long servicioId);
 
     // Último turno insertado (mayor ID)
     Turnos findTopByOrderByTurnoIdDesc();
@@ -57,4 +62,8 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("p_turno_id") Long turnoId,
             @Param("p_monto_pagado") BigDecimal montoPagado
     );
+
+    @Modifying
+    @Query(value = "UPDATE rtv_turnos SET estado = :estado WHERE turno_id = :turnoId", nativeQuery = true)
+    int actualizarEstado(@Param("turnoId") Long turnoId, @Param("estado") String estado);
 }

@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Repository
 public interface IDetalleInspeccionRepository extends JpaRepository<DetalleInspeccion, Long> {
@@ -16,6 +17,15 @@ public interface IDetalleInspeccionRepository extends JpaRepository<DetalleInspe
             "JOIN rtv_inspeccion i ON di.inspeccion_id = i.inspeccion_id " +
             "WHERE i.vehiculo_id = :vehiculoId", nativeQuery = true)
     List<Long> findMetodoIdsRealizadosPorVehiculo(@Param("vehiculoId") Long vehiculoId);
+
+    @Query(value = "SELECT DISTINCT di.metodo_inspeccion_id FROM rtv_detalle_inspeccion di " +
+            "JOIN rtv_inspeccion i ON di.inspeccion_id = i.inspeccion_id " +
+            "WHERE i.vehiculo_id = :vehiculoId AND i.fecha_inspeccion BETWEEN :desde AND :hasta", nativeQuery = true)
+    List<Long> findMetodoIdsRealizadosPorVehiculoYFecha(
+            @Param("vehiculoId") Long vehiculoId,
+            @Param("desde") LocalDateTime desde,
+            @Param("hasta") LocalDateTime hasta
+    );
 
     @Procedure(procedureName = "sp_insertar_detalle_inspeccion")
     void insertarDetalleInspeccion(
