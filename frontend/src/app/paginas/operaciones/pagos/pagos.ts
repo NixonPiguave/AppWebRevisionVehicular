@@ -308,7 +308,7 @@ export class PagosComponent implements OnInit {
     if (sinPagar.length === 0) return of(void 0);
 
     const propietarioIds = [...new Set(sinPagar.map(t => t.propietarioId))];
-    const vehiculoIds = [...new Set(sinPagar.map(t => t.vehiculoId))];
+    const vehiculoIds = [...new Set(sinPagar.map(t => t.vehiculoId).filter((x): x is number => typeof x === 'number'))];
 
     const propietarios$ = forkJoin(
       propietarioIds.map(id =>
@@ -348,7 +348,7 @@ export class PagosComponent implements OnInit {
           return {
             ...t,
             propietarioNombre: this.propietarioNombrePorId.get(t.propietarioId),
-            vehiculoDescripcion: this.vehiculoDescripcionPorId.get(t.vehiculoId),
+            vehiculoDescripcion: (t.vehiculoId != null) ? this.vehiculoDescripcionPorId.get(t.vehiculoId) : '-',
           };
         });
       })

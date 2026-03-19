@@ -33,10 +33,11 @@ public class TurnosController {
 
     @GetMapping
     public ResponseEntity<List<TurnosDTO>> listar(
-            @RequestParam(required = false) String estado
+            @RequestParam(required = false) String estado,
+            @RequestParam(required = false) Long servicioId
     ) {
-        if (estado != null && !estado.isBlank()) {
-            return ResponseEntity.ok(service.findTurnosPorEstado(estado));
+        if ((estado != null && !estado.isBlank()) || servicioId != null) {
+            return ResponseEntity.ok(service.findTurnosPorEstadoYServicio(estado, servicioId));
         }
         return ResponseEntity.ok(service.findAll());
     }

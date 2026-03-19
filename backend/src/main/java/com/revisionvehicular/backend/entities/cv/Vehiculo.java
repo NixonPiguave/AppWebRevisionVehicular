@@ -25,6 +25,13 @@ public class Vehiculo {
     private String chasis;
     @Column(nullable = false, length = 50)
     private String matricula;
+    @Column(name = "placa_anterior", length = 10)
+    private String placaAnterior;
+    @Column(name = "codigo_motor", length = 50)
+    private String codigoMotor;
+    /** Identificador único de matrícula vehicular (no confundir con placa). */
+    @Column(name = "numero_matricula_vehicular", length = 20, unique = true)
+    private String numeroMatriculaVehicular;
     @Column(name = "VIN",nullable = false, length = 50)
     private String vin;
     @ManyToOne

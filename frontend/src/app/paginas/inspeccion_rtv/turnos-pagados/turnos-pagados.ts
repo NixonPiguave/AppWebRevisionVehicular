@@ -120,7 +120,7 @@ export class TurnosPagadosComponent implements OnInit {
 
         // Enriquecer con nombre de propietario y marca/modelo del vehículo
         const propietarioIds = [...new Set(activos.map(t => t.propietarioId))];
-        const vehiculoIds = [...new Set(activos.map(t => t.vehiculoId))];
+        const vehiculoIds = [...new Set(activos.map(t => t.vehiculoId).filter((x): x is number => typeof x === 'number'))];
 
         const propietarios$ = forkJoin(
           propietarioIds.map(id =>
@@ -155,7 +155,7 @@ export class TurnosPagadosComponent implements OnInit {
             const enriquecidos: Turnos[] = activos.map(t => ({
               ...t,
               propietarioNombre: propMap.get(t.propietarioId),
-              vehiculoDescripcion: vehMap.get(t.vehiculoId),
+              vehiculoDescripcion: (t.vehiculoId != null) ? vehMap.get(t.vehiculoId) : '-',
             }));
 
             this.filtrarPorMetodosInspeccionPendientes(enriquecidos);

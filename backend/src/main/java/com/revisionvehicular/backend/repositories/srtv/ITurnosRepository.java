@@ -19,6 +19,8 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     List<Turnos> findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(String estado, Long idTipoTramite);
 
+    List<Turnos> findByServicio_IdTipoTramiteOrderByFechaInicioDesc(Long idTipoTramite);
+
     List<Turnos> findByEstadoInOrderByFechaInicioDesc(List<String> estados);
 
     List<Turnos> findByEstadoInAndServicio_IdTipoTramiteOrderByFechaInicioDesc(List<String> estados, Long idTipoTramite);
@@ -91,4 +93,8 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
             @Param("estado") String estado,
             @Param("fechaCancelado") LocalDate fechaCancelado
     );
+
+    @Modifying
+    @Query(value = "UPDATE rtv_turnos SET vehiculo_id = :vehiculoId WHERE turno_id = :turnoId", nativeQuery = true)
+    int asignarVehiculo(@Param("turnoId") Long turnoId, @Param("vehiculoId") Long vehiculoId);
 }

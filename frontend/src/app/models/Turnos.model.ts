@@ -1,7 +1,7 @@
 export interface Turnos {
   turnoId?: number;
   propietarioId: number;
-  vehiculoId: number;
+  vehiculoId: number | null;
   servicioId: number;
   tramiteId?: number;
   entidadId?: number;

@@ -124,6 +124,10 @@
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">storage</mat-icon>
               Registro Base Única
             </a>
+            <a *ngIf="puedeVer('menu_improntas')" class="submenu-item" routerLink="/inicio/gestion_vehicular/improntas">
+              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">fingerprint</mat-icon>
+              Improntas
+            </a>
             <a *ngIf="puedeVer('menu_baja')" class="submenu-item" (click)="irATramiteRapido(12)">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">remove_circle_outline</mat-icon>
               Baja
@@ -296,6 +300,9 @@
 
           <div class="submenu" [class.open]="antTramitesOpen && !sidebarCollapsed">
             <a routerLink="/inicio/ant/Calendarizacion-Matriculacion" routerLinkActive="active" class="submenu-item">Calendarización Matriculación</a>
+            <a *ngIf="puedeVer('menu_solicitudes_placas')" routerLink="/inicio/ant/solicitudes-placas" routerLinkActive="active" class="submenu-item">
+              Solicitudes de placas
+            </a>
             <a class="submenu-item">Tipo de Trámite</a>
             <a class="submenu-item">Tipos de Excepción</a>
           </div>

@@ -37,6 +37,7 @@ import {TipoVehiculoComponent} from './paginas/catalogos_vehiculos/tipo-vehiculo
 import {
   CalendarizacionMatriculacionComponent
 } from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
+import { SolicitudesPlacasComponent } from './paginas/ant/solicitudes-placas/solicitudes-placas';
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
@@ -49,6 +50,7 @@ import { RegistroObservacionesComponent } from './paginas/gestion_vehicular/regi
 import { RegistroIncidentesComponent } from './paginas/gestion_vehicular/registro-incidentes/registro-incidentes';
 import { AnulacionTramitesComponent } from './paginas/gestion_vehicular/anulacion-tramites/anulacion-tramites';
 import { RegistroBaseUnicaComponent } from './paginas/gestion_vehicular/registro-base-unica/registro-base-unica';
+import { ImprontasComponent } from './paginas/gestion_vehicular/improntas/improntas';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { HistorialTurnosComponent } from './paginas/operaciones/historial-turnos/historial-turnos';
@@ -113,6 +115,7 @@ export const routes: Routes = [
       // GESTIÓN VEHICULAR
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
       { path: 'gestion_vehicular/vehiculo', component: VehiculoComponent },
+      { path: 'gestion_vehicular/improntas', component: ImprontasComponent },
       { path: 'gestion_vehicular/bloqueo-vehiculo', component: BloqueoVehiculoComponent },
       { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
       { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },
@@ -123,6 +126,7 @@ export const routes: Routes = [
 
       // ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
+      { path: 'ant/solicitudes-placas', component: SolicitudesPlacasComponent },
 
       // ADMINISTRACIÓN - TURNOS
       { path: 'administracion/turnos', component: TurnosComponent },

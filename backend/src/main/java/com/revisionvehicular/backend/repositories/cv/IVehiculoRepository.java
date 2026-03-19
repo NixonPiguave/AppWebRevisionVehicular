@@ -59,4 +59,6 @@ public interface IVehiculoRepository extends JpaRepository<Vehiculo, Long> {
     Optional<Vehiculo> findByVin(String vin);
 
     List<Vehiculo> findByMatriculaContainingIgnoreCase(String matricula);
+
+    boolean existsByNumeroMatriculaVehicular(String numeroMatriculaVehicular);
 }

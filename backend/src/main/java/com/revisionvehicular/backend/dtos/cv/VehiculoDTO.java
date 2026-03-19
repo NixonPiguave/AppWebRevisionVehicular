@@ -7,6 +7,9 @@ public class VehiculoDTO {
     private Long id;
     private Long propietarioId;
     private String matricula;
+    private String placaAnterior;
+    private String codigoMotor;
+    private String numeroMatriculaVehicular;
     private String chasis;
     private String vin;
     private Long modeloVehiculoId;

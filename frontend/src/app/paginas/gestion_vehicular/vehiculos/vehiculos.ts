@@ -1,7 +1,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
 
@@ -26,6 +26,12 @@ import {
   PropietarioService
 } from '../../../services/gestion_vehicular/propietario.service';
 import { NotificationService } from '../../../services/notification.service';
+import { Servicio, ServicioService } from '../../../services/administracion/servicio.service';
+import {
+  RegistroVehicularBaseUnicaService,
+  TurnoRegistroBaseUnica,
+  PlacaDisponible
+} from '../../../services/rtv/registro-vehicular-base-unica.service';
 
 @Component({
   selector: 'app-vehiculo',
@@ -37,6 +43,15 @@ import { NotificationService } from '../../../services/notification.service';
 export class VehiculoComponent implements OnInit {
 
   vehiculos: Vehiculo[] = [];
+  vista: 'REGISTRO_BASE_UNICA' | 'VEHICULOS' = 'REGISTRO_BASE_UNICA';
+  servicioRegistroBaseUnicaId: number | null = null;
+  turnosRegistro: TurnoRegistroBaseUnica[] = [];
+  cargandoTurnosRegistro = false;
+  placasDisponibles: PlacaDisponible[] = [];
+  placaDisponibleIdSeleccionada: number | null = null;
+  turnoRegistroSeleccionado: TurnoRegistroBaseUnica | null = null;
+  improntaChasisTipo: 'FISICA' | 'OCULAR' | 'INACCESIBLE' = 'FISICA';
+  improntaMotorTipo: 'FISICA' | 'OCULAR' | 'INACCESIBLE' = 'FISICA';
   ambito: AmbitoOperacional[] = [];
   capacidadCarga: CapacidadCarga[] = [];
   categoria: Categoria[] = [];
@@ -86,14 +101,158 @@ export class VehiculoComponent implements OnInit {
   constructor(
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
+    private servicioService: ServicioService,
+    private registroBaseUnicaService: RegistroVehicularBaseUnicaService,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private notification: NotificationService
   ) {}
 
   ngOnInit(): void {
-    this.cargarDatos();
+    this.resolverServicioRegistroBaseUnicaYTurnos();
     this.cargarDatosCatalogo();
     this.cargarPropietarios();
+    this.route.queryParams.subscribe(params => {
+      const turnoId = params['turnoId'] ? Number(params['turnoId']) : null;
+      if (turnoId && this.vista === 'REGISTRO_BASE_UNICA') {
+        // cuando carguen turnos, intentamos abrir el modal
+        const intentar = () => {
+          const t = this.turnosRegistro.find(x => x.turnoId === turnoId);
+          if (t) this.abrirRegistroImpronta(t);
+        };
+        setTimeout(intentar, 500);
+      }
+    });
+  }
+
+  private resolverServicioRegistroBaseUnicaYTurnos(): void {
+    this.cargando = true;
+    this.servicioService.listar().subscribe({
+      next: (servicios: Servicio[]) => {
+        const s = (servicios ?? []).find(x => {
+          const n = (x.nombre ?? '').toUpperCase();
+          return n.includes('BASE') && (n.includes('ÚNICA') || n.includes('UNICA')) && n.includes('REGIST');
+        });
+        this.servicioRegistroBaseUnicaId = s?.idTipoTramite ?? null;
+        this.cargando = false;
+        this.cdr.detectChanges();
+        if (this.servicioRegistroBaseUnicaId != null) {
+          this.cargarTurnosRegistro();
+        } else {
+          this.vista = 'VEHICULOS';
+          this.cargarDatos();
+        }
+      },
+      error: () => {
+        this.cargando = false;
+        this.vista = 'VEHICULOS';
+        this.cargarDatos();
+      }
+    });
+  }
+
+  cambiarVista(v: 'REGISTRO_BASE_UNICA' | 'VEHICULOS'): void {
+    this.vista = v;
+    if (v === 'VEHICULOS') {
+      this.cargarDatos();
+    } else if (this.servicioRegistroBaseUnicaId != null) {
+      this.cargarTurnosRegistro();
+    }
+  }
+
+  cargarTurnosRegistro(): void {
+    if (this.servicioRegistroBaseUnicaId == null) return;
+    this.cargandoTurnosRegistro = true;
+    this.turnosRegistro = [];
+    this.registroBaseUnicaService.listarTurnosEnProceso(this.servicioRegistroBaseUnicaId).subscribe({
+      next: (data) => {
+        this.turnosRegistro = data ?? [];
+        this.cargandoTurnosRegistro = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.turnosRegistro = [];
+        this.cargandoTurnosRegistro = false;
+        this.notification.error('No se pudieron cargar los turnos EN_PROCESO para registro base única.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  abrirRegistroImpronta(turno: TurnoRegistroBaseUnica): void {
+    this.turnoRegistroSeleccionado = turno;
+    this.placaDisponibleIdSeleccionada = null;
+    this.improntaChasisTipo = 'FISICA';
+    this.improntaMotorTipo = 'FISICA';
+
+    this.modoEdicion = false;
+    this.vehiculoEditando = this.vehiculoVacio();
+    this.vehiculoEditando.propietarioId = turno.propietarioId ?? 0;
+    this.filtroPropietario = turno.propietarioNombre ?? '';
+    this.mostrarModalForm = true;
+
+    this.registroBaseUnicaService.listarPlacasDisponibles().subscribe({
+      next: (placas) => {
+        this.placasDisponibles = placas ?? [];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.placasDisponibles = [];
+        this.notification.error('No se pudieron cargar placas disponibles.');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  private registrarBaseUnica(): void {
+    if (!this.turnoRegistroSeleccionado) {
+      this.notification.error('Debe seleccionar un turno.');
+      return;
+    }
+    if (!this.placaDisponibleIdSeleccionada) {
+      this.notification.error('Debe seleccionar una placa disponible.');
+      return;
+    }
+    if (!this.vehiculoEditando.codigoMotor || !this.vehiculoEditando.codigoMotor.trim()) {
+      this.notification.error('El código de motor es obligatorio.');
+      return;
+    }
+    if (!this.vehiculoEditando.chasis.trim()) {
+      this.notification.error('El chasis es obligatorio');
+      return;
+    }
+    if (!this.vehiculoEditando.vin.trim()) {
+      this.notification.error('El VIN es obligatorio');
+      return;
+    }
+    if (this.vehiculoEditando.capacidadPasajeros <= 0) {
+      this.notification.error('La capacidad de pasajeros debe ser mayor a 0');
+      return;
+    }
+    if (!this.vehiculoEditando.tipoVehiculoId) {
+      this.notification.error('Debe seleccionar un tipo de vehículo');
+      return;
+    }
+
+    this.guardando = true;
+    this.registroBaseUnicaService.registrar({
+      turnoId: this.turnoRegistroSeleccionado.turnoId,
+      placaDisponibleId: this.placaDisponibleIdSeleccionada,
+      vehiculo: { ...this.vehiculoEditando, id: null, matricula: '' },
+      improntaChasisTipo: this.improntaChasisTipo,
+      improntaMotorTipo: this.improntaMotorTipo,
+    }).subscribe({
+      next: () => {
+        this.notification.success('Vehículo registrado e impronta generada.');
+        this.guardando = false;
+        this.cerrarModalForm();
+        this.cargarTurnosRegistro();
+      },
+      error: () => {
+        this.notification.error('Error al registrar el vehículo para base única.');
+        this.guardando = false;
+      }
+    });
   }
 
   private vehiculoVacio(): Vehiculo {
@@ -257,9 +416,16 @@ export class VehiculoComponent implements OnInit {
 
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
+    this.turnoRegistroSeleccionado = null;
+    this.placasDisponibles = [];
+    this.placaDisponibleIdSeleccionada = null;
   }
 
   guardar(): void {
+    if (this.vista === 'REGISTRO_BASE_UNICA' && this.turnoRegistroSeleccionado) {
+      this.registrarBaseUnica();
+      return;
+    }
     if (!this.vehiculoEditando.propietarioId || this.vehiculoEditando.propietarioId <= 0) {
       this.notification.error('Debe seleccionar un propietario');
       return;

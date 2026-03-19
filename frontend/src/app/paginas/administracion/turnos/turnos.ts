@@ -53,7 +53,7 @@ export class TurnosComponent implements OnInit {
   marcas: Marca[] = [];
 
   turnoForm: Turnos = {
-    propietarioId: 0, vehiculoId: 0, servicioId: 0, fechaInicio: '', estado: 'GENERADO'
+    propietarioId: 0, vehiculoId: null, servicioId: 0, fechaInicio: '', estado: 'GENERADO'
   };
 
   constructor(
@@ -132,7 +132,7 @@ export class TurnosComponent implements OnInit {
 
     this.turnoForm = {
       propietarioId: 0,
-      vehiculoId: 0,
+      vehiculoId: null,
       servicioId: 0,
       fechaInicio,
       estado: 'GENERADO'
@@ -150,14 +150,26 @@ export class TurnosComponent implements OnInit {
     if (this.turnoForm.vehiculoId)    this.cargarVehiculoPorId(this.turnoForm.vehiculoId);
   }
 
+  esServicioRegistroVehicular(): boolean {
+    const svc = this.servicios.find(s => s.idTipoTramite === this.turnoForm.servicioId);
+    const nombre = (svc?.nombre ?? '').toUpperCase();
+    return nombre.includes('BASE') && nombre.includes('ÚNICA') && nombre.includes('REGIST');
+  }
+
   guardarTurno(): void {
     if (!this.turnoForm.propietarioId || this.turnoForm.propietarioId <= 0) {
       this.notification.error('Debe seleccionar un propietario por cédula');
       return;
     }
-    if (!this.turnoForm.vehiculoId || this.turnoForm.vehiculoId <= 0) {
-      this.notification.error('Debe seleccionar un vehículo por placa');
-      return;
+    if (!this.esServicioRegistroVehicular()) {
+      if (!this.turnoForm.vehiculoId || this.turnoForm.vehiculoId <= 0) {
+        this.notification.error('Debe seleccionar un vehículo por placa');
+        return;
+      }
+    } else {
+      // En este trámite no se selecciona vehículo en la etapa de turnos
+      this.turnoForm.vehiculoId = null;
+      this.vehiculoSeleccionadoInfo = null;
     }
     if (!this.turnoForm.servicioId || this.turnoForm.servicioId <= 0) {
       this.notification.error('Debe seleccionar un servicio');
@@ -461,7 +473,7 @@ export class TurnosComponent implements OnInit {
 
   limpiarVehiculo(): void {
     this.vehiculoSeleccionadoInfo = null;
-    this.turnoForm.vehiculoId = 0;
+    this.turnoForm.vehiculoId = null;
     this.cdr.detectChanges();
   }
 
@@ -512,8 +524,8 @@ export class TurnosComponent implements OnInit {
     return p ? p.nombre : id.toString();
   }
 
-  obtenerPlacaVehiculo(id?: number): string {
-    if (!id) return '-';
+  obtenerPlacaVehiculo(id?: number | null): string {
+    if (id == null) return '-';
     const v = this.vehiculosMapa.get(id);
     return v ? v.matricula : id.toString();
   }

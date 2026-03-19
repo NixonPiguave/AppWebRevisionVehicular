@@ -6,6 +6,9 @@ export interface Vehiculo {
   id: number | null;
   propietarioId: number;
   matricula: string;
+  placaAnterior?: string;
+  codigoMotor?: string;
+  numeroMatriculaVehicular?: string;
   chasis: string;
   vin: string;
   modeloVehiculoId: number;

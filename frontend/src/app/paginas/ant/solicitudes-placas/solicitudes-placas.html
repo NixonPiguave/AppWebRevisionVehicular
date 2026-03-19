@@ -1,0 +1,80 @@
+<div class="rtv-container">
+  <div class="rtv-header">
+    <div class="header-titulo">
+      <mat-icon class="header-icono">confirmation_number</mat-icon>
+      <div>
+        <h2>Solicitudes de placas (simulación ANT)</h2>
+        <div class="sub">Se muestran solo solicitudes en estado <b>PENDIENTE</b>.</div>
+      </div>
+    </div>
+    <button class="btn-refrescar" (click)="cargarPendientes()">
+      <mat-icon>refresh</mat-icon> Refrescar
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <mat-icon>add</mat-icon> Nueva solicitud
+    </div>
+    <div class="form-grid">
+      <div class="form-grupo">
+        <label>Cantidad</label>
+        <input type="number" [(ngModel)]="cantidad" class="form-input" min="1" max="500" />
+      </div>
+      <div class="form-grupo">
+        <label>Provincia (1ra letra)</label>
+        <input type="text" [(ngModel)]="letraProvincia" class="form-input" maxlength="1" />
+      </div>
+      <div class="form-grupo">
+        <label>Tipo servicio</label>
+        <select [(ngModel)]="tipoServicio" class="form-select">
+          <option value="PARTICULAR">PARTICULAR</option>
+          <option value="PUBLICO">PUBLICO</option>
+          <option value="ESTATAL">ESTATAL</option>
+        </select>
+      </div>
+      <div class="form-grupo acciones">
+        <button class="btn-primary" (click)="crearSolicitud()">
+          <mat-icon>send</mat-icon> Solicitar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cargando" *ngIf="cargando">
+    <div class="spinner"></div> Cargando...
+  </div>
+
+  <div class="tabla-contenedor" *ngIf="!cargando">
+    <table class="rtv-tabla">
+      <thead>
+      <tr>
+        <th>ID</th>
+        <th>Fecha solicitud</th>
+        <th>Provincia</th>
+        <th>Tipo servicio</th>
+        <th>Cantidad</th>
+        <th class="th-acciones">Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let s of solicitudes">
+        <td>{{ s.idSolicitud }}</td>
+        <td>{{ s.fechaSolicitud | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ s.letraProvincia }}</td>
+        <td>{{ s.tipoServicio }}</td>
+        <td>{{ s.cantidad }}</td>
+        <td class="td-acciones">
+          <button class="btn-recibir" (click)="recibir(s)">
+            <mat-icon>download</mat-icon> Recibir
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="solicitudes.length===0">
+        <td colspan="6" class="sin-registros">No hay solicitudes pendientes.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

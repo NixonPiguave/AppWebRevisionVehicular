@@ -1,0 +1,60 @@
+<div class="rtv-container">
+  <div class="rtv-header">
+    <div class="header-titulo">
+      <mat-icon class="header-icono">fingerprint</mat-icon>
+      <div>
+        <h2>Improntas</h2>
+        <div class="sub">Buscar por placa y visualizar registros de impronta.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-row">
+      <div class="form-grupo">
+        <label>Placa</label>
+        <input class="form-input" type="text" [(ngModel)]="placa" (keyup.enter)="buscar()" placeholder="Ej: PBA1234" />
+      </div>
+      <button class="btn-buscar" (click)="buscar()">
+        <mat-icon>search</mat-icon> Buscar
+      </button>
+    </div>
+  </div>
+
+  <div class="cargando" *ngIf="cargando">
+    <div class="spinner"></div> Cargando...
+  </div>
+
+  <div class="tabla-contenedor" *ngIf="!cargando">
+    <table class="rtv-tabla">
+      <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Placa</th>
+        <th>Código impronta</th>
+        <th>Descripción</th>
+        <th>Estado</th>
+        <th class="th-acciones">Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let i of improntas">
+        <td>{{ i.fechaRegistro | date:'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ i.placa }}</td>
+        <td>{{ i.codigoImpronta || '-' }}</td>
+        <td class="desc">{{ i.descripcion || '-' }}</td>
+        <td>{{ i.estado || '-' }}</td>
+        <td class="td-acciones">
+          <button class="btn-imprimir" (click)="imprimirPorVehiculoId(i.vehiculoId)" title="Imprimir certificado impronta">
+            <mat-icon>print</mat-icon>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="improntas.length===0">
+        <td colspan="6" class="sin-registros">Sin resultados</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+

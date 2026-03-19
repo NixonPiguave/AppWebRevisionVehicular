@@ -31,7 +31,7 @@
           </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group" *ngIf="!esServicioRegistroVehicular()">
           <label>Vehículo (placa) *</label>
           <div class="input-accion">
             <input

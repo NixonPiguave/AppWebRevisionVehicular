@@ -10,14 +10,24 @@
     <!-- Header -->
     <div class="usuarios-header">
       <h2>Gestión de Vehículos</h2>
-      <button class="btn-agregar" (click)="abrirModalCrear()">
-        <mat-icon>add</mat-icon>
-        Nuevo Vehículo
-      </button>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-agregar" (click)="cambiarVista('REGISTRO_BASE_UNICA')" [disabled]="vista==='REGISTRO_BASE_UNICA'">
+          <mat-icon>assignment</mat-icon>
+          Turnos Base Única
+        </button>
+        <button class="btn-agregar" (click)="cambiarVista('VEHICULOS')" [disabled]="vista==='VEHICULOS'">
+          <mat-icon>directions_car</mat-icon>
+          Vehículos
+        </button>
+        <button class="btn-agregar" *ngIf="vista==='VEHICULOS'" (click)="abrirModalCrear()">
+          <mat-icon>add</mat-icon>
+          Nuevo Vehículo
+        </button>
+      </div>
     </div>
 
-    <!-- Controles -->
-    <div class="usuarios-controles">
+    <!-- Controles (solo en vista vehículos) -->
+    <div class="usuarios-controles" *ngIf="vista==='VEHICULOS'">
       <div class="control-grupo">
         <label>Buscar:</label>
         <input
@@ -45,9 +55,44 @@
       </div>
     </div>
 
-    <!-- Tabla -->
+    <!-- Turnos EN_PROCESO (Registro Base Única) -->
+    <div *ngIf="vista==='REGISTRO_BASE_UNICA'">
+      <div class="cargando" *ngIf="cargandoTurnosRegistro">Cargando turnos EN_PROCESO...</div>
+
+      <div class="tabla-contenedor" *ngIf="!cargandoTurnosRegistro">
+        <table class="usuarios-tabla">
+          <thead>
+          <tr>
+            <th>Turno</th>
+            <th>Propietario</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th class="th-acciones">Acción</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr *ngFor="let t of turnosRegistro">
+            <td>{{ t.turnoId }}</td>
+            <td>{{ t.propietarioNombre }}</td>
+            <td>{{ t.estado }}</td>
+            <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+            <td class="td-acciones">
+              <button class="btn-accion btn-editar" (click)="abrirRegistroImpronta(t)" title="Registrar impronta">
+                <mat-icon>fingerprint</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="turnosRegistro.length===0">
+            <td colspan="5" class="sin-registros">No hay turnos EN_PROCESO para este servicio.</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Tabla (vista vehículos) -->
     <div class="tabla-contenedor">
-      <table class="usuarios-tabla">
+      <table class="usuarios-tabla" *ngIf="vista==='VEHICULOS'">
         <thead>
         <tr>
           <th>ID</th>
@@ -101,7 +146,7 @@
     </div>
 
     <!-- Paginación -->
-    <div class="paginacion" *ngIf="totalPaginas > 1">
+    <div class="paginacion" *ngIf="vista==='VEHICULOS' && totalPaginas > 1">
       <button
         class="btn-pagina"
         (click)="paginaActual = paginaActual - 1"
@@ -129,7 +174,7 @@
     </div>
 
     <!-- Info -->
-    <div class="info-registros" *ngIf="vehiculosFiltrados.length > 0">
+    <div class="info-registros" *ngIf="vista==='VEHICULOS' && vehiculosFiltrados.length > 0">
       Mostrando
       {{ (paginaActual - 1) * registrosPorPagina + 1 }}
       a
@@ -183,12 +228,48 @@
       <div class="form-row">
         <div class="form-grupo">
           <label>Matrícula *</label>
-          <input type="text" [(ngModel)]="vehiculoEditando.matricula" class="form-input">
+          <input type="text" [(ngModel)]="vehiculoEditando.matricula" class="form-input" [readonly]="vista==='REGISTRO_BASE_UNICA'">
         </div>
 
         <div class="form-grupo">
           <label>VIN *</label>
           <input type="text" [(ngModel)]="vehiculoEditando.vin" class="form-input">
+        </div>
+      </div>
+
+      <!-- Campos extra para Registro Base Única -->
+      <div class="form-row" *ngIf="vista==='REGISTRO_BASE_UNICA' && turnoRegistroSeleccionado">
+        <div class="form-grupo">
+          <label>Placa actual (disponible) *</label>
+          <select [(ngModel)]="placaDisponibleIdSeleccionada" class="form-select">
+            <option [ngValue]="null">Seleccione</option>
+            <option *ngFor="let p of placasDisponibles" [ngValue]="p.idPlacaDisponible">
+              {{ p.serieAlfanumerica }} ({{ p.letraProvincia }}-{{ p.tipoServicio }})
+            </option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label>Código de motor *</label>
+          <input type="text" [(ngModel)]="vehiculoEditando.codigoMotor" class="form-input">
+        </div>
+      </div>
+
+      <div class="form-row" *ngIf="vista==='REGISTRO_BASE_UNICA' && turnoRegistroSeleccionado">
+        <div class="form-grupo">
+          <label>Impronta CHASIS</label>
+          <select [(ngModel)]="improntaChasisTipo" class="form-select">
+            <option value="FISICA">FÍSICA</option>
+            <option value="OCULAR">OCULAR</option>
+            <option value="INACCESIBLE">INACCESIBLE</option>
+          </select>
+        </div>
+        <div class="form-grupo">
+          <label>Impronta MOTOR</label>
+          <select [(ngModel)]="improntaMotorTipo" class="form-select">
+            <option value="FISICA">FÍSICA</option>
+            <option value="OCULAR">OCULAR</option>
+            <option value="INACCESIBLE">INACCESIBLE</option>
+          </select>
         </div>
       </div>
 
@@ -334,7 +415,7 @@
     <div class="modal-footer">
       <button class="btn-cancelar" (click)="cerrarModalForm()">Cancelar</button>
       <button class="btn-guardar" (click)="guardar()" [disabled]="guardando">
-        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Guardar Cambios' : 'Crear Vehículo') }}
+        {{ guardando ? 'Guardando...' : (vista==='REGISTRO_BASE_UNICA' && turnoRegistroSeleccionado ? 'Registrar impronta' : (modoEdicion ? 'Guardar Cambios' : 'Crear Vehículo')) }}
       </button>
     </div>
 

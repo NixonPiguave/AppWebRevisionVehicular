@@ -100,6 +100,22 @@ public class TurnosServiceImpl implements ITurnosService {
     }
 
     @Override
+    public List<TurnosDTO> findTurnosPorEstadoYServicio(String estado, Long servicioId) {
+        if (estado == null || estado.isBlank()) {
+            if (servicioId == null) return findAll();
+            return repository.findByServicio_IdTipoTramiteOrderByFechaInicioDesc(servicioId).stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
+        }
+        if (servicioId == null) {
+            return findTurnosPorEstado(estado);
+        }
+        return repository.findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(estado, servicioId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public TurnosDTO update(Long id, TurnosDTO dto) {
         Turnos existente = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + id));

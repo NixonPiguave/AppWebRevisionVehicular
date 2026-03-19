@@ -8,13 +8,14 @@ import { forkJoin, of } from 'rxjs';
 import { ServicioService } from '../../../services/administracion/servicio.service';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { CertificadoRtvService } from '../../../services/operaciones/certificado-rtv.service';
+import { CertificadosRegistroService } from '../../../services/operaciones/certificados-registro.service';
 import { catchError, map } from 'rxjs/operators';
 
 /* ─── Estructura real que devuelve el backend ─────────────── */
 export interface TurnoRaw {
   turnoId:      number;
   propietarioId: number;
-  vehiculoId:   number;
+  vehiculoId:   number | null;
   servicioId:   number;
   tramiteId:    number | null;
   entidadId:    number | null;
@@ -60,6 +61,7 @@ export class RecepcionComponent implements OnInit {
     private servicioService: ServicioService,
     private turnosService: TurnosService,
     private certificadoRtvService: CertificadoRtvService,
+    private certificadosRegistro: CertificadosRegistroService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -84,6 +86,7 @@ export class RecepcionComponent implements OnInit {
     if (n.includes('BLOQUEO') && !n.includes('DES')) return 'BLOQUEO';
     if (n.includes('DESBLOQUEO')) return 'DESBLOQUEO';
     if (n.includes('BAJA')) return 'BAJA';
+    if (n.includes('BASE') && (n.includes('ÚNICA') || n.includes('UNICA')) && n.includes('REGIST')) return 'REGISTRO_BASE_UNICA';
     return 'INSPECCION';
   }
 
@@ -115,7 +118,7 @@ export class RecepcionComponent implements OnInit {
 
       // Obtener IDs únicos para hacer menos llamadas
       const propietarioIds = [...new Set(activos.map(t => t.propietarioId))];
-      const vehiculoIds    = [...new Set(activos.map(t => t.vehiculoId))];
+      const vehiculoIds    = [...new Set(activos.map(t => t.vehiculoId).filter((x): x is number => typeof x === 'number'))];
 
       // Llamadas paralelas para obtener propietarios y vehículos
       const propietarios$ = forkJoin(
@@ -152,7 +155,7 @@ export class RecepcionComponent implements OnInit {
           // Enriquecer cada turno con los datos obtenidos
           this.turnos = activos.map(t => {
             const prop = propMap.get(t.propietarioId);
-            const veh  = vehMap.get(t.vehiculoId);
+            const veh  = (t.vehiculoId != null) ? vehMap.get(t.vehiculoId) : null;
             const svc  = this.mapaServicios[t.servicioId];
 
             return {
@@ -217,8 +220,8 @@ export class RecepcionComponent implements OnInit {
   }
 
   /* ─── Extrae la descripción del vehículo de cualquier estructura ── */
-  private extraerDescripcionVehiculo(v: any, fallbackId: number): string {
-    if (!v) return `Vehículo #${fallbackId}`;
+  private extraerDescripcionVehiculo(v: any, fallbackId: number | null): string {
+    if (!v) return fallbackId != null ? `Vehículo #${fallbackId}` : '-';
 
     const placa  = v.matricula ?? v.placa ?? '';
 
@@ -240,7 +243,7 @@ export class RecepcionComponent implements OnInit {
     if (marca && modelo)          return `${marca} ${modelo}`;
     if (marca && placa)           return `${marca} (${placa})`;
     if (placa)                    return placa;
-    return `Vehículo #${fallbackId}`;
+    return fallbackId != null ? `Vehículo #${fallbackId}` : '-';
   }
 
   /* ══════════════════════════════════════════════════════
@@ -274,9 +277,16 @@ export class RecepcionComponent implements OnInit {
 
   /** Indica si el turno está listo para imprimir certificado (EN_PROCESO + 0 métodos pendientes) */
   listoParaCertificado(t: TurnoEnriquecido): boolean {
-    if ((t.estado || '').toUpperCase() !== 'EN_PROCESO' || (t.tipoTramite || '') !== 'INSPECCION') return false;
-    const pend = this.pendientesPorTurnoId[t.turnoId];
-    return pend !== undefined && pend === 0;
+    const est = (t.estado || '').toUpperCase();
+    if (est !== 'EN_PROCESO') return false;
+    if ((t.tipoTramite || '') === 'INSPECCION') {
+      const pend = this.pendientesPorTurnoId[t.turnoId];
+      return pend !== undefined && pend === 0;
+    }
+    if ((t.tipoTramite || '') === 'REGISTRO_BASE_UNICA') {
+      return t.vehiculoId != null;
+    }
+    return false;
   }
 
   /** Muestra "Proceso en curso" (sin acción) cuando está EN_PROCESO pero aún hay métodos pendientes */
@@ -304,11 +314,19 @@ export class RecepcionComponent implements OnInit {
       });
       return;
     }
+    if (t.tipoTramite === 'REGISTRO_BASE_UNICA' && (est === 'PAGADO' || est === 'CONFIRMADO')) {
+      this.turnosService.cambiarEstado(t.turnoId, 'EN_PROCESO').subscribe({
+        next: () => { this.cargar(); this.cdr.detectChanges(); },
+        error: () => { this.error = 'No se pudo iniciar el proceso.'; this.cdr.detectChanges(); }
+      });
+      return;
+    }
     const rutas: Record<string, string> = {
       'BAJA':       '/inicio/gestion_vehicular/baja-vehiculo',
       'BLOQUEO':    '/inicio/gestion_vehicular/bloqueo-vehiculo',
       'DESBLOQUEO': '/inicio/gestion_vehicular/desbloqueo-vehiculo',
       'INSPECCION': '/inicio/inspeccion-rtv/turnos-pagados',
+      'REGISTRO_BASE_UNICA': '/inicio/gestion_vehicular/vehiculo',
     };
     const ruta = rutas[t.tipoTramite] ?? '/inicio/inspeccion-rtv/turnos-pagados';
     this.router.navigate([ruta], {
@@ -316,11 +334,20 @@ export class RecepcionComponent implements OnInit {
         turnoId: t.turnoId, tramiteId: t.tramiteId ?? '', vehiculoId: t.vehiculoId,
         propietarioId: t.propietarioId, servicioId: t.servicioId,
         numeroTurno: `TRN-${t.turnoId}`, fromRecepcion: 'true'
-      } : {}
+      } : (t.tipoTramite === 'REGISTRO_BASE_UNICA' ? { turnoId: t.turnoId } : {})
     });
   }
 
   imprimirCertificado(t: TurnoEnriquecido): void {
+    if ((t.tipoTramite || '') === 'REGISTRO_BASE_UNICA') {
+      this.certificadosRegistro.mostrarParaTurno(t.turnoId, () => {
+        this.turnosService.cambiarEstado(t.turnoId, 'FINALIZADO').subscribe({
+          next: () => { this.cargar(); this.cdr.detectChanges(); },
+          error: () => { this.error = 'No se pudo finalizar el turno.'; this.cdr.detectChanges(); }
+        });
+      });
+      return;
+    }
     this.certificadoRtvService.mostrar(t.turnoId, () => {
       this.turnosService.cambiarEstado(t.turnoId, 'FINALIZADO').subscribe({
         next: () => { this.cargar(); this.cdr.detectChanges(); },

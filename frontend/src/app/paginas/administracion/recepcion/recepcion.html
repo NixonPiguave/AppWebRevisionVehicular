@@ -137,7 +137,7 @@
             </button>
             <button *ngIf="listoParaCertificado(t)" class="btn-certificado" (click)="imprimirCertificado(t)">
               <mat-icon>print</mat-icon>
-              Imprimir certificado
+              {{ (t.tipoTramite === 'REGISTRO_BASE_UNICA') ? 'Imprimir certificados' : 'Imprimir certificado' }}
             </button>
           </td>
 

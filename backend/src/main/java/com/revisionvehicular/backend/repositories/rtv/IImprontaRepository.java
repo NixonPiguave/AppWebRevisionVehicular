@@ -7,6 +7,8 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface IImprontaRepository extends JpaRepository<Impronta, Long> {
@@ -33,4 +35,8 @@ public interface IImprontaRepository extends JpaRepository<Impronta, Long> {
             @Param("p_usuario_id") Long usuarioId,
             @Param("p_estado") String estado
     );
+
+    List<Impronta> findByVehiculo_MatriculaContainingIgnoreCase(String matricula);
+
+    Optional<Impronta> findTopByVehiculo_VehiculoidOrderByFechaRegistroDesc(Long vehiculoid);
 }
