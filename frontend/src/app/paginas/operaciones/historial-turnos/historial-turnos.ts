@@ -7,6 +7,7 @@ import { forkJoin, of } from 'rxjs';
 import { ServicioService } from '../../../services/administracion/servicio.service';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { CertificadoRtvService } from '../../../services/operaciones/certificado-rtv.service';
+import { CertificadosRegistroService } from '../../../services/operaciones/certificados-registro.service';
 import { catchError } from 'rxjs/operators';
 
 const API = 'http://localhost:8080/api';
@@ -55,6 +56,7 @@ export class HistorialTurnosComponent implements OnInit {
     private servicioService: ServicioService,
     private turnosService: TurnosService,
     private certificadoRtvService: CertificadoRtvService,
+    private certificadosRegistroService: CertificadosRegistroService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -78,7 +80,16 @@ export class HistorialTurnosComponent implements OnInit {
     if (n.includes('BLOQUEO') && !n.includes('DES')) return 'BLOQUEO';
     if (n.includes('DESBLOQUEO')) return 'DESBLOQUEO';
     if (n.includes('BAJA')) return 'BAJA';
+    if (n.includes('BASE') && (n.includes('ÚNICA') || n.includes('UNICA')) && n.includes('REGIST')) {
+      return 'REGISTRO_BASE_UNICA';
+    }
     return 'INSPECCION';
+  }
+
+  private esRegistroBaseUnicaTurno(t: TurnoHistorialEnriquecido): boolean {
+    if ((t.tipoTramite || '').toUpperCase() === 'REGISTRO_BASE_UNICA') return true;
+    const n = (t.servicioNombre || '').toUpperCase();
+    return n.includes('BASE') && (n.includes('ÚNICA') || n.includes('UNICA')) && n.includes('REGIST');
   }
 
   cargar(): void {
@@ -208,6 +219,10 @@ export class HistorialTurnosComponent implements OnInit {
   onFiltroChange(): void { this.paginaActual = 1; }
 
   verCertificado(t: TurnoHistorialEnriquecido): void {
+    if (this.esRegistroBaseUnicaTurno(t)) {
+      this.certificadosRegistroService.mostrarParaTurno(t.turnoId);
+      return;
+    }
     this.certificadoRtvService.mostrar(t.turnoId);
   }
 
@@ -215,6 +230,7 @@ export class HistorialTurnosComponent implements OnInit {
     if (tipo === 'BAJA') return 'remove_circle';
     if (tipo === 'DESBLOQUEO') return 'lock_open';
     if (tipo === 'BLOQUEO') return 'lock';
+    if (tipo === 'REGISTRO_BASE_UNICA') return 'fact_check';
     return 'fact_check';
   }
 
@@ -222,6 +238,7 @@ export class HistorialTurnosComponent implements OnInit {
     if (tipo === 'BAJA') return 'tipo-baja';
     if (tipo === 'DESBLOQUEO') return 'tipo-desbloqueo';
     if (tipo === 'BLOQUEO') return 'tipo-bloqueo';
+    if (tipo === 'REGISTRO_BASE_UNICA') return 'tipo-inspeccion';
     return 'tipo-inspeccion';
   }
 }

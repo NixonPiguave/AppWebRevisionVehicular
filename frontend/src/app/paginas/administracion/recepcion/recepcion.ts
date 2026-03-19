@@ -90,6 +90,12 @@ export class RecepcionComponent implements OnInit {
     return 'INSPECCION';
   }
 
+  private esRegistroBaseUnicaTurno(t: TurnoEnriquecido): boolean {
+    if ((t.tipoTramite || '').toUpperCase() === 'REGISTRO_BASE_UNICA') return true;
+    const n = (t.servicioNombre || '').toUpperCase();
+    return n.includes('BASE') && (n.includes('ÚNICA') || n.includes('UNICA')) && n.includes('REGIST');
+  }
+
   /* ══════════════════════════════════════════════════════
      CARGA Y ENRIQUECIMIENTO
   ══════════════════════════════════════════════════════ */
@@ -283,7 +289,7 @@ export class RecepcionComponent implements OnInit {
       const pend = this.pendientesPorTurnoId[t.turnoId];
       return pend !== undefined && pend === 0;
     }
-    if ((t.tipoTramite || '') === 'REGISTRO_BASE_UNICA') {
+    if (this.esRegistroBaseUnicaTurno(t)) {
       return t.vehiculoId != null;
     }
     return false;
@@ -339,7 +345,7 @@ export class RecepcionComponent implements OnInit {
   }
 
   imprimirCertificado(t: TurnoEnriquecido): void {
-    if ((t.tipoTramite || '') === 'REGISTRO_BASE_UNICA') {
+    if (this.esRegistroBaseUnicaTurno(t)) {
       this.certificadosRegistro.mostrarParaTurno(t.turnoId, () => {
         this.turnosService.cambiarEstado(t.turnoId, 'FINALIZADO').subscribe({
           next: () => { this.cargar(); this.cdr.detectChanges(); },

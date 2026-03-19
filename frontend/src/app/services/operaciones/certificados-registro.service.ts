@@ -229,11 +229,12 @@ export class CertificadosRegistroService {
     const p = d.propietario ?? {};
     const fecha = d.fechaEmision ? new Date(d.fechaEmision + 'T00:00:00').toLocaleDateString('es-EC') : new Date().toLocaleDateString('es-EC');
     return `
-      <div class="doc">
+      <div class="doc doc-mat">
         <div class="doc-head">
           <div class="doc-left">
+            <div class="doc-title-sm">REPÚBLICA DEL ECUADOR</div>
             <div class="doc-title">MATRÍCULA VEHICULAR</div>
-            <div class="doc-sub">Fecha: ${this.escape(fecha)}</div>
+            <div class="doc-sub">Nro: ${this.escape(v.matriculaVehicular ?? '-')} - Fecha: ${this.escape(fecha)}</div>
           </div>
           <div class="doc-right">
             ${d.empresa?.logoempresa ? `<img class="logo" src="${d.empresa.logoempresa}" onerror="this.style.display='none'"/>` : ''}
@@ -241,65 +242,119 @@ export class CertificadosRegistroService {
           </div>
         </div>
 
-        <div class="box">
-          <div class="row2">
-            <div><span class="lbl">PLACA ACTUAL:</span> ${this.escape(v.placaActual ?? '-')}</div>
-            <div><span class="lbl">PLACA ANTERIOR:</span> ${this.escape(v.placaAnterior ?? v.placaActual ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">MARCA:</span> ${this.escape(v.marca ?? '-')}</div>
-            <div><span class="lbl">MODELO:</span> ${this.escape(v.modelo ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">AÑO FAB:</span> ${this.escape(String(v.anio ?? ''))}</div>
-            <div><span class="lbl">COLOR:</span> ${this.escape(v.color ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">MOTOR:</span> ${this.escape(v.motor ?? '-')}</div>
-            <div><span class="lbl">CHASIS:</span> ${this.escape(v.chasis ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">CLASE:</span> ${this.escape(v.clase ?? '-')}</div>
-            <div><span class="lbl">TIPO:</span> ${this.escape(v.tipoServicio ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">PROPIETARIO:</span> ${this.escape(p.nombre ?? '-')}</div>
-            <div><span class="lbl">DOC:</span> ${this.escape(p.documento ?? '-')}</div>
-          </div>
-          <div class="row2">
-            <div><span class="lbl">Nº MATRÍCULA:</span> ${this.escape(v.matriculaVehicular ?? '-')}</div>
-            <div></div>
-          </div>
-        </div>
+        <table class="mat-table">
+          <tr>
+            <th>PLACA ACTUAL</th>
+            <th>PLACA ANTERIOR</th>
+            <th>FECHA MATRÍCULA</th>
+          </tr>
+          <tr>
+            <td>${this.escape(v.placaActual ?? '-')}</td>
+            <td>${this.escape(v.placaAnterior ?? v.placaActual ?? '-')}</td>
+            <td>${this.escape(fecha)}</td>
+          </tr>
+
+          <tr>
+            <th>MARCA</th>
+            <th>CLASE</th>
+            <th>TIPO</th>
+          </tr>
+          <tr>
+            <td>${this.escape(v.marca ?? '-')}</td>
+            <td>${this.escape(v.clase ?? '-')}</td>
+            <td>${this.escape(v.tipoServicio ?? '-')}</td>
+          </tr>
+
+          <tr>
+            <th>AÑO FAB</th>
+            <th>MODELO</th>
+            <th>COLOR</th>
+          </tr>
+          <tr>
+            <td>${this.escape(String(v.anio ?? '-'))}</td>
+            <td>${this.escape(v.modelo ?? '-')}</td>
+            <td>${this.escape(v.color ?? '-')}</td>
+          </tr>
+
+          <tr>
+            <th>MOTOR</th>
+            <th colspan="2">CHASIS</th>
+          </tr>
+          <tr>
+            <td>${this.escape(v.motor ?? '-')}</td>
+            <td colspan="2">${this.escape(v.chasis ?? '-')}</td>
+          </tr>
+
+          <tr>
+            <th>PROPIETARIO</th>
+            <th>DOCUMENTO</th>
+            <th>OBSERVACIONES</th>
+          </tr>
+          <tr>
+            <td>${this.escape(p.nombre ?? '-')}</td>
+            <td>${this.escape(p.documento ?? '-')}</td>
+            <td>SIN GRAVAMEN</td>
+          </tr>
+        </table>
       </div>
     `;
   }
 
   private estilos(): string {
     return `
-      *{box-sizing:border-box}
-      body{font-family:Inter,system-ui,sans-serif;color:#111;margin:0;padding:18px}
-      .doc{border:2px solid #000; padding:14px}
+      *{
+        box-sizing:border-box;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      body{font-family:Inter,system-ui,sans-serif;color:#111;margin:0;padding:18px;background:#fff}
+      :root{
+        --sys-green:#2f6b2f;
+        --sys-green-dark:#1f4f1f;
+        --sys-green-soft:#eaf4ea;
+      }
+      .doc{border:2px solid var(--sys-green-dark); padding:14px}
       .doc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px}
-      .doc-title{font-weight:900;font-size:18px;letter-spacing:.5px}
+      .doc-title{font-weight:900;font-size:18px;letter-spacing:.5px;color:var(--sys-green-dark)}
+      .doc-title-sm{font-weight:800;font-size:13px;color:var(--sys-green-dark)}
       .doc-sub{font-size:12px;color:#333;margin-top:4px}
       .doc-right{text-align:right}
       .logo{height:40px;object-fit:contain;margin-bottom:4px}
-      .org{font-size:12px;font-weight:700}
-      .box{border:1px solid #000;padding:10px;margin:8px 0}
+      .org{font-size:12px;font-weight:700;color:var(--sys-green-dark)}
+      .box{border:1px solid var(--sys-green-dark);padding:10px;margin:8px 0}
       .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0;font-size:12px}
       .lbl{font-weight:800}
       .bar{display:grid;grid-template-columns:1fr 1fr 1fr;margin-top:10px}
-      .bar-cell{background:#ff7a00;color:#fff;text-align:center;font-weight:800;padding:6px 0;border:1px solid #000}
-      .sec{border:1px solid #000;margin-top:10px}
-      .sec-title{background:#ff7a00;color:#fff;font-weight:900;padding:6px 10px;border-bottom:1px solid #000}
+      .bar-cell{background:var(--sys-green);color:#fff;text-align:center;font-weight:800;padding:6px 0;border:1px solid var(--sys-green-dark)}
+      .sec{border:1px solid var(--sys-green-dark);margin-top:10px}
+      .sec-title{background:var(--sys-green);color:#fff;font-weight:900;padding:6px 10px;border-bottom:1px solid var(--sys-green-dark)}
       .sec-body{display:flex;gap:10px;align-items:center;padding:10px}
-      .tag{min-width:120px;border:1px solid #000;padding:8px 10px;font-weight:900;text-align:center}
+      .tag{
+        min-width:120px;border:1px solid var(--sys-green-dark);padding:8px 10px;
+        font-weight:900;text-align:center;color:#fff;background:var(--sys-green) !important
+      }
       .value{flex:1;border:1px dashed #aaa;padding:8px 10px;min-height:34px}
       .foot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
-      .sign{border-top:2px solid #000;padding-top:10px}
-      .sign-title{background:#ff7a00;color:#fff;font-weight:900;padding:6px 10px;border:1px solid #000}
+      .sign{border-top:2px solid var(--sys-green-dark);padding-top:10px}
+      .sign-title{background:var(--sys-green);color:#fff;font-weight:900;padding:6px 10px;border:1px solid var(--sys-green-dark)}
       .sign-line{padding:10px 10px;font-size:12px}
+
+      .doc-mat { border-color:var(--sys-green-dark); }
+      .mat-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+      .mat-table th{
+        background:var(--sys-green);color:#fff;text-align:left;padding:6px 8px;
+        border:1px solid var(--sys-green-dark);font-weight:800
+      }
+      .mat-table td{
+        background:#fff;padding:7px 8px;border:1px solid #b8c6b7;color:#1d1d1d
+      }
+
+      @media print {
+        .tag, .bar-cell, .sec-title, .sign-title, .mat-table th {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+      }
     `;
   }
 

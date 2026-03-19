@@ -19,10 +19,6 @@
           <mat-icon>directions_car</mat-icon>
           Vehículos
         </button>
-        <button class="btn-agregar" *ngIf="vista==='VEHICULOS'" (click)="abrirModalCrear()">
-          <mat-icon>add</mat-icon>
-          Nuevo Vehículo
-        </button>
       </div>
     </div>
 
@@ -129,9 +125,6 @@
           <td class="td-acciones">
             <button class="btn-accion btn-ver" (click)="verDetalle(vehiculo)">
               <mat-icon>visibility</mat-icon>
-            </button>
-            <button class="btn-accion btn-editar" (click)="abrirModalEditar(vehiculo)">
-              <mat-icon>edit</mat-icon>
             </button>
           </td>
         </tr>

@@ -90,7 +90,7 @@
             <td class="td-acciones">
               <button type="button" class="btn-ver-certificado" (click)="verCertificado(t)">
                 <mat-icon>visibility</mat-icon>
-                Ver certificado
+                {{ ((t.tipoTramite || '').toUpperCase() === 'REGISTRO_BASE_UNICA' || (((t.servicioNombre || '').toUpperCase().includes('BASE')) && (((t.servicioNombre || '').toUpperCase().includes('ÚNICA')) || ((t.servicioNombre || '').toUpperCase().includes('UNICA'))) && ((t.servicioNombre || '').toUpperCase().includes('REGIST')))) ? 'Ver certificados' : 'Ver certificado' }}
               </button>
             </td>
           </tr>
