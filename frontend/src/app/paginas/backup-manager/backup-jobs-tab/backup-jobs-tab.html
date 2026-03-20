@@ -17,6 +17,17 @@
     <p class="jobs-descripcion">
       Ejecute un respaldo en este momento y guarde el archivo en una carpeta de su equipo.
     </p>
+    <p class="meta-incremental" *ngIf="archivoIncrementalServidor">
+      Incremental en servidor: siempre <strong>{{ archivoIncrementalServidor }}</strong>
+      (misma ruta en disco del servidor también se sobrescribe).
+    </p>
+    <p class="mensaje-error compacto" *ngIf="metaIncrementalFallo">
+      No se pudo leer la configuración incremental del API (¿backend sin actualizar o sin reiniciar?). Abra en el navegador:
+      <code>http://localhost:8080/api/backup/config/incremental-archivo</code>
+    </p>
+    <p class="mensaje-error compacto" *ngIf="advertenciaIncrementalAntiguo">
+      El archivo devuelto no coincide con el nombre fijo del servidor: está corriendo un backend antiguo o no se reinició tras compilar. Detenga Java, haga <em>Build → Rebuild Project</em> y vuelva a ejecutar.
+    </p>
   </div>
 
   <div class="tipos-grid">

@@ -6,6 +6,9 @@ import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.backup.IBackupConfigRepository;
 import com.revisionvehicular.backend.repositories.backup.IBackupRecordRepository;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +25,15 @@ import java.util.List;
 
 @Service
 public class BackupServiceImpl implements IBackupService {
+
+    private static final Logger log = LoggerFactory.getLogger(BackupServiceImpl.class);
+
+    @Value("${backup.incremental.rolling-filename:backup_incremental_actual.backup}")
+    private String nombreArchivoIncrementalRolling;
+
+    // En Google Drive evitamos acumulación subiendo siempre con nombres "rolling" por tipo.
+    private static final String NOMBRE_ARCHIVO_FULL_DRIVE_ROLLING = "backup_full_actual.backup";
+    private static final String NOMBRE_ARCHIVO_DIFFERENCIAL_DRIVE_ROLLING = "backup_diferencial_actual.backup";
 
     @Value("${backup.pgdump.path}")
     private String pgDumpPath;
@@ -46,24 +58,50 @@ public class BackupServiceImpl implements IBackupService {
 
     private final IBackupConfigRepository configRepository;
     private final IBackupRecordRepository recordRepository;
+    private final IBackupRecordService backupRecordService;
     private final DriveStorageService driveService;
     private final IBackupNotificationService notificationService;
 
     public BackupServiceImpl(
             IBackupConfigRepository configRepository,
             IBackupRecordRepository recordRepository,
+            IBackupRecordService backupRecordService,
             DriveStorageService driveService,
             IBackupNotificationService notificationService) {
         this.configRepository = configRepository;
         this.recordRepository = recordRepository;
+        this.backupRecordService = backupRecordService;
         this.driveService = driveService;
         this.notificationService = notificationService;
     }
 
+    @PostConstruct
+    void normalizarConfigIncremental() {
+        if (nombreArchivoIncrementalRolling == null || nombreArchivoIncrementalRolling.isBlank()) {
+            nombreArchivoIncrementalRolling = "backup_incremental_actual.backup";
+        } else {
+            nombreArchivoIncrementalRolling = nombreArchivoIncrementalRolling.trim();
+        }
+        log.info("Respaldos INCREMENTAL usan archivo fijo (sobrescrito): {}", nombreArchivoIncrementalRolling);
+    }
+
+    @Override
+    public String getNombreArchivoIncrementalRolling() {
+        if (nombreArchivoIncrementalRolling == null || nombreArchivoIncrementalRolling.isBlank()) {
+            return "backup_incremental_actual.backup";
+        }
+        return nombreArchivoIncrementalRolling;
+    }
+
     @Override
     public BackupRecordDTO ejecutarBackup(String tipo, String origen, Usuario usuario) {
+        if (tipo == null || tipo.isBlank()) {
+            throw new RuntimeException("Tipo de backup no válido.");
+        }
+        final String tipoNorm = tipo.trim().toUpperCase();
+
         // Cargar configuración
-        BackupConfig config = configRepository.findTopByOrderByConfigIdAsc()
+        BackupConfig config = configRepository.findTopByOrderByConfigIdDesc()
                 .orElseThrow(() -> new RuntimeException(
                         "No existe configuración de backup. Configure primero la ruta y credenciales."));
 
@@ -84,7 +122,7 @@ public class BackupServiceImpl implements IBackupService {
 
         // Preparar registro inicial
         BackupRecord record = new BackupRecord();
-        record.setTipo(tipo);
+        record.setTipo(tipoNorm);
         record.setOrigen(origen);
         record.setEstado("EN_PROCESO");
         record.setUsuario(usuario);
@@ -95,8 +133,9 @@ public class BackupServiceImpl implements IBackupService {
 
         String timestamp = LocalDateTime.now()
                 .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String nombreArchivo = String.format("backup_%s_%s.backup",
-                tipo.toLowerCase(), timestamp);
+        String nombreArchivo = "INCREMENTAL".equals(tipoNorm)
+                ? nombreArchivoIncrementalRolling
+                : String.format("backup_%s_%s.backup", tipoNorm.toLowerCase(), timestamp);
         record.setNombreArchivo(nombreArchivo);
         recordRepository.save(record);
 
@@ -104,11 +143,11 @@ public class BackupServiceImpl implements IBackupService {
         try {
             Files.createDirectories(rutaCompleta.getParent());
 
-            switch (tipo) {
+            switch (tipoNorm) {
                 case "FULL" -> ejecutarFull(rutaCompleta.toString());
                 case "DIFFERENTIAL" -> ejecutarDiferencial(rutaCompleta.toString());
                 case "INCREMENTAL" -> ejecutarIncremental(rutaCompleta.toString());
-                default -> throw new RuntimeException("Tipo de backup no válido: " + tipo);
+                default -> throw new RuntimeException("Tipo de backup no válido: " + tipoNorm);
             }
 
             File archivoGenerado = rutaCompleta.toFile();
@@ -122,7 +161,59 @@ public class BackupServiceImpl implements IBackupService {
             // Subir a Drive si está habilitado
             String driveFileId = null;
             if (Boolean.TRUE.equals(config.getDriveHabilitado())) {
-                driveFileId = driveService.subirArchivo(archivoGenerado, nombreFinal, config);
+                // En Drive evitamos acumulación subiendo siempre con nombres "rolling" por tipo.
+                final String nombreDrive = switch (tipoNorm) {
+                    case "FULL" -> NOMBRE_ARCHIVO_FULL_DRIVE_ROLLING;
+                    case "DIFFERENTIAL" -> NOMBRE_ARCHIVO_DIFFERENCIAL_DRIVE_ROLLING;
+                    case "INCREMENTAL" -> nombreArchivoIncrementalRolling;
+                    default -> nombreFinal;
+                };
+
+                try {
+                    driveFileId = driveService.subirArchivo(archivoGenerado, nombreDrive, config,
+                            true);
+                } catch (Exception driveEx) {
+                    // Si se agotó la cuota del Service Account, limpiamos respaldos viejos y reintentamos una vez.
+                    String msg = String.valueOf(driveEx.getMessage());
+                    String msgLower = msg.toLowerCase();
+
+                    boolean cuota = msgLower.contains("storagequotaexceeded")
+                            || msgLower.contains("usagequota")
+                            || msgLower.contains("usagelimits")
+                            || msgLower.contains("quota exceeded");
+
+                    if (!cuota) {
+                        // Si falla por un motivo distinto a cuota, marcamos el respaldo como fallido
+                        // porque el objetivo del modo Drive es subir al remoto.
+                        throw new RuntimeException("Error al subir a Drive: " + msg);
+                    }
+
+                    // 1) Intento: borrar lo que no sea rolling y reintentar una vez.
+                    try {
+                        driveService.eliminarBackupsNoRolling(config, java.util.Set.of(
+                                NOMBRE_ARCHIVO_FULL_DRIVE_ROLLING,
+                                NOMBRE_ARCHIVO_DIFFERENCIAL_DRIVE_ROLLING,
+                                nombreArchivoIncrementalRolling
+                        ));
+                        driveFileId = driveService.subirArchivo(archivoGenerado, nombreDrive, config, true);
+                    } catch (Exception cleanupEx1) {
+                        log.warn("Drive quota excedida: no se pudo recuperar tras eliminar no-rolling. Cleanup1: {}",
+                                cleanupEx1.getMessage());
+                    }
+
+                    // 2) Último recurso: borrar TODOS los respaldos y reintentar una vez más.
+                    try {
+                        driveService.eliminarTodosBackups(config);
+                        driveFileId = driveService.subirArchivo(archivoGenerado, nombreDrive, config, true);
+                    } catch (Exception cleanupEx2) {
+                        log.warn("Drive quota excedida: no se pudo recuperar tras eliminar TODO. Continuará sin Drive. Cleanup2: {}",
+                                cleanupEx2.getMessage());
+                    }
+
+                    if (driveFileId == null) {
+                        throw new RuntimeException("Drive upload falló tras limpieza por cuota. Error original: " + msg);
+                    }
+                }
             }
 
             // Actualizar registro como exitoso
@@ -134,10 +225,22 @@ public class BackupServiceImpl implements IBackupService {
             record.setFinalizadoEn(LocalDateTime.now());
             record = recordRepository.save(record);
 
+            if ("INCREMENTAL".equals(tipoNorm)) {
+                // La consolidación de historial no debe impedir que el backup finalice.
+                // En algunas bases antiguas pueden existir referencias (FK) que impidan el borrado.
+                try {
+                    backupRecordService.eliminarHistorialIncrementalDuplicado(
+                            record.getRecordId(), nombreArchivoIncrementalRolling);
+                } catch (Exception ex) {
+                    log.warn("No se pudo consolidar historial de incrementales. Se ignorará el error: {}",
+                            ex.getMessage());
+                }
+            }
+
         } catch (Exception e) {
             // Actualizar registro como fallido
             record.setEstado("FALLIDO");
-            record.setMensajeError(e.getMessage());
+            record.setMensajeError(truncarMensajeError(e.getMessage()));
             record.setFinalizadoEn(LocalDateTime.now());
             record = recordRepository.save(record);
         }
@@ -190,15 +293,10 @@ public class BackupServiceImpl implements IBackupService {
     }
 
     // -------------------------------------------------------
-    // INCREMENTAL: pg_dump en formato custom (comprimido), igual que FULL/Diferencial.
-    // Así el archivo .backup se puede restaurar desde la app con pg_restore.
-    // Requiere un FULL exitoso previo (misma regla que diferencial).
+    // INCREMENTAL: pg_dump completo al mismo path en cada ejecución (archivo rotativo).
+    // Misma cadencia que el programador; solo se sustituye el archivo en backup.incremental.rolling-filename.
     // -------------------------------------------------------
     private void ejecutarIncremental(String rutaSalida) throws Exception {
-        recordRepository.findTopByTipoAndEstadoOrderByCreadoEnDesc("FULL", "EXITOSO")
-                .orElseThrow(() -> new RuntimeException(
-                        "No existe un backup FULL exitoso previo. Ejecute un backup completo primero."));
-
         List<String> comando = new ArrayList<>();
         comando.add(pgDumpPath);
         comando.add("-h"); comando.add(dbHost);
@@ -267,5 +365,13 @@ public class BackupServiceImpl implements IBackupService {
         if (bytes < 1024 * 1024) return String.format("%.1f KB", bytes / 1024.0);
         if (bytes < 1024 * 1024 * 1024) return String.format("%.1f MB", bytes / (1024.0 * 1024));
         return String.format("%.2f GB", bytes / (1024.0 * 1024 * 1024));
+    }
+
+    private String truncarMensajeError(String msg) {
+        if (msg == null) return null;
+        // srtv_backup_record.mensaje_error es varchar(1000)
+        final int max = 1000;
+        if (msg.length() <= max) return msg;
+        return msg.substring(0, max);
     }
 }

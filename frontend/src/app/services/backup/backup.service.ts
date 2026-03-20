@@ -70,6 +70,26 @@ export class BackupService {
     return this.http.post<BackupConfig>(`${this.base}/config`, config);
   }
 
+  /** Guarda el JSON de credenciales en el servidor y devuelve config actualizado (driveCredentialsPath). */
+  guardarDriveCredentials(file: File): Observable<BackupConfig> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<BackupConfig>(`${this.base}/config/drive-credentials`, fd);
+  }
+
+
+  /** Genera la URL para autorizar Drive con OAuth (si usas client secret JSON en vez de service account). */
+  obtenerDriveOAuthUrl(): Observable<{ url: string; redirectUri: string }> {
+    return this.http.get<{ url: string; redirectUri: string }>(`${this.base}/config/drive-oauth-url`);
+  }
+
+  /** Nombre fijo que el servidor usará en cada incremental (GET para verificar build activo). */
+  obtenerArchivoIncrementalConfigurado(): Observable<{ nombreArchivo: string }> {
+    return this.http.get<{ nombreArchivo: string }>(
+      `${this.base}/config/incremental-archivo`
+    );
+  }
+
   // Ejecutar backup manual
   ejecutarBackup(tipo: string): Observable<BackupRecord> {
     const params = new HttpParams().set('tipo', tipo);

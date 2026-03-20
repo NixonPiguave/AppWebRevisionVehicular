@@ -2,6 +2,8 @@ package com.revisionvehicular.backend.repositories.backup;
 
 import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -26,4 +28,11 @@ public interface IBackupRecordRepository extends JpaRepository<BackupRecord, Lon
 
     /** Para marcar como EXITOSO al restaurar un archivo que tenía registro EN_PROCESO. */
     List<BackupRecord> findByNombreArchivoAndEstado(String nombreArchivo, String estado);
+
+    /** IDs de registros incremental duplicados a eliminar (excluye el que se conserva). */
+    @Query("SELECT r.recordId FROM BackupRecord r WHERE r.tipo = :tipo AND r.nombreArchivo = :nombre AND r.recordId <> :keepId")
+    List<Long> findRecordIdsByTipoAndNombreArchivoAndRecordIdNot(
+            @Param("tipo") String tipo,
+            @Param("nombre") String nombre,
+            @Param("keepId") Long keepId);
 }

@@ -34,7 +34,7 @@ public class BackupSchedulerService {
     // Al arrancar la aplicación, retoma la configuración guardada en BD
     @PostConstruct
     public void inicializar() {
-        configRepository.findTopByOrderByConfigIdAsc().ifPresent(config -> {
+        configRepository.findTopByOrderByConfigIdDesc().ifPresent(config -> {
             try {
                 if (Boolean.TRUE.equals(config.getSchedulerActivo())) {
                     aplicarSchedules(config);

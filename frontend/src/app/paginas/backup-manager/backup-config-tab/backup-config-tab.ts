@@ -37,15 +37,17 @@ export class BackupConfigTabComponent implements OnInit {
 
   // Modelo de UI para programar sin escribir cron
   fullActivo = true;
-  fullFrecuencia: 'NINGUNO' | 'DIARIO' | 'SEMANAL' | 'PERSONALIZADO' = 'SEMANAL';
+  fullFrecuencia: 'NINGUNO' | 'DIARIO' | 'SEMANAL' | 'PERSONALIZADO' | 'MENSUAL' = 'SEMANAL';
   fullHora = '02:00';
   fullDiaSemana = 'SUN';
+  fullDiaMes: number = 1;
   fullDiasSemanaList: string[] = ['SUN'];
 
   diffActivo = true;
-  diffFrecuencia: 'NINGUNO' | 'DIARIO' | 'SEMANAL' | 'PERSONALIZADO' = 'DIARIO';
+  diffFrecuencia: 'NINGUNO' | 'DIARIO' | 'SEMANAL' | 'PERSONALIZADO' | 'MENSUAL' = 'DIARIO';
   diffHora = '03:00';
   diffDiasSemana = 'MON-SAT';
+  diffDiaMes: number = 1;
   diffDiasSemanaList: string[] = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
   incrActivo = true;
@@ -139,6 +141,49 @@ export class BackupConfigTabComponent implements OnInit {
     });
   }
 
+  abrirSelectorDriveCredentials(): void {
+    const el = document.getElementById('driveCredentialsInput') as HTMLInputElement | null;
+    el?.click();
+  }
+
+  onDriveCredentialsSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files && input.files.length > 0 ? input.files[0] : null;
+    if (!file) return;
+
+    this.backupService.guardarDriveCredentials(file).subscribe({
+      next: (data) => {
+        this.config = data;
+        this.sincronizarUIDesdeCrons();
+        this.mostrarExito('Credenciales Drive cargadas correctamente');
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.mostrarError(err?.error?.message || 'Error al cargar credenciales Drive');
+        this.cdr.detectChanges();
+      }
+    });
+
+    // Permite volver a seleccionar el mismo archivo.
+    if (input) input.value = '';
+  }
+
+  autorizarDriveOAuth(): void {
+    this.backupService.obtenerDriveOAuthUrl().subscribe({
+      next: (r) => {
+        const url = r?.url;
+        if (!url) {
+          this.mostrarError('No se pudo generar la URL de autorización de Google Drive.');
+          return;
+        }
+        window.open(url, '_blank');
+      },
+      error: (err) => {
+        this.mostrarError(err?.error?.message || 'Error al generar la URL de autorización de Drive');
+      }
+    });
+  }
+
   private pad2(n: number): string {
     return n.toString().padStart(2, '0');
   }
@@ -154,48 +199,78 @@ export class BackupConfigTabComponent implements OnInit {
 
     // FULL
     this.fullActivo = !!cf;
-    if (cf.startsWith('0 ') && cf.includes('? *')) {
-      const partes = cf.split(' ');
-      const minutos = partes[1] || '0';
-      const horaStr = partes[2] || '2';
-      const hora = parseInt(horaStr, 10);
-      this.fullHora = this.horaMinutosAHHMM(hora, parseInt(minutos, 10) || 0);
+    if (cf.startsWith('0 ')) {
+      const partes = cf.split(/\s+/).filter(Boolean);
+      if (partes.length >= 6) {
+        const minutos = parseInt(partes[1] || '0', 10) || 0;
+        const hora = parseInt(partes[2] || '2', 10) || 0;
+        this.fullHora = this.horaMinutosAHHMM(hora, minutos);
 
-      const diaCampo = partes[5] || '*';
-      if (diaCampo === '*') {
-        this.fullFrecuencia = 'DIARIO';
-      } else if (diaCampo.includes(',')) {
-        this.fullFrecuencia = 'PERSONALIZADO';
-        this.fullDiasSemanaList = diaCampo.split(',').map(d => d.trim()).filter(Boolean);
-      } else {
-        this.fullFrecuencia = 'SEMANAL';
-        this.fullDiaSemana = diaCampo;
-        this.fullDiasSemanaList = [diaCampo];
+        const diaDelMes = partes[3] || '*';
+        const mesCampo = partes[4] || '*';
+        const diaSemanaCampo = partes[5] || '?';
+
+        // Mensual: seg/ min / hora / diaDelMes * ?
+        if (diaSemanaCampo === '?' && mesCampo === '*' && diaDelMes !== '*' && diaDelMes !== '?') {
+          this.fullFrecuencia = 'MENSUAL';
+          this.fullDiaMes = parseInt(diaDelMes, 10) || 1;
+        } else if (diaDelMes === '*' && diaSemanaCampo === '?') {
+          // Diario
+          this.fullFrecuencia = 'DIARIO';
+        } else {
+          // Semanal / personalizado: ? * (MON|TUE|...|MON,TUE,...)
+          const diaCampo = diaSemanaCampo || '*';
+          if (diaCampo === '*') {
+            this.fullFrecuencia = 'DIARIO';
+          } else if (diaCampo.includes(',')) {
+            this.fullFrecuencia = 'PERSONALIZADO';
+            this.fullDiasSemanaList = diaCampo.split(',').map(d => d.trim()).filter(Boolean);
+          } else {
+            this.fullFrecuencia = 'SEMANAL';
+            this.fullDiaSemana = diaCampo;
+            this.fullDiasSemanaList = [diaCampo];
+          }
+        }
       }
     }
 
     // DIFERENCIAL
     this.diffActivo = !!cd;
-    if (cd.startsWith('0 ') && cd.includes('? *')) {
-      const partes = cd.split(' ');
-      const minutos = partes[1] || '0';
-      const horaStr = partes[2] || '3';
-      const hora = parseInt(horaStr, 10);
-      this.diffHora = this.horaMinutosAHHMM(hora, parseInt(minutos, 10) || 0);
+    if (cd.startsWith('0 ')) {
+      const partes = cd.split(/\s+/).filter(Boolean);
+      if (partes.length >= 6) {
+        const minutos = parseInt(partes[1] || '0', 10) || 0;
+        const hora = parseInt(partes[2] || '3', 10) || 0;
+        this.diffHora = this.horaMinutosAHHMM(hora, minutos);
 
-      const diaCampo = partes[5] || '*';
-      if (diaCampo === '*') {
-        this.diffFrecuencia = 'DIARIO';
-        this.diffDiasSemana = '*';
-        this.diffDiasSemanaList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-      } else if (diaCampo.includes(',')) {
-        this.diffFrecuencia = 'PERSONALIZADO';
-        this.diffDiasSemanaList = diaCampo.split(',').map(d => d.trim()).filter(Boolean);
-        this.diffDiasSemana = diaCampo;
-      } else {
-        this.diffFrecuencia = 'SEMANAL';
-        this.diffDiasSemana = diaCampo;
-        this.diffDiasSemanaList = [diaCampo];
+        const diaDelMes = partes[3] || '*';
+        const mesCampo = partes[4] || '*';
+        const diaSemanaCampo = partes[5] || '?';
+
+        // Mensual: seg/ min / hora / diaDelMes * ?
+        if (diaSemanaCampo === '?' && mesCampo === '*' && diaDelMes !== '*' && diaDelMes !== '?') {
+          this.diffFrecuencia = 'MENSUAL';
+          this.diffDiaMes = parseInt(diaDelMes, 10) || 1;
+        } else if (diaDelMes === '*' && diaSemanaCampo === '?') {
+          // Diario
+          this.diffFrecuencia = 'DIARIO';
+        } else {
+          // Semanal / personalizado: ? * (MON|...|MON,TUE,...)
+          const diaCampo = diaSemanaCampo || '*';
+          if (diaCampo === '*') {
+            this.diffFrecuencia = 'DIARIO';
+            this.diffDiasSemana = '*';
+            this.diffDiasSemanaList = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+          } else if (diaCampo.includes(',')) {
+            this.diffFrecuencia = 'PERSONALIZADO';
+            this.diffDiasSemanaList = diaCampo.split(',').map(d => d.trim()).filter(Boolean);
+            this.diffDiasSemana = diaCampo;
+          } else {
+            this.diffFrecuencia = 'SEMANAL';
+            this.diffDiasSemana = diaCampo;
+            this.diffDiasSemanaList = [diaCampo];
+          }
+        }
       }
     }
 
@@ -227,6 +302,8 @@ export class BackupConfigTabComponent implements OnInit {
       const m = parseInt(mStr || '0', 10);
       if (this.fullFrecuencia === 'DIARIO') {
         this.config.cronFull = `0 ${m} ${h} * * ?`;
+      } else if (this.fullFrecuencia === 'MENSUAL') {
+        this.config.cronFull = `0 ${m} ${h} ${this.fullDiaMes || 1} * ?`;
       } else if (this.fullFrecuencia === 'SEMANAL') {
         this.config.cronFull = `0 ${m} ${h} ? * ${this.fullDiaSemana}`;
       } else {
@@ -246,6 +323,8 @@ export class BackupConfigTabComponent implements OnInit {
       const m = parseInt(mStr || '0', 10);
       if (this.diffFrecuencia === 'DIARIO') {
         this.config.cronDiferencial = `0 ${m} ${h} * * ?`;
+      } else if (this.diffFrecuencia === 'MENSUAL') {
+        this.config.cronDiferencial = `0 ${m} ${h} ${this.diffDiaMes || 1} * ?`;
       } else if (this.diffFrecuencia === 'SEMANAL') {
         this.config.cronDiferencial = `0 ${m} ${h} ? * ${this.diffDiasSemana}`;
       } else {
@@ -298,6 +377,17 @@ export class BackupConfigTabComponent implements OnInit {
       try {
         const dirHandle = await win.showDirectoryPicker({ mode: 'readwrite' });
         this.carpetaNativaNombre = dirHandle?.name || '';
+        // showDirectoryPicker no entrega la ruta completa por seguridad; solo el nombre.
+        // Para que el backend guarde y muestre la ruta correcta, conservamos el padre
+        // de la ruta actual y reemplazamos únicamente el último segmento.
+        const actualRuta = this.config?.rutaServidor?.trim();
+        if (actualRuta && this.carpetaNativaNombre) {
+          const partes = actualRuta.split(/[/\\]+/).filter(Boolean);
+          if (partes.length > 0) {
+            partes[partes.length - 1] = this.carpetaNativaNombre;
+            this.config.rutaServidor = partes.join('\\');
+          }
+        }
         this.cdr.detectChanges();
       } catch {
         // Usuario canceló: no hacer nada

@@ -16,7 +16,25 @@
   color: #2d5a27;
 }
 
-.jobs-descripcion { color: #666; font-size: 14px; margin: 0 0 16px; }
+.jobs-descripcion { color: #666; font-size: 14px; margin: 0 0 8px; }
+
+.meta-incremental {
+  font-size: 13px;
+  color: #444;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  background: #f5f9f5;
+  border-radius: 8px;
+  border-left: 3px solid #2d5a27;
+}
+
+.mensaje-error.compacto {
+  font-size: 13px;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+}
+
+.mensaje-error.compacto code { font-size: 12px; word-break: break-all; }
 
 .tipos-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
 

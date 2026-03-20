@@ -32,16 +32,19 @@ public class BackupNotificationServiceImpl implements IBackupNotificationService
 
         boolean exitoso = "EXITOSO".equals(record.getEstado());
         notif.setTipo(exitoso ? "EXITO" : "ERROR");
-        notif.setTitulo(exitoso
+        String titulo = exitoso
                 ? "Respaldo completado: " + record.getTipo()
-                : "Respaldo fallido: " + record.getTipo());
-        notif.setMensaje(exitoso
+                : "Respaldo fallido: " + record.getTipo();
+        notif.setTitulo(truncar(titulo, 200));
+
+        String mensaje = exitoso
                 ? "El respaldo " + record.getNombreArchivo() + " se completó correctamente."
-                : "Error al ejecutar el respaldo: " + record.getMensajeError());
+                : "Error al ejecutar el respaldo: " + record.getMensajeError();
+        notif.setMensaje(truncar(mensaje, 1000));
         notif.setLeida(false);
         repository.save(notif);
 
-        configRepository.findTopByOrderByConfigIdAsc().ifPresent(config -> {
+        configRepository.findTopByOrderByConfigIdDesc().ifPresent(config -> {
             mailService.enviarNotificacion(record, config);
         });
     }
@@ -82,5 +85,11 @@ public class BackupNotificationServiceImpl implements IBackupNotificationService
         dto.setLeida(n.getLeida());
         dto.setCreadoEn(n.getCreadoEn());
         return dto;
+    }
+
+    private static String truncar(String msg, int max) {
+        if (msg == null) return null;
+        if (msg.length() <= max) return msg;
+        return msg.substring(0, max);
     }
 }

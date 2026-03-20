@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.service.backup;
 
 import com.revisionvehicular.backend.dtos.backup.BackupRecordDTO;
 import com.revisionvehicular.backend.entities.backup.BackupRecord;
+import com.revisionvehicular.backend.repositories.backup.IBackupNotificationRepository;
 import com.revisionvehicular.backend.repositories.backup.IBackupRecordRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +15,12 @@ import java.util.stream.Collectors;
 public class BackupRecordServiceImpl implements IBackupRecordService {
 
     private final IBackupRecordRepository repository;
+    private final IBackupNotificationRepository notificationRepository;
 
-    public BackupRecordServiceImpl(IBackupRecordRepository repository) {
+    public BackupRecordServiceImpl(IBackupRecordRepository repository,
+                                   IBackupNotificationRepository notificationRepository) {
         this.repository = repository;
+        this.notificationRepository = notificationRepository;
     }
 
     @Override
@@ -45,6 +49,18 @@ public class BackupRecordServiceImpl implements IBackupRecordService {
     @Override
     public boolean hayBackupEnProceso() {
         return repository.existsByEstado("EN_PROCESO");
+    }
+
+    @Override
+    @Transactional
+    public void eliminarHistorialIncrementalDuplicado(Long recordIdConservar, String nombreArchivoRotativo) {
+        List<Long> ids = repository.findRecordIdsByTipoAndNombreArchivoAndRecordIdNot(
+                "INCREMENTAL", nombreArchivoRotativo, recordIdConservar);
+        if (ids.isEmpty()) {
+            return;
+        }
+        notificationRepository.deleteByBackupRecordRecordIdIn(ids);
+        repository.deleteAllByIdInBatch(ids);
     }
 
     @Override

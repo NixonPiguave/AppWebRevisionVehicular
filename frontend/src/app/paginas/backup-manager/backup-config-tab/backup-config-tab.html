@@ -84,7 +84,29 @@
           <label>Ruta del archivo de credenciales</label>
           <input type="text" [(ngModel)]="config.driveCredentialsPath" class="form-input"
                  placeholder="C:\secrets\drive-credentials.json" />
-          <span class="hint">Ruta al archivo JSON de Service Account descargado de Google Cloud.</span>
+          <span class="hint">Ruta al archivo JSON: Service Account (cuota) o OAuth Client Secret (recomendado si no puedes crear Shared Drives).</span>
+          <div class="drive-cred-actions">
+            <input
+              type="file"
+              id="driveCredentialsInput"
+              accept="application/json,.json"
+              style="display:none"
+              (change)="onDriveCredentialsSelected($event)"
+            />
+            <button type="button" class="btn-probar" (click)="abrirSelectorDriveCredentials()">
+              <mat-icon>folder_open</mat-icon>
+              Seleccionar JSON
+            </button>
+            <button
+              type="button"
+              class="btn-probar"
+              (click)="autorizarDriveOAuth()"
+              [disabled]="!config.driveCredentialsPath || !config.driveFolderId || !config.driveHabilitado"
+              title="Autoriza acceso a tu Drive usando OAuth (necesario si tu JSON es de OAuth Client Secret)">
+              <mat-icon>lock_open</mat-icon>
+              Autorizar Drive (OAuth)
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -180,6 +202,7 @@
                       [(ngModel)]="fullFrecuencia"
                       [disabled]="!fullActivo">
                 <option value="DIARIO">Diario</option>
+                <option value="MENSUAL">Mensual</option>
                 <option value="SEMANAL">Semanal (un día)</option>
                 <option value="PERSONALIZADO">Semanal (varios días)</option>
                 <option value="NINGUNO">No programar</option>
@@ -190,6 +213,11 @@
               <input type="time" class="form-input"
                      [(ngModel)]="fullHora">
             </div>
+          </div>
+          <div class="form-grupo" *ngIf="fullFrecuencia === 'MENSUAL' && fullActivo">
+            <label>Día del mes</label>
+            <input type="number" class="form-input"
+                   [(ngModel)]="fullDiaMes" min="1" max="31">
           </div>
           <div class="form-grupo" *ngIf="fullFrecuencia === 'SEMANAL' && fullActivo">
             <label>Día de la semana</label>
@@ -268,6 +296,7 @@
                       [(ngModel)]="diffFrecuencia"
                       [disabled]="!diffActivo">
                 <option value="DIARIO">Diario</option>
+                <option value="MENSUAL">Mensual</option>
                 <option value="SEMANAL">Semanal (rango)</option>
                 <option value="PERSONALIZADO">Semanal (varios días)</option>
                 <option value="NINGUNO">No programar</option>
@@ -277,6 +306,11 @@
               <label>Hora</label>
               <input type="time" class="form-input"
                      [(ngModel)]="diffHora">
+            </div>
+            <div class="form-grupo" *ngIf="diffFrecuencia === 'MENSUAL' && diffActivo">
+              <label>Día del mes</label>
+              <input type="number" class="form-input"
+                     [(ngModel)]="diffDiaMes" min="1" max="31">
             </div>
           </div>
           <div class="form-grupo" *ngIf="diffFrecuencia === 'SEMANAL' && diffActivo">
@@ -337,7 +371,7 @@
               <mat-icon class="label-icon icono-naranja">add_circle</mat-icon>
               <div>
                 <div class="cron-card-label">Respaldo Incremental</div>
-                <div class="cron-card-sub">Cambios frecuentes desde el último respaldo</div>
+                <div class="cron-card-sub">Misma copia completa, archivo único actualizado en cada corrida</div>
               </div>
             </div>
             <label class="toggle-label">

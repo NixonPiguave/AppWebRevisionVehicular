@@ -8,5 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface IBackupConfigRepository extends JpaRepository<BackupConfig, Long> {
-    Optional<BackupConfig> findTopByOrderByConfigIdAsc();
+    Optional<BackupConfig> findTopByOrderByConfigIdDesc();
 }

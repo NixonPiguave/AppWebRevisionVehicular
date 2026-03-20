@@ -10,4 +10,7 @@ public interface IBackupRecordService {
     boolean hayBackupEnProceso();
     /** Marca un registro EN_PROCESO como FALLIDO (para desbloquear respaldos colgados). */
     void marcarComoFallido(Long recordId);
+
+    /** Tras un incremental exitoso: conserva un solo registro por el archivo rotativo. */
+    void eliminarHistorialIncrementalDuplicado(Long recordIdConservar, String nombreArchivoRotativo);
 }

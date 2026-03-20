@@ -8,6 +8,7 @@ import com.revisionvehicular.backend.repositories.backup.IBackupConfigRepository
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -36,7 +37,7 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
 
     @Override
     public BackupConfigDTO obtenerConfig() {
-        return repository.findTopByOrderByConfigIdAsc()
+        return repository.findTopByOrderByConfigIdDesc()
                 .map(this::toDTO)
                 .orElse(new BackupConfigDTO());
     }
@@ -46,7 +47,7 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         // Validar que la ruta del servidor exista o pueda crearse
         validarRutaServidor(dto.getRutaServidor());
 
-        BackupConfig config = repository.findTopByOrderByConfigIdAsc()
+        BackupConfig config = repository.findTopByOrderByConfigIdDesc()
                 .orElse(new BackupConfig());
 
         config.setRutaServidor(dto.getRutaServidor());
@@ -81,6 +82,34 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
             System.err.println("Error al actualizar scheduler: " + e.getMessage());
         }
         return toDTO(configGuardada);
+    }
+
+    @Override
+    public BackupConfigDTO guardarDriveCredentials(MultipartFile file) {
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("Archivo JSON de credenciales inválido.");
+        }
+
+        BackupConfig config = repository.findTopByOrderByConfigIdDesc()
+                .orElseThrow(() -> new RuntimeException("No existe configuración de backup. Configure primero la ruta del servidor."));
+
+        String rutaServidor = config.getRutaServidor();
+        validarRutaServidor(rutaServidor);
+
+        try {
+            Path dirCreds = Paths.get(rutaServidor, "drive-credentials");
+            Files.createDirectories(dirCreds);
+
+            // Guardamos siempre con un nombre fijo para evitar acumulación.
+            Path destino = dirCreds.resolve("drive-credentials.json");
+            file.transferTo(destino.toFile());
+
+            config.setDriveCredentialsPath(destino.toString());
+            BackupConfig guardado = repository.save(config);
+            return toDTO(guardado);
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo almacenar el JSON de credenciales: " + e.getMessage());
+        }
     }
 
     private void validarRutaServidor(String ruta) {

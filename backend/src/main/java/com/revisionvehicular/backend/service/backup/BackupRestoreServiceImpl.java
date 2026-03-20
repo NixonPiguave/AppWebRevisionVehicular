@@ -141,7 +141,7 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
 
     @Override
     public List<BackupLocalFileDTO> listarArchivosLocales() {
-        BackupConfig config = configRepository.findTopByOrderByConfigIdAsc()
+        BackupConfig config = configRepository.findTopByOrderByConfigIdDesc()
                 .orElseThrow(() -> new RuntimeException("No existe configuración de backup. Configure la ruta de respaldos primero."));
 
         Path directorio = Paths.get(config.getRutaServidor());
@@ -178,7 +178,7 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
             throw new RuntimeException("Nombre de archivo no permitido.");
         }
 
-        BackupConfig config = configRepository.findTopByOrderByConfigIdAsc()
+        BackupConfig config = configRepository.findTopByOrderByConfigIdDesc()
                 .orElseThrow(() -> new RuntimeException("No existe configuración de backup."));
 
         Path archivo = Paths.get(config.getRutaServidor(), nombreArchivo);

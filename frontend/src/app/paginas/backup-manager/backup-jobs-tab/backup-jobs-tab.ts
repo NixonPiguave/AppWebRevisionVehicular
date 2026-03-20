@@ -17,6 +17,10 @@ export class BackupJobsTabComponent implements OnInit {
   ultimoResultado: BackupRecord | null = null;
   mensajeExito: string = '';
   mensajeError: string = '';
+  /** Nombre fijo que anuncia el backend (debe coincidir con el archivo tras un incremental). */
+  archivoIncrementalServidor: string | null = null;
+  metaIncrementalFallo: boolean = false;
+  advertenciaIncrementalAntiguo: boolean = false;
 
   tipos = [
     {
@@ -36,7 +40,8 @@ export class BackupJobsTabComponent implements OnInit {
     {
       id: 'INCREMENTAL',
       label: 'Respaldo Incremental',
-      descripcion: 'Cambios desde el último respaldo de cualquier tipo. Más liviano.',
+      descripcion:
+        'Copia completa de la base en un único archivo que se sobrescribe en cada ejecución (programada o manual).',
       icono: 'add_circle',
       color: 'naranja'
     }
@@ -47,7 +52,18 @@ export class BackupJobsTabComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.backupService.obtenerArchivoIncrementalConfigurado().subscribe({
+      next: (r) => {
+        this.archivoIncrementalServidor = r?.nombreArchivo ?? null;
+        this.metaIncrementalFallo = false;
+      },
+      error: () => {
+        this.archivoIncrementalServidor = null;
+        this.metaIncrementalFallo = true;
+      }
+    });
+  }
 
   async ejecutarBackup(tipo: string): Promise<void> {
     if (this.ejecutando) return;
@@ -72,6 +88,12 @@ export class BackupJobsTabComponent implements OnInit {
         this.ultimoResultado = record;
 
         if (record.estado === 'EXITOSO') {
+          const esperado = this.archivoIncrementalServidor;
+          this.advertenciaIncrementalAntiguo =
+            tipo === 'INCREMENTAL' &&
+            !!esperado &&
+            !!record.nombreArchivo &&
+            record.nombreArchivo !== esperado;
           // Descargar y guardar en la carpeta elegida
           await this.guardarEnCarpeta(record, dirHandle!);
           this.mostrarExito('Respaldo ejecutado y guardado correctamente');
