@@ -3,16 +3,17 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpClient } from '@angular/common/http';
 import {
   DefectosService,
-  Defectos
+  Defectos,
+  TipoDefecto
 } from '../../../services/defectos_inspeccion/defectos.service';
 import { MetodoInspeccionService, MetodoInspeccion } from '../../../services/inspeccion_rtv/metodo_inspeccion.service';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.service';
 import { UmbralService } from '../../../services/configuracion_umbral/umbral.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
-import { DatosFabricaService, DatosFabrica } from '../../../services/gestion_vehicular/datos-fabrica.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
@@ -45,6 +46,7 @@ interface UbicacionesMoto {
 interface VehiculoInfo {
   matricula?:       string;
   chasis?:          string;
+  codigoMotor?:     string;
   id?:              number;
 
   color?:           string;
@@ -59,8 +61,18 @@ interface VehiculoInfo {
 interface CampoComparado {
   etiqueta: string;
   valorVehiculo: string;
-  valorFabrica:  string;
+  valorImpronta:  string;
   coincide:      boolean;
+}
+
+interface ImprontaRow {
+  id: number;
+  fechaRegistro: string;
+  codigoImpronta?: string;
+  descripcion?: string;
+  estado?: string;
+  vehiculoId?: number;
+  placa?: string;
 }
 
 @Component({
@@ -77,6 +89,7 @@ export class RegistrarInspeccionComponent implements OnInit {
   vehiculoInfo: VehiculoInfo | null = null;
 
   defectos: Defectos[] = [];
+  tiposDefecto: TipoDefecto[] = [];
   metodosInspeccion: MetodoInspeccion[] = [];
   umbrales: { idUmbral: number }[] = [];
 
@@ -124,8 +137,9 @@ export class RegistrarInspeccionComponent implements OnInit {
   private turnoConfirmadoIntentado = false;
 
   camposComparados: CampoComparado[] = [];
+  private readonly improntasApi = 'http://localhost:8080/api/improntas';
 
-  get estadoFabrica(): 'coincide' | 'discrepancia' | 'no-encontrado' | 'sin-datos' {
+  get estadoImpronta(): 'coincide' | 'discrepancia' | 'no-encontrado' | 'sin-datos' {
     if (!this.vehiculoInfo) return 'sin-datos';
     if (this.camposComparados.length === 0) return 'no-encontrado';
     return this.camposComparados.every(c => c.coincide) ? 'coincide' : 'discrepancia';
@@ -146,7 +160,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     private inspeccionService: InspeccionService,
     private umbralService: UmbralService,
     private vehiculoService: VehiculoService,
-    private datosFabricaService: DatosFabricaService,
+    private http: HttpClient,
     private notification: NotificationService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef
@@ -177,12 +191,14 @@ export class RegistrarInspeccionComponent implements OnInit {
 
     const observables: {
       defectos?: ReturnType<DefectosService['listar']>;
+      tiposDefecto?: ReturnType<DefectosService['listarTipoDefectos']>;
       metodos?: ReturnType<MetodoInspeccionService['listarMetodosInspeccion']>;
       umbrales?: ReturnType<UmbralService['listar']>;
       turno?: ReturnType<TurnosService['getById']>;
     } = {};
 
     observables.defectos = this.defectosService.listar();
+    observables.tiposDefecto = this.defectosService.listarTipoDefectos();
     observables.metodos = this.metodoInspeccionService.listarMetodosInspeccion();
     observables.umbrales = this.umbralService.listar();
 
@@ -193,6 +209,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     forkJoin(observables).subscribe({
       next: (res: any) => {
         this.defectos = res.defectos || [];
+        this.tiposDefecto = res.tiposDefecto || [];
         this.metodosInspeccion = res.metodos || [];
         this.umbrales = (res.umbrales || []).map((u: any) => ({ idUmbral: u.idUmbral ?? u.id }));
 
@@ -249,13 +266,14 @@ export class RegistrarInspeccionComponent implements OnInit {
           id:              v.id,
           matricula:       v.matricula || v.placa,
           chasis:          v.chasis,
+          codigoMotor:     v.codigoMotor,
           vin:             v.vin,
           marca:           v.marcaNombre || v.marca?.nombre || v.marca || '',
           modelo:          v.modeloNombre || v.modelo?.nombre || v.modelo || '',
           color:           v.color,
           anioFabricacion: v.anioFabricacion
         };
-        this.cargarDatosFabricaYComparar();
+        this.cargarImprontaYComparar();
       },
       error: () => {
         this.vehiculoInfo = { id, matricula: `Veh #${id}` };
@@ -265,16 +283,22 @@ export class RegistrarInspeccionComponent implements OnInit {
     });
   }
 
-  /** Busca datos de fábrica en BD y compara con datos del vehículo */
-  private cargarDatosFabricaYComparar(): void {
+  /** Busca última impronta por placa y compara con datos del vehículo */
+  private cargarImprontaYComparar(): void {
     if (!this.vehiculoInfo?.matricula) {
       this.camposComparados = [];
       this.cdr.detectChanges();
       return;
     }
-    this.datosFabricaService.buscarPorMatricula(this.vehiculoInfo.matricula).subscribe({
-      next: (fabrica) => {
-        this.compararConFabrica(fabrica);
+
+    this.http.get<ImprontaRow[]>(this.improntasApi, {
+      params: { placa: this.vehiculoInfo.matricula }
+    }).subscribe({
+      next: (rows) => {
+        const ultima = (rows ?? [])
+          .slice()
+          .sort((a, b) => String(b.fechaRegistro || '').localeCompare(String(a.fechaRegistro || '')))[0] ?? null;
+        this.compararConImpronta(ultima);
         this.cdr.detectChanges();
       },
       error: () => {
@@ -284,9 +308,9 @@ export class RegistrarInspeccionComponent implements OnInit {
     });
   }
 
-  /** Compara datos del vehículo con datos de fábrica (desde BD) */
-  private compararConFabrica(fabrica: DatosFabrica | null): void {
-    if (!this.vehiculoInfo || !fabrica) {
+  /** Compara datos del vehículo con datos de impronta (desde BD) */
+  private compararConImpronta(impronta: ImprontaRow | null): void {
+    if (!this.vehiculoInfo || !impronta) {
       this.camposComparados = [];
       return;
     }
@@ -294,32 +318,41 @@ export class RegistrarInspeccionComponent implements OnInit {
     const cmp = (a: string | number | undefined, b: string | number | undefined) =>
       String(a ?? '').trim().toLowerCase() === String(b ?? '').trim().toLowerCase();
 
+    const tipos = this.extraerTiposImpronta(impronta.descripcion);
     this.camposComparados = [
       {
-        etiqueta:      'VIN',
-        valorVehiculo: this.vehiculoInfo.vin   ?? '—',
-        valorFabrica:  fabrica.vin ?? '—',
-        coincide:      cmp(this.vehiculoInfo.vin, fabrica.vin)
+        etiqueta:      'Código motor',
+        valorVehiculo: this.vehiculoInfo.codigoMotor ?? '—',
+        valorImpronta: impronta.codigoImpronta ?? '—',
+        coincide:      cmp(this.vehiculoInfo.codigoMotor, impronta.codigoImpronta)
       },
       {
-        etiqueta:      'Marca',
-        valorVehiculo: this.vehiculoInfo.marca ?? '—',
-        valorFabrica:  fabrica.marca ?? '—',
-        coincide:      cmp(this.vehiculoInfo.marca, fabrica.marca)
+        etiqueta:      'Placa',
+        valorVehiculo: this.vehiculoInfo.matricula ?? '—',
+        valorImpronta: impronta.placa ?? '—',
+        coincide:      cmp(this.vehiculoInfo.matricula, impronta.placa)
       },
       {
-        etiqueta:      'Modelo',
-        valorVehiculo: this.vehiculoInfo.modelo ?? '—',
-        valorFabrica:  fabrica.modelo ?? '—',
-        coincide:      cmp(this.vehiculoInfo.modelo, fabrica.modelo)
+        etiqueta:      'Impronta chasis',
+        valorVehiculo: this.vehiculoInfo.chasis ? 'Registrado' : 'Sin dato',
+        valorImpronta: tipos.chasisTipo || 'N/D',
+        coincide:      !!this.vehiculoInfo.chasis && !!tipos.chasisTipo
       },
       {
-        etiqueta:      'Color',
-        valorVehiculo: this.vehiculoInfo.color ?? '—',
-        valorFabrica:  fabrica.color ?? '—',
-        coincide:      cmp(this.vehiculoInfo.color, fabrica.color)
+        etiqueta:      'Impronta motor',
+        valorVehiculo: this.vehiculoInfo.codigoMotor ? 'Registrado' : 'Sin dato',
+        valorImpronta: tipos.motorTipo || 'N/D',
+        coincide:      !!this.vehiculoInfo.codigoMotor && !!tipos.motorTipo
       }
     ];
+  }
+
+  private extraerTiposImpronta(desc?: string): { chasisTipo: string; motorTipo: string } {
+    const raw = (desc || '').trim();
+    if (!raw) return { chasisTipo: '', motorTipo: '' };
+    const chasis = (raw.match(/CHASIS:([^|]+)/i)?.[1] || '').trim();
+    const motor = (raw.match(/MOTOR:([^|]+)/i)?.[1] || '').trim();
+    return { chasisTipo: chasis, motorTipo: motor };
   }
 
   // ════════════════════════════════════════════════════════════
@@ -451,6 +484,44 @@ export class RegistrarInspeccionComponent implements OnInit {
 
   get totalUbicaciones(): number {
     return this.getUbicacionesArray().length;
+  }
+
+  private tipoDefectoNumero(defecto: Defectos): number | null {
+    const candidatos: string[] = [];
+
+    if (defecto?.tipoDefectoId) {
+      const tipo = this.tiposDefecto.find(t => t.id === defecto.tipoDefectoId);
+      if (tipo) candidatos.push(`${tipo.codigo || ''} ${tipo.nombre || ''}`);
+    }
+
+    // Fallbacks para datos legacy/carga rápida sin FK de tipo
+    candidatos.push(
+      defecto?.codigo || '',
+      defecto?.descripciontipo || '',
+      defecto?.descripcion || ''
+    );
+
+    const value = candidatos.join(' ').toUpperCase();
+    if (/\b3\b/.test(value) || value.includes('TIPO 3') || value.includes('TIPO III') || value.endsWith(' III')) return 3;
+    if (/\b2\b/.test(value) || value.includes('TIPO 2') || value.includes('TIPO II') || value.endsWith(' II')) return 2;
+    if (/\b1\b/.test(value) || value.includes('TIPO 1') || value.includes('TIPO I') || value.endsWith(' I')) return 1;
+    return null;
+  }
+
+  get totalTipo1(): number {
+    return this.defectosSeleccionados.filter(d => this.tipoDefectoNumero(d) === 1).length;
+  }
+
+  get totalTipo2(): number {
+    return this.defectosSeleccionados.filter(d => this.tipoDefectoNumero(d) === 2).length;
+  }
+
+  get totalTipo3(): number {
+    return this.defectosSeleccionados.filter(d => this.tipoDefectoNumero(d) === 3).length;
+  }
+
+  get resultadoVisualEstimado(): 'APROBADO' | 'RECHAZADO' {
+    return (this.totalTipo2 > 0 || this.totalTipo3 > 0) ? 'RECHAZADO' : 'APROBADO';
   }
 
   guardarInspeccion(): void {

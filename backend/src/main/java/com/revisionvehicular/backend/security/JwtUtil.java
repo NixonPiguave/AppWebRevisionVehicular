@@ -6,7 +6,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,7 +20,7 @@ public class JwtUtil {
     @Value("${jwt.expiration}")
     private Long expiration;
 
-    private Key getSigningKey() {
+    private SecretKey secretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
@@ -37,21 +37,20 @@ public class JwtUtil {
         }
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(usuario)
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(getSigningKey())
+                .claims(claims)
+                .subject(usuario)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(secretKey())
                 .compact();
     }
 
     public Claims extractClaims(String token) {
         return Jwts.parser()
-
-                .setSigningKey(getSigningKey())
+                .verifyWith(secretKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public String extractUsername(String token) {
@@ -77,8 +76,30 @@ public class JwtUtil {
     public Long extractSesionId(String token) {
         try {
             Object sid = extractClaims(token).get("sid");
-            if (sid instanceof Number) return ((Number) sid).longValue();
+            if (sid instanceof Number) {
+                return ((Number) sid).longValue();
+            }
             return null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
+    private static final long CLOCK_SKEW_SECONDS_FOR_EXPIRED_READ = 3650L * 24 * 60 * 60;
+
+
+    public Claims extractClaimsIgnoringExpiration(String token) {
+        if (token == null || token.isBlank()) {
+            return null;
+        }
+        try {
+            return Jwts.parser()
+                    .verifyWith(secretKey())
+                    .clockSkewSeconds(CLOCK_SKEW_SECONDS_FOR_EXPIRED_READ)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
         } catch (Exception e) {
             return null;
         }

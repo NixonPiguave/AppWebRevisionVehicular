@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.repositories.rtv;
 
 import com.revisionvehicular.backend.entities.rtv.Inspeccion;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
@@ -13,7 +14,13 @@ import java.util.List;
 @Repository
 public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
 
-    @Query("SELECT DISTINCT i FROM Inspeccion i LEFT JOIN FETCH i.usuario u LEFT JOIN FETCH i.detalles d LEFT JOIN FETCH d.metodoInspeccion WHERE i.vehiculo.vehiculoid = :vehiculoId AND i.fechaInspeccion BETWEEN :desde AND :hasta ORDER BY i.fechaInspeccion")
+    @Query("SELECT DISTINCT i FROM Inspeccion i " +
+            "LEFT JOIN FETCH i.usuario u " +
+            "LEFT JOIN FETCH i.detalles d " +
+            "LEFT JOIN FETCH d.metodoInspeccion " +
+            "LEFT JOIN FETCH d.defecto dd " +
+            "LEFT JOIN FETCH dd.tipoDefecto " +
+            "WHERE i.vehiculo.vehiculoid = :vehiculoId AND i.fechaInspeccion BETWEEN :desde AND :hasta ORDER BY i.fechaInspeccion")
     List<Inspeccion> findByVehiculoIdAndRangoFechas(@Param("vehiculoId") Long vehiculoId, @Param("desde") LocalDateTime desde, @Param("hasta") LocalDateTime hasta);
 
     @Query(
@@ -46,4 +53,8 @@ public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
             @Param("p_estado") String estado,
             @Param("p_id_calendarizacion") Long idCalendarizacion
     );
+
+    @Modifying
+    @Query(value = "UPDATE rtv_inspeccion SET resultado = :resultado WHERE inspeccion_id = :inspeccionId", nativeQuery = true)
+    void actualizarResultado(@Param("inspeccionId") Long inspeccionId, @Param("resultado") String resultado);
 }

@@ -177,10 +177,12 @@ public class TurnosServiceImpl implements ITurnosService {
         if (lineaId == null) {
             return findTurnosPagadosPorServicio(servicioId);
         }
-        // Determinar categoría según línea: L=motos, M=carros (normativa ANT Ecuador)
+        // Determinar categorías según línea: L=motos, M/N=carros (normativa ANT Ecuador)
         String nombreLinea = lineaService.findById(lineaId).getNombre();
         boolean esLineaMoto = nombreLinea != null && nombreLinea.toLowerCase().contains("moto");
-        String codigoCategoriaFiltro = esLineaMoto ? "L" : "M";
+        Set<String> codigosCategoriaFiltro = esLineaMoto
+                ? Set.of("L")
+                : Set.of("M", "N");
 
         Stream<com.revisionvehicular.backend.entities.srtv.Turnos> stream;
         if (servicioId == null) {
@@ -198,7 +200,8 @@ public class TurnosServiceImpl implements ITurnosService {
                     if (sub == null) return false;
                     Categoria cat = sub.getCategoria();
                     if (cat == null || cat.getCodigo() == null) return false;
-                    return codigoCategoriaFiltro.equalsIgnoreCase(cat.getCodigo().trim());
+                    String codigo = cat.getCodigo().trim().toUpperCase();
+                    return codigosCategoriaFiltro.contains(codigo);
                 })
                 .map(this::toDTO)
                 .collect(Collectors.toList());

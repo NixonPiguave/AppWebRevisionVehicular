@@ -86,17 +86,23 @@
   gap: 24px;
 }
 
-.panel-parametros, .panel-equipos, .panel-resultado, .panel-observaciones {
+.panel-parametros, .panel-resultado, .panel-observaciones {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 20px;
 }
 
-.panel-parametros h3, .panel-equipos h3, .panel-resultado h3 {
+.panel-parametros h3, .panel-resultado h3 {
   margin: 0 0 16px 0;
   font-size: 16px;
   color: #333;
+}
+
+.panel-parametros .panel-desc {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 16px 0;
 }
 
 .parametros-grid {
@@ -174,6 +180,39 @@
   flex-shrink: 0;
 }
 
+.select-equipo {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.param-fila-botones {
+  margin-bottom: 8px;
+}
+
+.btn-leer-datos {
+  padding: 6px 14px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #90caf9;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-leer-datos:hover {
+  background: #bbdefb;
+}
+
+input[readonly] {
+  background: #f5f5f5;
+  color: #555;
+  cursor: not-allowed;
+}
+
 .equipos-lista {
   display: flex;
   flex-wrap: wrap;
@@ -202,6 +241,8 @@
 
 .eq-nombre { font-weight: 500; }
 .eq-serial { font-size: 12px; color: #666; }
+.eq-influencia { font-size: 11px; color: #2e7d32; font-style: italic; }
+
 
 .resultado-opciones {
   display: flex;

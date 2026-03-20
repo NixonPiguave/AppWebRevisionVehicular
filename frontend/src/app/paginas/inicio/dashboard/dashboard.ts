@@ -5,7 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { AuditoriaService, AuditoriaRegistro } from '../../../services/administracion/auditoria.service';
 
-export type EstadoTurno = 'GENERADO' | 'PAGADO' | 'ATENDIDO' | 'CONFIRMADO' | 'CANCELADO';
+export type EstadoTurno = 'GENERADO' | 'PAGADO' | 'EN_PROCESO' | 'CONFIRMADO' | 'CANCELADO';
 
 interface ConteoEstado {
   estado: EstadoTurno;
@@ -31,7 +31,7 @@ export class DashboardComponent implements OnInit {
   private readonly ESTADOS: { key: EstadoTurno; label: string }[] = [
     { key: 'GENERADO', label: 'Generado' },
     { key: 'PAGADO', label: 'Pagado' },
-    { key: 'ATENDIDO', label: 'Atendido' },
+    { key: 'EN_PROCESO', label: 'En proceso' },
     { key: 'CONFIRMADO', label: 'Confirmado' },
     { key: 'CANCELADO', label: 'Cancelado' }
   ];
@@ -55,7 +55,8 @@ export class DashboardComponent implements OnInit {
         const map: Record<string, number> = {};
         this.ESTADOS.forEach(e => { map[e.key] = 0; });
         (turnos ?? []).forEach(t => {
-          const est = (t.estado || '').toUpperCase();
+          let est = (t.estado || '').toUpperCase();
+          if (est === 'ATENDIDO') est = 'EN_PROCESO'; // alias histórico en UI
           if (est in map) map[est]++;
           else map[est] = (map[est] || 0) + 1;
         });
@@ -112,7 +113,7 @@ export class DashboardComponent implements OnInit {
     const icons: Record<EstadoTurno, string> = {
       GENERADO: 'schedule',
       PAGADO: 'payments',
-      ATENDIDO: 'build',
+      EN_PROCESO: 'build',
       CONFIRMADO: 'check_circle',
       CANCELADO: 'cancel'
     };

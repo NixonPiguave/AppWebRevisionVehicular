@@ -183,12 +183,20 @@ export class MarcaVehiculoComponent implements OnInit {
     this.paisesFiltrados = [...this.paises];
   }
 
+  /** Cierra el desplegable de países y deja listo el estado para la próxima apertura del modal */
+  private resetSelectorPaises(): void {
+    this.mostrarListaPaises = false;
+    this.filtroPais = '';
+    this.paisesFiltrados = [...this.paises];
+  }
+
   abrirModalCrear(): void {
     this.modoEdicion = false;
     this.marcaEditando = this.getMarcaVacia();
     this.logoFile = null;
     this.logoPreview = null;
     this.uploadingLogo = false;
+    this.resetSelectorPaises();
     this.mostrarModalForm = true;
   }
 
@@ -203,11 +211,13 @@ export class MarcaVehiculoComponent implements OnInit {
 
     this.logoFile = null;
     this.uploadingLogo = false;
+    this.resetSelectorPaises();
     this.mostrarModalForm = true;
   }
 
   cerrarModalForm(): void {
     this.mostrarModalForm = false;
+    this.resetSelectorPaises();
     this.logoFile = null;
     this.logoPreview = null;
     this.uploadingLogo = false;

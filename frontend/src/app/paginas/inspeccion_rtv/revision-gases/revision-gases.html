@@ -103,6 +103,24 @@
       </div>
     </section>
 
+    <section class="panel-equipos">
+      <h3>Equipos utilizados</h3>
+      <p class="panel-desc">Seleccione los equipos de gases usados. Si el equipo tiene influencia, los valores se rellenan automáticamente al seleccionarlo.</p>
+      <div class="equipos-lista">
+        <div
+          class="equipo-item"
+          *ngFor="let eq of equipos"
+          [class.seleccionado]="equiposSeleccionados.includes(eq.equipoid ?? 0)"
+          (click)="toggleEquipo(eq.equipoid ?? 0)"
+        >
+          <span class="eq-nombre">{{ eq.equipo }}</span>
+          <span class="eq-serial">{{ eq.serialEquipo }}</span>
+          <span class="eq-influencia" *ngIf="eq.influencia === 1">(auto)</span>
+        </div>
+        <p class="sin-datos" *ngIf="equipos.length === 0">No hay equipos de gases registrados</p>
+      </div>
+    </section>
+
     <section class="panel-resultado">
       <h3>Resultado</h3>
       <div class="resultado-opciones">

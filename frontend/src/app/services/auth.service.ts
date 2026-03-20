@@ -44,18 +44,48 @@ export class AuthService {
 
   logout(): Observable<any> {
     const token = this.getToken();
+    if (token) this.notifyServerLogoutBeacon();
     const headers: { [key: string]: string } = {};
     if (token) headers['Authorization'] = `Bearer ${token}`;
-    return this.http.post<any>(`${this.apiUrl}/logout`, {}, { headers }).pipe(
-      tap(() => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('usuario');
-        localStorage.removeItem('nombre');
-        localStorage.removeItem('usuarioId');
-        localStorage.removeItem('rol');
-        localStorage.removeItem('permisos');
+    // Token en query (evita 415/500 con body; Edge acepta query params)
+    const url = token ? `${this.apiUrl}/logout?token=${encodeURIComponent(token)}` : `${this.apiUrl}/logout`;
+    return this.http.post<any>(url, {}, { headers }).pipe(
+      tap({
+        next: () => this.limpiarStorage(),
+        error: () => {
+          // Si falla la petición HTTP, intentar con sendBeacon como respaldo
+          this.notifyServerLogoutBeacon();
+          this.limpiarStorage();
+        }
       })
     );
+  }
+
+  private limpiarStorage(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('usuario');
+    localStorage.removeItem('nombre');
+    localStorage.removeItem('usuarioId');
+    localStorage.removeItem('rol');
+    localStorage.removeItem('permisos');
+  }
+
+  /**
+   * Aviso de cierre al servidor. Token en query evita 415 (Edge rechaza form-urlencoded).
+   */
+  notifyServerLogoutBeacon(): void {
+    const token = this.getToken();
+    if (!token) return;
+    try {
+      const url = `${this.apiUrl}/logout?token=${encodeURIComponent(token)}`;
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(url);
+      } else {
+        void fetch(url, { method: 'POST', keepalive: true });
+      }
+    } catch {
+      /* ignorar */
+    }
   }
 
   /** Lista de claves de permisos (menú) del usuario. Si es null o vacío, se muestran todas las opciones. */

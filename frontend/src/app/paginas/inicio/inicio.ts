@@ -86,6 +86,24 @@ export class InicioComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Al cerrar la pestaña/navegar fuera, avisa al servidor para marcar la sesión como cerrada.
+   * No se ejecuta en recarga (F5) para no desconectar al usuario.
+   */
+  @HostListener('window:pagehide', ['$event'])
+  onWindowPageHide(ev: PageTransitionEvent): void {
+    if (ev.persisted) return;
+    try {
+      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      if (nav?.type === 'reload') return;
+    } catch {
+      /* ignorar */
+    }
+    if (this.authService.isLoggedIn()) {
+      this.authService.notifyServerLogoutBeacon();
+    }
+  }
+
   cerrarMensajeInfo(): void {
     this.mensajeInfo = '';
     if (this.mensajeInfoTimeout) {

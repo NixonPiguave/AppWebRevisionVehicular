@@ -14,8 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -89,6 +91,11 @@ public class CertificadoRtvServiceImpl implements ICertificadoRtvService {
 
         // Pruebas (una por inspección: método, resultado, observaciones, inspector)
         List<CertificadoRtvDTO.PruebaInfo> pruebas = new ArrayList<>();
+        List<CertificadoRtvDTO.DefectoCertificadoInfo> defectosCertificado = new ArrayList<>();
+        Map<Integer, Integer> conteoTipos = new HashMap<>();
+        conteoTipos.put(1, 0);
+        conteoTipos.put(2, 0);
+        conteoTipos.put(3, 0);
         for (Inspeccion ins : inspecciones) {
             CertificadoRtvDTO.PruebaInfo p = new CertificadoRtvDTO.PruebaInfo();
             String metodoNombre = "Inspección";
@@ -108,9 +115,54 @@ public class CertificadoRtvServiceImpl implements ICertificadoRtvService {
                 p.setInspectorNombre("-");
             }
             pruebas.add(p);
+
+            if (ins.getDetalles() != null) {
+                for (DetalleInspeccion det : ins.getDetalles()) {
+                    if (det.getDefecto() == null || det.getDefecto().getCodigo() == null) continue;
+                    if ("SIN_DEFECTO".equalsIgnoreCase(det.getDefecto().getCodigo())) continue;
+
+                    CertificadoRtvDTO.DefectoCertificadoInfo d = new CertificadoRtvDTO.DefectoCertificadoInfo();
+                    d.setCodigo(det.getDefecto().getCodigo());
+                    d.setDescripcion(det.getDefecto().getDescripcion());
+                    Integer tipo = extraerTipoDefecto(det);
+                    d.setTipo(tipo != null ? "TIPO " + tipo : "N/D");
+                    defectosCertificado.add(d);
+                    if (tipo != null && tipo >= 1 && tipo <= 3) {
+                        conteoTipos.put(tipo, conteoTipos.get(tipo) + 1);
+                    }
+                }
+            }
         }
         dto.setPruebas(pruebas);
+        dto.setDefectos(defectosCertificado);
+        dto.setTotalTipo1(conteoTipos.getOrDefault(1, 0));
+        dto.setTotalTipo2(conteoTipos.getOrDefault(2, 0));
+        dto.setTotalTipo3(conteoTipos.getOrDefault(3, 0));
+        dto.setResultadoFinal((dto.getTotalTipo2() > 0 || dto.getTotalTipo3() > 0) ? "RECHAZADO" : "APROBADO");
 
         return dto;
+    }
+
+    private Integer extraerTipoDefecto(DetalleInspeccion det) {
+        if (det == null || det.getDefecto() == null) return null;
+        String tipoCodigo = "";
+        String tipoNombre = "";
+        if (det.getDefecto().getTipoDefecto() != null) {
+            tipoCodigo = det.getDefecto().getTipoDefecto().getCodigo() != null ? det.getDefecto().getTipoDefecto().getCodigo() : "";
+            tipoNombre = det.getDefecto().getTipoDefecto().getNombre() != null ? det.getDefecto().getTipoDefecto().getNombre() : "";
+        }
+
+        String valor = (tipoCodigo + " " + tipoNombre + " "
+                + safe(det.getDefecto().getCodigo()) + " "
+                + safe(det.getDefecto().getDescripciontipo()) + " "
+                + safe(det.getDefecto().getDescripcion())).toUpperCase().trim();
+        if (valor.matches(".*\\b3\\b.*") || valor.contains("TIPO 3") || valor.contains("TIPO III") || valor.endsWith(" III")) return 3;
+        if (valor.matches(".*\\b2\\b.*") || valor.contains("TIPO 2") || valor.contains("TIPO II") || valor.endsWith(" II")) return 2;
+        if (valor.matches(".*\\b1\\b.*") || valor.contains("TIPO 1") || valor.contains("TIPO I") || valor.endsWith(" I")) return 1;
+        return null;
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
     }
 }

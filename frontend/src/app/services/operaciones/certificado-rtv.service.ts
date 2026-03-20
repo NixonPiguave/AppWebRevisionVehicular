@@ -28,6 +28,15 @@ export interface CertificadoRtvData {
     fechaInspeccion?: string;
     inspectorNombre?: string;
   }>;
+  defectos?: Array<{
+    codigo?: string;
+    descripcion?: string;
+    tipo?: string;
+  }>;
+  totalTipo1?: number;
+  totalTipo2?: number;
+  totalTipo3?: number;
+  resultadoFinal?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -169,6 +178,13 @@ export class CertificadoRtvService {
         <td class="cert-td-fec">${p.fechaInspeccion ? new Date(p.fechaInspeccion).toLocaleString('es') : '-'}</td>
       </tr>
     `).join('');
+    const defectosRows = (data.defectos ?? []).map(d => `
+      <tr>
+        <td>${this.escape(d.codigo ?? '-')}</td>
+        <td>${this.escape(d.descripcion ?? '-')}</td>
+        <td>${this.escape(d.tipo ?? '-')}</td>
+      </tr>
+    `).join('');
 
     const turno = data.turno ?? {};
     const fechaFormateada = turno.fechaInicio
@@ -198,6 +214,20 @@ export class CertificadoRtvService {
         <tr><td class="cert-lbl">Propietario:</td><td class="cert-val">${this.escape(turno.propietarioNombre ?? '-')}</td></tr>
         <tr><td class="cert-lbl">Servicio:</td><td class="cert-val">${this.escape(turno.servicioNombre ?? '-')}</td></tr>
         <tr><td class="cert-lbl">Fecha:</td><td class="cert-val">${fechaFormateada}</td></tr>
+      </table>
+      <div class="cert-divider"></div>
+      <div class="cert-section-title">RESUMEN DE DEFECTOS VISUALES</div>
+      <table class="cert-tabla-datos">
+        <tr><td class="cert-lbl">Tipo 1:</td><td class="cert-val">${data.totalTipo1 ?? 0}</td></tr>
+        <tr><td class="cert-lbl">Tipo 2:</td><td class="cert-val">${data.totalTipo2 ?? 0}</td></tr>
+        <tr><td class="cert-lbl">Tipo 3:</td><td class="cert-val">${data.totalTipo3 ?? 0}</td></tr>
+        <tr><td class="cert-lbl">Resultado final:</td><td class="cert-val cert-resultado ${(data.resultadoFinal || '').toUpperCase() === 'APROBADO' ? 'ok' : 'ko'}">${this.escape(data.resultadoFinal ?? 'PENDIENTE')}</td></tr>
+      </table>
+      <table class="cert-tabla-pruebas">
+        <thead>
+          <tr><th>Código</th><th>Defecto</th><th>Tipo</th></tr>
+        </thead>
+        <tbody>${defectosRows || '<tr><td colspan="3">Sin defectos detectados</td></tr>'}</tbody>
       </table>
       <div class="cert-divider"></div>
       <div class="cert-section-title">RESULTADOS DE LAS PRUEBAS</div>
@@ -245,6 +275,9 @@ export class CertificadoRtvService {
       .cert-td-obs { max-width: 180px; word-break: break-word; }
       .cert-td-ins { max-width: 150px; word-break: break-word; }
       .cert-td-fec { white-space: nowrap; }
+      .cert-resultado { font-weight: 800; }
+      .cert-resultado.ok { color: #1f7a2e; }
+      .cert-resultado.ko { color: #b31f1f; }
     `;
   }
 }

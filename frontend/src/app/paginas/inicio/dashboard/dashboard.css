@@ -162,6 +162,14 @@
   background: #2d7a3e;
 }
 
+.estado-card[data-estado="EN_PROCESO"] .estado-bar {
+  background: #1565c0;
+}
+
+.estado-card[data-estado="EN_PROCESO"] .estado-header mat-icon {
+  color: #1565c0;
+}
+
 .auditoria-list {
   display: flex;
   flex-direction: column;

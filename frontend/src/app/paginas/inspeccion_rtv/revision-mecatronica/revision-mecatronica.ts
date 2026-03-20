@@ -5,6 +5,11 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { EquiposService, Equipo } from '../../../services/inspeccion_rtv/equipos.service';
 import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.service';
+import {
+  esEquipoMecatronica,
+  parametrosQueInfluenciaEquipo,
+  generarValoresAleatoriosMecatronica
+} from '../../../utils/equipo-categoria.util';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
 import { DefectosService, Defectos } from '../../../services/defectos_inspeccion/defectos.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
@@ -35,13 +40,43 @@ export class RevisionMecatronica implements OnInit {
   vehiculoInfo: { matricula?: string; marca?: string; modelo?: string } | null = null;
 
   equipos: Equipo[] = [];
-  equiposSeleccionados: number[] = [];
+  /** Equipo seleccionado por grupo. null = manual */
+  equipoFrenosId: number | null = null;
+  equipoSuspensionId: number | null = null;
+  equipoAlineacionId: number | null = null;
   defectos: Defectos[] = [];
   defectosSeleccionados: Defectos[] = [];
   filtroDefectos = '';
 
   get esMoto(): boolean {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
+  }
+
+  /** Equipos que influyen en frenos */
+  get equiposFrenos(): Equipo[] {
+    return this.equipos.filter(e => parametrosQueInfluenciaEquipo(e.equipo || '').includes('frenos'));
+  }
+  /** Equipos que influyen en suspensión */
+  get equiposSuspension(): Equipo[] {
+    return this.equipos.filter(e => parametrosQueInfluenciaEquipo(e.equipo || '').includes('suspension'));
+  }
+  /** Equipos que influyen en alineación */
+  get equiposAlineacion(): Equipo[] {
+    return this.equipos.filter(e => parametrosQueInfluenciaEquipo(e.equipo || '').includes('alineacion'));
+  }
+
+  /** Grupos con influencia=1: inputs read-only */
+  get frenosSoloLectura(): boolean {
+    const eq = this.equipoFrenosId ? this.equipos.find(e => (e.equipoid ?? 0) === this.equipoFrenosId) : null;
+    return eq != null && eq.influencia === 1;
+  }
+  get suspensionSoloLectura(): boolean {
+    const eq = this.equipoSuspensionId ? this.equipos.find(e => (e.equipoid ?? 0) === this.equipoSuspensionId) : null;
+    return eq != null && eq.influencia === 1;
+  }
+  get alineacionSoloLectura(): boolean {
+    const eq = this.equipoAlineacionId ? this.equipos.find(e => (e.equipoid ?? 0) === this.equipoAlineacionId) : null;
+    return eq != null && eq.influencia === 1;
   }
 
   // Parámetros CARROS (normativa RTV Ecuador)
@@ -109,7 +144,8 @@ export class RevisionMecatronica implements OnInit {
     }
     forkJoin(obs).subscribe({
       next: (res: any) => {
-        this.equipos = res.equipos || [];
+        const todos = res.equipos || [];
+        this.equipos = todos.filter((e: Equipo) => esEquipoMecatronica(e.equipo || ''));
         this.defectos = res.defectos || [];
         if (res.turno) {
           this.confirmarTurnoSiAplica(res.turno);
@@ -170,10 +206,59 @@ export class RevisionMecatronica implements OnInit {
     });
   }
 
-  toggleEquipo(id: number): void {
-    const idx = this.equiposSeleccionados.indexOf(id);
-    if (idx >= 0) this.equiposSeleccionados.splice(idx, 1);
-    else this.equiposSeleccionados.push(id);
+  /** Al cambiar equipo de un grupo: si influencia=1, auto-llenar y read-only */
+  onEquipoFrenosChange(equipoId: number | null | string): void {
+    this.equipoFrenosId = equipoId == null || equipoId === '' ? null : Number(equipoId);
+    const id = this.equipoFrenosId;
+    if (id) {
+      const eq = this.equipos.find(e => (e.equipoid ?? 0) === id);
+      if (eq && eq.influencia === 1) {
+        this.leerDatosFrenos();
+      }
+    }
+    this.cdr.detectChanges();
+  }
+  onEquipoSuspensionChange(equipoId: number | null | string): void {
+    this.equipoSuspensionId = equipoId == null || equipoId === '' ? null : Number(equipoId);
+    const id = this.equipoSuspensionId;
+    if (id) {
+      const eq = this.equipos.find(e => (e.equipoid ?? 0) === id);
+      if (eq && eq.influencia === 1) {
+        this.leerDatosSuspension();
+      }
+    }
+    this.cdr.detectChanges();
+  }
+  onEquipoAlineacionChange(equipoId: number | null | string): void {
+    this.equipoAlineacionId = equipoId == null || equipoId === '' ? null : Number(equipoId);
+    const id = this.equipoAlineacionId;
+    if (id) {
+      const eq = this.equipos.find(e => (e.equipoid ?? 0) === id);
+      if (eq && eq.influencia === 1) {
+        this.leerDatosAlineacion();
+      }
+    }
+    this.cdr.detectChanges();
+  }
+
+  /** Botón "Leer datos" para grupos manuales */
+  leerDatosFrenos(): void {
+    const vals = generarValoresAleatoriosMecatronica(['frenos']);
+    if (vals.frenosEficacia != null) this.frenosEficacia = String(vals.frenosEficacia);
+    if (vals.frenosDesequilibrio != null) this.frenosDesequilibrio = String(vals.frenosDesequilibrio);
+    this.cdr.detectChanges();
+  }
+  leerDatosSuspension(): void {
+    const vals = generarValoresAleatoriosMecatronica(['suspension']);
+    if (vals.suspensionEficacia != null) this.suspensionEficacia = String(vals.suspensionEficacia);
+    if (vals.suspensionDesequilibrio != null) this.suspensionDesequilibrio = String(vals.suspensionDesequilibrio);
+    this.cdr.detectChanges();
+  }
+  leerDatosAlineacion(): void {
+    const vals = generarValoresAleatoriosMecatronica(['alineacion']);
+    if (vals.alineacionConvergencia != null) this.alineacionConvergencia = String(vals.alineacionConvergencia);
+    if (vals.alineacionDivergencia != null) this.alineacionDivergencia = String(vals.alineacionDivergencia);
+    this.cdr.detectChanges();
   }
 
   toggleDefecto(d: Defectos): void {
@@ -207,9 +292,17 @@ export class RevisionMecatronica implements OnInit {
       this.notification.error('No se pudo obtener el usuario logueado. Vuelva a iniciar sesión.');
       return;
     }
-    const eqNombres = this.equiposSeleccionados
-      .map(id => this.equipos.find(e => (e.equipoid ?? 0) === id)?.equipo)
-      .filter(Boolean);
+    const eqNombresSet = new Set<string>();
+    const addEq = (id: number | null) => {
+      if (id) {
+        const n = this.equipos.find(e => (e.equipoid ?? 0) === id)?.equipo;
+        if (n) eqNombresSet.add(n);
+      }
+    };
+    addEq(this.equipoFrenosId);
+    addEq(this.equipoSuspensionId);
+    addEq(this.equipoAlineacionId);
+    const eqNombres = Array.from(eqNombresSet);
     const obs = this.esMoto
       ? [
           `Frenos: pastillas ${this.frenosPastillasOk ? 'OK' : 'defecto'}, zapatas ${this.frenosZapatasOk ? 'OK' : 'defecto'}, líquido ${this.frenosLiquidoOk ? 'OK' : 'defecto'}`,
@@ -234,8 +327,16 @@ export class RevisionMecatronica implements OnInit {
     if (!this.esMoto) {
       const fe = parseFloat(this.frenosEficacia);
       if (!isNaN(fe)) valoresMedidos['FRENOS_EFICACIA'] = fe;
+      const fd = parseFloat(this.frenosDesequilibrio);
+      if (!isNaN(fd)) valoresMedidos['FRENOS_DESEQUILIBRIO'] = fd;
       const se = parseFloat(this.suspensionEficacia);
       if (!isNaN(se)) valoresMedidos['SUSPENSION_EFICACIA'] = se;
+      const sd = parseFloat(this.suspensionDesequilibrio);
+      if (!isNaN(sd)) valoresMedidos['SUSPENSION_DESEQUILIBRIO'] = sd;
+      const ac = parseFloat(this.alineacionConvergencia);
+      if (!isNaN(ac)) valoresMedidos['ALINEACION_CONVERGENCIA'] = ac;
+      const ad = parseFloat(this.alineacionDivergencia);
+      if (!isNaN(ad)) valoresMedidos['ALINEACION_DIVERGENCIA'] = ad;
     }
 
     const payload = {

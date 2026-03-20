@@ -37,8 +37,20 @@ public class CertificadoRtvDTO {
         private String fechaInicio;
     }
 
+    @Data
+    public static class DefectoCertificadoInfo {
+        private String codigo;
+        private String descripcion;
+        private String tipo;
+    }
+
     private EmpresaInfo empresa = new EmpresaInfo();
     private List<String> inspectores = new ArrayList<>();
     private TurnoInfo turno = new TurnoInfo();
     private List<PruebaInfo> pruebas = new ArrayList<>();
+    private List<DefectoCertificadoInfo> defectos = new ArrayList<>();
+    private Integer totalTipo1 = 0;
+    private Integer totalTipo2 = 0;
+    private Integer totalTipo3 = 0;
+    private String resultadoFinal = "PENDIENTE";
 }

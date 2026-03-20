@@ -24,6 +24,7 @@ export interface PlacaDisponible {
 @Injectable({ providedIn: 'root' })
 export class SolicitudesPlacasAntService {
   private readonly api = 'http://localhost:8080/api/ant/solicitudes-placas';
+  private readonly apiPlacas = 'http://localhost:8080/api/ant/placas-disponibles';
 
   constructor(private http: HttpClient) {}
 
@@ -37,6 +38,11 @@ export class SolicitudesPlacasAntService {
 
   recibir(idSolicitud: number): Observable<PlacaDisponible[]> {
     return this.http.post<PlacaDisponible[]>(`${this.api}/${idSolicitud}/recibir`, {});
+  }
+
+  /** Inventario de placas en estado DISPONIBLE (solo consulta). */
+  listarPlacasDisponibles(): Observable<PlacaDisponible[]> {
+    return this.http.get<PlacaDisponible[]>(this.apiPlacas);
   }
 }
 

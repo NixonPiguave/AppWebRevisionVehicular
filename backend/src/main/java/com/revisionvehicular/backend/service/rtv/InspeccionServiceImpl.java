@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -26,6 +27,8 @@ public class InspeccionServiceImpl implements IInspeccionService {
     private static final Long UMBRAL_DEFAULT = 1L;
     private static final String ESTADO_ACTIVO = "A";
     private static final String RESULTADO_PENDIENTE = "PENDIENTE";
+    private static final String RESULTADO_APROBADO = "APROBADO";
+    private static final String RESULTADO_RECHAZADO = "RECHAZADO";
 
     private static final String CODIGO_DEFECTO_APROBADO = "SIN_DEFECTO";
 
@@ -104,6 +107,7 @@ public class InspeccionServiceImpl implements IInspeccionService {
         List<Long> defectosIds = request.getDefectosIds();
         Long metodoId = request.getMetodoInspeccionId();
         Long umbralId = resolverUmbralId(request.getValoresMedidos());
+        Map<Integer, Integer> conteoTipos = contarTiposDefecto(defectosIds);
 
         if (defectosIds != null && !defectosIds.isEmpty()) {
             for (Long defectoId : defectosIds) {
@@ -132,7 +136,67 @@ public class InspeccionServiceImpl implements IInspeccionService {
             );
         }
 
+        String resultadoFinal = resolverResultadoVisual(conteoTipos);
+        inspeccionRepository.actualizarResultado(inspeccion.getInspeccion_id(), resultadoFinal);
+        inspeccion.setResultado(resultadoFinal);
+
         return toDTO(inspeccion);
+    }
+
+    private Map<Integer, Integer> contarTiposDefecto(List<Long> defectosIds) {
+        Map<Integer, Integer> conteo = new HashMap<>();
+        conteo.put(1, 0);
+        conteo.put(2, 0);
+        conteo.put(3, 0);
+        if (defectosIds == null || defectosIds.isEmpty()) {
+            return conteo;
+        }
+
+        List<Defecto> defectos = defectoRepository.findAllById(
+                defectosIds.stream().filter(id -> id != null && id > 0).distinct().collect(Collectors.toList())
+        );
+        for (Defecto d : defectos) {
+            Integer tipo = extraerTipoDefecto(d);
+            if (tipo != null && tipo >= 1 && tipo <= 3) {
+                conteo.put(tipo, conteo.get(tipo) + 1);
+            }
+        }
+        return conteo;
+    }
+
+    private Integer extraerTipoDefecto(Defecto defecto) {
+        if (defecto == null) {
+            return null;
+        }
+        String tipoCodigo = "";
+        String tipoNombre = "";
+        if (defecto.getTipoDefecto() != null) {
+            tipoCodigo = defecto.getTipoDefecto().getCodigo() != null ? defecto.getTipoDefecto().getCodigo() : "";
+            tipoNombre = defecto.getTipoDefecto().getNombre() != null ? defecto.getTipoDefecto().getNombre() : "";
+        }
+        // Fallback para datos legacy sin relación de tipo
+        String combinado = (tipoCodigo + " " + tipoNombre + " "
+                + safe(defecto.getCodigo()) + " "
+                + safe(defecto.getDescripciontipo()) + " "
+                + safe(defecto.getDescripcion())).toUpperCase().trim();
+
+        if (combinado.matches(".*\\b3\\b.*") || combinado.contains("TIPO 3") || combinado.contains("TIPO III") || combinado.endsWith(" III")) return 3;
+        if (combinado.matches(".*\\b2\\b.*") || combinado.contains("TIPO 2") || combinado.contains("TIPO II") || combinado.endsWith(" II")) return 2;
+        if (combinado.matches(".*\\b1\\b.*") || combinado.contains("TIPO 1") || combinado.contains("TIPO I") || combinado.endsWith(" I")) return 1;
+        return null;
+    }
+
+    private String safe(String value) {
+        return value == null ? "" : value;
+    }
+
+    private String resolverResultadoVisual(Map<Integer, Integer> conteoTipos) {
+        int tipo2 = conteoTipos.getOrDefault(2, 0);
+        int tipo3 = conteoTipos.getOrDefault(3, 0);
+        if (tipo2 > 0 || tipo3 > 0) {
+            return RESULTADO_RECHAZADO;
+        }
+        return RESULTADO_APROBADO;
     }
 
     @Override

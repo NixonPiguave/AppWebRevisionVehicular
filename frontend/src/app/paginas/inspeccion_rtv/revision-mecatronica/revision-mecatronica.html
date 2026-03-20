@@ -29,29 +29,62 @@
   <div class="contenido" *ngIf="!cargando && !error">
     <section class="panel-parametros">
       <h3>Parámetros de inspección</h3>
+      <p class="panel-desc">Seleccione el equipo usado para cada medición. Si el equipo tiene influencia, los datos se llenan automáticamente (solo lectura). Si es manual, use el botón "Leer datos" para generar valores aleatorios o ingrese manualmente.</p>
 
       <!-- CARROS -->
       <div class="parametros-grid" *ngIf="!esMoto">
         <div class="param-grupo">
           <h4>Frenos</h4>
           <div class="param-fila">
+            <label>Equipo usado</label>
+            <select [ngModel]="equipoFrenosId" (ngModelChange)="onEquipoFrenosChange($event)" class="select-equipo">
+              <option [ngValue]="null">— Manual —</option>
+              <option *ngFor="let eq of equiposFrenos" [ngValue]="eq.equipoid">
+                {{ eq.equipo }} ({{ eq.serialEquipo }}){{ eq.influencia === 1 ? ' — auto' : '' }}
+              </option>
+            </select>
+          </div>
+          <div class="param-fila param-fila-botones">
+            <button type="button" class="btn-leer-datos" *ngIf="!frenosSoloLectura" (click)="leerDatosFrenos()">
+              Leer datos
+            </button>
+          </div>
+          <div class="param-fila">
             <label>Eficacia (%)</label>
-            <input type="number" [(ngModel)]="frenosEficacia" placeholder="Ej: 85" min="0" max="100" step="0.1" />
+            <input type="number" [(ngModel)]="frenosEficacia" placeholder="Ej: 85" min="0" max="100" step="0.1"
+              [readonly]="frenosSoloLectura" />
           </div>
           <div class="param-fila">
             <label>Desequilibrio (%)</label>
-            <input type="number" [(ngModel)]="frenosDesequilibrio" placeholder="Ej: 3" min="0" max="100" step="0.1" />
+            <input type="number" [(ngModel)]="frenosDesequilibrio" placeholder="Ej: 3" min="0" max="100" step="0.1"
+              [readonly]="frenosSoloLectura" />
           </div>
         </div>
         <div class="param-grupo">
           <h4>Suspensión</h4>
           <div class="param-fila">
+            <label>Equipo usado</label>
+            <select [ngModel]="equipoSuspensionId" (ngModelChange)="onEquipoSuspensionChange($event)" class="select-equipo">
+              <option [ngValue]="null">— Manual —</option>
+              <option *ngFor="let eq of equiposSuspension" [ngValue]="eq.equipoid">
+                {{ eq.equipo }} ({{ eq.serialEquipo }}){{ eq.influencia === 1 ? ' — auto' : '' }}
+              </option>
+            </select>
+          </div>
+          <div class="param-fila param-fila-botones">
+            <button type="button" class="btn-leer-datos" *ngIf="!suspensionSoloLectura" (click)="leerDatosSuspension()">
+              Leer datos
+            </button>
+          </div>
+          <div class="param-fila">
             <label>Eficacia (%)</label>
-            <input type="number" [(ngModel)]="suspensionEficacia" placeholder="Ej: 90" min="0" max="100" step="0.1" />
+            <input type="number" [(ngModel)]="suspensionEficacia" placeholder="Ej: 90" min="0" max="100" step="0.1"
+              [readonly]="suspensionSoloLectura" />
           </div>
           <div class="param-fila">
             <label>Desequilibrio (%)</label>
-            <input type="number" [(ngModel)]="suspensionDesequilibrio" placeholder="Ej: 2" min="0" max="100" step="0.1" />
+            <input type="number" [(ngModel)]="suspensionDesequilibrio" placeholder="Ej: 2" min="0" max="100" step="0.1"
+              [readonly]="suspensionSoloLectura" />
           </div>
           <div class="param-fila checkbox-fila">
             <label>
@@ -63,12 +96,26 @@
         <div class="param-grupo">
           <h4>Alineación (eje delantero)</h4>
           <div class="param-fila">
+            <label>Equipo usado</label>
+            <select [ngModel]="equipoAlineacionId" (ngModelChange)="onEquipoAlineacionChange($event)" class="select-equipo">
+              <option [ngValue]="null">— Manual —</option>
+              <option *ngFor="let eq of equiposAlineacion" [ngValue]="eq.equipoid">
+                {{ eq.equipo }} ({{ eq.serialEquipo }}){{ eq.influencia === 1 ? ' — auto' : '' }}
+              </option>
+            </select>
+          </div>
+          <div class="param-fila param-fila-botones">
+            <button type="button" class="btn-leer-datos" *ngIf="!alineacionSoloLectura" (click)="leerDatosAlineacion()">
+              Leer datos
+            </button>
+          </div>
+          <div class="param-fila">
             <label>Convergencia (mm)</label>
-            <input type="text" [(ngModel)]="alineacionConvergencia" placeholder="Ej: 0.5" />
+            <input type="text" [(ngModel)]="alineacionConvergencia" placeholder="Ej: 0.5" [readonly]="alineacionSoloLectura" />
           </div>
           <div class="param-fila">
             <label>Divergencia (mm)</label>
-            <input type="text" [(ngModel)]="alineacionDivergencia" placeholder="Ej: 0" />
+            <input type="text" [(ngModel)]="alineacionDivergencia" placeholder="Ej: 0" [readonly]="alineacionSoloLectura" />
           </div>
         </div>
       </div>
@@ -114,22 +161,6 @@
             </label>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="panel-equipos">
-      <h3>Equipos utilizados</h3>
-      <div class="equipos-lista">
-        <div
-          class="equipo-item"
-          *ngFor="let eq of equipos"
-          [class.seleccionado]="equiposSeleccionados.includes(eq.equipoid ?? 0)"
-          (click)="toggleEquipo(eq.equipoid ?? 0)"
-        >
-          <span class="eq-nombre">{{ eq.equipo }}</span>
-          <span class="eq-serial">{{ eq.serialEquipo }}</span>
-        </div>
-        <p class="sin-datos" *ngIf="equipos.length === 0">No hay equipos registrados</p>
       </div>
     </section>
 

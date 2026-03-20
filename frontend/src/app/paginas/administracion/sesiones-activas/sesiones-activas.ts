@@ -1,7 +1,11 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { interval, Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { SesionesUsuariosService, SesionUsuarioDTO } from '../../../services/administracion/sesiones-usuarios.service';
+
+const INTERVALO_ACTUALIZACION_MS = 10000; // 10 segundos
 
 @Component({
   selector: 'app-sesiones-activas',
@@ -10,12 +14,13 @@ import { SesionesUsuariosService, SesionUsuarioDTO } from '../../../services/adm
   templateUrl: './sesiones-activas.html',
   styleUrl: './sesiones-activas.css'
 })
-export class SesionesActivasComponent implements OnInit {
+export class SesionesActivasComponent implements OnInit, OnDestroy {
 
   sesiones: SesionUsuarioDTO[] = [];
   cargando = false;
   cerrandoId: number | null = null;
   error = '';
+  private refreshSubscription: Subscription | null = null;
 
   constructor(
     private sesionesService: SesionesUsuariosService,
@@ -24,6 +29,23 @@ export class SesionesActivasComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargar();
+    // Actualizar la lista automáticamente cada 10 segundos
+    this.refreshSubscription = interval(INTERVALO_ACTUALIZACION_MS).pipe(
+      switchMap(() => this.sesionesService.listarActivas())
+    ).subscribe({
+      next: (data) => {
+        if (!this.cargando && this.cerrandoId == null) {
+          this.sesiones = data ?? [];
+          this.cdr.detectChanges();
+        }
+      },
+      error: () => { /* ignorar errores del refresh en background */ }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.refreshSubscription?.unsubscribe();
+    this.refreshSubscription = null;
   }
 
   cargar(): void {

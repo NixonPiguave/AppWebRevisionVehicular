@@ -14,35 +14,35 @@
       </span>
       <span class="badge-turno" *ngIf="turnoId">Turno #{{ turnoId }}</span>
 
-      <!-- Badge de validación de fábrica -->
+      <!-- Badge de validación de impronta -->
       <span
         class="badge-fabrica"
-        [class.fab-ok]="estadoFabrica === 'coincide'"
-        [class.fab-warn]="estadoFabrica === 'discrepancia'"
-        [class.fab-neutro]="estadoFabrica === 'no-encontrado'"
-        *ngIf="estadoFabrica !== 'sin-datos'"
+        [class.fab-ok]="estadoImpronta === 'coincide'"
+        [class.fab-warn]="estadoImpronta === 'discrepancia'"
+        [class.fab-neutro]="estadoImpronta === 'no-encontrado'"
+        *ngIf="estadoImpronta !== 'sin-datos'"
       >
-        <mat-icon>{{ estadoFabrica === 'coincide' ? 'verified' : estadoFabrica === 'discrepancia' ? 'warning_amber' : 'help_outline' }}</mat-icon>
-        {{ estadoFabrica === 'coincide' ? 'Datos fábrica OK' : estadoFabrica === 'discrepancia' ? 'Discrepancia fábrica' : 'No registrado' }}
+        <mat-icon>{{ estadoImpronta === 'coincide' ? 'verified' : estadoImpronta === 'discrepancia' ? 'warning_amber' : 'help_outline' }}</mat-icon>
+        {{ estadoImpronta === 'coincide' ? 'Datos impronta OK' : estadoImpronta === 'discrepancia' ? 'Discrepancia con impronta' : 'Impronta no registrada' }}
       </span>
     </div>
   </header>
 
-  <!-- Detalle de discrepancias de fábrica -->
-  <div class="fabrica-detalle" *ngIf="estadoFabrica === 'discrepancia'">
+  <!-- Detalle de discrepancias de impronta -->
+  <div class="fabrica-detalle" *ngIf="estadoImpronta === 'discrepancia'">
     <mat-icon class="fabrica-icono">warning_amber</mat-icon>
     <div class="fabrica-contenido">
-      <span class="fabrica-titulo">Discrepancias con datos de fabricación</span>
+      <span class="fabrica-titulo">Discrepancias con datos de impronta</span>
       <div class="fabrica-fila" *ngFor="let campo of camposConDiscrepancia">
         <span class="fab-campo-nombre">{{ campo.etiqueta }}</span>
         <span class="fab-chip rtv">
-          <span class="fab-chip-label">Registrado</span>
+          <span class="fab-chip-label">Vehículo</span>
           {{ campo.valorVehiculo }}
         </span>
         <mat-icon class="fab-arrow">east</mat-icon>
         <span class="fab-chip fab">
-          <span class="fab-chip-label">Fábrica</span>
-          {{ campo.valorFabrica }}
+          <span class="fab-chip-label">Impronta</span>
+          {{ campo.valorImpronta }}
         </span>
       </div>
     </div>
@@ -291,6 +291,17 @@
 
       <div class="defectos-seleccionados" *ngIf="defectosSeleccionados.length > 0">
         <strong>{{ defectosSeleccionados.length }}</strong> defecto(s) seleccionado(s)
+      </div>
+      <div class="defectos-seleccionados" *ngIf="defectosSeleccionados.length > 0">
+        Tipo 1: <strong>{{ totalTipo1 }}</strong> ·
+        Tipo 2: <strong>{{ totalTipo2 }}</strong> ·
+        Tipo 3: <strong>{{ totalTipo3 }}</strong>
+      </div>
+      <div class="defectos-seleccionados" *ngIf="defectosSeleccionados.length > 0">
+        Resultado estimado visual:
+        <strong [style.color]="resultadoVisualEstimado === 'APROBADO' ? '#1f7a2e' : '#b31f1f'">
+          {{ resultadoVisualEstimado }}
+        </strong>
       </div>
     </aside>
   </div>

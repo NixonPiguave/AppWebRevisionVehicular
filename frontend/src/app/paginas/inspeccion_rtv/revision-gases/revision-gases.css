@@ -86,11 +86,59 @@
   gap: 24px;
 }
 
-.panel-combustible, .panel-parametros, .panel-resultado, .panel-observaciones {
+.panel-combustible, .panel-parametros, .panel-equipos, .panel-resultado, .panel-observaciones {
   background: #fff;
   border: 1px solid #e0e0e0;
   border-radius: 12px;
   padding: 20px;
+}
+
+.panel-equipos h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  color: #333;
+}
+
+.panel-desc {
+  font-size: 12px;
+  color: #666;
+  margin: 0 0 12px 0;
+}
+
+.equipos-lista {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.equipo-item {
+  padding: 10px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.equipo-item:hover {
+  border-color: #1976d2;
+  background: #f5f9ff;
+}
+
+.equipo-item.seleccionado {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+}
+
+.eq-nombre { font-weight: 500; }
+.eq-serial { font-size: 12px; color: #666; }
+.eq-influencia { font-size: 11px; color: #2e7d32; font-style: italic; }
+
+.sin-datos {
+  font-size: 13px;
+  color: #999;
+  margin: 0;
 }
 
 .panel-combustible h3, .panel-parametros h3, .panel-resultado h3 {

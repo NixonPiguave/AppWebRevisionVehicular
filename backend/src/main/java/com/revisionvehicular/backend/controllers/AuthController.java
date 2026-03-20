@@ -10,9 +10,13 @@ import com.revisionvehicular.backend.service.srtv.ISesionUsuarioService;
 import com.revisionvehicular.backend.dtos.srtv.SesionUsuarioDTO;
 import com.revisionvehicular.backend.security.UserDatabaseContext;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import io.jsonwebtoken.Claims;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +26,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
     private final IUsuarioRepository usuarioRepository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
@@ -97,20 +103,42 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<?> logout(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @RequestParam(value = "token", required = false) String tokenParam) {
+        String token = null;
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            sesionUsuarioService.cerrarSesionPorToken(token);
-            try {
-                String username = jwtUtil.extractUsername(token);
-                Optional<Usuario> optionalUser = usuarioRepository.findByUsuario(username);
-                if (optionalUser.isPresent()) {
-                    Usuario user = optionalUser.get();
-                    sesionUsuarioService.cerrarSesionesDeUsuario(user.getUsuarioId());
-                    UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
-                    auditoriaService.registrarAccion(user, "CIERRE_SESION");
+            token = authHeader.substring(7);
+        } else if (tokenParam != null && !tokenParam.isBlank()) {
+            token = tokenParam.trim();
+        }
+        log.info("Logout recibido, token presente: {}", token != null);
+        try {
+            if (token != null) {
+                Claims claims = jwtUtil.extractClaimsIgnoringExpiration(token);
+                if (claims != null) {
+                    Object sidObj = claims.get("sid");
+                    if (sidObj instanceof Number) {
+                        long sid = ((Number) sidObj).longValue();
+                        sesionUsuarioService.cerrarSesion(sid);
+                        log.info("Sesión {} cerrada por logout (usuario: {})", sid, claims.getSubject());
+                    }
+                    String usuario = claims.getSubject();
+                    if (usuario != null && !usuario.isBlank()) {
+                        Optional<Usuario> optionalUser = usuarioRepository.findByUsuario(usuario.trim());
+                        if (optionalUser.isPresent()) {
+                            Usuario user = optionalUser.get();
+                            sesionUsuarioService.cerrarSesionesDeUsuario(user.getUsuarioId());
+                            try {
+                                UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());
+                                auditoriaService.registrarAccion(user, "CIERRE_SESION");
+                            } catch (Exception ignored) {}
+                        }
+                    }
                 }
-            } catch (Exception ignored) {}
+            }
+        } catch (Exception e) {
+            log.error("Error en logout", e);
         }
         return ResponseEntity.ok("Sesión cerrada");
     }
