@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,7 +23,7 @@ export interface ImprontaRow {
   templateUrl: './improntas.html',
   styleUrl: './improntas.css'
 })
-export class ImprontasComponent {
+export class ImprontasComponent implements OnInit {
   private readonly api = 'http://localhost:8080/api/improntas';
 
   placa = '';
@@ -37,26 +37,33 @@ export class ImprontasComponent {
     private cdr: ChangeDetectorRef
   ) {}
 
-  buscar(): void {
-    const placa = this.placa.trim();
-    if (!placa) {
-      this.notification.error('Ingrese una placa para buscar.');
-      return;
-    }
+  ngOnInit(): void {
+    this.cargarImprontas();
+  }
+
+  /** Sin placa carga todas; con placa filtra en el backend. */
+  private cargarImprontas(placaFiltro?: string): void {
+    const placa = placaFiltro?.trim() ?? '';
     this.cargando = true;
     this.improntas = [];
-    this.http.get<ImprontaRow[]>(this.api, { params: { placa } }).subscribe({
-      next: (data) => {
-        this.improntas = data ?? [];
-        this.cargando = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.notification.error('No se pudieron cargar improntas.');
-        this.cargando = false;
-        this.cdr.detectChanges();
-      }
-    });
+    this.http
+      .get<ImprontaRow[]>(this.api, placa ? { params: { placa } } : {})
+      .subscribe({
+        next: (data) => {
+          this.improntas = data ?? [];
+          this.cargando = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.notification.error('No se pudieron cargar improntas.');
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }
+      });
+  }
+
+  buscar(): void {
+    this.cargarImprontas(this.placa);
   }
 
   imprimirPorVehiculoId(vehiculoId?: number): void {
