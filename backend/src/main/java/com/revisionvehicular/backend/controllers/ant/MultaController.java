@@ -1,6 +1,9 @@
 package com.revisionvehicular.backend.controllers.ant;
 
 import com.revisionvehicular.backend.dtos.ant.MultaDTO;
+import com.revisionvehicular.backend.dtos.ant.MultaRtvDetalleCompletoDTO;
+import com.revisionvehicular.backend.dtos.ant.MultaRtvResumenFilaDTO;
+import com.revisionvehicular.backend.service.ant.IMultaRtvConsultaService;
 import com.revisionvehicular.backend.service.ant.IMultaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,9 +15,24 @@ import java.util.List;
 public class MultaController {
 
     private final IMultaService service;
+    private final IMultaRtvConsultaService multaRtvConsultaService;
 
-    public MultaController(IMultaService service) {
+    public MultaController(IMultaService service, IMultaRtvConsultaService multaRtvConsultaService) {
         this.service = service;
+        this.multaRtvConsultaService = multaRtvConsultaService;
+    }
+
+    @GetMapping("/consulta-rtv-anual/resumen")
+    public ResponseEntity<List<MultaRtvResumenFilaDTO>> resumenMultasNoPresentacionRtvAnual() {
+        return ResponseEntity.ok(multaRtvConsultaService.listarResumenNoPresentacionRtvAnual());
+    }
+
+    @GetMapping("/consulta-rtv-anual/vehiculo/{vehiculoId}")
+    public ResponseEntity<MultaRtvDetalleCompletoDTO> detalleMultasNoPresentacionRtvAnual(
+            @PathVariable Long vehiculoId) {
+        return multaRtvConsultaService.obtenerDetallePorVehiculo(vehiculoId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

@@ -28,4 +28,10 @@ public class TarifaConCalendarizacionDTO {
 
     /** Último dígito de placa usado para calendarización */
     private int ultimoDigitoPlaca;
+
+    /**
+     * Si es true, el recargo por calendarización no aplica porque el vehículo tiene bloqueo activo
+     * o baja concluida (no debe sancionarse por no presentarse a RTV anual mientras dure esa situación).
+     */
+    private boolean exentoRecargoRtvPorBloqueoOBaja;
 }

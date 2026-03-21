@@ -77,6 +77,14 @@
           </div>
         </div>
 
+        <div class="alerta-exento" *ngIf="tarifaConCalendarizacion?.exentoRecargoRtvPorBloqueoOBaja">
+          <mat-icon>info</mat-icon>
+          <div>
+            <strong>Sin recargo por calendarización</strong>
+            <p>El vehículo tiene bloqueo activo o baja concluida: no aplica recargo por no presentarse en el mes asignado. Al desbloquearse o si la situación cambia, volverá a evaluarse la calendarización.</p>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-success" (click)="registrarPago()" [disabled]="guardando || !montoValido()">
             <mat-icon *ngIf="!guardando">payment</mat-icon>

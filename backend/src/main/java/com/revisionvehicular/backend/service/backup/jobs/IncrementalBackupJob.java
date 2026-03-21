@@ -1,12 +1,14 @@
 package com.revisionvehicular.backend.service.backup.jobs;
 
 import com.revisionvehicular.backend.service.backup.IBackupService;
+import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+@DisallowConcurrentExecution
 @Component
 public class IncrementalBackupJob implements Job {
 

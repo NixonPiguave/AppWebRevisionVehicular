@@ -14,6 +14,7 @@ import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepositor
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
 import com.revisionvehicular.backend.service.rtv.CalendarizacionRtvService;
 import com.revisionvehicular.backend.service.rtv.ILineaService;
+import com.revisionvehicular.backend.service.rtv.IVehiculoExentoSancionesRtvAnualService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,6 +40,7 @@ public class TurnosServiceImpl implements ITurnosService {
     private final ILineaService lineaService;
     private final AuditoriaService auditoriaService;
     private final CalendarizacionRtvService calendarizacionRtvService;
+    private final IVehiculoExentoSancionesRtvAnualService vehiculoExentoSancionesRtvAnualService;
 
     @Autowired
     public TurnosServiceImpl(ITurnosRepository repository,
@@ -48,7 +50,8 @@ public class TurnosServiceImpl implements ITurnosService {
                              IMetodoInspeccionRepository metodoInspeccionRepository,
                              ILineaService lineaService,
                              AuditoriaService auditoriaService,
-                             CalendarizacionRtvService calendarizacionRtvService) {
+                             CalendarizacionRtvService calendarizacionRtvService,
+                             IVehiculoExentoSancionesRtvAnualService vehiculoExentoSancionesRtvAnualService) {
         this.repository = repository;
         this.tarifarioRepository = tarifarioRepository;
         this.detalleInspeccionRepository = detalleInspeccionRepository;
@@ -57,6 +60,7 @@ public class TurnosServiceImpl implements ITurnosService {
         this.lineaService = lineaService;
         this.auditoriaService = auditoriaService;
         this.calendarizacionRtvService = calendarizacionRtvService;
+        this.vehiculoExentoSancionesRtvAnualService = vehiculoExentoSancionesRtvAnualService;
     }
 
     @Override
@@ -258,15 +262,19 @@ public class TurnosServiceImpl implements ITurnosService {
         String placa = turno.getVehiculo() != null ? turno.getVehiculo().getMatricula() : null;
         var resultado = calendarizacionRtvService.evaluar(placa, LocalDate.now());
 
-        BigDecimal total = tarifaBase.add(resultado.montoRecargo());
+        Long vehiculoId = turno.getVehiculo() != null ? turno.getVehiculo().getVehiculoid() : null;
+        boolean exento = vehiculoExentoSancionesRtvAnualService.estaExento(vehiculoId);
+        BigDecimal recargoAplicado = exento ? BigDecimal.ZERO : resultado.montoRecargo();
+        BigDecimal total = tarifaBase.add(recargoAplicado);
 
         return new TarifaConCalendarizacionDTO(
                 tarifaBase,
-                resultado.montoRecargo(),
+                recargoAplicado,
                 total,
                 resultado.estado(),
                 resultado.mesObligatorio(),
-                resultado.ultimoDigito()
+                resultado.ultimoDigito(),
+                exento
         );
     }
     @Override

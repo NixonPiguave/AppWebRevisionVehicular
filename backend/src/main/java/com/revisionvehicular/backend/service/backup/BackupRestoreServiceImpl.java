@@ -143,8 +143,11 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
     public List<BackupLocalFileDTO> listarArchivosLocales() {
         BackupConfig config = configRepository.findTopByOrderByConfigIdDesc()
                 .orElseThrow(() -> new RuntimeException("No existe configuración de backup. Configure la ruta de respaldos primero."));
+        if (config.getRutaServidor() == null || config.getRutaServidor().isBlank()) {
+            return List.of();
+        }
 
-        Path directorio = Paths.get(config.getRutaServidor());
+        Path directorio = Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize();
         if (!Files.isDirectory(directorio)) {
             return List.of();
         }
@@ -180,8 +183,15 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
 
         BackupConfig config = configRepository.findTopByOrderByConfigIdDesc()
                 .orElseThrow(() -> new RuntimeException("No existe configuración de backup."));
+        if (config.getRutaServidor() == null || config.getRutaServidor().isBlank()) {
+            throw new RuntimeException("Ruta de respaldos no configurada.");
+        }
 
-        Path archivo = Paths.get(config.getRutaServidor(), nombreArchivo);
+        Path base = Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize();
+        Path archivo = base.resolve(nombreArchivo).normalize();
+        if (!archivo.startsWith(base)) {
+            throw new RuntimeException("Nombre de archivo no permitido.");
+        }
         if (!Files.isRegularFile(archivo)) {
             throw new RuntimeException("El archivo no existe o no es accesible: " + nombreArchivo);
         }

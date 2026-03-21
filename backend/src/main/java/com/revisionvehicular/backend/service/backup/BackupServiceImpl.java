@@ -75,6 +75,28 @@ public class BackupServiceImpl implements IBackupService {
         this.notificationService = notificationService;
     }
 
+    /**
+     * Misma resolución de ruta desde peticiones HTTP o desde Quartz: siempre absoluta respecto al cwd del proceso JVM.
+     */
+    private Path directorioRespaldoAbsoluto(BackupConfig config) {
+        String ruta = config.getRutaServidor();
+        if (ruta == null || ruta.isBlank()) {
+            throw new RuntimeException("Ruta del servidor no configurada para respaldos.");
+        }
+        try {
+            Path base = Paths.get(ruta.trim()).toAbsolutePath().normalize();
+            Files.createDirectories(base);
+            if (!Files.isWritable(base)) {
+                throw new RuntimeException("Sin permiso de escritura en el directorio de respaldos: " + base);
+            }
+            return base;
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("No se pudo preparar el directorio de respaldos: " + e.getMessage(), e);
+        }
+    }
+
     @PostConstruct
     void normalizarConfigIncremental() {
         if (nombreArchivoIncrementalRolling == null || nombreArchivoIncrementalRolling.isBlank()) {
@@ -139,7 +161,13 @@ public class BackupServiceImpl implements IBackupService {
         record.setNombreArchivo(nombreArchivo);
         recordRepository.save(record);
 
-        Path rutaCompleta = Paths.get(config.getRutaServidor(), nombreArchivo);
+        Path directorioBase = directorioRespaldoAbsoluto(config);
+        Path rutaCompleta = directorioBase.resolve(nombreArchivo).normalize();
+        if (!rutaCompleta.startsWith(directorioBase)) {
+            throw new RuntimeException("Nombre de archivo de respaldo inválido.");
+        }
+        log.info("Respaldo {} ({}) — directorio configurado: {} — archivo: {}",
+                tipoNorm, origen, directorioBase, rutaCompleta);
         try {
             Files.createDirectories(rutaCompleta.getParent());
 
@@ -154,9 +182,11 @@ public class BackupServiceImpl implements IBackupService {
             if (!archivoGenerado.exists()) {
                 throw new RuntimeException("El archivo de backup no fue generado correctamente.");
             }
-            String rutaFinal = rutaCompleta.toString();
+            String rutaFinal = rutaCompleta.toAbsolutePath().normalize().toString();
             String nombreFinal = nombreArchivo;
             long tamano = archivoGenerado.length();
+
+            log.info("Respaldo local listo ({}): {} ({} bytes)", origen, rutaFinal, tamano);
 
             // Subir a Drive si está habilitado
             String driveFileId = null;

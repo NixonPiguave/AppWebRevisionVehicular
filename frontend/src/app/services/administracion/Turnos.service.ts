@@ -10,6 +10,8 @@ export interface TarifaConCalendarizacion {
   estadoCalendarizacion: 'OPORTUNO' | 'OPCIONAL' | 'CON_RECARGO';
   mesObligatorio: number;
   ultimoDigitoPlaca: number;
+  /** Sin recargo por calendarización: bloqueo activo o baja concluida */
+  exentoRecargoRtvPorBloqueoOBaja?: boolean;
 }
 
 @Injectable({

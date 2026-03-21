@@ -511,6 +511,21 @@
 .alerta-recargo p { margin: 4px 0 0; }
 .alerta-recargo .desglose { font-weight: 500; margin-top: 8px !important; }
 
+.alerta-exento {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  color: #1565c0;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-top: 12px;
+}
+.alerta-exento mat-icon { flex-shrink: 0; color: #1976d2; }
+.alerta-exento p { margin: 4px 0 0; }
+
 /* Ocultar flechas del input número en el campo monto */
 .input-monto::-webkit-outer-spin-button,
 .input-monto::-webkit-inner-spin-button {

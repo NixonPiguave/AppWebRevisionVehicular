@@ -15,7 +15,9 @@
       Respaldos manuales
     </h3>
     <p class="jobs-descripcion">
-      Ejecute un respaldo en este momento y guarde el archivo en una carpeta de su equipo.
+      Primero el servidor genera el archivo en la <strong>ruta de almacenamiento</strong> (pestaña Configuración).
+      Luego el navegador le pedirá una carpeta de <strong>su PC</strong> para guardar una copia descargada.
+      Esa carpeta del navegador <strong>no</strong> se usa para los respaldos automáticos: esos solo quedan en la ruta del servidor.
     </p>
     <p class="meta-incremental" *ngIf="archivoIncrementalServidor">
       Incremental en servidor: siempre <strong>{{ archivoIncrementalServidor }}</strong>
@@ -64,6 +66,10 @@
         <span class="resultado-label">Archivo:</span>
         <span>{{ ultimoResultado.nombreArchivo }}</span>
       </div>
+      <div class="resultado-fila" *ngIf="ultimoResultado.rutaServidor">
+        <span class="resultado-label">Ruta en servidor:</span>
+        <span class="resultado-ruta" [title]="ultimoResultado.rutaServidor">{{ ultimoResultado.rutaServidor }}</span>
+      </div>
       <div class="resultado-fila">
         <span class="resultado-label">Tipo:</span>
         <span>{{ ultimoResultado.tipo }}</span>
@@ -87,6 +93,8 @@
     </h3>
     <p class="auto-scheduler-descripcion">
       Programa respaldos completos, diferenciales e incrementales sin salir de esta pantalla.
+      Los archivos se escriben únicamente en la ruta del servidor configurada en la pestaña <strong>Configuración</strong>
+      (misma lógica que el paso en servidor del respaldo manual).
     </p>
     <app-backup-config-tab [soloScheduler]="true"></app-backup-config-tab>
   </div>

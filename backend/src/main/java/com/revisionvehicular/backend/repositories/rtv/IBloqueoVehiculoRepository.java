@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Repository
 public interface IBloqueoVehiculoRepository extends JpaRepository<BloqueoVehiculo, Long> {
 
+    boolean existsByVehiculoVehiculoidAndEstadoIgnoreCase(Long vehiculoid, String estado);
+
     @Procedure(procedureName = "sp_insertar_bloqueo_vehiculo")
     void insertarBloqueoVehiculo(
             @Param("p_vehiculo_id") Long vehiculoId,

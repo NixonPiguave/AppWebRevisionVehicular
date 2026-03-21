@@ -19,45 +19,21 @@
       </div>
       <div class="form-grupo">
         <label>Ruta de almacenamiento en el servidor <span class="requerido">*</span></label>
-        <div class="ruta-carpeta-row">
-          <div class="ruta-carpeta-info">
-            <span class="nombre-carpeta" [title]="config.rutaServidor">
-              {{ config.rutaServidor || 'Ninguna ruta seleccionada' }}
-            </span>
-          </div>
+        <span class="hint" *ngIf="!soloScheduler">
+          <strong>Seleccionar carpeta</strong> abre el explorador de Windows (Chrome o Edge). El backend debe poder escribir en esa ruta
+          (en desarrollo local suele ser la misma PC). Los navegadores no siempre muestran la ruta completa: si solo ve el nombre de la carpeta,
+          ábrala en el Explorador de Windows, copie la ruta (barra de direcciones, Ctrl+L) y péguela aquí. Luego pulse
+          <strong>Guardar configuración</strong>.
+        </span>
+        <div class="ruta-carpeta-input-row">
+          <input type="text"
+                 class="form-input form-input-ruta-inline"
+                 [(ngModel)]="config.rutaServidor"
+                 placeholder="Ej: C:\Users\SuUsuario\Respaldos\RTV" />
           <button type="button" class="btn-seleccionar-carpeta" (click)="elegirCarpeta()">
             <mat-icon>folder_open</mat-icon>
             Seleccionar carpeta
           </button>
-        </div>
-        <input type="text"
-               class="form-input form-input-ruta"
-               [value]="nombreCarpetaSeleccionada || carpetaNativaNombre || ''"
-               placeholder="Nombre de la carpeta"
-               readonly />
-      </div>
-    </div>
-
-    <!-- Fallback: explorador del servidor (si el navegador no soporta el selector nativo) -->
-    <div class="explorador-overlay" *ngIf="mostrarExplorador" (click)="cerrarExplorador()">
-      <div class="explorador-modal" (click)="$event.stopPropagation()">
-        <div class="explorador-header">
-          <span class="explorador-titulo">Seleccionar carpeta del servidor</span>
-          <button type="button" class="btn-cerrar" (click)="cerrarExplorador()" aria-label="Cerrar">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-        <div class="explorador-lista">
-          <div class="explorador-cargando" *ngIf="cargandoCarpetas">Cargando...</div>
-          <div class="explorador-error" *ngIf="errorCarpetas">{{ errorCarpetas }}</div>
-          <button type="button" *ngFor="let item of carpetasListadas" class="carpeta-item"
-                  (click)="seleccionarCarpeta(item)">
-            <mat-icon>folder</mat-icon>
-            <span>{{ item.name }}</span>
-          </button>
-          <div class="explorador-vacio" *ngIf="!cargandoCarpetas && !errorCarpetas && carpetasListadas.length === 0">
-            No hay carpetas para mostrar.
-          </div>
         </div>
       </div>
     </div>
@@ -83,8 +59,15 @@
         <div class="form-grupo">
           <label>Ruta del archivo de credenciales</label>
           <input type="text" [(ngModel)]="config.driveCredentialsPath" class="form-input"
-                 placeholder="C:\secrets\drive-credentials.json" />
-          <span class="hint">Ruta al archivo JSON: Service Account (cuota) o OAuth Client Secret (recomendado si no puedes crear Shared Drives).</span>
+                 placeholder="Se actualiza al subir el JSON (ruta en el servidor)"
+                 [readonly]="true" />
+          <span class="hint">El navegador no puede mostrar la ruta de tu PC; al elegir el archivo se sube al servidor y aquí verás la ruta donde quedó guardado (p. ej. …\drive-credentials\drive-credentials.json).</span>
+          <span class="hint archivo-seleccionado" *ngIf="ultimoJsonCredencialesNombre || subiendoDriveCredentials">
+            <ng-container *ngIf="subiendoDriveCredentials">Subiendo <strong>{{ ultimoJsonCredencialesNombre }}</strong>…</ng-container>
+            <ng-container *ngIf="!subiendoDriveCredentials && ultimoJsonCredencialesNombre">
+              Último archivo enviado: <strong>{{ ultimoJsonCredencialesNombre }}</strong>
+            </ng-container>
+          </span>
           <div class="drive-cred-actions">
             <input
               type="file"
@@ -93,9 +76,10 @@
               style="display:none"
               (change)="onDriveCredentialsSelected($event)"
             />
-            <button type="button" class="btn-probar" (click)="abrirSelectorDriveCredentials()">
+            <button type="button" class="btn-probar" (click)="abrirSelectorDriveCredentials()"
+                    [disabled]="subiendoDriveCredentials">
               <mat-icon>folder_open</mat-icon>
-              Seleccionar JSON
+              {{ subiendoDriveCredentials ? 'Subiendo…' : 'Seleccionar JSON' }}
             </button>
             <button
               type="button"

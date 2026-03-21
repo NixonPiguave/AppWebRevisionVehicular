@@ -1,9 +1,11 @@
 package com.revisionvehicular.backend.service.ant;
 
+import com.revisionvehicular.backend.constants.MultaRtvConstants;
 import com.revisionvehicular.backend.dtos.ant.MultaDTO;
 import com.revisionvehicular.backend.entities.ant.Multa;
 import com.revisionvehicular.backend.repositories.ant.IMultaRepository;
 import com.revisionvehicular.backend.service.ant.IMultaService;
+import com.revisionvehicular.backend.service.rtv.IVehiculoExentoSancionesRtvAnualService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,13 +16,33 @@ import java.util.stream.Collectors;
 public class MultaServiceImpl implements IMultaService {
 
     private final IMultaRepository repository;
+    private final IVehiculoExentoSancionesRtvAnualService vehiculoExentoSancionesRtvAnualService;
 
-    public MultaServiceImpl(IMultaRepository repository) {
+    public MultaServiceImpl(IMultaRepository repository,
+                            IVehiculoExentoSancionesRtvAnualService vehiculoExentoSancionesRtvAnualService) {
         this.repository = repository;
+        this.vehiculoExentoSancionesRtvAnualService = vehiculoExentoSancionesRtvAnualService;
+    }
+
+    private void aplicarValoresPorDefecto(MultaDTO dto) {
+        if (dto.getPais() == null || dto.getPais().isBlank()) {
+            dto.setPais(MultaRtvConstants.PAIS_DEFECTO_MULTA);
+        }
+        if (dto.getPuntos() == null || dto.getPuntos().isBlank()) {
+            dto.setPuntos(MultaRtvConstants.PUNTOS_DEFECTO_MULTA);
+        }
     }
 
     @Override
     public void crear(MultaDTO dto) {
+        aplicarValoresPorDefecto(dto);
+        if (dto.getIdVehiculo() != null
+                && vehiculoExentoSancionesRtvAnualService.estaExento(dto.getIdVehiculo())
+                && MultaRtvConstants.esMotivoMultaRtvAnual(dto.getMotivo())) {
+            throw new IllegalArgumentException(
+                    "No se registran multas por no presentación a la revisión técnica anual mientras el vehículo "
+                            + "tenga bloqueo activo o baja concluida.");
+        }
         repository.insertar(
                 dto.getIdEntidadTransito(),
                 dto.getIdPropietario(),
@@ -40,6 +62,7 @@ public class MultaServiceImpl implements IMultaService {
 
     @Override
     public void actualizar(Long id, MultaDTO dto) {
+        aplicarValoresPorDefecto(dto);
         repository.actualizar(
                 id,
                 dto.getIdEntidadTransito(),

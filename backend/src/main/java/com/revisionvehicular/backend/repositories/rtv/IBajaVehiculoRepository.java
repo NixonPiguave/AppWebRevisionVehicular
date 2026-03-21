@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @Repository
 public interface IBajaVehiculoRepository extends JpaRepository<BajaVehiculo, Long> {
 
+    boolean existsByVehiculoVehiculoidAndEstado(Long vehiculoid, String estado);
+
     @Procedure(procedureName = "sp_insertar_baja_vehiculo")
     void insertarBajaVehiculo(
             @Param("p_id_tramite") Long tramiteId,

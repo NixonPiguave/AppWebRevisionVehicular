@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BackupService, BackupConfig, FolderItem } from '../../../services/backup/backup.service';
+import { BackupService, BackupConfig } from '../../../services/backup/backup.service';
 
 @Component({
   selector: 'app-backup-config-tab',
@@ -25,15 +25,10 @@ export class BackupConfigTabComponent implements OnInit {
   mensajeExito = '';
   mensajeError = '';
 
-  // Selección con explorador nativo (no entrega ruta completa por seguridad)
-  carpetaNativaNombre = '';
-
-  // Explorador de carpetas
-  mostrarExplorador = false;
-  carpetasListadas: FolderItem[] = [];
-  rutaExploradorActual = '';
-  cargandoCarpetas = false;
-  errorCarpetas = '';
+  /** Subida del JSON de credenciales a /drive-credentials */
+  subiendoDriveCredentials = false;
+  /** Nombre del último archivo elegido (el navegador no entrega la ruta local completa). */
+  ultimoJsonCredencialesNombre = '';
 
   // Modelo de UI para programar sin escribir cron
   fullActivo = true;
@@ -151,21 +146,54 @@ export class BackupConfigTabComponent implements OnInit {
     const file = input.files && input.files.length > 0 ? input.files[0] : null;
     if (!file) return;
 
+    this.ultimoJsonCredencialesNombre = file.name;
+    this.subiendoDriveCredentials = true;
+    this.mensajeError = '';
+    this.cdr.detectChanges();
+
     this.backupService.guardarDriveCredentials(file).subscribe({
       next: (data) => {
-        this.config = data;
+        this.subiendoDriveCredentials = false;
+        this.aplicarRespuestaConfigDrive(data);
         this.sincronizarUIDesdeCrons();
-        this.mostrarExito('Credenciales Drive cargadas correctamente');
+        this.mostrarExito('Credenciales Drive guardadas en el servidor. Ruta actualizada.');
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.mostrarError(err?.error?.message || 'Error al cargar credenciales Drive');
+        this.subiendoDriveCredentials = false;
+        const msg =
+          typeof err?.error === 'string'
+            ? err.error
+            : err?.error?.message || err?.message || 'Error al cargar credenciales Drive';
+        this.mostrarError(msg);
         this.cdr.detectChanges();
       }
     });
 
     // Permite volver a seleccionar el mismo archivo.
     if (input) input.value = '';
+  }
+
+  /**
+   * El POST devuelve un DTO que a veces trae solo campos no nulos; no sustituir todo el modelo
+   * o se pierden mail/cron/etc. en pantalla. La ruta efectiva la guarda el backend.
+   */
+  private aplicarRespuestaConfigDrive(data: BackupConfig | null | undefined): void {
+    if (!data || typeof data !== 'object') {
+      return;
+    }
+    const raw = data as unknown as Record<string, unknown>;
+    const snake = raw['drive_credentials_path'];
+    const path =
+      (typeof data.driveCredentialsPath === 'string' && data.driveCredentialsPath) ||
+      (typeof snake === 'string' && snake) ||
+      '';
+
+    this.config = {
+      ...this.config,
+      ...data,
+      driveCredentialsPath: path || data.driveCredentialsPath || this.config.driveCredentialsPath
+    };
   }
 
   autorizarDriveOAuth(): void {
@@ -363,77 +391,41 @@ export class BackupConfigTabComponent implements OnInit {
     }
   }
 
-  get nombreCarpetaSeleccionada(): string {
-    const r = this.config?.rutaServidor?.trim();
-    if (!r) return '';
-    const parts = r.replace(/[/\\]+/g, '/').split('/').filter(Boolean);
-    return parts.length > 0 ? parts[parts.length - 1] : '';
-  }
-
-  /** Igual que en Respaldos manuales: abre el explorador de carpetas. Al seleccionar se asigna y muestra la ruta. */
+  /**
+   * Selector de carpeta del sistema (en Windows, el cuadro de diálogo nativo vía Chrome/Edge).
+   * El navegador no entrega la ruta absoluta completa: si solo aparece el nombre de la carpeta,
+   * complétela pegando la ruta desde el Explorador de Windows (barra de direcciones).
+   */
   async elegirCarpeta(): Promise<void> {
-    const win = window as any;
-    if (typeof win.showDirectoryPicker === 'function') {
-      try {
-        const dirHandle = await win.showDirectoryPicker({ mode: 'readwrite' });
-        this.carpetaNativaNombre = dirHandle?.name || '';
-        // showDirectoryPicker no entrega la ruta completa por seguridad; solo el nombre.
-        // Para que el backend guarde y muestre la ruta correcta, conservamos el padre
-        // de la ruta actual y reemplazamos únicamente el último segmento.
-        const actualRuta = this.config?.rutaServidor?.trim();
-        if (actualRuta && this.carpetaNativaNombre) {
-          const partes = actualRuta.split(/[/\\]+/).filter(Boolean);
-          if (partes.length > 0) {
-            partes[partes.length - 1] = this.carpetaNativaNombre;
-            this.config.rutaServidor = partes.join('\\');
-          }
-        }
-        this.cdr.detectChanges();
-      } catch {
-        // Usuario canceló: no hacer nada
-        return;
-      }
-      // No abrir el explorador del servidor después del nativo
+    const w = window as any;
+    if (typeof w.showDirectoryPicker !== 'function') {
+      this.mostrarError(
+        'Use Google Chrome o Microsoft Edge en Windows para el selector de carpetas, o escriba la ruta completa en el campo.'
+      );
       return;
     }
-    this.abrirExplorador();
-  }
-
-  abrirExplorador(): void {
-    this.mostrarExplorador = true;
-    // Selector simple: siempre listamos desde la raíz; el usuario elige una carpeta y listo.
-    this.rutaExploradorActual = '';
-    this.cargarCarpetas();
-  }
-
-  cerrarExplorador(): void {
-    this.mostrarExplorador = false;
-    this.errorCarpetas = '';
-  }
-
-  seleccionarCarpeta(item: FolderItem): void {
-    this.config.rutaServidor = item.path;
-    this.cerrarExplorador();
-    this.cdr.detectChanges();
-  }
-
-  private cargarCarpetas(): void {
-    this.cargandoCarpetas = true;
-    this.errorCarpetas = '';
-    const path = this.rutaExploradorActual || undefined;
-    this.backupService.listarCarpetas(path).subscribe({
-      next: (items) => {
-        this.carpetasListadas = items;
-        this.cargandoCarpetas = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        this.cargandoCarpetas = false;
-        this.errorCarpetas = err?.error?.message || 'No se pudo listar las carpetas';
-        this.carpetasListadas = [];
-        this.cdr.detectChanges();
+    try {
+      const handle = await w.showDirectoryPicker({ mode: 'readwrite' });
+      const name = (handle?.name || '').trim();
+      if (!name) {
+        return;
       }
-    });
+      const actual = this.config?.rutaServidor?.trim();
+      if (actual) {
+        const partes = actual.split(/[/\\]+/).filter(Boolean);
+        if (partes.length > 0) {
+          partes[partes.length - 1] = name;
+          this.config.rutaServidor = partes.join('\\');
+        } else {
+          this.config.rutaServidor = name;
+        }
+      } else {
+        this.config.rutaServidor = name;
+      }
+      this.cdr.detectChanges();
+    } catch {
+      /* usuario canceló */
+    }
   }
 
   onToggleDia(tipo: 'FULL' | 'DIFF', dia: string, checked: boolean): void {

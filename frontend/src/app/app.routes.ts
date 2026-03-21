@@ -38,6 +38,7 @@ import {
   CalendarizacionMatriculacionComponent
 } from './paginas/ant/calendarizacion-matriculacion/calendarizacion-matriculacion';
 import { SolicitudesPlacasComponent } from './paginas/ant/solicitudes-placas/solicitudes-placas';
+import { ConsultaMultasRtvAnualComponent } from './paginas/ant/consulta-multas-rtv-anual/consulta-multas-rtv-anual';
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
@@ -131,6 +132,7 @@ export const routes: Routes = [
       // ANT
       { path: 'ant/Calendarizacion-Matriculacion', component: CalendarizacionMatriculacionComponent },
       { path: 'ant/solicitudes-placas', component: SolicitudesPlacasComponent },
+      { path: 'ant/consulta-multas-rtv-anual', component: ConsultaMultasRtvAnualComponent },
 
       // ADMINISTRACIÓN - TURNOS
       { path: 'administracion/turnos', component: TurnosComponent },

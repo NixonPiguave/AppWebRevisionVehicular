@@ -55,7 +55,8 @@ public class DriveStorageService {
     }
 
     private GoogleAuthorizationCodeFlow buildOAuthFlow(BackupConfig config) throws Exception {
-        String tokenDir = Paths.get(config.getRutaServidor(), "drive-oauth-tokens").toString();
+        String tokenDir = Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize()
+                .resolve("drive-oauth-tokens").toString();
         FileDataStoreFactory dataStoreFactory = new FileDataStoreFactory(new java.io.File(tokenDir));
 
         GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(

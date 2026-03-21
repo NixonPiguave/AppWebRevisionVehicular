@@ -53,7 +53,7 @@ public class BackupController {
         BackupRecord record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new RuntimeException("Backup no encontrado"));
 
-        Path path = Paths.get(record.getRutaServidor());
+        Path path = Paths.get(record.getRutaServidor()).toAbsolutePath().normalize();
         if (!Files.exists(path)) {
             return ResponseEntity.notFound().build();
         }

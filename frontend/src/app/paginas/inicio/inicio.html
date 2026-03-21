@@ -55,7 +55,7 @@
       <!-- ========================================
            GESTIÓN VEHICULAR
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_transferencia_dominio','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_transferencia_dominio','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja','menu_improntas')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
         </span>
@@ -85,7 +85,7 @@
         </div>
 
         <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
-        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja','menu_registro_observaciones','menu_registro_incidentes','menu_anulacion_tramites','menu_registro_base_unica')" class="menu-item-expandable">
+        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja','menu_improntas')" class="menu-item-expandable">
           <div
             class="menu-item"
             (click)="toggleAccesosRapidos()"
@@ -108,22 +108,6 @@
             <a *ngIf="puedeVer('menu_desbloqueo')" class="submenu-item" (click)="irATramiteRapido(10)">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock_open</mat-icon>
               Desbloqueo
-            </a>
-            <a *ngIf="puedeVer('menu_registro_observaciones')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-observaciones">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">visibility</mat-icon>
-              Registro de Observaciones
-            </a>
-            <a *ngIf="puedeVer('menu_registro_incidentes')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-incidentes">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">report_problem</mat-icon>
-              Registro de Incidentes
-            </a>
-            <a *ngIf="puedeVer('menu_anulacion_tramites')" class="submenu-item" routerLink="/inicio/gestion_vehicular/anulacion-tramites">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">cancel</mat-icon>
-              Anulación de Trámites
-            </a>
-            <a *ngIf="puedeVer('menu_registro_base_unica')" class="submenu-item" routerLink="/inicio/gestion_vehicular/registro-base-unica">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">storage</mat-icon>
-              Registro Base Única
             </a>
             <a *ngIf="puedeVer('menu_improntas')" class="submenu-item" routerLink="/inicio/gestion_vehicular/improntas">
               <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">fingerprint</mat-icon>
@@ -304,8 +288,6 @@
             <a *ngIf="puedeVer('menu_solicitudes_placas')" routerLink="/inicio/ant/solicitudes-placas" routerLinkActive="active" class="submenu-item">
               Solicitudes de placas
             </a>
-            <a class="submenu-item">Tipo de Trámite</a>
-            <a class="submenu-item">Tipos de Excepción</a>
           </div>
         </div>
       </div>
@@ -370,7 +352,6 @@
             <a *ngIf="puedeVer('menu_roles')" routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
             <a *ngIf="puedeVer('menu_areas')" routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
             <a *ngIf="puedeVer('menu_empresa')" routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
-            <a *ngIf="puedeVer('menu_turnos')" routerLink="/inicio/administracion/turnos" routerLinkActive="active" class="submenu-item">Turnos</a>
             <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
             <a *ngIf="puedeVer('menu_accesos_rol')" routerLink="/inicio/administracion/accesos-rol" routerLinkActive="active" class="submenu-item">Accesos por rol</a>
             <a *ngIf="puedeVer('menu_sesiones_activas')" routerLink="/inicio/administracion/sesiones-activas" routerLinkActive="active" class="submenu-item">Sesiones activas</a>
