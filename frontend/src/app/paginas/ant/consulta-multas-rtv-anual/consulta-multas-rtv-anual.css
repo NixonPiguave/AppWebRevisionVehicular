@@ -1,0 +1,38 @@
+.rtv-container { padding: 18px; max-width: 1200px; margin: 0 auto; }
+.rtv-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.header-titulo { display: flex; gap: 10px; align-items: flex-start; flex: 1; min-width: 240px; }
+.header-icono { color: #1a3d16; font-size: 28px; width: 28px; height: 28px; }
+.titulo { font-size: 1.35rem; margin: 0; color: #1a3d16; }
+.sub { color: #666; font-size: 12px; margin-top: 6px; line-height: 1.45; max-width: 640px; }
+
+.btn-refrescar { display: flex; gap: 6px; align-items: center; border: none; background: #efefef; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+.btn-refrescar:hover:not(:disabled) { background: #e4e4e4; }
+.btn-refrescar:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 14px; margin-bottom: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.card-form { border-left: 4px solid #1a3d16; }
+.card-title { display: flex; gap: 8px; align-items: center; font-weight: 700; margin-bottom: 10px; color: #1a3d16; }
+
+.muted { color: #888; font-size: 13px; }
+
+.table-wrap { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.data-table th, .data-table td { border-bottom: 1px solid #eee; padding: 8px 10px; text-align: left; }
+.data-table th { background: #f8f9f8; color: #333; font-weight: 600; }
+.data-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+.cell-motivo { max-width: 280px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.linkish { background: none; border: none; color: #1a5f1a; cursor: pointer; text-decoration: underline; font-size: 13px; padding: 0; }
+.linkish:hover { color: #0d3d0d; }
+
+.form-inline { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 12px; }
+.form-grupo label { font-size: 12px; color: #555; display: block; margin-bottom: 6px; }
+.form-input { width: 160px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; outline: none; box-sizing: border-box; }
+
+.btn-primary {
+  border: none; background: #1a3d16; color: #fff; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;
+}
+.btn-primary:hover:not(:disabled) { background: #143214; }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.detalle-bloque { margin: 10px 0 14px; font-size: 14px; line-height: 1.5; }

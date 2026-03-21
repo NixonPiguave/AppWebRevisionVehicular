@@ -1,0 +1,106 @@
+<div class="rtv-container">
+  <div class="rtv-header">
+    <div class="header-titulo">
+      <mat-icon class="header-icono" aria-hidden="true">gavel</mat-icon>
+      <div>
+        <h1 class="titulo">Consulta multas — no presentación RTV anual</h1>
+        <p class="sub">Resumen por vehículo y detalle de infracciones cuyo motivo corresponde a revisión técnica anual.</p>
+      </div>
+    </div>
+    <button type="button" class="btn-refrescar" (click)="cargarResumen()" [disabled]="cargando">
+      <mat-icon>refresh</mat-icon>
+      Actualizar lista
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <mat-icon>table_rows</mat-icon>
+      Resumen acumulado
+    </div>
+    @if (cargando) {
+      <p class="muted">Cargando…</p>
+    } @else if (filas.length === 0) {
+      <p class="muted">No hay registros para mostrar.</p>
+    } @else {
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Vehículo ID</th>
+              <th>Propietario ID</th>
+              <th class="num">Recargo acumulado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of filas; track f.vehiculoId + '-' + f.propietarioId) {
+              <tr>
+                <td>{{ f.vehiculoId }}</td>
+                <td>{{ f.propietarioId }}</td>
+                <td class="num">{{ f.recargoAcumulado | number: '1.2-2' }}</td>
+                <td>
+                  <button type="button" class="linkish" (click)="verDetallePorId(f.vehiculoId)">Ver detalle</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  <div class="card card-form">
+    <div class="card-title">
+      <mat-icon>search</mat-icon>
+      Detalle por vehículo
+    </div>
+    <div class="form-inline">
+      <div class="form-grupo">
+        <label for="vid">ID vehículo</label>
+        <input id="vid" class="form-input" type="number" [(ngModel)]="vehiculoIdBusqueda" min="1" placeholder="Ej. 1" />
+      </div>
+      <button type="button" class="btn-primary" (click)="buscarDetalle()" [disabled]="cargandoDetalle">
+        Consultar
+      </button>
+    </div>
+    @if (cargandoDetalle) {
+      <p class="muted">Cargando detalle…</p>
+    }
+    @if (detalle && !cargandoDetalle) {
+      <div class="detalle-bloque">
+        <p><strong>Placa:</strong> {{ detalle.placa || '—' }}</p>
+        <p><strong>Propietario:</strong> {{ detalle.propietarioNombre || '—' }}
+          <span class="muted">({{ detalle.propietarioDocumento || 'sin documento' }})</span></p>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID multa</th>
+              <th>Entidad</th>
+              <th>Citación</th>
+              <th>Emisión</th>
+              <th>Motivo</th>
+              <th class="num">Monto</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of detalle.multas; track m.idMulta) {
+              <tr>
+                <td>{{ m.idMulta }}</td>
+                <td>{{ m.entidadNombre || '—' }}</td>
+                <td>{{ m.numeroCitacion || '—' }}</td>
+                <td>{{ m.fechaEmision | date: 'short' }}</td>
+                <td class="cell-motivo">{{ m.motivo }}</td>
+                <td class="num">{{ m.monto | number: '1.2-2' }}</td>
+                <td>{{ m.estado || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+</div>
