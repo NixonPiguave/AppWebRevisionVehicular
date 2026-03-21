@@ -186,7 +186,7 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
             throw new RuntimeException("El archivo no existe o no es accesible: " + nombreArchivo);
         }
         if (!nombreArchivo.toLowerCase().endsWith(".backup")) {
-            throw new RuntimeException("Solo se pueden restaurar archivos con extensión .backup (respaldos FULL o Diferencial).");
+            throw new RuntimeException("Solo se pueden restaurar archivos con extensión .backup (respaldos FULL, DIFFERENTIAL o INCREMENTAL).");
         }
 
         try {
