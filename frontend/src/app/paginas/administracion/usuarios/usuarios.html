@@ -185,13 +185,14 @@
       <!-- Fila 2: Usuario y Documento -->
       <div class="form-row">
         <div class="form-grupo">
-          <label>Usuario <span class="requerido">*</span></label>
+          <label>Usuario <span class="requerido">*</span><span class="hint" *ngIf="modoEdicion">(no editable)</span></label>
           <input
             type="text"
             [(ngModel)]="usuarioEditando.usuario"
             [class.error]="erroresValidacion['usuario']"
             placeholder="Ingrese el usuario"
             class="form-input"
+            [readonly]="modoEdicion"
           />
           <span class="error-text" *ngIf="erroresValidacion['usuario']">{{ erroresValidacion['usuario'] }}</span>
         </div>
@@ -282,14 +283,15 @@
 
       <!-- Fila 6: Roles -->
       <div class="form-grupo full-width">
-        <label>Roles <span class="requerido">*</span></label>
-        <div class="roles-checkbox-group" [class.error]="erroresValidacion['rolesIds']">
+        <label>Roles <span class="requerido">*</span><span class="hint" *ngIf="modoEdicion">(no editable)</span></label>
+        <div class="roles-checkbox-group" [class.error]="erroresValidacion['rolesIds']" [class.readonly]="modoEdicion">
           <div class="role-checkbox" *ngFor="let rol of roles">
             <input
               type="checkbox"
               [id]="'rol_' + rol.rolId"
               [checked]="tieneRol(rol.rolId)"
               (change)="toggleRol(rol.rolId)"
+              [disabled]="modoEdicion"
             />
             <label [for]="'rol_' + rol.rolId">{{ rol.nombre }}</label>
           </div>
