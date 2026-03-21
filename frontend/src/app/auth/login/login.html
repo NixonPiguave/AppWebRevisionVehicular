@@ -64,6 +64,12 @@
             <mat-icon>error_outline</mat-icon>
             <span>{{ error }}</span>
           </div>
+          @if (mostrarBotonContactar) {
+            <button type="button" class="btn-contactar-admin" (click)="abrirModalContacto()">
+              <mat-icon>mail</mat-icon>
+              Contactar administrador
+            </button>
+          }
         }
 
         <!-- Submit button -->
@@ -112,3 +118,45 @@
   </div>
 
 </div>
+
+<!-- Modal Contactar Administrador -->
+@if (mostrarModalContacto) {
+  <div class="modal-overlay-contacto" (click)="cerrarModalContacto()">
+    <div class="modal-contacto" (click)="$event.stopPropagation()">
+      <div class="modal-contacto-header">
+        <h3>Contactar administrador</h3>
+        <button type="button" class="btn-cerrar-modal" (click)="cerrarModalContacto()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="modal-contacto-body">
+        <p class="modal-contacto-desc">Se enviará un correo al administrador con tu solicitud. Indica brevemente el motivo si lo deseas.</p>
+        <div class="form-grupo-contacto">
+          <label>Usuario</label>
+          <input type="text" [(ngModel)]="contactoUsuario" readonly class="form-input-contacto" />
+        </div>
+        <div class="form-grupo-contacto">
+          <label>Mensaje (opcional)</label>
+          <textarea [(ngModel)]="contactoMensaje" class="form-textarea-contacto" rows="3"
+            placeholder="Ej: Necesito que activen mi cuenta para poder acceder al sistema..."></textarea>
+        </div>
+        @if (contactoError) {
+          <div class="contacto-error">{{ contactoError }}</div>
+        }
+        @if (contactoExito) {
+          <div class="contacto-exito">
+            <mat-icon>check_circle</mat-icon>
+            Solicitud enviada. El administrador te contactará pronto.
+          </div>
+        }
+      </div>
+      <div class="modal-contacto-footer">
+        <button type="button" class="btn-cancelar-contacto" (click)="cerrarModalContacto()">Cancelar</button>
+        <button type="button" class="btn-enviar-contacto" (click)="enviarContacto()" [disabled]="enviandoContacto">
+          <mat-icon *ngIf="!enviandoContacto">send</mat-icon>
+          {{ enviandoContacto ? 'Enviando...' : 'Enviar solicitud' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -60,6 +60,8 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         config.setSchedulerActivo(dto.getSchedulerActivo() != null && dto.getSchedulerActivo());
         config.setEmailNotificacion(dto.getEmailNotificacion());
         config.setMailHabilitado(dto.getMailHabilitado() != null && dto.getMailHabilitado());
+        config.setMailHost(dto.getMailHost());
+        config.setMailPort(dto.getMailPort());
         config.setMailUsername(dto.getMailUsername());
         config.setMailFrom(dto.getMailFrom());
         if (dto.getMailPassword() != null && !dto.getMailPassword().isBlank()) {
@@ -169,6 +171,8 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         dto.setCronIncremental(config.getCronIncremental());
         dto.setSchedulerActivo(config.getSchedulerActivo());
         dto.setEmailNotificacion(config.getEmailNotificacion());
+        dto.setMailHost(config.getMailHost());
+        dto.setMailPort(config.getMailPort());
         dto.setMailUsername(config.getMailUsername());
         dto.setMailFrom(config.getMailFrom());
         dto.setMailHabilitado(config.getMailHabilitado());

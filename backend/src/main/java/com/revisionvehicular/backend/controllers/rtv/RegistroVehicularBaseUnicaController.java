@@ -163,6 +163,9 @@ public class RegistroVehicularBaseUnicaController {
         r.setUsuario(auditoriaService.getUsuarioActual().orElse(null));
         registroBaseUnicaRepo.save(r);
 
+        // Actualizar estado del turno a FINALIZADO para que deje de mostrarse en turnos EN_PROCESO
+        turnosRepo.actualizarEstado(turno.getTurnoId(), "FINALIZADO", LocalDate.now());
+
         return ResponseEntity.ok(new RegistrarResponse(
                 turno.getTurnoId(),
                 creado.getId(),

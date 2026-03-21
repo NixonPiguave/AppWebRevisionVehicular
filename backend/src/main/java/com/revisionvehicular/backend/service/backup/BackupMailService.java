@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.service.backup;
 
+import com.revisionvehicular.backend.dtos.ContactoAdminRequest;
 import com.revisionvehicular.backend.entities.backup.BackupConfig;
 import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import jakarta.mail.internet.MimeMessage;
@@ -7,6 +8,8 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Properties;
 
 @Service
@@ -49,11 +52,77 @@ public class BackupMailService {
         }
     }
 
+    /**
+     * Envía correo de solicitud de contacto al administrador (usado cuando usuario no puede iniciar sesión).
+     */
+    public void enviarContactoAdmin(ContactoAdminRequest request, BackupConfig config) {
+        if (!Boolean.TRUE.equals(config.getMailHabilitado())) return;
+        if (!cryptoService.isEnabled()) return;
+        if (config.getMailUsername() == null || config.getMailUsername().isBlank()) return;
+        if (config.getMailPassword() == null || config.getMailPassword().isBlank()) return;
+        if (config.getEmailNotificacion() == null || config.getEmailNotificacion().isBlank()) return;
+
+        try {
+            JavaMailSenderImpl mailSender = construirMailSender(config);
+            MimeMessage mensaje = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mensaje, true, "UTF-8");
+
+            String from = (config.getMailFrom() != null && !config.getMailFrom().isBlank())
+                    ? config.getMailFrom()
+                    : config.getMailUsername();
+            helper.setFrom(from);
+            helper.setTo(config.getEmailNotificacion());
+            helper.setSubject("🔔 Solicitud de contacto - Usuario: " + request.getUsuario());
+            helper.setText(construirCuerpoContactoAdmin(request), true);
+
+            mailSender.send(mensaje);
+        } catch (Exception e) {
+            System.err.println("Error al enviar correo de contacto admin: " + e.getMessage());
+            throw new RuntimeException("No se pudo enviar la solicitud. Verifique la configuración de correo.");
+        }
+    }
+
+    private String construirCuerpoContactoAdmin(ContactoAdminRequest request) {
+        String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        String motivoTexto = request.getMotivo() != null && !request.getMotivo().isBlank()
+                ? request.getMotivo() : "Solicitud de ayuda";
+        String mensaje = request.getMensaje() != null && !request.getMensaje().isBlank()
+                ? request.getMensaje() : "Sin mensaje adicional";
+
+        return """
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #fff;">
+              <div style="background: linear-gradient(135deg, #1a472a 0%%, #2d6a4f 100%%); padding: 24px; border-radius: 12px 12px 0 0; text-align: center;">
+                <h1 style="color: white; margin: 0; font-size: 22px;">📩 Solicitud de Contacto</h1>
+                <p style="color: rgba(255,255,255,0.9); margin: 8px 0 0 0; font-size: 14px;">Sistema RTV - Revisión Técnica Vehicular</p>
+              </div>
+              <div style="padding: 24px; border: 1px solid #e0e0e0; border-top: none; border-radius: 0 0 12px 12px;">
+                <table style="width: 100%%; border-collapse: collapse;">
+                  <tr><td style="padding: 10px 12px; font-weight: bold; background: #f5f5f5; width: 35%%; border-bottom: 1px solid #eee;">Usuario</td><td style="padding: 10px 12px; border-bottom: 1px solid #eee;">%s</td></tr>
+                  <tr><td style="padding: 10px 12px; font-weight: bold; background: #f5f5f5; border-bottom: 1px solid #eee;">Motivo</td><td style="padding: 10px 12px; border-bottom: 1px solid #eee;">%s</td></tr>
+                  <tr><td style="padding: 10px 12px; font-weight: bold; background: #f5f5f5; border-bottom: 1px solid #eee;">Mensaje</td><td style="padding: 10px 12px; border-bottom: 1px solid #eee;">%s</td></tr>
+                  <tr><td style="padding: 10px 12px; font-weight: bold; background: #f5f5f5; border-bottom: 1px solid #eee;">Fecha</td><td style="padding: 10px 12px; border-bottom: 1px solid #eee;">%s</td></tr>
+                </table>
+                <p style="color: #666; font-size: 12px; margin-top: 20px;">Este correo fue generado automáticamente desde la pantalla de inicio de sesión.</p>
+              </div>
+            </div>
+            """.formatted(
+                escapeHtml(request.getUsuario()),
+                escapeHtml(motivoTexto),
+                escapeHtml(mensaje),
+                fecha
+        );
+    }
+
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\"", "&quot;");
+    }
+
     private JavaMailSenderImpl construirMailSender(BackupConfig config) {
         JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
-        // Gmail SMTP fijo
-        mailSender.setHost("smtp.gmail.com");
-        mailSender.setPort(587);
+        mailSender.setHost(config.getMailHost() != null && !config.getMailHost().isBlank()
+                ? config.getMailHost() : "smtp.gmail.com");
+        mailSender.setPort(config.getMailPort() != null ? config.getMailPort() : 587);
         mailSender.setUsername(config.getMailUsername());
         mailSender.setPassword(cryptoService.decryptOrPlain(config.getMailPassword()));
         mailSender.setDefaultEncoding("UTF-8");

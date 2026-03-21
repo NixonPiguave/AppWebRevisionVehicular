@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../models/login-request.model';
 import { EmpresaService } from '../../services/administracion/empresa.service';
+import { ContactoAdminService } from '../../services/contacto-admin.service';
 
 @Component({
   selector: 'app-login',
@@ -24,6 +25,21 @@ export class LoginComponent implements OnInit {
   /** Mensaje cuando la sesión fue cerrada por admin o por inicio en otro dispositivo. */
   mensajeSesionCerrada = '';
 
+  /** Mostrar botón "Contactar administrador" solo en errores de acceso (cuenta inactiva, sin rol activo) */
+  get mostrarBotonContactar(): boolean {
+    if (!this.error) return false;
+    const msg = this.error.toLowerCase();
+    return msg.includes('acceso activo') || msg.includes('no se encuentra activo');
+  }
+
+  /** Modal contacto */
+  mostrarModalContacto = false;
+  contactoUsuario = '';
+  contactoMensaje = '';
+  contactoError = '';
+  contactoExito = false;
+  enviandoContacto = false;
+
   //  Variables para el logo
   empresaLogo: string | null = null;
   empresaNombre: string = 'Revisión Técnica Vehicular';
@@ -33,6 +49,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
+    private contactoAdminService: ContactoAdminService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -96,7 +113,55 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/inicio']);
       },
       error: (err) => {
-        this.error = err.error;
+        this.error = typeof err.error === 'string' ? err.error : (err.error?.message || 'Error al iniciar sesión');
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  abrirModalContacto(): void {
+    this.contactoUsuario = this.usuario || '';
+    this.contactoMensaje = '';
+    this.contactoError = '';
+    this.contactoExito = false;
+    this.mostrarModalContacto = true;
+    this.cdr.detectChanges();
+  }
+
+  cerrarModalContacto(): void {
+    this.mostrarModalContacto = false;
+    this.contactoError = '';
+    this.contactoExito = false;
+    this.cdr.detectChanges();
+  }
+
+  enviarContacto(): void {
+    this.contactoError = '';
+    this.contactoExito = false;
+    if (!this.contactoUsuario?.trim()) {
+      this.contactoError = 'El usuario es requerido';
+      return;
+    }
+    this.enviandoContacto = true;
+    const motivo = this.error?.includes('acceso activo')
+      ? 'Sin rol activo'
+      : this.error?.includes('activo')
+        ? 'Usuario inactivo'
+        : 'Solicitud de ayuda';
+
+    this.contactoAdminService.enviarSolicitud({
+      usuario: this.contactoUsuario.trim(),
+      mensaje: this.contactoMensaje?.trim() || undefined,
+      motivo
+    }).subscribe({
+      next: () => {
+        this.contactoExito = true;
+        this.enviandoContacto = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.contactoError = typeof err.error === 'string' ? err.error : (err.error?.message || 'No se pudo enviar. Verifique la configuración de correo.');
+        this.enviandoContacto = false;
         this.cdr.detectChanges();
       }
     });
