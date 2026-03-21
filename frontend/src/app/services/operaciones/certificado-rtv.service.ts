@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import * as QRCode from 'qrcode';
 import { NotificationService } from '../notification.service';
 
 const API = 'http://localhost:8080/api/turnos';
@@ -83,23 +84,28 @@ export class CertificadoRtvService {
     this.destruir();
     this.http.get<CertificadoRtvData>(`${API}/${turnoId}/certificado`).subscribe({
       next: (data) => {
-        const overlay = document.createElement('div');
-        overlay.id = 'certificado-overlay';
-        overlay.innerHTML = this.renderOverlay(data);
-        document.body.appendChild(overlay);
-        this.overlayEl = overlay;
-
-        overlay.addEventListener('click', (e) => {
-          if ((e.target as HTMLElement).id === 'certificado-overlay') this.destruir();
-        });
-        overlay.querySelector('#cert-btn-cerrar')?.addEventListener('click', () => this.destruir());
-        overlay.querySelector('#cert-btn-imprimir')?.addEventListener('click', () => {
-          this.imprimirEnVentana(data);
-          this.destruir();
-          onImpreso?.();
-        });
+        void this.mostrarConQr(data, onImpreso);
       },
       error: () => this.notification.error('No se pudieron cargar los datos del certificado.')
+    });
+  }
+
+  private async mostrarConQr(data: CertificadoRtvData, onImpreso?: () => void): Promise<void> {
+    const qrDataUrl = await this.buildQrDataUrl(data);
+    const overlay = document.createElement('div');
+    overlay.id = 'certificado-overlay';
+    overlay.innerHTML = this.renderOverlay(data, qrDataUrl);
+    document.body.appendChild(overlay);
+    this.overlayEl = overlay;
+
+    overlay.addEventListener('click', (e) => {
+      if ((e.target as HTMLElement).id === 'certificado-overlay') this.destruir();
+    });
+    overlay.querySelector('#cert-btn-cerrar')?.addEventListener('click', () => this.destruir());
+    overlay.querySelector('#cert-btn-imprimir')?.addEventListener('click', () => {
+      void this.imprimirEnVentana(data, qrDataUrl);
+      this.destruir();
+      onImpreso?.();
     });
   }
 
@@ -108,7 +114,8 @@ export class CertificadoRtvService {
     this.overlayEl = null;
   }
 
-  private imprimirEnVentana(data: CertificadoRtvData): void {
+  private async imprimirEnVentana(data: CertificadoRtvData, qrDataUrl?: string): Promise<void> {
+    const qr = qrDataUrl ?? (await this.buildQrDataUrl(data));
     const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -118,7 +125,7 @@ export class CertificadoRtvService {
 </head>
 <body onload="window.focus(); window.print();">
   <script>window.addEventListener('afterprint', function fn() { window.removeEventListener('afterprint', fn); window.close(); });</script>
-  <div class="cert-wrap">${this.renderCuerpo(data)}</div>
+  <div class="cert-wrap">${this.renderCuerpo(data, qr)}</div>
 </body>
 </html>`;
     const win = window.open('', '_blank', 'width=900,height=900,scrollbars=yes');
@@ -130,7 +137,7 @@ export class CertificadoRtvService {
     win.document.close();
   }
 
-  private renderOverlay(data: CertificadoRtvData): string {
+  private renderOverlay(data: CertificadoRtvData, qrDataUrl: string): string {
     return `
       <style>
         #certificado-overlay {
@@ -173,7 +180,7 @@ export class CertificadoRtvService {
       </style>
       <div id="certificado-modal">
         <div class="cert-wrap">
-          ${this.renderCuerpo(data)}
+          ${this.renderCuerpo(data, qrDataUrl)}
         </div>
         <div class="cert-acciones">
           <button id="cert-btn-cerrar">Cerrar</button>
@@ -186,7 +193,58 @@ export class CertificadoRtvService {
     `;
   }
 
-  private renderCuerpo(data: CertificadoRtvData): string {
+  /** Solo matrícula y datos del vehículo (nada de certificado, turno ni empresa). */
+  private buildQrPayload(data: CertificadoRtvData): string {
+    const veh = data.vehiculo ?? {};
+    const turno = data.turno ?? {};
+    const matricula = (veh.placa ?? turno.placa ?? '').trim();
+
+    return JSON.stringify({
+      matricula,
+      marca: veh.marca ?? '',
+      modelo: veh.modelo ?? '',
+      anio: veh.anio ?? null,
+      chasis: veh.chasis ?? '',
+      motor: veh.motor ?? '',
+      vin: veh.vin ?? ''
+    });
+  }
+
+  private async buildQrDataUrl(data: CertificadoRtvData): Promise<string> {
+    try {
+      return await QRCode.toDataURL(this.buildQrPayload(data), {
+        width: 200,
+        margin: 1,
+        errorCorrectionLevel: 'M'
+      });
+    } catch {
+      return '';
+    }
+  }
+
+  /** Año mostrado en el adhesivo (prioridad: fecha de emisión del certificado). */
+  private anioSticker(data: CertificadoRtvData): string {
+    const fe = data.fechaEmision?.trim();
+    if (fe) {
+      const y4 = fe.match(/\b(20\d{2})\b/);
+      if (y4) return y4[1];
+      const parts = fe.split(/[/\-.]/).map((p) => p.trim());
+      if (parts.length >= 3) {
+        let y = parseInt(parts[parts.length - 1]!, 10);
+        if (y >= 0 && y < 100) y += 2000;
+        if (y >= 1990 && y <= 2100) return String(y);
+      }
+    }
+    return String(new Date().getFullYear());
+  }
+
+  private formatoSerialRevision(data: CertificadoRtvData): string {
+    const raw = String(data.numeroRevision ?? data.turno?.numeroTurno ?? '0').replace(/\D/g, '') || '0';
+    const n = parseInt(raw, 10) || 0;
+    return String(n).padStart(7, '0');
+  }
+
+  private renderCuerpo(data: CertificadoRtvData, qrDataUrl: string): string {
     const emp = data.empresa ?? {};
     const veh = data.vehiculo ?? {};
     const turno = data.turno ?? {};
@@ -198,6 +256,16 @@ export class CertificadoRtvService {
 
     const marcaModeloAnio = [veh.marca, veh.modelo, veh.anio].filter(Boolean).join(', ');
     const chasisMotor = [veh.chasis, veh.motor].filter(Boolean).join(' / ') || '-';
+    const placaCert = veh.placa ?? turno.placa ?? '-';
+    const anioAdh = this.anioSticker(data);
+    const serialRev = this.formatoSerialRevision(data);
+    const qrImg = qrDataUrl
+      ? `<img class="cert-adh-qr" src="${qrDataUrl}" width="200" height="200" alt="QR datos vehículo"/>`
+      : '<span class="cert-adh-qr-fail">QR no disponible</span>';
+    const logoMini =
+      emp.logoempresa && emp.logoempresa.trim()
+        ? `<img src="${emp.logoempresa}" alt="" class="cert-adh-logo" onerror="this.style.display='none'"/>`
+        : `<div class="cert-adh-logo-fallback">${this.escape((emp.nombre ?? 'RTV').substring(0, 18))}</div>`;
 
     const pruebasMecRows = (data.pruebasMecatronicas ?? []).map(p => `
       <tr>
@@ -324,6 +392,34 @@ export class CertificadoRtvService {
         `).join('')}</tbody>
       </table>
       ` : ''}
+      <div class="cert-divider cert-adh-divider"></div>
+      <div class="cert-adhesivos-fila" aria-label="Adhesivos certificación RTV">
+        <div class="cert-adhesivo cert-adhesivo-holo">
+          <div class="cert-adh-holo-band">CERTIFICADO REVISIÓN TÉCNICA VEHICULAR</div>
+          <div class="cert-adh-holo-body">
+            <div class="cert-adh-blanco">
+              <div class="cert-adh-anio">${this.escape(anioAdh)}</div>
+              <div class="cert-adh-placa">${this.escape(placaCert)}</div>
+              ${qrImg}
+              <div class="cert-adh-solo">SOLO REVISIÓN TÉCNICA</div>
+            </div>
+          </div>
+          <div class="cert-adh-serial">${this.escape(serialRev)}</div>
+        </div>
+        <div class="cert-adhesivo cert-adhesivo-marco">
+          <div class="cert-adh-marco-inner">
+            <div class="cert-adh-lateral cert-adh-lateral-izq">VEHICULO</div>
+            <div class="cert-adh-centro">
+              <div class="cert-adh-centro-logo">${logoMini}</div>
+              <div class="cert-adh-anio">${this.escape(anioAdh)}</div>
+              <div class="cert-adh-placa">${this.escape(placaCert)}</div>
+              ${qrImg}
+              <div class="cert-adh-solo cert-adh-solo-largo">SOLO REVISIÓN TÉCNICA VEHICULAR</div>
+            </div>
+            <div class="cert-adh-lateral cert-adh-lateral-der">${this.escape(serialRev)}</div>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -386,10 +482,169 @@ export class CertificadoRtvService {
       .cert-resultado { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
       .cert-resultado.ok { color: #1e7b34; }
       .cert-resultado.ko { color: #c62828; }
+      .cert-adh-divider { margin-top: 24px; }
+      .cert-adhesivos-fila {
+        display: flex;
+        flex-direction: row;
+        gap: 5mm;
+        justify-content: space-between;
+        align-items: flex-end;
+        margin-top: 4px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      .cert-adhesivo {
+        flex: 1 1 0;
+        min-width: 0;
+        box-sizing: border-box;
+        position: relative;
+      }
+      .cert-adhesivo-holo {
+        border: 0.35mm solid #9e9e9e;
+        border-radius: 2mm;
+        background:
+          linear-gradient(125deg, rgba(255,255,255,0.35) 0%, transparent 40%),
+          linear-gradient(210deg, #e8f5e9 0%, #b2dfdb 18%, #fff9c4 35%, #e1bee7 52%, #bbdefb 70%, #c8e6c9 100%);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,0.5);
+        padding: 2mm 2mm 0;
+        width: 90mm;
+        max-width: 100%;
+      }
+      .cert-adh-holo-band {
+        font-size: 5.5px;
+        font-weight: 800;
+        text-align: center;
+        letter-spacing: 0.04em;
+        color: #1a237e;
+        line-height: 1.15;
+        padding: 1mm 2mm 1.5mm;
+        text-transform: uppercase;
+      }
+      .cert-adh-holo-body { padding: 0 1mm 1mm; }
+      .cert-adh-blanco {
+        background: #fff;
+        border: 0.25mm solid #cfd8dc;
+        border-radius: 1mm;
+        padding: 2mm 3mm 2mm;
+        text-align: center;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+      }
+      .cert-adh-anio {
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+        color: #111;
+        letter-spacing: 0.02em;
+      }
+      .cert-adh-placa {
+        font-size: 13px;
+        font-weight: 700;
+        margin: 2px 0 3px;
+        letter-spacing: 0.12em;
+        color: #1a1a1a;
+      }
+      .cert-adh-qr-fail { font-size: 8px; color: #c62828; display: block; padding: 4px; }
+      .cert-adh-qr {
+        display: block;
+        margin: 0 auto;
+        width: 26mm !important;
+        height: 26mm !important;
+        max-width: 100%;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      .cert-adh-solo {
+        font-size: 5.5px;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        margin-top: 2px;
+        color: #37474f;
+        text-transform: uppercase;
+      }
+      .cert-adh-solo-largo { font-size: 5px; line-height: 1.2; }
+      .cert-adh-serial {
+        text-align: center;
+        font-size: 11px;
+        font-weight: 800;
+        color: #c62828;
+        letter-spacing: 0.15em;
+        padding: 2mm 0 1mm;
+      }
+      .cert-adhesivo-marco {
+        border: 1.2mm solid #5d4037;
+        border-radius: 3mm;
+        background: #faf8f5;
+        padding: 1.5mm;
+        width: 90mm;
+        max-width: 100%;
+        min-height: 44mm;
+        box-sizing: border-box;
+      }
+      .cert-adh-marco-inner {
+        display: flex;
+        flex-direction: row;
+        align-items: stretch;
+        justify-content: space-between;
+        gap: 1mm;
+        min-height: 38mm;
+        background: #fff;
+        border-radius: 2mm;
+        border: 0.25mm solid #d7ccc8;
+        overflow: hidden;
+      }
+      .cert-adh-lateral {
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        font-size: 6px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        color: #3e2723;
+        padding: 2mm 1mm;
+        background: #efebe9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .cert-adh-centro {
+        flex: 1;
+        min-width: 0;
+        text-align: center;
+        padding: 2mm 2mm 2.5mm;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .cert-adh-centro-logo { margin-bottom: 1mm; min-height: 14px; }
+      .cert-adh-logo {
+        max-height: 14px;
+        max-width: 100px;
+        object-fit: contain;
+        display: block;
+        margin: 0 auto;
+      }
+      .cert-adh-logo-fallback {
+        font-size: 6px;
+        font-weight: 700;
+        color: #1a3d16;
+        line-height: 1.2;
+        max-width: 90px;
+        margin: 0 auto;
+      }
+      @media screen {
+        .cert-adhesivo-holo, .cert-adhesivo-marco { width: auto; }
+        .cert-adhesivos-fila { flex-wrap: wrap; }
+      }
       @media print {
         @page { size: A4; margin: 12mm; }
         body { background: #fff; }
         .cert-wrap { padding: 0 8px; max-width: none; }
+        .cert-adhesivos-fila { gap: 4mm; }
+        .cert-adhesivo-holo, .cert-adhesivo-marco {
+          width: 90mm;
+          flex: 0 0 90mm;
+        }
+        .cert-adh-qr { width: 24mm !important; height: 24mm !important; }
       }
     `;
   }
