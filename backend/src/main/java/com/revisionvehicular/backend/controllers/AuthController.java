@@ -68,12 +68,19 @@ public class AuthController {
         if (optionalUser.isEmpty() || !passwordEncoder.matches(contrasena, optionalUser.get().getContrasena())) {
             return ResponseEntity.status(401).body("Credenciales inválidas");
         }
-        if(optionalUser.get().getEstado().equals("Inactivo")){
+        if (optionalUser.get().getEstado().equals("Inactivo")) {
             return ResponseEntity.status(401).body("Usuario no se encuentra activo");
         }
 
-
         Usuario user = optionalUser.get();
+
+        // Solo permitir acceso si tiene al menos un rol activo
+        List<UsuarioRoles> rolesUsuario = usuarioRolesRepository.findByUsuario(user);
+        boolean tieneRolActivo = rolesUsuario != null && rolesUsuario.stream()
+                .anyMatch(ur -> ur.getRol() != null && "A".equals(ur.getRol().getEstado()));
+        if (!tieneRolActivo) {
+            return ResponseEntity.status(401).body("Su cuenta no tiene acceso activo. Contacte al administrador.");
+        }
 
 
         UserDatabaseContext.setCredentials(user.getUsuarioBaseDatos(), user.getContrasenaBaseDatos());

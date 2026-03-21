@@ -168,7 +168,8 @@ export class RolesComponent implements OnInit {
       return;
     }
 
-    if (!this.validarPermisos()) {
+    // Solo validar permisos al crear; al editar solo se cambia nombre y estado
+    if (!this.modoEdicion && !this.validarPermisos()) {
       this.error = 'Debe seleccionar al menos un permiso';
       return;
     }

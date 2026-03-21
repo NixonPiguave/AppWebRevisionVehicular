@@ -170,8 +170,8 @@
         </select>
       </div>
 
-
-      <div class="form-grupo permisos-grupo">
+      <!-- Permisos: solo al crear nuevo rol, no al editar -->
+      <div class="form-grupo permisos-grupo" *ngIf="!modoEdicion">
         <label class="permisos-label">
           Permisos del Rol *
           <span class="permisos-ayuda">(Seleccione al menos uno)</span>
@@ -183,7 +183,7 @@
           Cargando permisos...
         </div>
 
-        <!-- Lista dinámica (ya no hardcodeada) -->
+        <!-- Lista dinámica -->
         <div class="permisos-lista" *ngIf="permisosDisponibles.length > 0">
           <div
             *ngFor="let permiso of permisosFormulario"
