@@ -10,6 +10,7 @@ import com.revisionvehicular.backend.repositories.srtv.IOpcionMenuRepository;
 import com.revisionvehicular.backend.repositories.srtv.IRolOpcionMenuRepository;
 import com.revisionvehicular.backend.repositories.srtv.IRolRepository;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRolesRepository;
+import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +27,18 @@ public class OpcionMenuServiceImpl implements IOpcionMenuService {
     private final IRolOpcionMenuRepository rolOpcionMenuRepository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
     private final IRolRepository rolRepository;
+    private final AuditoriaService auditoriaService;
 
     public OpcionMenuServiceImpl(IOpcionMenuRepository opcionMenuRepository,
                                  IRolOpcionMenuRepository rolOpcionMenuRepository,
                                  IUsuarioRolesRepository usuarioRolesRepository,
-                                 IRolRepository rolRepository) {
+                                 IRolRepository rolRepository,
+                                 AuditoriaService auditoriaService) {
         this.opcionMenuRepository = opcionMenuRepository;
         this.rolOpcionMenuRepository = rolOpcionMenuRepository;
         this.usuarioRolesRepository = usuarioRolesRepository;
         this.rolRepository = rolRepository;
+        this.auditoriaService = auditoriaService;
     }
 
     @Override
@@ -70,6 +74,13 @@ public class OpcionMenuServiceImpl implements IOpcionMenuService {
                 }
             }
         }
+
+        int cantidad = opcionMenuIds != null ? opcionMenuIds.size() : 0;
+        auditoriaService.registrar(
+                "UPDATE",
+                "Accesos por rol",
+                "Actualizó opciones de menú del rol ID " + rolId + " (opciones: " + cantidad + ")."
+        );
     }
 
     @Override

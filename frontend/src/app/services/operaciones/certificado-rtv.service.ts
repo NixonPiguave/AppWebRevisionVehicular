@@ -282,6 +282,8 @@ export class CertificadoRtvService {
       ? data.inspectores.map(n => this.escape(n)).join(', ')
       : '-';
 
+    const primerInspector = (data.inspectores && data.inspectores.length > 0) ? data.inspectores[0] : '-';
+
     return `
       <div class="cert-header-block">
         <div class="cert-header-top">
@@ -363,7 +365,7 @@ export class CertificadoRtvService {
       </table>
       <div class="cert-divider"></div>
       <div class="cert-section-title">DEFECTOS INSPECCIÓN VISUAL</div>
-      <table class="cert-tabla-pruebas">
+      <table class="cert-tabla-pruebas cert-tabla-defectos">
         <thead>
           <tr><th>Código</th><th>Defecto</th><th>Tipo</th></tr>
         </thead>
@@ -392,6 +394,23 @@ export class CertificadoRtvService {
         `).join('')}</tbody>
       </table>
       ` : ''}
+      <div class="cert-divider"></div>
+      <div class="cert-firma-row" aria-label="Firma y estado del certificado">
+        <div class="cert-firma-box">
+          <div class="cert-firma-label">Firma de RTV</div>
+          <div class="cert-firma-line"></div>
+          <div class="cert-firma-nombre">${this.escape(primerInspector)}</div>
+        </div>
+        <div class="cert-firma-box cert-firma-box-der">
+          <div class="cert-firma-label">Resultado</div>
+          <div class="cert-firma-estado">
+            <span class="cert-estado-badge ${(data.resultadoFinal || '').toUpperCase() === 'APROBADO' ? 'ok' : 'ko'}">
+              ${this.escape(data.resultadoFinal ?? 'PENDIENTE')}
+            </span>
+          </div>
+          <div class="cert-firma-sub">Válido hasta: ${this.escape(data.validoHasta ?? '-')}</div>
+        </div>
+      </div>
       <div class="cert-divider cert-adh-divider"></div>
       <div class="cert-adhesivos-fila" aria-label="Adhesivos certificación RTV">
         <div class="cert-adhesivo cert-adhesivo-holo">
@@ -434,7 +453,20 @@ export class CertificadoRtvService {
     return `
       * { box-sizing: border-box; }
       body { margin: 0; padding: 0; font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; font-size: 12px; color: #1a1a1a; line-height: 1.4; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .cert-wrap { padding: 28px 32px 24px; max-width: 800px; margin: 0 auto; }
+      .cert-wrap { padding: 28px 32px 24px; max-width: 800px; margin: 0 auto; position: relative; overflow: hidden; }
+      .cert-wrap::before{
+        content:'RTV TEC';
+        position:absolute;
+        top:52%;
+        left:50%;
+        transform:translate(-50%,-50%) rotate(-12deg);
+        font-size:84px;
+        font-weight:900;
+        letter-spacing:0.18em;
+        color:rgba(26,61,22,0.06);
+        white-space:nowrap;
+        pointer-events:none;
+      }
       .cert-header-block { margin-bottom: 24px; }
       .cert-header-top { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 20px; padding: 16px 20px; background: linear-gradient(180deg, #f0f7ef 0%, #fff 100%); border: 1px solid #d4e5d2; border-radius: 10px; }
       .cert-header-gob { text-align: left; }
@@ -456,13 +488,13 @@ export class CertificadoRtvService {
       .cert-empresa-linea { color: #555; font-size: 11px; }
       @media (max-width: 600px) { .cert-header-top { grid-template-columns: 1fr; text-align: center; } .cert-header-empresa { text-align: center; } }
       .cert-encabezado-vehiculo { width: 100%; }
-      .cert-datos-vehiculo-wrap { background: #fafbfa; border: 1px solid #dce5dc; border-radius: 10px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(26,61,22,0.06); }
-      .cert-tabla-enc { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; }
-      .cert-tabla-enc .cert-col-lbl { width: 150px; min-width: 150px; }
-      .cert-tabla-enc .cert-lbl { color: #5a6b59; font-weight: 600; font-size: 11px; padding: 10px 16px 10px 0; min-width: 150px; vertical-align: top; text-transform: uppercase; letter-spacing: 0.03em; }
-      .cert-tabla-enc .cert-val { color: #1a1a1a; font-weight: 500; padding: 10px 0; border-bottom: 1px solid #e8ece8; }
-      .cert-tabla-enc tr:last-child .cert-val { border-bottom: none; }
-      .cert-tabla-enc tr:last-child td { padding-bottom: 0; }
+      .cert-datos-vehiculo-wrap { background: #fff; border: 1px solid #dce5dc; border-radius: 12px; padding: 20px 24px; box-shadow: 0 1px 3px rgba(26,61,22,0.06); position: relative; z-index: 1; }
+      .cert-tabla-enc { width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; border: 1px solid #dce5dc; border-radius: 10px; overflow: hidden; }
+      .cert-tabla-enc .cert-col-lbl { width: 160px; min-width: 160px; }
+      .cert-tabla-enc td { border-bottom: 1px solid #e8ece8; }
+      .cert-tabla-enc tr:last-child td { border-bottom: none; }
+      .cert-tabla-enc .cert-lbl { background: #f0f7ef; color: #2d5a27; font-weight: 800; font-size: 10.5px; padding: 10px 14px; min-width: 160px; vertical-align: top; text-transform: uppercase; letter-spacing: 0.04em; border-right: 1px solid #dce5dc; }
+      .cert-tabla-enc .cert-val { background: #fff; color: #1a1a1a; font-weight: 700; padding: 10px 12px; }
       .cert-divider { border: none; border-top: 1px solid #ddd; margin: 20px 0; }
       .cert-section-title { font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; background: #1a3d16; color: #fff; padding: 10px 14px; margin-bottom: 0; border-radius: 4px 4px 0 0; }
       .cert-tabla-mecatronica { width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 0; border: 1px solid #ddd; border-top: none; }
@@ -479,9 +511,21 @@ export class CertificadoRtvService {
       .cert-tabla-pruebas th { background: #2d5a27; color: #fff; padding: 10px 14px; text-align: left; font-weight: 600; font-size: 10px; }
       .cert-tabla-pruebas td { padding: 10px 14px; border-bottom: 1px solid #eee; }
       .cert-tabla-pruebas tbody tr:nth-child(even) { background: #f8faf8; }
+      .cert-tabla-defectos td:first-child { color: #c62828; font-weight: 900; letter-spacing: 0.02em; }
       .cert-resultado { font-weight: 700; font-size: 14px; letter-spacing: 0.04em; }
       .cert-resultado.ok { color: #1e7b34; }
       .cert-resultado.ko { color: #c62828; }
+      .cert-firma-row { display: flex; gap: 10px; align-items: stretch; margin-top: 10px; margin-bottom: 6px; }
+      .cert-firma-box { flex: 1; border: 1px solid #dce5dc; border-radius: 12px; background: #fafbfa; padding: 14px 16px; }
+      .cert-firma-box-der { display:flex; flex-direction:column; justify-content:center; }
+      .cert-firma-label { font-weight: 800; font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.05em; color: #5a6b59; margin-bottom: 10px; }
+      .cert-firma-line { height: 38px; border-bottom: 2px dashed #1a1a1a; opacity: 0.85; }
+      .cert-firma-nombre { margin-top: 6px; text-align: center; font-weight: 900; font-size: 12px; color: #1a3d16; }
+      .cert-firma-estado { display:flex; justify-content:center; }
+      .cert-estado-badge { display: inline-block; padding: 10px 14px; border-radius: 999px; font-weight: 900; letter-spacing: 0.06em; font-size: 12px; text-transform: uppercase; }
+      .cert-estado-badge.ok { background: rgba(30,123,52,0.12); color: #1e7b34; border: 1px solid rgba(30,123,52,0.25); }
+      .cert-estado-badge.ko { background: rgba(198,40,40,0.12); color: #c62828; border: 1px solid rgba(198,40,40,0.25); }
+      .cert-firma-sub { margin-top: 10px; text-align: center; font-weight: 800; color:#37474f; font-size: 11px; }
       .cert-adh-divider { margin-top: 24px; }
       .cert-adhesivos-fila {
         display: flex;
@@ -639,6 +683,7 @@ export class CertificadoRtvService {
         @page { size: A4; margin: 12mm; }
         body { background: #fff; }
         .cert-wrap { padding: 0 8px; max-width: none; }
+        .cert-wrap::before { font-size: 76px; opacity: 0.9; }
         .cert-adhesivos-fila { gap: 4mm; }
         .cert-adhesivo-holo, .cert-adhesivo-marco {
           width: 90mm;
