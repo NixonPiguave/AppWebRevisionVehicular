@@ -573,6 +573,12 @@
   border-color: #dc3545;
 }
 
+.form-input[readonly] {
+  background: #f0f0f0;
+  color: #555;
+  cursor: not-allowed;
+}
+
 .form-input.error:focus,
 .form-select.error:focus {
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
@@ -603,6 +609,12 @@
 
 .roles-checkbox-group.error {
   border-color: #dc3545;
+}
+
+.roles-checkbox-group.readonly {
+  background: #f0f0f0;
+  opacity: 0.9;
+  pointer-events: none;
 }
 
 .role-checkbox {
