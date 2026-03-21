@@ -56,7 +56,6 @@ export class RevisionGases implements OnInit {
   o2 = '';
   opacidad = '';
   observaciones = '';
-  kilometraje: number | null = null;
 
   cargando = false;
   guardando = false;
@@ -182,10 +181,6 @@ export class RevisionGases implements OnInit {
       this.notification.error('Opacidad debe estar entre 0 y 100.');
       return;
     }
-    if (this.kilometraje != null && this.kilometraje < 0) {
-      this.notification.error('El kilometraje no puede ser negativo.');
-      return;
-    }
     const tieneValores = this.tipoCombustible === 'DIESEL'
       ? !isNaN(parseFloat(this.opacidad))
       : (!isNaN(parseFloat(this.co)) || !isNaN(parseFloat(this.hc)));
@@ -239,8 +234,7 @@ export class RevisionGases implements OnInit {
       observaciones: observacionesCompletas,
       defectosIds: [] as number[],
       equiposIds: equiposIds.length > 0 ? equiposIds : undefined,
-      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined,
-      kilometraje: this.kilometraje != null && this.kilometraje >= 0 ? this.kilometraje : undefined
+      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined
     };
 
     this.guardando = true;

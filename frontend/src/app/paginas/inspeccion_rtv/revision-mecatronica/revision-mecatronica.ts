@@ -11,7 +11,6 @@ import {
   generarValoresAleatoriosMecatronica
 } from '../../../utils/equipo-categoria.util';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
-import { DefectosService, Defectos } from '../../../services/defectos_inspeccion/defectos.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
@@ -44,21 +43,9 @@ export class RevisionMecatronica implements OnInit {
   equipoFrenosId: number | null = null;
   equipoSuspensionId: number | null = null;
   equipoAlineacionId: number | null = null;
-  defectos: Defectos[] = [];
-  defectosSeleccionados: Defectos[] = [];
-  filtroDefectos = '';
-  kilometraje: number | null = null;
 
   get esMoto(): boolean {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
-  }
-
-  /** Motos: true si alguna verificación falló (checkbox desmarcado) */
-  get motoTieneFallas(): boolean {
-    return this.esMoto && (
-      !this.frenosPastillasOk || !this.frenosZapatasOk || !this.frenosLiquidoOk ||
-      !this.amortiguadoresMotoOk || !this.alineacionMotoOk
-    );
   }
 
   /** Equipos que influyen en frenos */
@@ -88,7 +75,7 @@ export class RevisionMecatronica implements OnInit {
     return eq != null && eq.influencia === 1;
   }
 
-  // Parámetros CARROS (normativa RTV Ecuador)
+  // Parámetros (Carros y Motos — misma lógica)
   frenosEficacia = '';
   frenosDesequilibrio = '';
   suspensionEficacia = '';
@@ -96,13 +83,6 @@ export class RevisionMecatronica implements OnInit {
   alineacionConvergencia = '';
   alineacionDivergencia = '';
   amortiguadoresOk = true;
-
-  // Parámetros MOTOS (RTV Ecuador: pastillas, zapatas, líquido, amortiguadores)
-  frenosPastillasOk = true;
-  frenosZapatasOk = true;
-  frenosLiquidoOk = true;
-  amortiguadoresMotoOk = true;
-  alineacionMotoOk = true;  // Dirección / alineación (opcional)
 
   observaciones = '';
 
@@ -118,7 +98,6 @@ export class RevisionMecatronica implements OnInit {
     private equiposService: EquiposService,
     private inspeccionService: InspeccionService,
     private turnosService: TurnosService,
-    private defectosService: DefectosService,
     private vehiculoService: VehiculoService,
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
@@ -144,8 +123,7 @@ export class RevisionMecatronica implements OnInit {
     this.cargando = true;
     this.error = '';
     const obs: any = {
-      equipos: this.equiposService.listarEquipos(),
-      defectos: this.defectosService.listar()
+      equipos: this.equiposService.listarEquipos()
     };
     if (this.turnoId) {
       obs.turno = this.turnosService.getById(this.turnoId);
@@ -154,7 +132,6 @@ export class RevisionMecatronica implements OnInit {
       next: (res: any) => {
         const todos = res.equipos || [];
         this.equipos = todos.filter((e: Equipo) => esEquipoMecatronica(e.equipo || ''));
-        this.defectos = res.defectos || [];
         if (res.turno) {
           this.confirmarTurnoSiAplica(res.turno);
           const vid = (res.turno as any).vehiculoId ?? (res.turno as any).vehiculo?.id;
@@ -269,26 +246,6 @@ export class RevisionMecatronica implements OnInit {
     this.cdr.detectChanges();
   }
 
-  toggleDefecto(d: Defectos): void {
-    const idx = this.defectosSeleccionados.findIndex(x => x.id === d.id);
-    if (idx >= 0) this.defectosSeleccionados.splice(idx, 1);
-    else this.defectosSeleccionados.push(d);
-  }
-
-  estaDefectoSeleccionado(id: number | null): boolean {
-    return id != null && this.defectosSeleccionados.some(d => d.id === id);
-  }
-
-  get defectosFiltrados(): Defectos[] {
-    const f = (this.filtroDefectos || '').toLowerCase();
-    if (!f) return this.defectos;
-    return this.defectos.filter(d =>
-      (d.codigo || '').toLowerCase().includes(f) ||
-      (d.descripcion || '').toLowerCase().includes(f) ||
-      (d.puntoDeTrabajo || '').toLowerCase().includes(f)
-    );
-  }
-
   guardarInspeccion(): void {
     if (!this.vehiculoId || !this.metodoInspeccionId) {
       this.notification.error('Faltan datos del turno o vehículo.');
@@ -299,29 +256,22 @@ export class RevisionMecatronica implements OnInit {
     const fd = parseFloat(this.frenosDesequilibrio);
     const se = parseFloat(this.suspensionEficacia);
     const sd = parseFloat(this.suspensionDesequilibrio);
-    if (!this.esMoto) {
-      if (!isNaN(fe) && (fe < 0 || fe > 100)) {
-        this.notification.error('Eficacia de frenos debe estar entre 0 y 100.');
-        return;
-      }
-      if (!isNaN(fd) && (fd < 0 || fd > 100)) {
-        this.notification.error('Desequilibrio de frenos debe estar entre 0 y 100.');
-        return;
-      }
-      if (!isNaN(se) && (se < 0 || se > 100)) {
-        this.notification.error('Eficacia de suspensión debe estar entre 0 y 100.');
-        return;
-      }
-      if (!isNaN(sd) && (sd < 0 || sd > 100)) {
-        this.notification.error('Desequilibrio de suspensión debe estar entre 0 y 100.');
-        return;
-      }
-    }
-    if (this.kilometraje != null && this.kilometraje < 0) {
-      this.notification.error('El kilometraje no puede ser negativo.');
+    if (!isNaN(fe) && (fe < 0 || fe > 100)) {
+      this.notification.error('Eficacia de frenos debe estar entre 0 y 100.');
       return;
     }
-
+    if (!isNaN(fd) && (fd < 0 || fd > 100)) {
+      this.notification.error('Desequilibrio de frenos debe estar entre 0 y 100.');
+      return;
+    }
+    if (!isNaN(se) && (se < 0 || se > 100)) {
+      this.notification.error('Eficacia de suspensión debe estar entre 0 y 100.');
+      return;
+    }
+    if (!isNaN(sd) && (sd < 0 || sd > 100)) {
+      this.notification.error('Desequilibrio de suspensión debe estar entre 0 y 100.');
+      return;
+    }
     const usuarioId = Number(this.authService.getUsuarioId() ?? 0);
     if (!usuarioId || Number.isNaN(usuarioId)) {
       this.notification.error('No se pudo obtener el usuario logueado. Vuelva a iniciar sesión.');
@@ -338,25 +288,14 @@ export class RevisionMecatronica implements OnInit {
     addEq(this.equipoSuspensionId);
     addEq(this.equipoAlineacionId);
     const eqNombres = Array.from(eqNombresSet);
-    const obs = this.esMoto
-      ? [
-          `Frenos: pastillas ${this.frenosPastillasOk ? 'OK' : 'defecto'}, zapatas ${this.frenosZapatasOk ? 'OK' : 'defecto'}, líquido ${this.frenosLiquidoOk ? 'OK' : 'defecto'}`,
-          `Amortiguadores: ${this.amortiguadoresMotoOk ? 'sin fugas' : 'con fugas'}`,
-          `Alineación/dirección: ${this.alineacionMotoOk ? 'OK' : 'defecto'}`,
-          eqNombres.length ? `Equipos: ${eqNombres.join(', ')}` : ''
-        ].filter(Boolean).join('. ')
-      : [
-          `Frenos eficacia: ${this.frenosEficacia || 'N/A'}%, desequilibrio: ${this.frenosDesequilibrio || 'N/A'}%`,
-          `Suspensión eficacia: ${this.suspensionEficacia || 'N/A'}%, desequilibrio: ${this.suspensionDesequilibrio || 'N/A'}%`,
-          `Alineación conv: ${this.alineacionConvergencia || 'N/A'} div: ${this.alineacionDivergencia || 'N/A'}`,
-          `Amortiguadores: ${this.amortiguadoresOk ? 'OK' : 'Con fugas'}`,
-          eqNombres.length ? `Equipos: ${eqNombres.join(', ')}` : ''
-        ].filter(Boolean).join('. ');
+    const obs = [
+      `Frenos eficacia: ${this.frenosEficacia || 'N/A'}%, desequilibrio: ${this.frenosDesequilibrio || 'N/A'}%`,
+      `Suspensión eficacia: ${this.suspensionEficacia || 'N/A'}%, desequilibrio: ${this.suspensionDesequilibrio || 'N/A'}%`,
+      `Alineación conv: ${this.alineacionConvergencia || 'N/A'} div: ${this.alineacionDivergencia || 'N/A'}`,
+      `Amortiguadores: ${this.amortiguadoresOk ? 'OK' : 'Con fugas'}`,
+      eqNombres.length ? `Equipos: ${eqNombres.join(', ')}` : ''
+    ].filter(Boolean).join('. ');
     const observacionesCompletas = [obs, this.observaciones].filter(Boolean).join(' | ');
-
-    const defectosIds = this.esMoto && this.motoTieneFallas && this.defectosSeleccionados.length > 0
-      ? this.defectosSeleccionados.map(d => d.id!).filter(id => id > 0)
-      : [];
 
     const equiposIds = [
       this.equipoFrenosId,
@@ -365,20 +304,14 @@ export class RevisionMecatronica implements OnInit {
     ].filter((id): id is number => id != null && id > 0);
 
     const valoresMedidos: Record<string, number> = {};
-    if (!this.esMoto) {
-      const fe = parseFloat(this.frenosEficacia);
-      if (!isNaN(fe)) valoresMedidos['FRENOS_EFICACIA'] = fe;
-      const fd = parseFloat(this.frenosDesequilibrio);
-      if (!isNaN(fd)) valoresMedidos['FRENOS_DESEQUILIBRIO'] = fd;
-      const se = parseFloat(this.suspensionEficacia);
-      if (!isNaN(se)) valoresMedidos['SUSPENSION_EFICACIA'] = se;
-      const sd = parseFloat(this.suspensionDesequilibrio);
-      if (!isNaN(sd)) valoresMedidos['SUSPENSION_DESEQUILIBRIO'] = sd;
-      const ac = parseFloat(this.alineacionConvergencia);
-      if (!isNaN(ac)) valoresMedidos['ALINEACION_CONVERGENCIA'] = ac;
-      const ad = parseFloat(this.alineacionDivergencia);
-      if (!isNaN(ad)) valoresMedidos['ALINEACION_DIVERGENCIA'] = ad;
-    }
+    if (!isNaN(fe)) valoresMedidos['FRENOS_EFICACIA'] = fe;
+    if (!isNaN(fd)) valoresMedidos['FRENOS_DESEQUILIBRIO'] = fd;
+    if (!isNaN(se)) valoresMedidos['SUSPENSION_EFICACIA'] = se;
+    if (!isNaN(sd)) valoresMedidos['SUSPENSION_DESEQUILIBRIO'] = sd;
+    const ac = parseFloat(this.alineacionConvergencia);
+    if (!isNaN(ac)) valoresMedidos['ALINEACION_CONVERGENCIA'] = ac;
+    const ad = parseFloat(this.alineacionDivergencia);
+    if (!isNaN(ad)) valoresMedidos['ALINEACION_DIVERGENCIA'] = ad;
 
     const payload = {
       vehiculoId: this.vehiculoId,
@@ -386,16 +319,10 @@ export class RevisionMecatronica implements OnInit {
       lineaId: this.lineaIdParam ?? 1,
       usuarioId,
       observaciones: observacionesCompletas,
-      defectosIds,
+      defectosIds: [] as number[],
       equiposIds: equiposIds.length > 0 ? [...new Set(equiposIds)] : undefined,
-      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined,
-      kilometraje: this.kilometraje != null && this.kilometraje >= 0 ? this.kilometraje : undefined
+      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined
     };
-
-    if (this.esMoto && this.motoTieneFallas && defectosIds.length === 0) {
-      this.notification.error('Debe seleccionar al menos un defecto cuando hay verificaciones con falla.');
-      return;
-    }
 
     this.guardando = true;
     this.inspeccionService.crear(payload).subscribe({

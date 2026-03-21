@@ -415,23 +415,15 @@ input[readonly] {
 .def-desc { font-size: 13px; color: #57606a; }
 
 .panel-observaciones {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  align-items: flex-start;
+  min-width: 0;
+  overflow: hidden;
 }
-.panel-observaciones .campo-kilometraje {
-  flex: 0 0 auto;
-  min-width: 140px;
+.panel-observaciones .campo-observaciones {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
-.panel-observaciones .campo-kilometraje input {
-  width: 120px;
-  padding: 12px 14px;
-  border: 1px solid #d0d7de;
-  border-radius: 8px;
-  font-size: 14px;
-}
-.panel-observaciones .campo-observaciones { flex: 1; min-width: 200px; }
 
 .panel-observaciones label {
   display: block;
@@ -443,6 +435,9 @@ input[readonly] {
 
 .panel-observaciones textarea {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   padding: 12px 14px;
   border: 1px solid #d0d7de;
   border-radius: 8px;
