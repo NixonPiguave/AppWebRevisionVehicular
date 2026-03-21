@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -147,7 +146,12 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
             return List.of();
         }
 
-        Path directorio = Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize();
+        Path directorio;
+        try {
+            directorio = BackupDirectoryResolver.requireAbsolutePath(config.getRutaServidor().trim());
+        } catch (RuntimeException e) {
+            return List.of();
+        }
         if (!Files.isDirectory(directorio)) {
             return List.of();
         }
@@ -187,7 +191,7 @@ public class BackupRestoreServiceImpl implements IBackupRestoreService {
             throw new RuntimeException("Ruta de respaldos no configurada.");
         }
 
-        Path base = Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize();
+        Path base = BackupDirectoryResolver.requireAbsolutePath(config.getRutaServidor().trim());
         Path archivo = base.resolve(nombreArchivo).normalize();
         if (!archivo.startsWith(base)) {
             throw new RuntimeException("Nombre de archivo no permitido.");

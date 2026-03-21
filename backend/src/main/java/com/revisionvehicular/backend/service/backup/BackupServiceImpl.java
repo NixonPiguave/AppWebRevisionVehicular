@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -76,25 +75,14 @@ public class BackupServiceImpl implements IBackupService {
     }
 
     /**
-     * Misma resolución de ruta desde peticiones HTTP o desde Quartz: siempre absoluta respecto al cwd del proceso JVM.
+     * Misma ruta para peticiones HTTP y Quartz: leída de BD; debe ser absoluta en el equipo del backend.
      */
     private Path directorioRespaldoAbsoluto(BackupConfig config) {
         String ruta = config.getRutaServidor();
         if (ruta == null || ruta.isBlank()) {
             throw new RuntimeException("Ruta del servidor no configurada para respaldos.");
         }
-        try {
-            Path base = Paths.get(ruta.trim()).toAbsolutePath().normalize();
-            Files.createDirectories(base);
-            if (!Files.isWritable(base)) {
-                throw new RuntimeException("Sin permiso de escritura en el directorio de respaldos: " + base);
-            }
-            return base;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("No se pudo preparar el directorio de respaldos: " + e.getMessage(), e);
-        }
+        return BackupDirectoryResolver.resolveWritableDirectory(ruta);
     }
 
     @PostConstruct

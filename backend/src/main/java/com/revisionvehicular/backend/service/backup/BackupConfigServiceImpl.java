@@ -15,7 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Service
@@ -50,11 +49,21 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
 
     @Override
     public BackupConfigDTO guardarConfig(BackupConfigDTO dto) {
-        // Ruta absoluta normalizada: evita que respaldos automáticos (Quartz) y la UI usen cwd distintos con rutas relativas.
-        Path dirRespaldo = validarYObtenerDirectorioRespaldo(dto.getRutaServidor());
-
         BackupConfig config = repository.findTopByOrderByConfigIdDesc()
                 .orElse(new BackupConfig());
+
+        // Si el cliente no envía ruta (p. ej. guardado parcial), conservar la ya persistida.
+        String rutaIn = dto.getRutaServidor();
+        if (rutaIn == null || rutaIn.isBlank()) {
+            if (config.getRutaServidor() != null && !config.getRutaServidor().isBlank()) {
+                rutaIn = config.getRutaServidor();
+            }
+        }
+        if (rutaIn == null || rutaIn.isBlank()) {
+            throw new IllegalArgumentException("La ruta del servidor es obligatoria");
+        }
+        // Ruta absoluta normalizada: manual y Quartz usan la misma carpeta.
+        Path dirRespaldo = validarYObtenerDirectorioRespaldo(rutaIn);
 
         config.setRutaServidor(dirRespaldo.toString());
         config.setDriveFolderId(dto.getDriveFolderId());
@@ -130,26 +139,10 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
     }
 
     /**
-     * Directorio de respaldos siempre absoluto y normalizado (misma resolución desde el hilo HTTP o Quartz).
+     * Directorio de respaldos: ruta absoluta en el servidor (misma para manual y automático).
      */
     private Path validarYObtenerDirectorioRespaldo(String ruta) {
-        if (ruta == null || ruta.isBlank()) {
-            throw new RuntimeException("La ruta del servidor no puede estar vacía");
-        }
-        try {
-            Path path = Paths.get(ruta.trim()).toAbsolutePath().normalize();
-            if (!Files.exists(path)) {
-                Files.createDirectories(path);
-            }
-            if (!Files.isWritable(path)) {
-                throw new RuntimeException("La ruta no tiene permisos de escritura: " + path);
-            }
-            return path;
-        } catch (RuntimeException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new RuntimeException("Ruta inválida: " + e.getMessage());
-        }
+        return BackupDirectoryResolver.resolveWritableDirectory(ruta);
     }
 
     @Override
@@ -184,7 +177,12 @@ public class BackupConfigServiceImpl implements IBackupConfigService {
         BackupConfigDTO dto = new BackupConfigDTO();
         dto.setConfigId(config.getConfigId());
         if (config.getRutaServidor() != null && !config.getRutaServidor().isBlank()) {
-            dto.setRutaServidor(Paths.get(config.getRutaServidor().trim()).toAbsolutePath().normalize().toString());
+            String raw = config.getRutaServidor().trim();
+            try {
+                dto.setRutaServidor(BackupDirectoryResolver.requireAbsolutePath(raw).toString());
+            } catch (RuntimeException e) {
+                dto.setRutaServidor(raw);
+            }
         } else {
             dto.setRutaServidor(config.getRutaServidor());
         }

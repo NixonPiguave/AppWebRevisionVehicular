@@ -5,6 +5,7 @@ import com.revisionvehicular.backend.entities.backup.BackupRecord;
 import com.revisionvehicular.backend.entities.srtv.Usuario;
 import com.revisionvehicular.backend.repositories.backup.IBackupRecordRepository;
 import com.revisionvehicular.backend.repositories.srtv.IUsuarioRepository;
+import com.revisionvehicular.backend.service.backup.BackupDirectoryResolver;
 import com.revisionvehicular.backend.service.backup.IBackupService;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.core.io.FileSystemResource;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/backup")
@@ -53,7 +53,7 @@ public class BackupController {
         BackupRecord record = recordRepository.findById(recordId)
                 .orElseThrow(() -> new RuntimeException("Backup no encontrado"));
 
-        Path path = Paths.get(record.getRutaServidor()).toAbsolutePath().normalize();
+        Path path = BackupDirectoryResolver.requireAbsolutePath(record.getRutaServidor());
         if (!Files.exists(path)) {
             return ResponseEntity.notFound().build();
         }

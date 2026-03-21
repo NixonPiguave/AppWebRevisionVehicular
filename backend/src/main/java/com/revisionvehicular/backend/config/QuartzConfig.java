@@ -8,12 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 import org.springframework.scheduling.quartz.SpringBeanJobFactory;
 
-/**
- * Quartz instancia los {@link org.quartz.Job} sin pasar por el contenedor Spring salvo que se
- * configure un {@link org.springframework.scheduling.quartz.SpringBeanJobFactory}.
- * Spring Boot crea uno por defecto, pero este customizer asegura {@code autowireBean} sobre cada
- * ejecución para inyectar {@code IBackupService} en los jobs de respaldo.
- */
+
 @Configuration
 public class QuartzConfig {
 

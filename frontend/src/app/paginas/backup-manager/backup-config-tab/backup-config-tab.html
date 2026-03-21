@@ -19,12 +19,6 @@
       </div>
       <div class="form-grupo">
         <label>Ruta de almacenamiento en el servidor <span class="requerido">*</span></label>
-        <span class="hint" *ngIf="!soloScheduler">
-          <strong>Seleccionar carpeta</strong> abre el explorador de Windows (Chrome o Edge). El backend debe poder escribir en esa ruta
-          (en desarrollo local suele ser la misma PC). Los navegadores no siempre muestran la ruta completa: si solo ve el nombre de la carpeta,
-          ábrala en el Explorador de Windows, copie la ruta (barra de direcciones, Ctrl+L) y péguela aquí. Luego pulse
-          <strong>Guardar configuración</strong>.
-        </span>
         <div class="ruta-carpeta-input-row">
           <input type="text"
                  class="form-input form-input-ruta-inline"
@@ -54,14 +48,12 @@
           <label>ID de carpeta en Drive</label>
           <input type="text" [(ngModel)]="config.driveFolderId" class="form-input"
                  placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUq..." />
-          <span class="hint">ID de la carpeta de Google Drive donde se subirán los respaldos.</span>
         </div>
         <div class="form-grupo">
           <label>Ruta del archivo de credenciales</label>
           <input type="text" [(ngModel)]="config.driveCredentialsPath" class="form-input"
                  placeholder="Se actualiza al subir el JSON (ruta en el servidor)"
                  [readonly]="true" />
-          <span class="hint">El navegador no puede mostrar la ruta de tu PC; al elegir el archivo se sube al servidor y aquí verás la ruta donde quedó guardado (p. ej. …\drive-credentials\drive-credentials.json).</span>
           <span class="hint archivo-seleccionado" *ngIf="ultimoJsonCredencialesNombre || subiendoDriveCredentials">
             <ng-container *ngIf="subiendoDriveCredentials">Subiendo <strong>{{ ultimoJsonCredencialesNombre }}</strong>…</ng-container>
             <ng-container *ngIf="!subiendoDriveCredentials && ultimoJsonCredencialesNombre">
@@ -105,7 +97,6 @@
         <label>Correo del administrador</label>
         <input type="email" [(ngModel)]="config.emailNotificacion" class="form-input"
                placeholder="admin@empresa.com" />
-        <span class="hint">Correo para notificaciones de respaldo.</span>
       </div>
     </div>
 
@@ -131,7 +122,6 @@
             <label>App Password <span class="requerido">*</span></label>
             <input type="password" [(ngModel)]="config.mailPassword" class="form-input"
                    placeholder="Contraseña de aplicación (16 caracteres)" />
-            <span class="hint">Requiere 2FA y App Password de Google.</span>
           </div>
         </div>
 

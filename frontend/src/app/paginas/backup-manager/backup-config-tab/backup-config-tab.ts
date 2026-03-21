@@ -75,12 +75,60 @@ export class BackupConfigTabComponent implements OnInit {
   }
 
   guardar(): void {
+    /**
+     * La pestaña de jobs incrusta otra instancia de este componente con soloScheduler=true.
+     * Si el usuario cambió la ruta en la otra pestaña, esta instancia aún tiene la ruta vieja en memoria
+     * y al guardar solo el programador sobrescribiría la BD. Antes de POST, tomamos la config actual del servidor.
+     */
+    if (this.soloScheduler) {
+      this.actualizarCronsDesdeUI();
+      const parcialScheduler = {
+        schedulerActivo: this.config.schedulerActivo,
+        cronFull: this.config.cronFull,
+        cronDiferencial: this.config.cronDiferencial,
+        cronIncremental: this.config.cronIncremental
+      };
+      this.guardando = true;
+      this.mensajeError = '';
+      this.backupService.obtenerConfig().subscribe({
+        next: (fresh) => {
+          this.config = { ...fresh, ...parcialScheduler };
+          this.backupService.guardarConfig(this.config).subscribe({
+            next: (data) => {
+              this.config = data;
+              this.guardando = false;
+              this.mostrarExito('Configuración guardada correctamente');
+              this.sincronizarUIDesdeCrons();
+              this.cdr.detectChanges();
+            },
+            error: (err) => {
+              this.guardando = false;
+              this.mostrarError(err?.error?.message || 'Error al guardar la configuración');
+              this.cdr.detectChanges();
+            }
+          });
+        },
+        error: () => {
+          this.guardando = false;
+          this.mostrarError('No se pudo cargar la configuración actual. Intente de nuevo.');
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
+
     if (!this.config.rutaServidor?.trim()) {
       this.mostrarError('La ruta del servidor es obligatoria');
       return;
     }
+    if (!this.esRutaAbsolutaEnBackend(this.config.rutaServidor)) {
+      this.mostrarError(
+        'Use una ruta absoluta en el PC donde corre el backend (ej. C:\\Respaldos\\RTV). ' +
+          'No use solo el nombre de carpeta; cópiela desde el Explorador (Ctrl+L).'
+      );
+      return;
+    }
 
-    // Actualizar expresiones cron a partir de la selección de la UI
     this.actualizarCronsDesdeUI();
 
     this.guardando = true;
@@ -89,6 +137,7 @@ export class BackupConfigTabComponent implements OnInit {
         this.config = data;
         this.guardando = false;
         this.mostrarExito('Configuración guardada correctamente');
+        this.sincronizarUIDesdeCrons();
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -97,6 +146,27 @@ export class BackupConfigTabComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Ruta que el backend acepta: absoluta, UNC, Unix, o variables que expande el servidor (%USERPROFILE%, etc.).
+   */
+  private esRutaAbsolutaEnBackend(r: string): boolean {
+    const t = r.trim();
+    if (!t) return false;
+    if (/^[A-Za-z]:[\\/]/.test(t)) return true;
+    if (t.startsWith('\\\\')) return true;
+    if (t.startsWith('/')) return true;
+    if (/^%[A-Za-z_][A-Za-z0-9_]*%/.test(t)) return true;
+    if (t.startsWith('${user.home}')) return true;
+    if (t.startsWith('~/') || t.startsWith('~\\')) return true;
+    return false;
+  }
+
+  /** Cuando el navegador solo da el nombre de la carpeta, el backend expande %USERPROFILE%. */
+  private rutaDesdeNombreCarpeta(nombreCarpeta: string): string {
+    const n = (nombreCarpeta || '').replace(/^[/\\]+|[/\\]+$/g, '').trim();
+    return n ? `%USERPROFILE%\\${n}` : '';
   }
 
   mostrarExito(msg: string): void {
@@ -392,16 +462,31 @@ export class BackupConfigTabComponent implements OnInit {
   }
 
   /**
-   * Selector de carpeta del sistema (en Windows, el cuadro de diálogo nativo vía Chrome/Edge).
-   * El navegador no entrega la ruta absoluta completa: si solo aparece el nombre de la carpeta,
-   * complétela pegando la ruta desde el Explorador de Windows (barra de direcciones).
+   * Diálogo de carpeta del sistema (Windows): primero el selector clásico del navegador; si expone
+   * {@code File.path} (p. ej. algunos entornos), se usa la ruta absoluta. Si no, se rellena
+   * {@code %USERPROFILE%\\nombreCarpeta} para que el backend la expanda (misma PC que el backend).
    */
   async elegirCarpeta(): Promise<void> {
+    const paso1 = await this.elegirCarpetaMedianteInputDirectorio();
+    if (paso1 === 'cancelado') {
+      return;
+    }
+    if (paso1 !== null) {
+      this.config.rutaServidor = paso1;
+      if (paso1.startsWith('%USERPROFILE%')) {
+        this.mostrarExito(
+          'Ruta con %USERPROFILE% (su usuario de Windows). Guarde; si la carpeta está en otro disco, edite el campo.'
+        );
+      } else {
+        this.mostrarExito('Ruta absoluta detectada. Pulse Guardar configuración.');
+      }
+      this.cdr.detectChanges();
+      return;
+    }
+
     const w = window as any;
     if (typeof w.showDirectoryPicker !== 'function') {
-      this.mostrarError(
-        'Use Google Chrome o Microsoft Edge en Windows para el selector de carpetas, o escriba la ruta completa en el campo.'
-      );
+      this.mostrarError('Use Chrome o Edge, o escriba la ruta a mano.');
       return;
     }
     try {
@@ -410,22 +495,66 @@ export class BackupConfigTabComponent implements OnInit {
       if (!name) {
         return;
       }
-      const actual = this.config?.rutaServidor?.trim();
-      if (actual) {
-        const partes = actual.split(/[/\\]+/).filter(Boolean);
-        if (partes.length > 0) {
-          partes[partes.length - 1] = name;
-          this.config.rutaServidor = partes.join('\\');
-        } else {
-          this.config.rutaServidor = name;
-        }
-      } else {
-        this.config.rutaServidor = name;
-      }
+      this.config.rutaServidor = this.rutaDesdeNombreCarpeta(name);
+      this.mostrarExito(
+        'Se rellenó %USERPROFILE%\\' + name + '. Guarde; si la carpeta no está bajo su perfil, pegue la ruta completa (Ctrl+L en el Explorador).'
+      );
       this.cdr.detectChanges();
     } catch {
       /* usuario canceló */
     }
+  }
+
+  private elegirCarpetaMedianteInputDirectorio(): Promise<string | null | 'cancelado'> {
+    return new Promise((resolve) => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      (input as any).webkitdirectory = true;
+      (input as any).directory = true;
+      input.multiple = true;
+      input.style.cssText = 'position:fixed;width:0;height:0;opacity:0;pointer-events:none;left:-100px';
+
+      let terminado = false;
+      const fin = (v: string | null | 'cancelado') => {
+        if (terminado) {
+          return;
+        }
+        terminado = true;
+        try {
+          document.body.removeChild(input);
+        } catch {
+          /* */
+        }
+        resolve(v);
+      };
+
+      input.addEventListener('change', () => {
+        const files = input.files;
+        if (!files?.length) {
+          fin(null);
+          return;
+        }
+        const f = files[0] as File & { path?: string };
+        if (f.path && typeof f.path === 'string') {
+          const conBarras = f.path.replace(/\//g, '\\');
+          const carpeta = conBarras.replace(/[/\\][^/\\]+$/, '');
+          fin(carpeta || null);
+          return;
+        }
+        const wrp = f.webkitRelativePath || '';
+        const segmento = wrp.includes('/') ? wrp.substring(0, wrp.indexOf('/')) : wrp;
+        if (segmento) {
+          fin(this.rutaDesdeNombreCarpeta(segmento));
+          return;
+        }
+        fin(null);
+      });
+
+      input.addEventListener('cancel', () => fin('cancelado'));
+
+      document.body.appendChild(input);
+      input.click();
+    });
   }
 
   onToggleDia(tipo: 'FULL' | 'DIFF', dia: string, checked: boolean): void {
