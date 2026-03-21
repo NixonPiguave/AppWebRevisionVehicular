@@ -95,23 +95,32 @@ export class PagosComponent implements OnInit {
   abrirSelectorTurno(): void {
     this.mostrarModalTurno = true;
     this.busquedaTurno = '';
-
-    if (this.modalEnriquecida) {
-      this.filtrarTurnos();
-      this.cdr.detectChanges();
-      return;
-    }
-
     this.cargandoTurnos = true;
-    this.enriquecerTurnosSinPagoParaModal().subscribe({
-      next: () => {
-        this.cargandoTurnos = false;
-        this.modalEnriquecida = true;
-        this.filtrarTurnos();
-        this.cdr.detectChanges();
+    this.cdr.detectChanges(); // Forzar actualización inmediata para mostrar "Cargando turnos..."
+
+    // Siempre refrescar turnos al abrir el modal para incluir turnos recién creados (ej. registro base única)
+    this.turnosService.getAll().subscribe({
+      next: (data) => {
+        this.turnos = data ?? [];
+        this.modalEnriquecida = false;
+        this.propietarioNombrePorId.clear();
+        this.vehiculoDescripcionPorId.clear();
+        this.enriquecerTurnosSinPagoParaModal().subscribe({
+          next: () => {
+            this.cargandoTurnos = false;
+            this.modalEnriquecida = true;
+            this.filtrarTurnos();
+            this.cdr.detectChanges();
+          },
+          error: () => {
+            this.cargandoTurnos = false;
+            this.modalEnriquecida = true;
+            this.filtrarTurnos();
+            this.cdr.detectChanges();
+          }
+        });
       },
       error: () => {
-        // Fallback: si falla el enriquecimiento, igual dejamos funcionar el selector
         this.cargandoTurnos = false;
         this.modalEnriquecida = true;
         this.filtrarTurnos();
@@ -329,21 +338,26 @@ export class PagosComponent implements OnInit {
     const propietarioIds = [...new Set(sinPagar.map(t => t.propietarioId))];
     const vehiculoIds = [...new Set(sinPagar.map(t => t.vehiculoId).filter((x): x is number => typeof x === 'number'))];
 
-    const propietarios$ = forkJoin(
-      propietarioIds.map(id =>
-        this.propietarioService.obtenerPorId(id).pipe(
-          catchError(() => of({ idPropietario: id, nombre: `Propietario #${id}` } as any))
-        )
-      )
-    );
+    // forkJoin([]) nunca completa en RxJS; usar of([]) cuando no hay IDs
+    const propietarios$ = propietarioIds.length === 0
+      ? of([])
+      : forkJoin(
+          propietarioIds.map(id =>
+            this.propietarioService.obtenerPorId(id).pipe(
+              catchError(() => of({ idPropietario: id, nombre: `Propietario #${id}` } as any))
+            )
+          )
+        );
 
-    const vehiculos$ = forkJoin(
-      vehiculoIds.map(id =>
-        this.vehiculoService.obtenerPorId(id).pipe(
-          catchError(() => of({ id, matricula: `Vehículo #${id}` } as any))
-        )
-      )
-    );
+    const vehiculos$ = vehiculoIds.length === 0
+      ? of([])
+      : forkJoin(
+          vehiculoIds.map(id =>
+            this.vehiculoService.obtenerPorId(id).pipe(
+              catchError(() => of({ id, matricula: `Vehículo #${id}` } as any))
+            )
+          )
+        );
 
     return forkJoin({ propietarios: propietarios$, vehiculos: vehiculos$ }).pipe(
       map(({ propietarios, vehiculos }) => {

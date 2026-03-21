@@ -229,10 +229,12 @@ export class CertificadosRegistroService {
         <div class="foot">
           <div class="sign">
             <div class="sign-title">IMPRONTERO</div>
+            <div class="sign-space"></div>
             <div class="sign-line">FIRMA Y SELLO</div>
           </div>
           <div class="sign">
             <div class="sign-title">JEFE DE MATRICULACIÓN</div>
+            <div class="sign-space"></div>
             <div class="sign-line">FIRMA Y SELLO</div>
           </div>
         </div>
@@ -353,7 +355,8 @@ export class CertificadosRegistroService {
       .foot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}
       .sign{border-top:2px solid var(--sys-green-dark);padding-top:10px}
       .sign-title{background:var(--sys-green);color:#fff;font-weight:900;padding:6px 10px;border:1px solid var(--sys-green-dark)}
-      .sign-line{padding:10px 10px;font-size:12px}
+      .sign-space{min-height:70px;margin:12px 0;border:1px dashed #999;background:#fafafa}
+      .sign-line{padding:8px 10px 0;font-size:12px}
 
       .doc-mat { border-color:var(--sys-green-dark); }
       .mat-table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}

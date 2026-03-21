@@ -115,7 +115,12 @@
 
       <div class="modal-info" *ngIf="cargandoTurnos">Cargando turnos...</div>
 
-      <div class="tabla-modal-contenedor" *ngIf="!cargandoTurnos">
+      <div class="modal-info modal-sin-turnos" *ngIf="!cargandoTurnos && turnosFiltrados.length === 0">
+        <mat-icon>info</mat-icon>
+        No hay turnos pendientes de pago (estado GENERADO sin monto pagado).
+      </div>
+
+      <div class="tabla-modal-contenedor" *ngIf="!cargandoTurnos && turnosFiltrados.length > 0">
         <table class="tabla-modal">
           <thead>
           <tr>

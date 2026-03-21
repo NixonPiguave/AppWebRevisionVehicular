@@ -79,7 +79,7 @@ public class AuthController {
         boolean tieneRolActivo = rolesUsuario != null && rolesUsuario.stream()
                 .anyMatch(ur -> ur.getRol() != null && "A".equals(ur.getRol().getEstado()));
         if (!tieneRolActivo) {
-            return ResponseEntity.status(401).body("Su cuenta no tiene acceso activo. Contacte al administrador.");
+            return ResponseEntity.status(401).body("Su cuenta no tiene acceso activo.");
         }
 
 
