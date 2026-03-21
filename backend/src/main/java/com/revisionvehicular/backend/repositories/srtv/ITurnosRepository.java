@@ -19,6 +19,26 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     List<Turnos> findByEstadoAndServicio_IdTipoTramiteOrderByFechaInicioDesc(String estado, Long idTipoTramite);
 
+    /** Turnos con propietario del trámite y vehículo + propietario actual del vehículo (para transferencia de dominio). */
+    @Query("SELECT DISTINCT t FROM Turnos t " +
+            "LEFT JOIN FETCH t.propietario " +
+            "LEFT JOIN FETCH t.servicio " +
+            "LEFT JOIN FETCH t.vehiculo v " +
+            "LEFT JOIN FETCH v.propietario " +
+            "WHERE t.estado = :estado AND t.servicio.idTipoTramite = :servicioId " +
+            "ORDER BY t.fechaInicio DESC")
+    List<Turnos> findByEstadoAndServicioIdConVehiculoYPropietarios(
+            @Param("estado") String estado,
+            @Param("servicioId") Long servicioId);
+
+    @Query("SELECT t FROM Turnos t " +
+            "LEFT JOIN FETCH t.propietario " +
+            "LEFT JOIN FETCH t.servicio " +
+            "LEFT JOIN FETCH t.vehiculo v " +
+            "LEFT JOIN FETCH v.propietario " +
+            "WHERE t.turnoId = :turnoId")
+    java.util.Optional<Turnos> findByIdParaTransferenciaDominio(@Param("turnoId") Long turnoId);
+
     List<Turnos> findByServicio_IdTipoTramiteOrderByFechaInicioDesc(Long idTipoTramite);
 
     List<Turnos> findByEstadoInOrderByFechaInicioDesc(List<String> estados);

@@ -52,6 +52,7 @@ import { RegistroIncidentesComponent } from './paginas/gestion_vehicular/registr
 import { AnulacionTramitesComponent } from './paginas/gestion_vehicular/anulacion-tramites/anulacion-tramites';
 import { RegistroBaseUnicaComponent } from './paginas/gestion_vehicular/registro-base-unica/registro-base-unica';
 import { ImprontasComponent } from './paginas/gestion_vehicular/improntas/improntas';
+import { TransferenciaDominioComponent } from './paginas/gestion_vehicular/transferencia-dominio/transferencia-dominio';
 import { PagosComponent } from './paginas/operaciones/pagos/pagos';
 import { RecepcionComponent } from './paginas/administracion/recepcion/recepcion';
 import { HistorialTurnosComponent } from './paginas/operaciones/historial-turnos/historial-turnos';
@@ -118,6 +119,7 @@ export const routes: Routes = [
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },
       { path: 'gestion_vehicular/vehiculo', component: VehiculoComponent },
       { path: 'gestion_vehicular/improntas', component: ImprontasComponent },
+      { path: 'gestion_vehicular/transferencia-dominio', component: TransferenciaDominioComponent },
       { path: 'gestion_vehicular/bloqueo-vehiculo', component: BloqueoVehiculoComponent },
       { path: 'gestion_vehicular/desbloqueo-vehiculo', component: DesbloqueoVehiculoComponent },
       { path: 'gestion_vehicular/baja-vehiculo', component: BajaVehiculoComponent },

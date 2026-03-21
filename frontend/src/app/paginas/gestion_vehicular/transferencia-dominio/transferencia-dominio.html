@@ -1,0 +1,180 @@
+<div class="rtv-container">
+  <div class="rtv-header">
+    <div class="header-titulo">
+      <mat-icon class="header-icono">swap_horiz</mat-icon>
+      <div>
+        <h2>Transferencia de dominio</h2>
+        <div class="sub">
+          Elija el <strong>nuevo propietario</strong> del vehículo (existente o regístrelo aquí). Se actualiza el vehículo, la impronta y se cierra el turno.
+        </div>
+      </div>
+    </div>
+    <button
+      type="button"
+      class="btn-refresh"
+      *ngIf="servicioTransferenciaId !== null"
+      (click)="cargarTurnos()"
+      [disabled]="cargandoTurnos"
+      title="Actualizar lista">
+      <mat-icon>refresh</mat-icon>
+    </button>
+  </div>
+
+  <div class="aviso" *ngIf="!cargandoServicio && servicioTransferenciaId === null">
+    <mat-icon>warning</mat-icon>
+    <span>
+      No se encontró en el catálogo un servicio de traspaso/transferencia de dominio.
+      Verifique que el nombre del trámite contenga «dominio» y «traspaso», «transferencia» o «traspas».
+    </span>
+  </div>
+
+  <div class="meta-servicio" *ngIf="nombreServicioDetectado">
+    <strong>Trámite:</strong> {{ nombreServicioDetectado }}
+  </div>
+
+  <div class="cargando" *ngIf="cargandoServicio || cargandoTurnos">
+    <div class="spinner"></div> Cargando...
+  </div>
+
+  <div class="tabla-contenedor" *ngIf="!cargandoServicio && !cargandoTurnos && servicioTransferenciaId !== null">
+    <table class="rtv-tabla">
+      <thead>
+      <tr>
+        <th>Turno</th>
+        <th>Placa</th>
+        <th>Propietario actual (vehículo)</th>
+        <th>Solicitante (turno)</th>
+        <th>Servicio</th>
+        <th>Estado</th>
+        <th>Fecha</th>
+        <th class="th-acciones">Acción</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let t of turnos">
+        <td>{{ t.turnoId }}</td>
+        <td>{{ t.vehiculoPlaca || '—' }}</td>
+        <td>{{ t.propietarioAnteriorNombre || '—' }}</td>
+        <td>{{ t.solicitanteTurnoNombre || '—' }}</td>
+        <td>{{ t.servicioNombre || '-' }}</td>
+        <td>{{ t.estado }}</td>
+        <td>{{ t.fechaInicio | date:'dd/MM/yyyy' }}</td>
+        <td class="td-acciones">
+          <button
+            type="button"
+            class="btn-ejecutar"
+            (click)="abrirConfirmacion(t)"
+            [disabled]="!t.vehiculoId"
+            title="Elegir nuevo propietario y registrar la transferencia">
+            <mat-icon>person_add</mat-icon>
+            Transferir
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="turnos.length === 0">
+        <td colspan="8" class="sin-registros">No hay turnos EN_PROCESO para este servicio.</td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Modal: elegir o registrar nuevo propietario -->
+<div class="modal-overlay" *ngIf="turnoConfirmar" (click)="cerrarConfirmacion()">
+  <div class="modal-caja modal-grande" (click)="$event.stopPropagation()">
+    <h3>Transferir vehículo a otro propietario</h3>
+    <p class="modal-resumen">
+      Vehículo <strong>{{ turnoConfirmar.vehiculoPlaca }}</strong>
+      · Actualmente: <strong>{{ turnoConfirmar.propietarioAnteriorNombre || '—' }}</strong>
+    </p>
+
+    <div class="bloque-campo">
+      <label>Buscar propietario</label>
+      <input
+        type="text"
+        class="inp"
+        [(ngModel)]="filtroPropietarioSel"
+        placeholder="Nombre o cédula..."
+      />
+    </div>
+
+    <div class="bloque-campo">
+      <label>Nuevo propietario del vehículo <span class="req">*</span></label>
+      <select class="inp select-prop" [(ngModel)]="nuevoPropietarioIdSel">
+        <option [ngValue]="null">— Seleccione —</option>
+        <option *ngFor="let p of propietariosFiltradosModal" [ngValue]="p.idPropietario">
+          {{ p.nombre }} — {{ p.documentoIdentidad }}
+        </option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-link-nuevo" (click)="toggleFormNuevoPropietario()">
+      <mat-icon>{{ mostrarFormNuevoProp ? 'expand_less' : 'person_add_alt' }}</mat-icon>
+      {{ mostrarFormNuevoProp ? 'Ocultar formulario' : 'Registrar un propietario nuevo' }}
+    </button>
+
+    <div class="form-nuevo-prop" *ngIf="mostrarFormNuevoProp">
+      <div class="form-grid">
+        <div>
+          <label>Cédula / documento <span class="req">*</span></label>
+          <input
+            class="inp"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+            placeholder="Solo números, 10–13 dígitos"
+            [value]="nuevoProp.documentoIdentidad"
+            (input)="onDocumentoInput($event)"
+            (keydown)="onDocumentoKeydown($event)"
+          />
+        </div>
+        <div>
+          <label>Nombre completo <span class="req">*</span></label>
+          <input class="inp" [(ngModel)]="nuevoProp.nombre" maxlength="200" />
+        </div>
+        <div>
+          <label>Correo <span class="req">*</span></label>
+          <input class="inp" type="email" [(ngModel)]="nuevoProp.correo" />
+        </div>
+        <div>
+          <label>Teléfono</label>
+          <input
+            class="inp"
+            type="text"
+            inputmode="numeric"
+            placeholder="Solo números, opcional"
+            [value]="nuevoProp.telefono"
+            (input)="onTelefonoInput($event)"
+            (keydown)="onTelefonoKeydown($event)"
+          />
+        </div>
+        <div class="span-2">
+          <label>Dirección</label>
+          <input class="inp" [(ngModel)]="nuevoProp.direccion" />
+        </div>
+      </div>
+      <button
+        type="button"
+        class="btn-guardar-prop"
+        (click)="guardarNuevoPropietario()"
+        [disabled]="guardandoPropietario">
+        {{ guardandoPropietario ? 'Guardando...' : 'Guardar y usar este propietario' }}
+      </button>
+    </div>
+
+    <p class="modal-preview" *ngIf="nuevoPropietarioIdSel != null">
+      Quedará como dueño: <strong>{{ nombrePropietarioSeleccionado() }}</strong>
+    </p>
+
+    <div class="modal-acciones">
+      <button type="button" class="btn-cancelar" (click)="cerrarConfirmacion()" [disabled]="ejecutando">Cancelar</button>
+      <button
+        type="button"
+        class="btn-ok"
+        (click)="confirmarEjecutar()"
+        [disabled]="ejecutando || nuevoPropietarioIdSel == null">
+        {{ ejecutando ? 'Procesando...' : 'Confirmar transferencia' }}
+      </button>
+    </div>
+  </div>
+</div>

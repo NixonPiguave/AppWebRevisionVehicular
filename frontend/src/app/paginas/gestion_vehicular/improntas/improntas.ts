@@ -46,6 +46,7 @@ export class ImprontasComponent implements OnInit {
     const placa = placaFiltro?.trim() ?? '';
     this.cargando = true;
     this.improntas = [];
+    this.cdr.detectChanges();
     this.http
       .get<ImprontaRow[]>(this.api, placa ? { params: { placa } } : {})
       .subscribe({

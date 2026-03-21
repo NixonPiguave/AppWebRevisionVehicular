@@ -116,13 +116,14 @@ export class VehiculoComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const turnoId = params['turnoId'] ? Number(params['turnoId']) : null;
       if (turnoId && this.vista === 'REGISTRO_BASE_UNICA') {
-        // cuando carguen turnos, intentamos abrir el modal
         const intentar = () => {
           const t = this.turnosRegistro.find(x => x.turnoId === turnoId);
           if (t) this.abrirRegistroImpronta(t);
+          this.cdr.detectChanges();
         };
         setTimeout(intentar, 500);
       }
+      this.cdr.detectChanges();
     });
   }
 
@@ -148,6 +149,7 @@ export class VehiculoComponent implements OnInit {
         this.cargando = false;
         this.vista = 'VEHICULOS';
         this.cargarDatos();
+        this.cdr.detectChanges();
       }
     });
   }
@@ -191,6 +193,7 @@ export class VehiculoComponent implements OnInit {
     this.vehiculoEditando.propietarioId = turno.propietarioId ?? 0;
     this.filtroPropietario = turno.propietarioNombre ?? '';
     this.mostrarModalForm = true;
+    this.cdr.detectChanges();
 
     this.registroBaseUnicaService.listarPlacasDisponibles().subscribe({
       next: (placas) => {
@@ -236,6 +239,7 @@ export class VehiculoComponent implements OnInit {
     }
 
     this.guardando = true;
+    this.cdr.detectChanges();
     this.registroBaseUnicaService.registrar({
       turnoId: this.turnoRegistroSeleccionado.turnoId,
       placaDisponibleId: this.placaDisponibleIdSeleccionada,
@@ -248,10 +252,12 @@ export class VehiculoComponent implements OnInit {
         this.guardando = false;
         this.cerrarModalForm();
         this.cargarTurnosRegistro();
+        this.cdr.detectChanges();
       },
       error: () => {
         this.notification.error('Error al registrar el vehículo para base única.');
         this.guardando = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -312,6 +318,7 @@ export class VehiculoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar catálogos:', err);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -343,6 +350,7 @@ export class VehiculoComponent implements OnInit {
       },
       error: (err) => {
         console.error('Error al cargar propietarios:', err);
+        this.cdr.detectChanges();
       }
     });
   }

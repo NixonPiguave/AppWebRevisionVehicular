@@ -75,4 +75,5 @@ INSERT INTO srtv_opcion_menu (clave, nombre_visible, modulo, orden) VALUES
 ('menu_improntas', 'Improntas', 'Menú', 51),
 ('menu_solicitudes_placas', 'Solicitudes de placas', 'Menú', 52),
 ('menu_backup', 'Respaldos', 'Menú', 53),
-('menu_criterio_resultado', 'Criterios Aprobación', 'Menú', 54);
+('menu_criterio_resultado', 'Criterios Aprobación', 'Menú', 54),
+('menu_transferencia_dominio', 'Transferencia de dominio', 'Menú', 55);

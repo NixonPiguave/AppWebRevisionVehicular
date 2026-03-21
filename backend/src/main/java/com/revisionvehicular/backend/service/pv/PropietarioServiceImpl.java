@@ -6,6 +6,7 @@ import com.revisionvehicular.backend.repositories.pv.IPropietarioRepository;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,6 +35,7 @@ public class PropietarioServiceImpl implements IPropietarioService {
 
     @Override
     public PropietarioDTO save(PropietarioDTO dto) {
+        LocalDate fechaRegistro = dto.getFechaRegistro() != null ? dto.getFechaRegistro() : LocalDate.now();
 
         repository.insertarPropietario(
                 dto.getDocumentoIdentidad(),
@@ -41,7 +43,7 @@ public class PropietarioServiceImpl implements IPropietarioService {
                 dto.getTelefono(),
                 dto.getCorreo(),
                 dto.getDireccion(),
-                dto.getFechaRegistro()
+                fechaRegistro
         );
 
         Propietario propietario = repository.findAll()

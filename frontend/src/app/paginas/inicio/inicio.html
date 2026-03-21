@@ -55,7 +55,7 @@
       <!-- ========================================
            GESTIÓN VEHICULAR
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_transferencia_dominio','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Gestión Vehicular
         </span>
@@ -78,6 +78,7 @@
           <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
             <a *ngIf="puedeVer('menu_vehiculos')" routerLink="/inicio/gestion_vehicular/vehiculo" routerLinkActive="active" class="submenu-item">Vehículos</a>
             <a *ngIf="puedeVer('menu_propietario')" routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
+            <a *ngIf="puedeVer('menu_transferencia_dominio')" routerLink="/inicio/gestion_vehicular/transferencia-dominio" routerLinkActive="active" class="submenu-item">Transferencia de dominio</a>
             <a *ngIf="puedeVer('menu_revisiones')" class="submenu-item">Revisiones</a>
             <a *ngIf="puedeVer('menu_resultados_revision')" class="submenu-item">Resultados de Revisión</a>
           </div>
