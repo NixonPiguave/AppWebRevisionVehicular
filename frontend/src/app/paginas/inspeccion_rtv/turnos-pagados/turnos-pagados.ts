@@ -58,7 +58,7 @@ export class TurnosPagadosComponent implements OnInit {
       next: (data) => {
         this.servicios = data ?? [];
         this.tipoTramitePorServicioId = new Map(
-          (this.servicios ?? []).map(s => [s.idTipoTramite, this.derivarTipoTramite(s.nombre)])
+          (this.servicios ?? []).map(s => [s.idTipoTramite, this.clasificarServicioInspeccion(s)])
         );
         this.cdr.detectChanges();
       },
@@ -107,7 +107,13 @@ export class TurnosPagadosComponent implements OnInit {
         // Requisito: el inspector SOLO debe ver turnos con proceso en curso.
         const activos = lista.filter(t => {
           if ((t.estado || '').trim().toUpperCase() !== 'EN_PROCESO') return false;
-          const tipo = this.tipoTramitePorServicioId.get(t.servicioId) ?? this.derivarTipoTramite(this.getNombreServicio(t.servicioId));
+          const s = this.servicios.find(x => x.idTipoTramite === t.servicioId);
+          if (s && this.servicioExcluidoDeInspeccionPorFlag(s)) return false;
+          const tipo =
+            this.tipoTramitePorServicioId.get(t.servicioId) ??
+            (s
+              ? this.clasificarServicioInspeccion(s)
+              : this.derivarTipoTramite(this.getNombreServicio(t.servicioId)));
           return tipo === 'INSPECCION';
         });
 
@@ -209,9 +215,33 @@ export class TurnosPagadosComponent implements OnInit {
     return s?.nombre ?? `Servicio #${servicioId}`;
   }
 
-  private derivarTipoTramite(nombre?: string): string {
+  /**
+   * Clasifica el trámite para la cola "Iniciar inspección".
+   * Solo INSPECCION debe listarse aquí (emisión matrícula, RTV, etc.).
+   * Transferencia de dominio y similares van a OTRO.
+   */
+  private clasificarServicioInspeccion(s: Servicio): string {
+    return this.derivarTipoTramite(s.nombre, s.requiereRevision);
+  }
+
+  /** Si el catálogo marca explícitamente que no requiere revisión RTV. */
+  private servicioExcluidoDeInspeccionPorFlag(s: Servicio): boolean {
+    const rr = (s.requiereRevision ?? '').toString().trim().toUpperCase();
+    return rr === 'N' || rr === 'NO' || rr === 'FALSE' || rr === '0';
+  }
+
+  private derivarTipoTramite(nombre?: string, requiereRevision?: string | boolean): string {
+    const rr = (requiereRevision ?? '').toString().trim().toUpperCase();
+    if (rr === 'N' || rr === 'NO' || rr === 'FALSE' || rr === '0') {
+      return 'OTRO';
+    }
     if (!nombre) return 'INSPECCION';
     const n = nombre.toUpperCase();
+    // Trámites legales / gestión que no pasan por línea de inspección RTV
+    const esTransferenciaDominio =
+      n.includes('DOMINIO') &&
+      (n.includes('TRANSFERENCIA') || n.includes('TRASPASO') || n.includes('TRASPAS'));
+    if (esTransferenciaDominio) return 'OTRO';
     if (n.includes('BLOQUEO') && !n.includes('DES')) return 'BLOQUEO';
     if (n.includes('DESBLOQUEO')) return 'DESBLOQUEO';
     if (n.includes('BAJA')) return 'BAJA';
