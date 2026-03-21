@@ -233,6 +233,24 @@ export class UsuariosComponent implements OnInit {
     this.usuarioDetalle = null;
   }
 
+  /** Bloquear teclas no numéricas en documento */
+  soloNumeros(event: KeyboardEvent): void {
+    const key = event.key;
+    if (key === 'e' || key === 'E' || key === '+' || key === '-' || key === '.' || key === ',') {
+      event.preventDefault();
+    }
+    if (!/^\d$/.test(key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(key)) {
+      event.preventDefault();
+    }
+  }
+
+  /** Filtrar documento: solo dígitos */
+  filtrarSoloNumerosDocumento(): void {
+    if (this.usuarioEditando.documentoIdentidad) {
+      this.usuarioEditando.documentoIdentidad = this.usuarioEditando.documentoIdentidad.replace(/\D/g, '');
+    }
+  }
+
   // ────────────────────────────────────────
   // VALIDACIÓN
   // ────────────────────────────────────────

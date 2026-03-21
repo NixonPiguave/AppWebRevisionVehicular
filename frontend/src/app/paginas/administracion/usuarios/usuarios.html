@@ -200,9 +200,13 @@
           <input
             type="text"
             [(ngModel)]="usuarioEditando.documentoIdentidad"
+            (ngModelChange)="filtrarSoloNumerosDocumento()"
             [class.error]="erroresValidacion['documentoIdentidad']"
-            placeholder="Ingrese el documento"
+            placeholder="Cédula (10) o RUC (13) - solo números"
             class="form-input"
+            maxlength="13"
+            inputmode="numeric"
+            (keypress)="soloNumeros($event)"
           />
           <span class="error-text" *ngIf="erroresValidacion['documentoIdentidad']">{{ erroresValidacion['documentoIdentidad'] }}</span>
         </div>

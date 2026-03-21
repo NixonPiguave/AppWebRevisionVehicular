@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.pv;
 
 import com.revisionvehicular.backend.dtos.pv.PropietarioDTO;
 import com.revisionvehicular.backend.service.pv.IPropietarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class PropietarioController {
 
     @PostMapping
     public ResponseEntity<PropietarioDTO> crear(
-            @RequestBody PropietarioDTO dto
+            @Valid @RequestBody PropietarioDTO dto
     ) {
         PropietarioDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
@@ -49,7 +50,7 @@ public class PropietarioController {
     @PutMapping("/{id}")
     public ResponseEntity<PropietarioDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody PropietarioDTO dto
+            @Valid @RequestBody PropietarioDTO dto
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }

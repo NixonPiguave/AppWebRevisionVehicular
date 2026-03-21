@@ -14,6 +14,7 @@ import com.revisionvehicular.backend.repositories.rtv.IDetalleInspeccionReposito
 import com.revisionvehicular.backend.repositories.rtv.IEquipoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IInspeccionEquipoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IInspeccionRepository;
+import com.revisionvehicular.backend.config.BusinessException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +90,30 @@ public class InspeccionServiceImpl implements IInspeccionService {
     }
 
     /**
+     * Valida rangos de valores medidos (CO, HC, O2, Opacidad, eficacia/desequilibrio 0-100).
+     */
+    private void validarRangosValoresMedidos(Map<String, Object> valoresMedidos) {
+        if (valoresMedidos == null || valoresMedidos.isEmpty()) return;
+        for (Map.Entry<String, Object> e : valoresMedidos.entrySet()) {
+            Object v = e.getValue();
+            if (v == null || !(v instanceof Number)) continue;
+            double val = ((Number) v).doubleValue();
+            String key = e.getKey();
+            if (val < 0) {
+                throw new BusinessException("El valor de " + key + " no puede ser negativo");
+            }
+            if ("O2".equals(key) && val > 25) {
+                throw new BusinessException("El valor de O2 no puede ser mayor a 25");
+            }
+            if (("CO".equals(key) || "OPACIDAD".equals(key) ||
+                    "FRENOS_EFICACIA".equals(key) || "FRENOS_DESEQUILIBRIO".equals(key) ||
+                    "SUSPENSION_EFICACIA".equals(key) || "SUSPENSION_DESEQUILIBRIO".equals(key)) && val > 100) {
+                throw new BusinessException("El valor de " + key + " no puede ser mayor a 100");
+            }
+        }
+    }
+
+    /**
      * Resuelve el umbral según valores medidos. Usa el "peor" umbral (mayor calificación).
      */
     private Long resolverUmbralId(Map<String, Object> valoresMedidos) {
@@ -117,14 +142,18 @@ public class InspeccionServiceImpl implements IInspeccionService {
     @Transactional
     public InspeccionDTO crear(CrearInspeccionRequest request) {
         if (request.getVehiculoId() == null) {
-            throw new IllegalArgumentException("vehiculoId es obligatorio");
+            throw new BusinessException("vehiculoId es obligatorio");
         }
         if (request.getMetodoInspeccionId() == null) {
-            throw new IllegalArgumentException("metodoInspeccionId es obligatorio");
+            throw new BusinessException("metodoInspeccionId es obligatorio");
         }
         if (request.getUsuarioId() == null) {
-            throw new IllegalArgumentException("usuarioId es obligatorio");
+            throw new BusinessException("usuarioId es obligatorio");
         }
+        if (request.getKilometraje() != null && request.getKilometraje() < 0) {
+            throw new BusinessException("El kilometraje no puede ser negativo");
+        }
+        validarRangosValoresMedidos(request.getValoresMedidos());
 
         Long lineaId = request.getLineaId() != null ? request.getLineaId() : 1L;
 
@@ -140,7 +169,7 @@ public class InspeccionServiceImpl implements IInspeccionService {
 
         Inspeccion inspeccion = inspeccionRepository.findUltimaPorVehiculo(request.getVehiculoId());
         if (inspeccion == null) {
-            throw new RuntimeException("No se pudo recuperar la inspección recién creada");
+            throw new BusinessException("No se pudo recuperar la inspección recién creada");
         }
 
         List<Long> defectosIds = request.getDefectosIds();

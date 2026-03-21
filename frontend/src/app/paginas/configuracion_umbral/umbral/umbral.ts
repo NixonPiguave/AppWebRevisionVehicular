@@ -196,10 +196,6 @@ export class UmbralComponent implements OnInit {
       this.notification.error('Debe seleccionar una descripción');
       return;
     }
-    if (this.umbralEditando.valorMin < 0 || this.umbralEditando.valorMax < 0) {
-      this.notification.error('Los valores MIN y MAX no pueden ser negativos');
-      return;
-    }
 
     this.guardando = true;
 

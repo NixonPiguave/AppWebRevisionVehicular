@@ -157,14 +157,18 @@
         <label>Valor Mínimo *</label>
         <input type="number"
                [(ngModel)]="umbralEditando.valorMin"
-               class="form-input" />
+               class="form-input"
+               step="any"
+               placeholder="Ej: -10 o 0" />
       </div>
 
       <div class="form-grupo">
         <label>Valor Máximo *</label>
         <input type="number"
                [(ngModel)]="umbralEditando.valorMax"
-               class="form-input" />
+               class="form-input"
+               step="any"
+               placeholder="Ej: 0 o 100" />
       </div>
       <!-- Checkboxes -->
       <div class="form-grupo checkbox-group">

@@ -194,15 +194,15 @@
         <div class="form-grid-2">
           <div class="form-grupo">
             <label>ID Inspección 1 *</label>
-            <input type="number" [(ngModel)]="editando.inspeccion1Id" class="form-input" placeholder="1er período reprobado" />
+            <input type="number" [(ngModel)]="editando.inspeccion1Id" class="form-input" min="1" placeholder="1er período reprobado" />
           </div>
           <div class="form-grupo">
             <label>ID Inspección 2 *</label>
-            <input type="number" [(ngModel)]="editando.inspeccion2Id" class="form-input" placeholder="2do período reprobado" />
+            <input type="number" [(ngModel)]="editando.inspeccion2Id" class="form-input" min="1" placeholder="2do período reprobado" />
           </div>
           <div class="form-grupo">
             <label>ID Inspección 3 *</label>
-            <input type="number" [(ngModel)]="editando.inspeccion3Id" class="form-input" placeholder="3er período reprobado consecutivo" />
+            <input type="number" [(ngModel)]="editando.inspeccion3Id" class="form-input" min="1" placeholder="3er período reprobado consecutivo" />
           </div>
         </div>
       </div>

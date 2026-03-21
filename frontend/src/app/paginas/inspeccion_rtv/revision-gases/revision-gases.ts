@@ -161,6 +161,31 @@ export class RevisionGases implements OnInit {
       this.notification.error('Faltan datos del turno o vehículo.');
       return;
     }
+    // Validar rangos antes de enviar
+    const coVal = parseFloat(this.co);
+    const hcVal = parseFloat(this.hc);
+    const o2Val = parseFloat(this.o2);
+    const opVal = parseFloat(this.opacidad);
+    if (!isNaN(coVal) && (coVal < 0 || coVal > 100)) {
+      this.notification.error('CO debe estar entre 0 y 100.');
+      return;
+    }
+    if (!isNaN(hcVal) && hcVal < 0) {
+      this.notification.error('HC no puede ser negativo.');
+      return;
+    }
+    if (!isNaN(o2Val) && (o2Val < 0 || o2Val > 25)) {
+      this.notification.error('O2 debe estar entre 0 y 25.');
+      return;
+    }
+    if (!isNaN(opVal) && (opVal < 0 || opVal > 100)) {
+      this.notification.error('Opacidad debe estar entre 0 y 100.');
+      return;
+    }
+    if (this.kilometraje != null && this.kilometraje < 0) {
+      this.notification.error('El kilometraje no puede ser negativo.');
+      return;
+    }
     const tieneValores = this.tipoCombustible === 'DIESEL'
       ? !isNaN(parseFloat(this.opacidad))
       : (!isNaN(parseFloat(this.co)) || !isNaN(parseFloat(this.hc)));

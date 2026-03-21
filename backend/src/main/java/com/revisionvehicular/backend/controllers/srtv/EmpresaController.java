@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.srtv.EmpresaDTO;
 import com.revisionvehicular.backend.service.srtv.IEmpresaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class EmpresaController {
     }
 
     @PostMapping
-    public ResponseEntity<EmpresaDTO> crear(@RequestBody EmpresaDTO dto) {
+    public ResponseEntity<EmpresaDTO> crear(@Valid @RequestBody EmpresaDTO dto) {
         EmpresaDTO crear = service.save(dto);
         return new ResponseEntity<>(crear, HttpStatus.CREATED);
     }
@@ -32,7 +33,7 @@ public class EmpresaController {
     @PutMapping("/{id}")
     public ResponseEntity<EmpresaDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody EmpresaDTO dto
+            @Valid @RequestBody EmpresaDTO dto
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }

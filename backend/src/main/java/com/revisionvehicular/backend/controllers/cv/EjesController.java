@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.cv;
 
 import com.revisionvehicular.backend.dtos.cv.EjesDTO;
 import com.revisionvehicular.backend.service.cv.IEjesService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class EjesController {
 
     @PostMapping
     public ResponseEntity<EjesDTO> crear(
-            @RequestBody EjesDTO dto
+            @Valid @RequestBody EjesDTO dto
     ) {
         EjesDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
@@ -41,7 +42,7 @@ public class EjesController {
     @PutMapping("/{id}")
     public ResponseEntity<EjesDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody EjesDTO dto
+            @Valid @RequestBody EjesDTO dto
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }

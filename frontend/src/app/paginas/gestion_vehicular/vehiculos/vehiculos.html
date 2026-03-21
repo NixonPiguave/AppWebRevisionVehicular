@@ -286,12 +286,22 @@
       <div class="form-row">
         <div class="form-grupo">
           <label>Año Fabricación</label>
-          <input type="number" [(ngModel)]="vehiculoEditando.anioFabricacion" class="form-input">
+          <input type="number"
+                 [(ngModel)]="vehiculoEditando.anioFabricacion"
+                 class="form-input"
+                 min="1900"
+                 [max]="anioActual + 1"
+                 placeholder="Ej: 2024">
         </div>
 
         <div class="form-grupo">
           <label>Capacidad Pasajeros</label>
-          <input type="number" [(ngModel)]="vehiculoEditando.capacidadPasajeros" class="form-input">
+          <input type="number"
+                 [(ngModel)]="vehiculoEditando.capacidadPasajeros"
+                 class="form-input"
+                 min="1"
+                 max="50"
+                 placeholder="1-50">
         </div>
       </div>
 

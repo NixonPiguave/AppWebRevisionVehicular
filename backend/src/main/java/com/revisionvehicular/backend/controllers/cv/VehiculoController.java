@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.cv;
 
 import com.revisionvehicular.backend.dtos.cv.VehiculoDTO;
 import com.revisionvehicular.backend.service.cv.IVehiculoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class VehiculoController {
     }
 
     @PostMapping
-    public ResponseEntity<VehiculoDTO> crear(@RequestBody VehiculoDTO dto) {
+    public ResponseEntity<VehiculoDTO> crear(@Valid @RequestBody VehiculoDTO dto) {
         VehiculoDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }
@@ -44,7 +45,7 @@ public class VehiculoController {
     @PutMapping("/{id}")
     public ResponseEntity<VehiculoDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody VehiculoDTO dto) {
+            @Valid @RequestBody VehiculoDTO dto) {
 
         return ResponseEntity.ok(service.update(id, dto));
     }

@@ -167,11 +167,14 @@
           type="text"
           id="documentoIdentidad"
           [(ngModel)]="propietarioEditando.documentoIdentidad"
+          (ngModelChange)="filtrarSoloNumerosDocumento()"
           class="form-input"
-          placeholder="Ej: 1234567890"
+          placeholder="Ej: 1234567890 (solo números)"
           maxlength="13"
+          inputmode="numeric"
+          (keypress)="soloNumeros($event)"
         />
-        <small class="form-hint">Cédula o RUC</small>
+        <small class="form-hint">Cédula (10 dígitos) o RUC (13 dígitos)</small>
       </div>
 
       <!-- Nombre -->
@@ -202,14 +205,17 @@
       <div class="form-grupo">
         <label for="telefono">Teléfono</label>
         <input
-          type="tel"
+          type="text"
           id="telefono"
-          [(ngModel)]="propietarioEditando.telefono"
+          [(ngModel)]="telefonoEdit"
+          (ngModelChange)="filtrarSoloNumerosTelefono()"
           class="form-input"
-          placeholder="Ej: 0987654321"
-          pattern="[0-9]*"
+          placeholder="Ej: 0987654321 (10 dígitos)"
+          maxlength="10"
+          inputmode="numeric"
+          (keypress)="soloNumeros($event)"
         />
-        <small class="form-hint">Solo números</small>
+        <small class="form-hint">Solo números, máx. 10 dígitos</small>
       </div>
 
       <!-- Dirección -->

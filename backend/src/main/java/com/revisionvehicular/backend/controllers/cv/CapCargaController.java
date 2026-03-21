@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.cv;
 
 import com.revisionvehicular.backend.dtos.cv.CapCargaDTO;
 import com.revisionvehicular.backend.service.cv.ICapCargaService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class CapCargaController {
 
     @PostMapping
     public ResponseEntity<CapCargaDTO> crear(
-            @RequestBody CapCargaDTO dto
+            @Valid @RequestBody CapCargaDTO dto
     ) {
         CapCargaDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
@@ -39,7 +40,7 @@ public class CapCargaController {
     @PutMapping("/{id}")
     public ResponseEntity<CapCargaDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody CapCargaDTO dto
+            @Valid @RequestBody CapCargaDTO dto
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }

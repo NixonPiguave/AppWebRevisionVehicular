@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.dtos.rtv;
 
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -20,8 +21,13 @@ public class BajaVehiculoDTO {
     private String motivoBaja;
     private String descripcionMotivo;
 
+    @Min(value = 1, message = "El ID de inspección debe ser al menos 1")
     private Long inspeccion1Id;
+
+    @Min(value = 1, message = "El ID de inspección debe ser al menos 1")
     private Long inspeccion2Id;
+
+    @Min(value = 1, message = "El ID de inspección debe ser al menos 1")
     private Long inspeccion3Id;
 
     private String empresaChatarrizado;

@@ -294,6 +294,33 @@ export class RevisionMecatronica implements OnInit {
       this.notification.error('Faltan datos del turno o vehículo.');
       return;
     }
+    // Validar rangos antes de enviar (0-100 para eficacia/desequilibrio)
+    const fe = parseFloat(this.frenosEficacia);
+    const fd = parseFloat(this.frenosDesequilibrio);
+    const se = parseFloat(this.suspensionEficacia);
+    const sd = parseFloat(this.suspensionDesequilibrio);
+    if (!this.esMoto) {
+      if (!isNaN(fe) && (fe < 0 || fe > 100)) {
+        this.notification.error('Eficacia de frenos debe estar entre 0 y 100.');
+        return;
+      }
+      if (!isNaN(fd) && (fd < 0 || fd > 100)) {
+        this.notification.error('Desequilibrio de frenos debe estar entre 0 y 100.');
+        return;
+      }
+      if (!isNaN(se) && (se < 0 || se > 100)) {
+        this.notification.error('Eficacia de suspensión debe estar entre 0 y 100.');
+        return;
+      }
+      if (!isNaN(sd) && (sd < 0 || sd > 100)) {
+        this.notification.error('Desequilibrio de suspensión debe estar entre 0 y 100.');
+        return;
+      }
+    }
+    if (this.kilometraje != null && this.kilometraje < 0) {
+      this.notification.error('El kilometraje no puede ser negativo.');
+      return;
+    }
 
     const usuarioId = Number(this.authService.getUsuarioId() ?? 0);
     if (!usuarioId || Number.isNaN(usuarioId)) {

@@ -67,6 +67,7 @@ export class VehiculoComponent implements OnInit {
 
   propietarios: Propietario[] = [];
   filtroPropietario = '';
+  anioActual = new Date().getFullYear();
 
   coloresVehiculo: string[] = [
     'Blanco',
@@ -446,8 +447,14 @@ export class VehiculoComponent implements OnInit {
       return;
     }
 
-    if (this.vehiculoEditando.capacidadPasajeros <= 0) {
-      this.notification.error('La capacidad de pasajeros debe ser mayor a 0');
+    if (this.vehiculoEditando.capacidadPasajeros <= 0 || this.vehiculoEditando.capacidadPasajeros > 50) {
+      this.notification.error('La capacidad de pasajeros debe estar entre 1 y 50');
+      return;
+    }
+
+    const anio = this.vehiculoEditando.anioFabricacion;
+    if (anio && (anio < 1900 || anio > this.anioActual + 1)) {
+      this.notification.error(`El año de fabricación debe estar entre 1900 y ${this.anioActual + 1}`);
       return;
     }
 

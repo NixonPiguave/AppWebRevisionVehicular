@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.rtv;
 
 import com.revisionvehicular.backend.dtos.rtv.BajaVehiculoDTO;
 import com.revisionvehicular.backend.service.rtv.IBajaVehiculoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +20,7 @@ public class BajaVehiculoController {
     }
 
     @PostMapping
-    public ResponseEntity<BajaVehiculoDTO> crear(@RequestBody BajaVehiculoDTO dto) {
+    public ResponseEntity<BajaVehiculoDTO> crear(@Valid @RequestBody BajaVehiculoDTO dto) {
         BajaVehiculoDTO creado = service.save(dto);
         return new ResponseEntity<>(creado, HttpStatus.CREATED);
     }
@@ -37,7 +38,7 @@ public class BajaVehiculoController {
     @PutMapping("/{id}")
     public ResponseEntity<BajaVehiculoDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody BajaVehiculoDTO dto
+            @Valid @RequestBody BajaVehiculoDTO dto
     ) {
         return ResponseEntity.ok(service.update(id, dto));
     }

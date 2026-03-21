@@ -37,6 +37,9 @@ export class PropietarioComponent implements OnInit {
   mostrarModalDetalle: boolean = false;
   propietarioDetalle: Propietario | null = null;
 
+  /** Campo auxiliar para teléfono (string) para validación solo números */
+  telefonoEdit: string = '';
+
   constructor(
     private propietarioService: PropietarioService,
     private cdr: ChangeDetectorRef,
@@ -137,6 +140,7 @@ export class PropietarioComponent implements OnInit {
       telefono: 0
       // NO incluir fechaRegistro - lo genera el backend
     } as Propietario;
+    this.telefonoEdit = '';
     this.mostrarModalForm = true;
   }
 
@@ -144,7 +148,33 @@ export class PropietarioComponent implements OnInit {
   abrirModalEditar(propietario: Propietario): void {
     this.modoEdicion = true;
     this.propietarioEditando = { ...propietario };
+    this.telefonoEdit = propietario.telefono ? String(propietario.telefono) : '';
     this.mostrarModalForm = true;
+  }
+
+  /** Bloquear teclas no numéricas */
+  soloNumeros(event: KeyboardEvent): void {
+    const key = event.key;
+    if (key === 'e' || key === 'E' || key === '+' || key === '-' || key === '.' || key === ',') {
+      event.preventDefault();
+    }
+    if (!/^\d$/.test(key) && !['Backspace', 'Tab', 'ArrowLeft', 'ArrowRight', 'Delete'].includes(key)) {
+      event.preventDefault();
+    }
+  }
+
+  /** Filtrar documento: solo dígitos */
+  filtrarSoloNumerosDocumento(): void {
+    if (this.propietarioEditando.documentoIdentidad) {
+      this.propietarioEditando.documentoIdentidad = this.propietarioEditando.documentoIdentidad.replace(/\D/g, '');
+    }
+  }
+
+  /** Filtrar teléfono: solo dígitos, máx 10 */
+  filtrarSoloNumerosTelefono(): void {
+    if (this.telefonoEdit) {
+      this.telefonoEdit = this.telefonoEdit.replace(/\D/g, '').slice(0, 10);
+    }
   }
 
   cerrarModalForm(): void {
@@ -153,6 +183,9 @@ export class PropietarioComponent implements OnInit {
 
   /** Guardar propietario */
   guardarPropietario(): void {
+    // Sincronizar teléfono desde campo string
+    this.propietarioEditando.telefono = this.telefonoEdit ? parseInt(this.telefonoEdit, 10) || 0 : 0;
+
     // Validaciones
     if (!this.propietarioEditando.documentoIdentidad.trim()) {
       this.notification.error('El documento de identidad es requerido');

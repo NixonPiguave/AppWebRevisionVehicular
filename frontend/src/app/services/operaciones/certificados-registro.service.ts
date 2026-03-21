@@ -69,8 +69,7 @@ export class CertificadosRegistroService {
         overlay.querySelector('#cert-reg-btn-impronta')?.addEventListener('click', () => this.imprimirImpronta(impronta));
         overlay.querySelector('#cert-reg-btn-matricula')?.addEventListener('click', () => this.imprimirMatricula(matricula));
         overlay.querySelector('#cert-reg-btn-ambos')?.addEventListener('click', () => {
-          this.imprimirImpronta(impronta);
-          setTimeout(() => this.imprimirMatricula(matricula), 350);
+          this.imprimirAmbos(impronta, matricula);
           this.destruir();
           onImpreso?.();
         });
@@ -112,6 +111,23 @@ export class CertificadosRegistroService {
     <body onload="window.focus(); window.print();">
     <script>window.addEventListener('afterprint', function fn(){window.removeEventListener('afterprint', fn); window.close();});</script>
     ${this.renderMatricula(data)}
+    </body></html>`;
+    const win = window.open('', '_blank', 'width=900,height=900,scrollbars=yes');
+    if (!win) { this.notification.warn('Permite ventanas emergentes para imprimir.'); return; }
+    win.document.write(html);
+    win.document.close();
+  }
+
+  /** Imprime ambos certificados en un solo documento para que salgan en la misma impresión */
+  private imprimirAmbos(impronta: CertImprontaData, matricula: CertMatriculaData): void {
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+    <title>Certificado Impronta y Matrícula</title><style>${this.estilos()}</style>
+    <style>.page-break{page-break-after:always}</style></head>
+    <body onload="window.focus(); window.print();">
+    <script>window.addEventListener('afterprint', function fn(){window.removeEventListener('afterprint', fn); window.close();});</script>
+    ${this.renderImpronta(impronta)}
+    <div class="page-break"></div>
+    ${this.renderMatricula(matricula)}
     </body></html>`;
     const win = window.open('', '_blank', 'width=900,height=900,scrollbars=yes');
     if (!win) { this.notification.warn('Permite ventanas emergentes para imprimir.'); return; }

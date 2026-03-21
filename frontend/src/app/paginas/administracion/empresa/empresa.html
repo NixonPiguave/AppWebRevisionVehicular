@@ -135,9 +135,12 @@
           type="text"
           id="ruc"
           [(ngModel)]="empresaEditando.ruc"
+          (ngModelChange)="filtrarSoloNumerosRuc()"
           placeholder="Ingrese el RUC (13 dígitos)"
           class="form-input"
           maxlength="13"
+          inputmode="numeric"
+          (keypress)="soloNumeros($event)"
           [readonly]="modoEdicion"
           [class.input-readonly]="modoEdicion"
           title="{{ modoEdicion ? 'El RUC no se puede modificar' : '' }}"
@@ -153,7 +156,17 @@
       </div>
       <div class="form-grupo">
         <label for="telefono">Teléfono</label>
-        <input type="text" id="telefono" [(ngModel)]="empresaEditando.telefono" placeholder="Ingrese el teléfono" class="form-input" />
+        <input
+          type="text"
+          id="telefono"
+          [(ngModel)]="empresaEditando.telefono"
+          (ngModelChange)="filtrarSoloNumerosTelefono()"
+          placeholder="Ingrese el teléfono (10 dígitos)"
+          class="form-input"
+          maxlength="10"
+          inputmode="numeric"
+          (keypress)="soloNumeros($event)"
+        />
       </div>
       <div class="form-grupo">
         <label for="correo">Correo Electrónico *</label>

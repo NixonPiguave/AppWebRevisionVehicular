@@ -260,6 +260,32 @@ export class EmpresaComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  soloNumeros(event: KeyboardEvent): boolean {
+    const key = event.key;
+    if (key === 'Backspace' || key === 'Tab' || key === 'ArrowLeft' || key === 'ArrowRight' || key === 'Delete') return true;
+    if (key >= '0' && key <= '9') return true;
+    event.preventDefault();
+    return false;
+  }
+
+  filtrarSoloNumerosRuc(): void {
+    if (!this.empresaEditando.ruc) return;
+    const filtrado = this.empresaEditando.ruc.replace(/\D/g, '').slice(0, 13);
+    if (filtrado !== this.empresaEditando.ruc) {
+      this.empresaEditando.ruc = filtrado;
+      this.cdr.detectChanges();
+    }
+  }
+
+  filtrarSoloNumerosTelefono(): void {
+    if (!this.empresaEditando.telefono) return;
+    const filtrado = this.empresaEditando.telefono.replace(/\D/g, '').slice(0, 10);
+    if (filtrado !== this.empresaEditando.telefono) {
+      this.empresaEditando.telefono = filtrado;
+      this.cdr.detectChanges();
+    }
+  }
+
   validarFormulario(): boolean {
     if (!this.empresaEditando.nombre.trim()) {
       this.notification.error('El nombre de la empresa es requerido');
@@ -274,6 +300,17 @@ export class EmpresaComponent implements OnInit {
     if (!/^\d{13}$/.test(this.empresaEditando.ruc)) {
       this.notification.error('El RUC debe tener exactamente 13 dígitos numéricos');
       return false;
+    }
+
+    if (this.empresaEditando.telefono) {
+      if (!/^\d+$/.test(this.empresaEditando.telefono)) {
+        this.notification.error('El teléfono solo puede contener números');
+        return false;
+      }
+      if (this.empresaEditando.telefono.length > 10) {
+        this.notification.error('El teléfono no puede exceder 10 dígitos');
+        return false;
+      }
     }
 
     if (!this.empresaEditando.correo.trim()) {

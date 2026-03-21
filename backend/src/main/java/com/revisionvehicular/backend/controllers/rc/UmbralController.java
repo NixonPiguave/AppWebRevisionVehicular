@@ -2,9 +2,11 @@ package com.revisionvehicular.backend.controllers.rc;
 
 import com.revisionvehicular.backend.dtos.rc.UmbralDTO;
 import com.revisionvehicular.backend.service.rc.IUmbralService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -18,7 +20,7 @@ public class UmbralController {
     }
 
     @PostMapping
-    public ResponseEntity<UmbralDTO> crear(@RequestBody UmbralDTO dto) {
+    public ResponseEntity<UmbralDTO> crear(@Valid @RequestBody UmbralDTO dto) {
         return new ResponseEntity<>(service.save(dto), HttpStatus.CREATED);
     }
 
@@ -30,7 +32,7 @@ public class UmbralController {
     @PutMapping("/{id}")
     public ResponseEntity<UmbralDTO> actualizar(
             @PathVariable Long id,
-            @RequestBody UmbralDTO dto) {
+            @Valid @RequestBody UmbralDTO dto) {
         return ResponseEntity.ok(service.update(id, dto));
     }
 

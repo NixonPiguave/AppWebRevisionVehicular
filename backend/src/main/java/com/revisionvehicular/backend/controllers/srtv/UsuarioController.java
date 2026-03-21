@@ -3,6 +3,7 @@ package com.revisionvehicular.backend.controllers.srtv;
 import com.revisionvehicular.backend.dtos.srtv.UsuarioDTO;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import com.revisionvehicular.backend.service.srtv.IUsuarioService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class UsuarioController {
     }
 
     @PostMapping
-    public ResponseEntity<UsuarioDTO> crear(@RequestBody UsuarioDTO dto) {
+    public ResponseEntity<UsuarioDTO> crear(@Valid @RequestBody UsuarioDTO dto) {
         UsuarioDTO created = service.save(dto);
         auditoriaService.registrar("INSERT", "Usuario", dto.getUsuario() != null ? dto.getUsuario() : "id " + created.getUsuarioId());
         return new ResponseEntity<>(created, HttpStatus.CREATED);
@@ -48,7 +49,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UsuarioDTO> actualizar(@PathVariable Long id, @RequestBody UsuarioDTO dto) {
+    public ResponseEntity<UsuarioDTO> actualizar(@PathVariable Long id, @Valid @RequestBody UsuarioDTO dto) {
         UsuarioDTO updated = service.update(id, dto);
         auditoriaService.registrar("UPDATE", "Usuario", "id " + id + (dto.getUsuario() != null ? " - " + dto.getUsuario() : ""));
         return ResponseEntity.ok(updated);
