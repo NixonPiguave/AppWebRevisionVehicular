@@ -97,4 +97,7 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
     @Modifying
     @Query(value = "UPDATE rtv_turnos SET vehiculo_id = :vehiculoId WHERE turno_id = :turnoId", nativeQuery = true)
     int asignarVehiculo(@Param("turnoId") Long turnoId, @Param("vehiculoId") Long vehiculoId);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.modeloVehiculo mv LEFT JOIN FETCH mv.marca WHERE t.turnoId = :turnoId")
+    java.util.Optional<Turnos> findByIdWithVehiculoCompleto(@Param("turnoId") Long turnoId);
 }

@@ -16,6 +16,12 @@ public class CrearInspeccionRequest {
     private List<String> ubicacionesRevisadas;
     private List<Long> defectosIds;
 
+    /** IDs de equipos utilizados (trazabilidad). */
+    private List<Long> equiposIds;
+
     /** Valores medidos para gases/mecatrónica. Claves: CO, HC, LAMBDA, OPACIDAD, FRENOS_EFICACIA, etc. */
     private Map<String, Object> valoresMedidos;
+
+    /** Kilometraje del vehículo al momento de la inspección (se guarda en valoresMedidos como KILOMETRAJE). */
+    private Integer kilometraje;
 }

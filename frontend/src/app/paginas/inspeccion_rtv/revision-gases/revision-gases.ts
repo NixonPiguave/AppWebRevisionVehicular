@@ -6,9 +6,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { InspeccionService } from '../../../services/inspeccion_rtv/inspeccion.service';
 import { ValoresgasesService } from '../../../services/inspeccion_rtv/valoresgases.service';
 import { EquiposService, Equipo } from '../../../services/inspeccion_rtv/equipos.service';
-import { esEquipoGases } from '../../../utils/equipo-categoria.util';
+import { esEquipoGases, esEquipoAnalizadorGases, esEquipoOpacimetro } from '../../../utils/equipo-categoria.util';
 import { TurnosService } from '../../../services/administracion/Turnos.service';
-import { DefectosService, Defectos } from '../../../services/defectos_inspeccion/defectos.service';
 import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.service';
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
@@ -34,15 +33,21 @@ export class RevisionGases implements OnInit {
   vehiculoInfo: { matricula?: string; marca?: string; modelo?: string } | null = null;
 
   equipos: Equipo[] = [];
-  equiposSeleccionados: number[] = [];
-  defectos: Defectos[] = [];
-  defectosSeleccionados: Defectos[] = [];
-  filtroDefectos = '';
+  /** Un solo equipo por inspección (analizador u opacímetro según combustible) */
+  equipoSeleccionadoId: number | null = null;
 
   get esMoto(): boolean {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
   }
 
+  /** Equipos filtrados según combustible: gasolina/motos = analizadores; diesel = opacímetros */
+  get equiposFiltrados(): Equipo[] {
+    const todos = this.equipos;
+    if (this.tipoCombustible === 'DIESEL') {
+      return todos.filter(e => esEquipoOpacimetro(e.equipo || ''));
+    }
+    return todos.filter(e => esEquipoAnalizadorGases(e.equipo || ''));
+  }
 
   tipoCombustible: 'GASOLINA' | 'DIESEL' = 'GASOLINA';
   co = '';
@@ -50,8 +55,8 @@ export class RevisionGases implements OnInit {
   lambda = '';
   o2 = '';
   opacidad = '';
-  resultado: 'APROBADO' | 'NO_APROBADO' = 'APROBADO';
   observaciones = '';
+  kilometraje: number | null = null;
 
   cargando = false;
   guardando = false;
@@ -65,7 +70,6 @@ export class RevisionGases implements OnInit {
     private valoresGasesService: ValoresgasesService,
     private equiposService: EquiposService,
     private turnosService: TurnosService,
-    private defectosService: DefectosService,
     private vehiculoService: VehiculoService,
     private cdr: ChangeDetectorRef,
     private notification: NotificationService,
@@ -89,8 +93,7 @@ export class RevisionGases implements OnInit {
     this.cargando = true;
     this.error = '';
     const obs: any = {
-      equipos: this.equiposService.listarEquipos(),
-      defectos: this.defectosService.listar()
+      equipos: this.equiposService.listarEquipos()
     };
     if (this.turnoId) {
       obs.turno = this.turnosService.getById(this.turnoId);
@@ -99,7 +102,6 @@ export class RevisionGases implements OnInit {
       next: (res: any) => {
         const todosEquipos = res.equipos || [];
         this.equipos = todosEquipos.filter((e: Equipo) => esEquipoGases(e.equipo || ''));
-        this.defectos = res.defectos || [];
         if (res.turno) {
           const vid = (res.turno as any).vehiculoId ?? (res.turno as any).vehiculo?.id;
           this.vehiculoId = vid ? Number(vid) : this.vehiculoId;
@@ -133,41 +135,37 @@ export class RevisionGases implements OnInit {
     });
   }
 
-  toggleEquipo(id: number): void {
-    const idx = this.equiposSeleccionados.indexOf(id);
-    const eq = this.equipos.find(e => (e.equipoid ?? 0) === id);
-    if (idx >= 0) {
-      this.equiposSeleccionados.splice(idx, 1);
-    } else {
-      this.equiposSeleccionados.push(id);
+  /** Al cambiar combustible, se limpia la selección de equipo (el equipo anterior puede no ser válido) */
+  onTipoCombustibleChange(): void {
+    this.equipoSeleccionadoId = null;
+    this.cdr.detectChanges();
+  }
+
+  seleccionarEquipo(id: number | null): void {
+    if (id === this.equipoSeleccionadoId) {
+      this.equipoSeleccionadoId = null;
+      return;
+    }
+    this.equipoSeleccionadoId = id;
+    if (id) {
+      const eq = this.equiposFiltrados.find(e => (e.equipoid ?? 0) === id);
       if (eq && eq.influencia === 1) {
         this.rellenarValoresAleatorios();
       }
     }
-  }
-
-  toggleDefecto(d: Defectos): void {
-    const idx = this.defectosSeleccionados.findIndex(x => x.id === d.id);
-    if (idx >= 0) this.defectosSeleccionados.splice(idx, 1);
-    else this.defectosSeleccionados.push(d);
-  }
-
-  estaDefectoSeleccionado(id: number | null): boolean {
-    return id != null && this.defectosSeleccionados.some(d => d.id === id);
-  }
-
-  get defectosFiltrados(): Defectos[] {
-    const f = (this.filtroDefectos || '').toLowerCase();
-    if (!f) return this.defectos;
-    return this.defectos.filter(d =>
-      (d.codigo || '').toLowerCase().includes(f) ||
-      (d.descripcion || '').toLowerCase().includes(f)
-    );
+    this.cdr.detectChanges();
   }
 
   guardarInspeccion(): void {
     if (!this.vehiculoId || !this.metodoInspeccionId) {
       this.notification.error('Faltan datos del turno o vehículo.');
+      return;
+    }
+    const tieneValores = this.tipoCombustible === 'DIESEL'
+      ? !isNaN(parseFloat(this.opacidad))
+      : (!isNaN(parseFloat(this.co)) || !isNaN(parseFloat(this.hc)));
+    if (!tieneValores) {
+      this.notification.error('Ingrese al menos un valor medido (CO/HC para gasolina, Opacidad para diesel).');
       return;
     }
 
@@ -176,22 +174,18 @@ export class RevisionGases implements OnInit {
       this.notification.error('No se pudo obtener el usuario logueado. Vuelva a iniciar sesión.');
       return;
     }
-    const eqNombres = this.equiposSeleccionados
-      .map(id => this.equipos.find(e => (e.equipoid ?? 0) === id)?.equipo)
-      .filter(Boolean);
+    const eqNombre = this.equipoSeleccionadoId
+      ? this.equipos.find(e => (e.equipoid ?? 0) === this.equipoSeleccionadoId)?.equipo
+      : null;
     const vals = this.esMoto
       ? `CO: ${this.co || 'N/A'}%, HC: ${this.hc || 'N/A'} ppm (RTE INEN 136)`
       : this.tipoCombustible === 'GASOLINA'
         ? `CO: ${this.co || 'N/A'}%, HC: ${this.hc || 'N/A'} ppm${this.lambda ? `, λ: ${this.lambda}` : ''}${this.o2 ? `, O2: ${this.o2}%` : ''}`
         : `Opacidad: ${this.opacidad || 'N/A'}%`;
     const partes = [`${this.tipoCombustible}. ${vals}`];
-    if (eqNombres.length) partes.push(`Equipos: ${eqNombres.join(', ')}`);
+    if (eqNombre) partes.push(`Equipo: ${eqNombre}`);
     if (this.observaciones) partes.push(this.observaciones);
     const observacionesCompletas = partes.join(' | ');
-
-    const defectosIds = this.resultado === 'NO_APROBADO' && this.defectosSeleccionados.length > 0
-      ? this.defectosSeleccionados.map(d => d.id!).filter(id => id > 0)
-      : [];
 
     const valoresMedidos: Record<string, number> = {};
     if (this.esMoto || this.tipoCombustible === 'GASOLINA') {
@@ -202,11 +196,15 @@ export class RevisionGases implements OnInit {
       if (!this.esMoto) {
         const lambdaVal = parseFloat(this.lambda);
         if (!isNaN(lambdaVal)) valoresMedidos['LAMBDA'] = lambdaVal;
+        const o2Val = parseFloat(this.o2);
+        if (!isNaN(o2Val)) valoresMedidos['O2'] = o2Val;
       }
     } else {
       const opVal = parseFloat(this.opacidad);
       if (!isNaN(opVal)) valoresMedidos['OPACIDAD'] = opVal;
     }
+
+    const equiposIds = this.equipoSeleccionadoId ? [this.equipoSeleccionadoId] : [];
 
     const payload = {
       vehiculoId: this.vehiculoId,
@@ -214,15 +212,18 @@ export class RevisionGases implements OnInit {
       lineaId: this.lineaIdParam ?? 1,
       usuarioId,
       observaciones: observacionesCompletas,
-      defectosIds,
-      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined
+      defectosIds: [] as number[],
+      equiposIds: equiposIds.length > 0 ? equiposIds : undefined,
+      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined,
+      kilometraje: this.kilometraje != null && this.kilometraje >= 0 ? this.kilometraje : undefined
     };
 
     this.guardando = true;
     this.inspeccionService.crear(payload).subscribe({
-      next: () => {
+      next: (resp: any) => {
         this.guardando = false;
-        this.notification.success('Revisión de gases registrada.');
+        const res = resp?.resultado ?? resp?.data?.resultado ?? 'APROBADO';
+        this.notification.success(`Revisión de gases registrada. Resultado: ${res}`);
         this.router.navigate(['/inicio/inspeccion-rtv/turnos-pagados']);
         this.cdr.detectChanges();
       },

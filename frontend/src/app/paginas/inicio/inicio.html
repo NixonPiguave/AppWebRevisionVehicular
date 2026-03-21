@@ -312,7 +312,7 @@
       <!-- ========================================
            CONFIGURACIÓN UMBRAL
            ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_umbral_unidades','menu_umbral_descripcion','menu_umbral')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_umbral_unidades','menu_umbral_descripcion','menu_umbral','menu_criterio_resultado')" class="menu-section">
         <span *ngIf="!sidebarCollapsed" class="section-title">
           Configuración Umbral
         </span>
@@ -336,6 +336,7 @@
             <a *ngIf="puedeVer('menu_umbral_unidades')" routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
             <a *ngIf="puedeVer('menu_umbral_descripcion')" routerLink="/inicio/configuracion-umbral/descripcion-umbral" routerLinkActive="active" class="submenu-item">Descripción de Umbral</a>
             <a *ngIf="puedeVer('menu_umbral')" routerLink="/inicio/configuracion-umbral/umbral" routerLinkActive="active" class="submenu-item">Umbral</a>
+            <a *ngIf="puedeVer('menu_criterio_resultado')" routerLink="/inicio/configuracion-umbral/criterio-resultado" routerLinkActive="active" class="submenu-item">Criterios Aprobación</a>
           </div>
         </div>
       </div>

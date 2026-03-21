@@ -28,22 +28,42 @@
 
   <div class="contenido" *ngIf="!cargando && !error">
     <section class="panel-combustible" *ngIf="!esMoto">
-      <h3>Tipo de combustible</h3>
+      <h3><mat-icon class="panel-icon">local_gas_station</mat-icon> Tipo de combustible</h3>
       <div class="combustible-opciones">
-        <label>
-          <input type="radio" [(ngModel)]="tipoCombustible" value="GASOLINA" name="combustible" />
-          Gasolina
+        <label class="combustible-card" [class.seleccionado]="tipoCombustible === 'GASOLINA'">
+          <input type="radio" [(ngModel)]="tipoCombustible" value="GASOLINA" name="combustible" (ngModelChange)="onTipoCombustibleChange()" />
+          <mat-icon>local_gas_station</mat-icon>
+          <span>Gasolina</span>
         </label>
-        <label>
-          <input type="radio" [(ngModel)]="tipoCombustible" value="DIESEL" name="combustible" />
-          Diesel
+        <label class="combustible-card" [class.seleccionado]="tipoCombustible === 'DIESEL'">
+          <input type="radio" [(ngModel)]="tipoCombustible" value="DIESEL" name="combustible" (ngModelChange)="onTipoCombustibleChange()" />
+          <mat-icon>oil_barrel</mat-icon>
+          <span>Diesel</span>
         </label>
+      </div>
+    </section>
+
+    <section class="panel-equipos">
+      <h3><mat-icon class="panel-icon">precision_manufacturing</mat-icon> Equipo utilizado</h3>
+      <p class="panel-desc">Seleccione el {{ tipoCombustible === 'DIESEL' ? 'opacímetro' : 'analizador de gases' }} con el que realizó la medición.</p>
+      <div class="equipos-lista">
+        <div
+          class="equipo-item"
+          *ngFor="let eq of equiposFiltrados"
+          [class.seleccionado]="equipoSeleccionadoId === (eq.equipoid ?? 0)"
+          (click)="seleccionarEquipo(eq.equipoid ?? 0)"
+        >
+          <span class="eq-nombre">{{ eq.equipo }}</span>
+          <span class="eq-serial">{{ eq.serialEquipo }}</span>
+          <span class="eq-influencia" *ngIf="eq.influencia === 1">(auto)</span>
+        </div>
+        <p class="sin-datos" *ngIf="equiposFiltrados.length === 0">No hay equipos de {{ tipoCombustible === 'DIESEL' ? 'opacímetro' : 'analizador de gases' }} registrados</p>
       </div>
     </section>
 
     <section class="panel-parametros">
       <div class="parametros-header">
-        <h3>Valores medidos</h3>
+        <h3><mat-icon class="panel-icon">analytics</mat-icon> Valores medidos</h3>
         <button type="button" class="btn-rellenar" (click)="rellenarValoresAleatorios()" [disabled]="rellenando">
           {{ rellenando ? 'Obteniendo datos...' : 'Leer datos' }}
         </button>
@@ -103,59 +123,23 @@
       </div>
     </section>
 
-    <section class="panel-equipos">
-      <h3>Equipos utilizados</h3>
-      <p class="panel-desc">Seleccione los equipos de gases usados. Si el equipo tiene influencia, los valores se rellenan automáticamente al seleccionarlo.</p>
-      <div class="equipos-lista">
-        <div
-          class="equipo-item"
-          *ngFor="let eq of equipos"
-          [class.seleccionado]="equiposSeleccionados.includes(eq.equipoid ?? 0)"
-          (click)="toggleEquipo(eq.equipoid ?? 0)"
-        >
-          <span class="eq-nombre">{{ eq.equipo }}</span>
-          <span class="eq-serial">{{ eq.serialEquipo }}</span>
-          <span class="eq-influencia" *ngIf="eq.influencia === 1">(auto)</span>
-        </div>
-        <p class="sin-datos" *ngIf="equipos.length === 0">No hay equipos de gases registrados</p>
-      </div>
-    </section>
-
     <section class="panel-resultado">
-      <h3>Resultado</h3>
-      <div class="resultado-opciones">
-        <label class="opcion-aprobado">
-          <input type="radio" [(ngModel)]="resultado" value="APROBADO" name="resultado" />
-          <mat-icon>check_circle</mat-icon>
-          Aprobado
-        </label>
-        <label class="opcion-noaprobado">
-          <input type="radio" [(ngModel)]="resultado" value="NO_APROBADO" name="resultado" />
-          <mat-icon>cancel</mat-icon>
-          No aprobado
-        </label>
-      </div>
-
-      <div class="defectos-no-aprobado" *ngIf="resultado === 'NO_APROBADO'">
-        <h4>Defectos detectados</h4>
-        <input type="text" [(ngModel)]="filtroDefectos" placeholder="Buscar defectos..." class="input-busqueda" />
-        <div class="defectos-lista">
-          <div
-            class="defecto-item"
-            *ngFor="let d of defectosFiltrados"
-            [class.seleccionado]="estaDefectoSeleccionado(d.id)"
-            (click)="toggleDefecto(d)"
-          >
-            <span class="def-codigo">{{ d.codigo }}</span>
-            <span class="def-desc">{{ d.descripcion }}</span>
-          </div>
-        </div>
-      </div>
+      <h3><mat-icon class="panel-icon">assignment_turned_in</mat-icon> Resultado</h3>
+      <p class="resultado-automatico">
+        <mat-icon>info</mat-icon>
+        El resultado se calcula automáticamente según los umbrales configurados.
+      </p>
     </section>
 
     <section class="panel-observaciones">
-      <label>Observaciones</label>
-      <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+      <div class="campo-kilometraje">
+        <label for="kilometraje">Kilometraje (opcional)</label>
+        <input type="number" id="kilometraje" [(ngModel)]="kilometraje" name="kilometraje" placeholder="Ej: 45000" min="0" step="1" />
+      </div>
+      <div class="campo-observaciones">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+      </div>
     </section>
 
     <footer class="footer">

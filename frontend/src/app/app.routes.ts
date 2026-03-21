@@ -41,6 +41,7 @@ import { SolicitudesPlacasComponent } from './paginas/ant/solicitudes-placas/sol
 import {PropietarioComponent} from './paginas/gestion_vehicular/propietario/propietario';
 import {UmbralComponent} from './paginas/configuracion_umbral/umbral/umbral';
 import {DescripcionUmbralComponent} from './paginas/configuracion_umbral/descripcion-umbral/descripcion-umbral';
+import { CriterioResultadoComponent } from './paginas/configuracion_umbral/criterio-resultado/criterio-resultado';
 import {VehiculoComponent} from './paginas/gestion_vehicular/vehiculos/vehiculos';
 import {DefectosComponent} from './paginas/defectos_inspeccion/defectos/defectos';
 import { BloqueoVehiculoComponent } from './paginas/gestion_vehicular/bloqueo-vehiculo/bloqueo-vehiculo';
@@ -111,6 +112,7 @@ export const routes: Routes = [
       { path: 'configuracion-umbral/unidades-medida', component: UnidadMedidaComponent },
       { path: 'configuracion-umbral/descripcion-umbral', component: DescripcionUmbralComponent },
       { path: 'configuracion-umbral/umbral', component: UmbralComponent },
+      { path: 'configuracion-umbral/criterio-resultado', component: CriterioResultadoComponent },
 
       // GESTIÓN VEHICULAR
       { path: 'gestion_vehicular/propietario', component: PropietarioComponent },

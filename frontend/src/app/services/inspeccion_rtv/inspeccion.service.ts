@@ -10,8 +10,12 @@ export interface InspeccionCrear {
   observaciones?: string;
   ubicacionesRevisadas?: string[];
   defectosIds: number[];
+  /** IDs de equipos utilizados (trazabilidad). */
+  equiposIds?: number[];
   /** Valores medidos para umbrales (CO, HC, LAMBDA, OPACIDAD). Claves según normativa. */
   valoresMedidos?: Record<string, number>;
+  /** Kilometraje del vehículo al momento de la inspección. */
+  kilometraje?: number | null;
 }
 
 export interface Inspeccion {

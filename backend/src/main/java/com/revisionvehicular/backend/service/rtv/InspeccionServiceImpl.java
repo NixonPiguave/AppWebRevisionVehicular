@@ -5,14 +5,21 @@ import com.revisionvehicular.backend.dtos.rtv.DetalleInspeccionDTO;
 import com.revisionvehicular.backend.dtos.rtv.InspeccionDTO;
 import com.revisionvehicular.backend.entities.rc.Umbral;
 import com.revisionvehicular.backend.entities.rtv.Defecto;
+import com.revisionvehicular.backend.entities.rtv.Equipos;
 import com.revisionvehicular.backend.entities.rtv.Inspeccion;
+import com.revisionvehicular.backend.entities.rtv.InspeccionEquipo;
 import com.revisionvehicular.backend.repositories.rc.IUmbralRepository;
 import com.revisionvehicular.backend.repositories.rtv.IDefectoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IDetalleInspeccionRepository;
+import com.revisionvehicular.backend.repositories.rtv.IEquipoRepository;
+import com.revisionvehicular.backend.repositories.rtv.IInspeccionEquipoRepository;
 import com.revisionvehicular.backend.repositories.rtv.IInspeccionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -32,21 +39,53 @@ public class InspeccionServiceImpl implements IInspeccionService {
 
     private static final String CODIGO_DEFECTO_APROBADO = "SIN_DEFECTO";
 
-    private static final String[] PARAMETROS_UMBRAL_ORDEN = {"CO", "HC", "LAMBDA", "OPACIDAD", "FRENOS_EFICACIA", "SUSPENSION_EFICACIA"};
+    private static final String[] PARAMETROS_UMBRAL_ORDEN = {"CO", "HC", "LAMBDA", "OPACIDAD", "O2",
+            "FRENOS_EFICACIA", "FRENOS_DESEQUILIBRIO", "SUSPENSION_EFICACIA", "SUSPENSION_DESEQUILIBRIO",
+            "ALINEACION_CONVERGENCIA", "ALINEACION_DIVERGENCIA"};
 
     private final IInspeccionRepository inspeccionRepository;
     private final IDetalleInspeccionRepository detalleRepository;
     private final IDefectoRepository defectoRepository;
     private final IUmbralRepository umbralRepository;
+    private final IInspeccionEquipoRepository inspeccionEquipoRepository;
+    private final IEquipoRepository equipoRepository;
+    private final ICriterioResultadoService criterioResultadoService;
 
     public InspeccionServiceImpl(IInspeccionRepository inspeccionRepository,
                                  IDetalleInspeccionRepository detalleRepository,
                                  IDefectoRepository defectoRepository,
-                                 IUmbralRepository umbralRepository) {
+                                 IUmbralRepository umbralRepository,
+                                 IInspeccionEquipoRepository inspeccionEquipoRepository,
+                                 IEquipoRepository equipoRepository,
+                                 ICriterioResultadoService criterioResultadoService) {
         this.inspeccionRepository = inspeccionRepository;
         this.detalleRepository = detalleRepository;
         this.defectoRepository = defectoRepository;
         this.umbralRepository = umbralRepository;
+        this.inspeccionEquipoRepository = inspeccionEquipoRepository;
+        this.equipoRepository = equipoRepository;
+        this.criterioResultadoService = criterioResultadoService;
+    }
+
+    /**
+     * Obtiene la peor calificación de umbral para los valores medidos.
+     * 1=OK, 2=TIPO1, 3=TIPO2, 4=TIPO3. Retorna null si no hay valores.
+     */
+    private Integer resolverPeorCalificacionUmbral(Map<String, Object> valoresMedidos) {
+        if (valoresMedidos == null || valoresMedidos.isEmpty()) return null;
+        int peor = 0;
+        for (String param : PARAMETROS_UMBRAL_ORDEN) {
+            Object v = valoresMedidos.get(param);
+            if (v == null) continue;
+            BigDecimal valor = v instanceof Number ? BigDecimal.valueOf(((Number) v).doubleValue()) : null;
+            if (valor == null) continue;
+            List<Umbral> umbrales = umbralRepository.findUmbralesPorParametroYValor(param, valor);
+            for (Umbral u : umbrales) {
+                int cal = u.getCalificacion() != null ? u.getCalificacion() : 0;
+                if (cal > peor) peor = cal;
+            }
+        }
+        return peor > 0 ? peor : null;
     }
 
     /**
@@ -109,6 +148,14 @@ public class InspeccionServiceImpl implements IInspeccionService {
         Long umbralId = resolverUmbralId(request.getValoresMedidos());
         Map<Integer, Integer> conteoTipos = contarTiposDefecto(defectosIds);
 
+        // Para gases/mecatrónica: el resultado se deriva de los umbrales (valores medidos vs normativa)
+        // calificacion 1=OK, 2=TIPO1, 3=TIPO2, 4=TIPO3
+        Integer peorCalificacionUmbral = resolverPeorCalificacionUmbral(request.getValoresMedidos());
+        if (peorCalificacionUmbral != null && peorCalificacionUmbral >= 2) {
+            int tipo = Math.min(peorCalificacionUmbral - 1, 3);
+            conteoTipos.put(tipo, conteoTipos.getOrDefault(tipo, 0) + 1);
+        }
+
         if (defectosIds != null && !defectosIds.isEmpty()) {
             for (Long defectoId : defectosIds) {
                 if (defectoId != null && defectoId > 0) {
@@ -123,7 +170,7 @@ public class InspeccionServiceImpl implements IInspeccionService {
                 }
             }
         } else if (metodoId != null) {
-            // Mecatrónica/Gases APROBADOS: registrar método con defecto SIN_DEFECTO
+            // Mecatrónica/Gases: registrar método con defecto SIN_DEFECTO (el resultado viene de umbrales)
             defectoRepository.findByCodigo(CODIGO_DEFECTO_APROBADO).ifPresent(defecto ->
                 detalleRepository.insertarDetalleInspeccion(
                         inspeccion.getInspeccion_id(),
@@ -136,9 +183,34 @@ public class InspeccionServiceImpl implements IInspeccionService {
             );
         }
 
-        String resultadoFinal = resolverResultadoVisual(conteoTipos);
+        String resultadoFinal = resolverResultado(conteoTipos);
         inspeccionRepository.actualizarResultado(inspeccion.getInspeccion_id(), resultadoFinal);
         inspeccion.setResultado(resultadoFinal);
+
+        Map<String, Object> valoresParaGuardar = request.getValoresMedidos() != null
+                ? new HashMap<>(request.getValoresMedidos())
+                : new HashMap<>();
+        if (request.getKilometraje() != null && request.getKilometraje() >= 0) {
+            valoresParaGuardar.put("KILOMETRAJE", request.getKilometraje());
+        }
+        if (!valoresParaGuardar.isEmpty()) {
+            try {
+                String json = new ObjectMapper().writeValueAsString(valoresParaGuardar);
+                inspeccionRepository.actualizarValoresMedidos(inspeccion.getInspeccion_id(), json);
+            } catch (JsonProcessingException ignored) {}
+        }
+
+        if (request.getEquiposIds() != null && !request.getEquiposIds().isEmpty()) {
+            for (Long equipoId : request.getEquiposIds()) {
+                if (equipoId == null || equipoId <= 0) continue;
+                equipoRepository.findById(equipoId).ifPresent(equipo -> {
+                    InspeccionEquipo ie = new InspeccionEquipo();
+                    ie.setInspeccion(inspeccion);
+                    ie.setEquipo(equipo);
+                    inspeccionEquipoRepository.save(ie);
+                });
+            }
+        }
 
         return toDTO(inspeccion);
     }
@@ -190,12 +262,14 @@ public class InspeccionServiceImpl implements IInspeccionService {
         return value == null ? "" : value;
     }
 
-    private String resolverResultadoVisual(Map<Integer, Integer> conteoTipos) {
-        int tipo2 = conteoTipos.getOrDefault(2, 0);
-        int tipo3 = conteoTipos.getOrDefault(3, 0);
-        if (tipo2 > 0 || tipo3 > 0) {
-            return RESULTADO_RECHAZADO;
-        }
+    /**
+     * Resultado final según criterios configurados (rtv_criterio_resultado).
+     */
+    private String resolverResultado(Map<Integer, Integer> conteoTipos) {
+        int t1 = conteoTipos.getOrDefault(1, 0);
+        int t2 = conteoTipos.getOrDefault(2, 0);
+        int t3 = conteoTipos.getOrDefault(3, 0);
+        if (criterioResultadoService.debeRechazar(t1, t2, t3)) return RESULTADO_RECHAZADO;
         return RESULTADO_APROBADO;
     }
 

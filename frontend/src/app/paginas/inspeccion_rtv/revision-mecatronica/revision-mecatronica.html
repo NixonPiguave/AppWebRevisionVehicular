@@ -28,13 +28,13 @@
 
   <div class="contenido" *ngIf="!cargando && !error">
     <section class="panel-parametros">
-      <h3>Parámetros de inspección</h3>
-      <p class="panel-desc">Seleccione el equipo usado para cada medición. Si el equipo tiene influencia, los datos se llenan automáticamente (solo lectura). Si es manual, use el botón "Leer datos" para generar valores aleatorios o ingrese manualmente.</p>
+      <h3><mat-icon class="panel-icon">build</mat-icon> Parámetros de inspección</h3>
+      <p class="panel-desc">Seleccione el equipo con el que realizó la medición.</p>
 
       <!-- CARROS -->
       <div class="parametros-grid" *ngIf="!esMoto">
         <div class="param-grupo">
-          <h4>Frenos</h4>
+          <h4><mat-icon class="grupo-icon">stop_circle</mat-icon> Frenos</h4>
           <div class="param-fila">
             <label>Equipo usado</label>
             <select [ngModel]="equipoFrenosId" (ngModelChange)="onEquipoFrenosChange($event)" class="select-equipo">
@@ -61,7 +61,7 @@
           </div>
         </div>
         <div class="param-grupo">
-          <h4>Suspensión</h4>
+          <h4><mat-icon class="grupo-icon">straighten</mat-icon> Suspensión</h4>
           <div class="param-fila">
             <label>Equipo usado</label>
             <select [ngModel]="equipoSuspensionId" (ngModelChange)="onEquipoSuspensionChange($event)" class="select-equipo">
@@ -94,7 +94,7 @@
           </div>
         </div>
         <div class="param-grupo">
-          <h4>Alineación (eje delantero)</h4>
+          <h4><mat-icon class="grupo-icon">settings_ethernet</mat-icon> Alineación (eje delantero)</h4>
           <div class="param-fila">
             <label>Equipo usado</label>
             <select [ngModel]="equipoAlineacionId" (ngModelChange)="onEquipoAlineacionChange($event)" class="select-equipo">
@@ -123,7 +123,7 @@
       <!-- MOTOS -->
       <div class="parametros-grid parametros-moto" *ngIf="esMoto">
         <div class="param-grupo">
-          <h4>Frenos</h4>
+          <h4><mat-icon class="grupo-icon">stop_circle</mat-icon> Frenos</h4>
           <div class="param-fila checkbox-fila">
             <label>
               <input type="checkbox" [(ngModel)]="frenosPastillasOk" />
@@ -144,7 +144,7 @@
           </div>
         </div>
         <div class="param-grupo">
-          <h4>Suspensión</h4>
+          <h4><mat-icon class="grupo-icon">straighten</mat-icon> Suspensión</h4>
           <div class="param-fila checkbox-fila">
             <label>
               <input type="checkbox" [(ngModel)]="amortiguadoresMotoOk" />
@@ -153,7 +153,7 @@
           </div>
         </div>
         <div class="param-grupo">
-          <h4>Dirección / Alineación</h4>
+          <h4><mat-icon class="grupo-icon">settings_ethernet</mat-icon> Dirección / Alineación</h4>
           <div class="param-fila checkbox-fila">
             <label>
               <input type="checkbox" [(ngModel)]="alineacionMotoOk" />
@@ -165,40 +165,48 @@
     </section>
 
     <section class="panel-resultado">
-      <h3>Resultado</h3>
-      <div class="resultado-opciones">
-        <label class="opcion-aprobado">
-          <input type="radio" [(ngModel)]="resultado" value="APROBADO" name="resultado" />
+      <h3><mat-icon class="panel-icon">assignment_turned_in</mat-icon> Resultado</h3>
+      <!-- Carros: resultado automático desde valores medidos + umbrales -->
+      <p class="resultado-automatico" *ngIf="!esMoto">
+        <mat-icon>info</mat-icon>
+        El resultado se calcula automáticamente según los umbrales configurados.
+      </p>
+      <!-- Motos: si hay fallas en checkboxes, se deben registrar defectos -->
+      <ng-container *ngIf="esMoto">
+        <p class="resultado-automatico" *ngIf="!motoTieneFallas">
           <mat-icon>check_circle</mat-icon>
-          Aprobado
-        </label>
-        <label class="opcion-noaprobado">
-          <input type="radio" [(ngModel)]="resultado" value="NO_APROBADO" name="resultado" />
-          <mat-icon>cancel</mat-icon>
-          No aprobado
-        </label>
-      </div>
-
-      <div class="defectos-no-aprobado" *ngIf="resultado === 'NO_APROBADO'">
-        <h4>Defectos detectados</h4>
-        <input type="text" [(ngModel)]="filtroDefectos" placeholder="Buscar defectos..." class="input-busqueda" />
-        <div class="defectos-lista">
-          <div
-            class="defecto-item"
-            *ngFor="let d of defectosFiltrados"
-            [class.seleccionado]="estaDefectoSeleccionado(d.id)"
-            (click)="toggleDefecto(d)"
-          >
-            <span class="def-codigo">{{ d.codigo }}</span>
-            <span class="def-desc">{{ d.descripcion }}</span>
+          Todas las verificaciones están OK. La inspección será aprobada.
+        </p>
+        <div class="defectos-moto" *ngIf="motoTieneFallas">
+          <p class="defectos-moto-aviso">
+            <mat-icon>warning</mat-icon>
+            Hay verificaciones con falla. Seleccione los defectos detectados:
+          </p>
+          <input type="text" [(ngModel)]="filtroDefectos" placeholder="Buscar defectos..." class="input-busqueda" />
+          <div class="defectos-lista">
+            <div
+              class="defecto-item"
+              *ngFor="let d of defectosFiltrados"
+              [class.seleccionado]="estaDefectoSeleccionado(d.id)"
+              (click)="toggleDefecto(d)"
+            >
+              <span class="def-codigo">{{ d.codigo }}</span>
+              <span class="def-desc">{{ d.descripcion }}</span>
+            </div>
           </div>
         </div>
-      </div>
+      </ng-container>
     </section>
 
     <section class="panel-observaciones">
-      <label>Observaciones</label>
-      <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+      <div class="campo-kilometraje">
+        <label for="kilometraje">Kilometraje (opcional)</label>
+        <input type="number" id="kilometraje" [(ngModel)]="kilometraje" name="kilometraje" placeholder="Ej: 45000" min="0" step="1" />
+      </div>
+      <div class="campo-observaciones">
+        <label>Observaciones</label>
+        <textarea [(ngModel)]="observaciones" rows="2" placeholder="Observaciones adicionales..."></textarea>
+      </div>
     </section>
 
     <footer class="footer">

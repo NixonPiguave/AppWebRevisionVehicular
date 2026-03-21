@@ -47,9 +47,18 @@ export class RevisionMecatronica implements OnInit {
   defectos: Defectos[] = [];
   defectosSeleccionados: Defectos[] = [];
   filtroDefectos = '';
+  kilometraje: number | null = null;
 
   get esMoto(): boolean {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
+  }
+
+  /** Motos: true si alguna verificación falló (checkbox desmarcado) */
+  get motoTieneFallas(): boolean {
+    return this.esMoto && (
+      !this.frenosPastillasOk || !this.frenosZapatasOk || !this.frenosLiquidoOk ||
+      !this.amortiguadoresMotoOk || !this.alineacionMotoOk
+    );
   }
 
   /** Equipos que influyen en frenos */
@@ -95,7 +104,6 @@ export class RevisionMecatronica implements OnInit {
   amortiguadoresMotoOk = true;
   alineacionMotoOk = true;  // Dirección / alineación (opcional)
 
-  resultado: 'APROBADO' | 'NO_APROBADO' = 'APROBADO';
   observaciones = '';
 
   cargando = false;
@@ -319,9 +327,15 @@ export class RevisionMecatronica implements OnInit {
         ].filter(Boolean).join('. ');
     const observacionesCompletas = [obs, this.observaciones].filter(Boolean).join(' | ');
 
-    const defectosIds = this.resultado === 'NO_APROBADO' && this.defectosSeleccionados.length > 0
+    const defectosIds = this.esMoto && this.motoTieneFallas && this.defectosSeleccionados.length > 0
       ? this.defectosSeleccionados.map(d => d.id!).filter(id => id > 0)
       : [];
+
+    const equiposIds = [
+      this.equipoFrenosId,
+      this.equipoSuspensionId,
+      this.equipoAlineacionId
+    ].filter((id): id is number => id != null && id > 0);
 
     const valoresMedidos: Record<string, number> = {};
     if (!this.esMoto) {
@@ -346,14 +360,22 @@ export class RevisionMecatronica implements OnInit {
       usuarioId,
       observaciones: observacionesCompletas,
       defectosIds,
-      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined
+      equiposIds: equiposIds.length > 0 ? [...new Set(equiposIds)] : undefined,
+      valoresMedidos: Object.keys(valoresMedidos).length > 0 ? valoresMedidos : undefined,
+      kilometraje: this.kilometraje != null && this.kilometraje >= 0 ? this.kilometraje : undefined
     };
+
+    if (this.esMoto && this.motoTieneFallas && defectosIds.length === 0) {
+      this.notification.error('Debe seleccionar al menos un defecto cuando hay verificaciones con falla.');
+      return;
+    }
 
     this.guardando = true;
     this.inspeccionService.crear(payload).subscribe({
-      next: () => {
+      next: (resp: any) => {
         this.guardando = false;
-        this.notification.success('Revisión mecatrónica registrada.');
+        const res = resp?.resultado ?? resp?.data?.resultado ?? 'APROBADO';
+        this.notification.success(`Revisión mecatrónica registrada. Resultado: ${res}`);
         this.router.navigate(['/inicio/inspeccion-rtv/turnos-pagados']);
         this.cdr.detectChanges();
       },

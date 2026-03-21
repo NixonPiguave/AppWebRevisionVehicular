@@ -26,6 +26,21 @@
       </button>
     </div>
 
+    <!-- Filtro y info -->
+    <div class="crud-controles" *ngIf="umbrales.length > 0">
+      <div class="control-grupo">
+        <input type="text" class="input-filtro" [(ngModel)]="filtro" (ngModelChange)="onFiltroChange()"
+               placeholder="Buscar por unidad, descripción, valor..." />
+      </div>
+      <div class="control-grupo">
+        <span class="registros-texto">
+          Mostrando {{ (paginaActual - 1) * registrosPorPagina + 1 }} a
+          {{ paginaActual * registrosPorPagina > umbralesFiltrados.length ? umbralesFiltrados.length : paginaActual * registrosPorPagina }}
+          de {{ umbralesFiltrados.length }} registros
+        </span>
+      </div>
+    </div>
+
     <!-- Tabla -->
     <div class="tabla-contenedor">
       <table class="crud-tabla">
@@ -44,6 +59,9 @@
         </tr>
         </thead>
         <tbody>
+        <tr *ngIf="umbralesPaginados.length === 0">
+          <td colspan="10" class="sin-registros">No hay umbrales que coincidan con el filtro.</td>
+        </tr>
         <tr *ngFor="let umbral of umbralesPaginados">
           <td>{{ umbral.idUmbral }}</td>
           <td>{{ umbral.nombreUnidad }}</td>
@@ -77,6 +95,24 @@
         </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Paginación -->
+    <div class="footer-tabla" *ngIf="umbrales.length > 0">
+      <div class="paginacion" *ngIf="totalPaginas > 1">
+        <button class="btn-pagina" (click)="irAPagina(paginaActual - 1)" [disabled]="paginaActual === 1">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <button *ngFor="let p of paginas" class="btn-pagina" [class.activa]="p === paginaActual" (click)="irAPagina(p)">
+          {{ p }}
+        </button>
+        <button class="btn-pagina" (click)="irAPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+      </div>
+      <span class="info-registros" *ngIf="totalPaginas > 1">
+        Página {{ paginaActual }} de {{ totalPaginas }}
+      </span>
     </div>
   </div>
 </div>

@@ -1,0 +1,78 @@
+<div class="criterio-resultado">
+  <header class="header">
+    <h1>Criterios de Aprobación / Rechazo</h1>
+    <p class="subtitulo">Configure qué tipos de defectos causan RECHAZADO en las inspecciones RTV</p>
+  </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <div class="contenido" *ngIf="!cargando && !error">
+    <section class="panel-criterios">
+      <h3><mat-icon class="panel-icon">rule</mat-icon> Tipos de defecto que causan RECHAZADO</h3>
+      <p class="panel-desc">Marque los tipos que aplican y defina la cantidad máxima permitida. Si se supera, la inspección será RECHAZADA.</p>
+
+      <div class="criterios-lista">
+        <div class="criterio-item">
+          <label class="criterio-check">
+            <input type="checkbox" [(ngModel)]="config.tipo1Rechaza" name="tipo1" />
+            <span class="criterio-label">Tipo 1</span>
+          </label>
+          <div class="criterio-max" *ngIf="config.tipo1Rechaza">
+            <label for="tipo1Max">Máx. permitidos:</label>
+            <input type="text" inputmode="numeric" id="tipo1Max" [(ngModel)]="config.tipo1Max" name="tipo1Max" placeholder="0"
+              pattern="[0-9]*" (keypress)="soloNumeros($event)" />
+            <span class="criterio-hint">0 = cualquiera causa rechazo. 2 = permitir hasta 2.</span>
+          </div>
+          <span class="criterio-hint" *ngIf="!config.tipo1Rechaza">Defectos menores. Por defecto no causan rechazo.</span>
+        </div>
+        <div class="criterio-item">
+          <label class="criterio-check">
+            <input type="checkbox" [(ngModel)]="config.tipo2Rechaza" name="tipo2" />
+            <span class="criterio-label">Tipo 2</span>
+          </label>
+          <div class="criterio-max" *ngIf="config.tipo2Rechaza">
+            <label for="tipo2Max">Máx. permitidos:</label>
+            <input type="text" inputmode="numeric" id="tipo2Max" [(ngModel)]="config.tipo2Max" name="tipo2Max" placeholder="0"
+              pattern="[0-9]*" (keypress)="soloNumeros($event)" />
+            <span class="criterio-hint">0 = cualquiera causa rechazo.</span>
+          </div>
+          <span class="criterio-hint" *ngIf="!config.tipo2Rechaza">Defectos moderados.</span>
+        </div>
+        <div class="criterio-item">
+          <label class="criterio-check">
+            <input type="checkbox" [(ngModel)]="config.tipo3Rechaza" name="tipo3" />
+            <span class="criterio-label">Tipo 3</span>
+          </label>
+          <div class="criterio-max" *ngIf="config.tipo3Rechaza">
+            <label for="tipo3Max">Máx. permitidos:</label>
+            <input type="text" inputmode="numeric" id="tipo3Max" [(ngModel)]="config.tipo3Max" name="tipo3Max" placeholder="0"
+              pattern="[0-9]*" (keypress)="soloNumeros($event)" />
+            <span class="criterio-hint">0 = cualquiera causa rechazo.</span>
+          </div>
+          <span class="criterio-hint" *ngIf="!config.tipo3Rechaza">Defectos graves.</span>
+        </div>
+      </div>
+
+      <div class="panel-info">
+        <mat-icon>info</mat-icon>
+        <p>Estos criterios se aplican tanto al registrar inspecciones (visual, gases, mecatrónica) como al generar el certificado RTV.</p>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando">
+        <mat-icon *ngIf="!guardando">save</mat-icon>
+        {{ guardando ? 'Guardando...' : 'Guardar criterios' }}
+      </button>
+    </footer>
+  </div>
+</div>

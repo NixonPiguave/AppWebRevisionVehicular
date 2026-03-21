@@ -7,8 +7,25 @@ export function esEquipoGases(nombreEquipo: string): boolean {
   const n = nombreEquipo.toUpperCase().normalize('NFD').replace(/\u0300/g, '');
   return (
     n.includes('GASES') ||
-    n.includes('OPACIMETRO')
+    n.includes('OPACIMETRO') ||
+    n.includes('OPACÍMETRO') ||
+    n.includes('ANALIZADOR') ||
+    n.includes('TUBO')
   );
+}
+
+/** Equipo para gasolina/motos: analizador de gases, totem, tubo (CO, HC, Lambda) */
+export function esEquipoAnalizadorGases(nombreEquipo: string): boolean {
+  if (!nombreEquipo || typeof nombreEquipo !== 'string') return false;
+  const n = nombreEquipo.toUpperCase().normalize('NFD').replace(/\u0300/g, '');
+  return n.includes('GASES') || n.includes('ANALIZADOR') || n.includes('TUBO') || n.includes('TOTEM');
+}
+
+/** Equipo para diesel: opacímetro */
+export function esEquipoOpacimetro(nombreEquipo: string): boolean {
+  if (!nombreEquipo || typeof nombreEquipo !== 'string') return false;
+  const n = nombreEquipo.toUpperCase().normalize('NFD').replace(/\u0300/g, '');
+  return n.includes('OPACIMETRO') || n.includes('OPACÍMETRO');
 }
 
 export function esEquipoMecatronica(nombreEquipo: string): boolean {

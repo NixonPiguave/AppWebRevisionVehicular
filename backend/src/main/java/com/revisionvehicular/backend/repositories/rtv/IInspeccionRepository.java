@@ -15,7 +15,11 @@ import java.util.List;
 public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
 
     @Query("SELECT DISTINCT i FROM Inspeccion i " +
-            "LEFT JOIN FETCH i.usuario u " +
+            "LEFT JOIN FETCH i.usuario " +
+            "LEFT JOIN FETCH i.vehiculo v " +
+            "LEFT JOIN FETCH v.modeloVehiculo mv " +
+            "LEFT JOIN FETCH mv.marca " +
+            "LEFT JOIN FETCH i.linea " +
             "LEFT JOIN FETCH i.detalles d " +
             "LEFT JOIN FETCH d.metodoInspeccion " +
             "LEFT JOIN FETCH d.defecto dd " +
@@ -57,4 +61,8 @@ public interface IInspeccionRepository extends JpaRepository<Inspeccion, Long> {
     @Modifying
     @Query(value = "UPDATE rtv_inspeccion SET resultado = :resultado WHERE inspeccion_id = :inspeccionId", nativeQuery = true)
     void actualizarResultado(@Param("inspeccionId") Long inspeccionId, @Param("resultado") String resultado);
+
+    @Modifying
+    @Query(value = "UPDATE rtv_inspeccion SET valores_medidos = :json WHERE inspeccion_id = :inspeccionId", nativeQuery = true)
+    void actualizarValoresMedidos(@Param("inspeccionId") Long inspeccionId, @Param("json") String json);
 }

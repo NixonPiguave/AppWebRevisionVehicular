@@ -1,53 +1,95 @@
 .revision-gases {
   padding: 24px;
-  max-width: 900px;
+  max-width: 920px;
   margin: 0 auto;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
 }
 
 .header {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8ecef;
 }
 
 .btn-volver {
   padding: 8px 14px;
-  margin-bottom: 12px;
-  background: transparent;
-  border: 1px solid #ccc;
+  margin-bottom: 16px;
+  background: #fff;
+  border: 1px solid #d0d7de;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
 }
 
 .btn-volver:hover {
-  background: #f0f0f0;
+  background: #f6f8fa;
+  border-color: #1a3d16;
+  color: #1a3d16;
 }
 
 .header h1 {
-  margin: 0 0 8px 0;
-  font-size: 22px;
-  font-weight: 600;
+  margin: 0 0 6px 0;
+  font-size: 24px;
+  font-weight: 700;
   color: #1a2e1a;
+  letter-spacing: -0.02em;
 }
 
 .subtitulo {
   margin: 0;
-  font-size: 14px;
-  color: #666;
+  font-size: 13px;
+  color: #57606a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subtitulo::before {
+  content: '';
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background: #1a3d16;
+  border-radius: 50%;
 }
 
 .header-info {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   flex-wrap: wrap;
-  margin-top: 12px;
+  margin-top: 16px;
 }
 
-.badge-vehiculo, .badge-datos, .badge-turno {
-  padding: 4px 10px;
-  border-radius: 6px;
+.badge-vehiculo {
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 13px;
-  background: #e8f5e9;
-  color: #2e7d32;
+  font-weight: 600;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #1b5e20;
+  border: 1px solid #a5d6a7;
+}
+
+.badge-datos {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #f1f8e9;
+  color: #33691e;
+  border: 1px solid #dcedc8;
+}
+
+.badge-turno {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: #e3f2fd;
+  color: #1565c0;
+  border: 1px solid #bbdefb;
 }
 
 .mensaje-error, .cargando {
@@ -88,63 +130,74 @@
 
 .panel-combustible, .panel-parametros, .panel-equipos, .panel-resultado, .panel-observaciones {
   background: #fff;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e1e4e8;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.2s ease;
+}
+
+.panel-combustible:hover, .panel-parametros:hover, .panel-equipos:hover, .panel-resultado:hover, .panel-observaciones:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .panel-equipos h3 {
   margin: 0 0 8px 0;
   font-size: 16px;
-  color: #333;
+  font-weight: 600;
+  color: #24292f;
 }
 
 .panel-desc {
-  font-size: 12px;
-  color: #666;
-  margin: 0 0 12px 0;
+  font-size: 13px;
+  color: #57606a;
+  margin: 0 0 14px 0;
+  line-height: 1.5;
 }
 
 .equipos-lista {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .equipo-item {
-  padding: 10px 14px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
+  padding: 12px 16px;
+  border: 2px solid #e1e4e8;
+  border-radius: 10px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  transition: all 0.2s ease;
 }
 
 .equipo-item:hover {
-  border-color: #1976d2;
-  background: #f5f9ff;
+  border-color: #1a3d16;
+  background: #f0f7ef;
 }
 
 .equipo-item.seleccionado {
   border-color: #2e7d32;
-  background: #e8f5e9;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  box-shadow: 0 0 0 1px rgba(46, 125, 50, 0.2);
 }
 
-.eq-nombre { font-weight: 500; }
-.eq-serial { font-size: 12px; color: #666; }
-.eq-influencia { font-size: 11px; color: #2e7d32; font-style: italic; }
+.eq-nombre { font-weight: 600; color: #24292f; }
+.eq-serial { font-size: 12px; color: #57606a; }
+.eq-influencia { font-size: 11px; color: #2e7d32; font-weight: 500; }
 
 .sin-datos {
   font-size: 13px;
-  color: #999;
+  color: #8c959f;
   margin: 0;
 }
 
 .panel-combustible h3, .panel-parametros h3, .panel-resultado h3 {
   margin: 0 0 16px 0;
   font-size: 16px;
-  color: #333;
+  font-weight: 600;
+  color: #24292f;
 }
 
 .parametros-header {
@@ -153,7 +206,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .parametros-header h3 {
@@ -161,55 +214,106 @@
 }
 
 .btn-rellenar {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 14px;
-  background: #e3f2fd;
-  color: #1565c0;
-  border: 1px solid #90caf9;
+  padding: 9px 16px;
+  background: linear-gradient(180deg, #e8f5e9 0%, #c8e6c9 100%);
+  color: #1b5e20;
+  border: 1px solid #81c784;
   border-radius: 8px;
   cursor: pointer;
   font-size: 13px;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .btn-rellenar:hover:not(:disabled) {
-  background: #bbdefb;
+  background: linear-gradient(180deg, #c8e6c9 0%, #a5d6a7 100%);
+  border-color: #66bb6a;
 }
 
 .btn-rellenar:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
 .combustible-opciones {
   display: flex;
-  gap: 24px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
-.combustible-opciones label {
+.combustible-card {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   cursor: pointer;
+  padding: 14px 20px;
+  border: 2px solid #e1e4e8;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 150px;
 }
 
-.parametros-gasolina, .parametros-diesel {
+.combustible-card mat-icon {
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: #57606a;
+}
+
+.combustible-card:hover {
+  border-color: #1a3d16;
+  background: #f0f7ef;
+}
+
+.combustible-card.seleccionado {
+  border-color: #2e7d32;
+  background: #e8f5e9;
+  font-weight: 600;
+}
+
+.combustible-card.seleccionado mat-icon {
+  color: #2e7d32;
+}
+
+.combustible-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.panel-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+  margin-right: 8px;
+  color: #1a3d16;
+}
+
+.parametros-gasolina, .parametros-diesel, .parametros-moto {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px 24px;
+  gap: 20px 28px;
 }
 
 @media (max-width: 600px) {
-  .parametros-gasolina, .parametros-diesel {
+  .parametros-gasolina, .parametros-diesel, .parametros-moto {
     grid-template-columns: 1fr;
   }
 }
 
 .param-descripcion {
   font-size: 12px;
-  color: #666;
+  color: #57606a;
   margin: 0 0 16px 0;
+  padding: 10px 12px;
+  background: #f6f8fa;
+  border-radius: 8px;
+  border-left: 4px solid #1a3d16;
 }
 
 .param-fila {
@@ -220,42 +324,53 @@
   display: block;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
-  margin-bottom: 4px;
+  color: #24292f;
+  margin-bottom: 6px;
 }
 
 .param-hint {
   display: block;
   font-size: 12px;
-  color: #666;
+  color: #57606a;
   margin-bottom: 8px;
-  line-height: 1.2;
+  line-height: 1.4;
   word-wrap: break-word;
 }
 
 .param-fila input {
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #ccc;
+  padding: 11px 14px;
+  border: 1px solid #d0d7de;
   border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
 
-.resultado-opciones {
+.param-fila input:focus {
+  outline: none;
+  border-color: #1a3d16;
+  box-shadow: 0 0 0 3px rgba(26, 61, 22, 0.15);
+}
+
+.resultado-automatico {
   display: flex;
-  gap: 24px;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f0f7ef;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #1b5e20;
+  line-height: 1.5;
+  margin: 0;
 }
 
-.resultado-opciones label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
+.resultado-automatico mat-icon {
+  flex-shrink: 0;
+  color: #2e7d32;
 }
-
-.opcion-aprobado mat-icon { color: #2e7d32; }
-.opcion-noaprobado mat-icon { color: #c62828; }
 
 .defectos-no-aprobado {
   margin-top: 16px;
@@ -293,40 +408,91 @@
 .def-codigo { font-weight: 500; margin-right: 8px; }
 .def-desc { font-size: 13px; color: #555; }
 
+.panel-observaciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+.panel-observaciones .campo-kilometraje {
+  flex: 0 0 auto;
+  min-width: 140px;
+}
+.panel-observaciones .campo-kilometraje input {
+  width: 120px;
+  padding: 12px 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  font-size: 14px;
+}
+.panel-observaciones .campo-observaciones { flex: 1; min-width: 200px; }
+
+.panel-observaciones label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #24292f;
+  margin-bottom: 8px;
+}
+
 .panel-observaciones textarea {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
+  padding: 12px 14px;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
   resize: vertical;
+  font-size: 14px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.panel-observaciones textarea:focus {
+  outline: none;
+  border-color: #1a3d16;
+  box-shadow: 0 0 0 3px rgba(26, 61, 22, 0.15);
 }
 
 .footer {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  padding: 16px 0;
+  gap: 14px;
+  padding: 20px 0;
+  margin-top: 8px;
+  border-top: 1px solid #e8ecef;
 }
 
 .btn {
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  display: flex;
+  font-weight: 600;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .btn-secondary {
-  background: #f5f5f5;
-  border: 1px solid #ccc;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  color: #24292f;
+}
+
+.btn-secondary:hover {
+  background: #f6f8fa;
+  border-color: #1a3d16;
 }
 
 .btn-primary {
-  background: #1976d2;
+  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%);
   color: white;
   border: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #388e3c 0%, #2e7d32 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .btn-primary:disabled {

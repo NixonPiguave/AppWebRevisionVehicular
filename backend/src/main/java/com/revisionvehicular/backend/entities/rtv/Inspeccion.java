@@ -41,7 +41,13 @@ public class Inspeccion {
     @OneToMany(mappedBy = "inspeccion", cascade = CascadeType.ALL)
     private List<DetalleInspeccion> detalles = new ArrayList<>();
 
+    @OneToMany(mappedBy = "inspeccion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<InspeccionEquipo> equiposUtilizados = new ArrayList<>();
+
     @Column(length = 50)
     private String estado;
 
+    /** Valores medidos (JSON) para certificado: FRENOS_EFICACIA, CO, HC, etc. */
+    @Column(name = "valores_medidos", length = 4000)
+    private String valoresMedidos;
 }

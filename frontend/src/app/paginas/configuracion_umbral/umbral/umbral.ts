@@ -135,7 +135,19 @@ export class UmbralComponent implements OnInit {
   }
 
   get totalPaginas(): number {
-    return Math.ceil(this.umbralesFiltrados.length / this.registrosPorPagina);
+    return Math.ceil(this.umbralesFiltrados.length / this.registrosPorPagina) || 1;
+  }
+
+  get paginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  irAPagina(p: number): void {
+    if (p >= 1 && p <= this.totalPaginas) this.paginaActual = p;
+  }
+
+  onFiltroChange(): void {
+    this.paginaActual = 1;
   }
 
   getEstadoTexto(estado: string): string {

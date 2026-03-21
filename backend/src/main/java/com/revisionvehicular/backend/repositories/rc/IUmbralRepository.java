@@ -22,6 +22,11 @@ public interface IUmbralRepository extends JpaRepository<Umbral, Long> {
             "AND u.valorMin <= :valor AND u.valorMax >= :valor AND (u.estado = 'A' OR u.estado IS NULL)")
     List<Umbral> findUmbralesPorParametroYValor(@Param("parametro") String parametro, @Param("valor") BigDecimal valor);
 
+    /** Umbrales por parámetro (para mostrar límites en certificado, calificación 1 = OK) */
+    @Query("SELECT u FROM Umbral u JOIN u.descripcionUmbral d WHERE d.descripcion = :parametro " +
+            "AND (u.estado = 'A' OR u.estado IS NULL) ORDER BY u.calificacion ASC")
+    List<Umbral> findUmbralesPorParametro(@Param("parametro") String parametro);
+
     Optional<Umbral> findTopByUnidadMedida_UmedidaidAndValorMinAndValorMaxAndCalificacionOrderByUmbralidDesc(
             Long unidadId,
             BigDecimal valorMin,

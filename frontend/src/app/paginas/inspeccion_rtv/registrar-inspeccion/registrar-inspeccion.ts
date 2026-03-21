@@ -96,6 +96,8 @@ export class RegistrarInspeccionComponent implements OnInit {
 
   readonly LINEA_MOTOS_ID = 1;
 
+  kilometraje: number | null = null;
+
   ubicaciones: UbicacionesRevisadas = {
     delantera:        false,
     ruedaDelIzq:      false,
@@ -362,12 +364,12 @@ export class RegistrarInspeccionComponent implements OnInit {
   /** Palabras clave por ubicación (carros) para filtrar defectos */
   private readonly UBICACION_KEYWORDS: Record<keyof UbicacionesRevisadas, string[]> = {
     delantera:        ['delantera', 'frontal', 'frente', 'delantero'],
-    ruedaDelIzq:      ['rueda delantera', 'del izq', 'izquierda', 'delantera izq'],
-    ruedaDelDer:      ['rueda delantera', 'del der', 'derecha', 'delantera der'],
+    ruedaDelIzq:      ['rueda delantera', 'ruedas', 'neumatico', 'llanta', 'del izq', 'izquierda', 'delantera izq', 'suspension'],
+    ruedaDelDer:      ['rueda delantera', 'ruedas', 'neumatico', 'llanta', 'del der', 'derecha', 'delantera der', 'suspension'],
     lateralIzquierdo: ['lateral', 'izquierdo', 'lateral izq'],
     lateralDerecho:   ['lateral', 'derecho', 'lateral der'],
-    ruedaTraIzq:      ['rueda trasera', 'tra izq', 'trasera izq', 'posterior izq'],
-    ruedaTraDer:      ['rueda trasera', 'tra der', 'trasera der', 'posterior der'],
+    ruedaTraIzq:      ['rueda trasera', 'ruedas', 'neumatico', 'llanta', 'tra izq', 'trasera izq', 'posterior izq', 'suspension'],
+    ruedaTraDer:      ['rueda trasera', 'ruedas', 'neumatico', 'llanta', 'tra der', 'trasera der', 'posterior der', 'suspension'],
     trasera:          ['trasera', 'posterior', 'retaguardia'],
     habitaculo:       ['habitaculo', 'habitáculo', 'interior', 'cabina', 'tablero'],
     parteInferior:    ['inferior', 'chasis', 'fosa', 'subsuelo', 'piso', 'parte inferior']
@@ -412,8 +414,19 @@ export class RegistrarInspeccionComponent implements OnInit {
     return keywords.some(kw => texto.includes(kw.toLowerCase()));
   }
 
+  /** Excluye defectos de motos cuando la inspección es de carros (y viceversa) */
+  private defectoAplicaALinea(d: Defectos): boolean {
+    const codigo = (d.codigo || '').toUpperCase();
+    const desc = (d.descripcion || '').toLowerCase();
+    const esDefectoMoto = codigo.includes('MOTC') || desc.includes('motocicleta');
+    if (this.esMoto) return true; // Motos: incluir todos (generales + MOTC)
+    return !esDefectoMoto;        // Carros: excluir defectos específicos de motos
+  }
+
   get defectosFiltrados(): Defectos[] {
     let lista = this.defectos;
+    // Filtrar por línea (carros vs motos)
+    lista = lista.filter(d => this.defectoAplicaALinea(d));
     // Filtrar por ubicaciones seleccionadas
     lista = lista.filter(d => this.defectoCoincideUbicacion(d));
     // Filtrar por búsqueda de texto
@@ -452,6 +465,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     const idx = this.defectosSeleccionados.findIndex(d => (d.id ?? 0) === (defecto.id ?? 0));
     if (idx >= 0) this.defectosSeleccionados.splice(idx, 1);
     else           this.defectosSeleccionados.push(defecto);
+    this.cdr.detectChanges();
   }
 
   getUbicacionesArray(): string[] {
@@ -487,24 +501,24 @@ export class RegistrarInspeccionComponent implements OnInit {
   }
 
   private tipoDefectoNumero(defecto: Defectos): number | null {
-    const candidatos: string[] = [];
-
+    // Prioridad: tipoDefectoId + tiposDefecto (fuente fiable)
     if (defecto?.tipoDefectoId) {
       const tipo = this.tiposDefecto.find(t => t.id === defecto.tipoDefectoId);
-      if (tipo) candidatos.push(`${tipo.codigo || ''} ${tipo.nombre || ''}`);
+      if (tipo) {
+        const tc = (tipo.codigo || '').toUpperCase();
+        const tn = (tipo.nombre || '').toUpperCase();
+        if (/TIPO\s*3|TIPO\s*III|^III$|^3$/.test(tc) || tn.includes('TIPO 3') || tn.includes('III')) return 3;
+        if (/TIPO\s*2|TIPO\s*II|^II$|^2$/.test(tc) || tn.includes('TIPO 2') || tn.includes('II')) return 2;
+        if (/TIPO\s*1|TIPO\s*I|^I$|^1$/.test(tc) || tn.includes('TIPO 1') || tn.includes('TIPO I') || tn.endsWith(' I')) return 1;
+      }
     }
 
-    // Fallbacks para datos legacy/carga rápida sin FK de tipo
-    candidatos.push(
-      defecto?.codigo || '',
-      defecto?.descripciontipo || '',
-      defecto?.descripcion || ''
-    );
-
-    const value = candidatos.join(' ').toUpperCase();
-    if (/\b3\b/.test(value) || value.includes('TIPO 3') || value.includes('TIPO III') || value.endsWith(' III')) return 3;
-    if (/\b2\b/.test(value) || value.includes('TIPO 2') || value.includes('TIPO II') || value.endsWith(' II')) return 2;
-    if (/\b1\b/.test(value) || value.includes('TIPO 1') || value.includes('TIPO I') || value.endsWith(' I')) return 1;
+    // Fallback: solo patrones explícitos (evitar que "2.5", "límite 2" etc. se clasifiquen como Tipo 2)
+    const value = [defecto?.codigo || '', defecto?.descripciontipo || '', defecto?.descripcion || '']
+      .join(' ').toUpperCase();
+    if (value.includes('TIPO 3') || value.includes('TIPO III') || value.endsWith(' III')) return 3;
+    if (value.includes('TIPO 2') || value.includes('TIPO II') || value.endsWith(' II')) return 2;
+    if (value.includes('TIPO 1') || value.includes('TIPO I') || value.endsWith(' I')) return 1;
     return null;
   }
 
@@ -553,7 +567,8 @@ export class RegistrarInspeccionComponent implements OnInit {
       usuarioId,
       observaciones: this.observaciones.trim() || undefined,
       ubicacionesRevisadas: this.getUbicacionesArray(),
-      defectosIds
+      defectosIds,
+      kilometraje: this.kilometraje != null && this.kilometraje >= 0 ? this.kilometraje : undefined
     };
 
     this.guardando = true;

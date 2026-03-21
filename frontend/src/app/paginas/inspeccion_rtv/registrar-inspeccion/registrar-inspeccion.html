@@ -308,6 +308,18 @@
 
   <!-- Pie: acciones -->
   <footer class="inspeccion-footer" *ngIf="!cargando && !error">
+    <div class="campo-kilometraje">
+      <label for="kilometraje">Kilometraje (opcional)</label>
+      <input
+        type="number"
+        id="kilometraje"
+        [(ngModel)]="kilometraje"
+        name="kilometraje"
+        placeholder="Ej: 45000"
+        min="0"
+        step="1"
+      />
+    </div>
     <div class="observaciones-opcional">
       <label for="observaciones">Observaciones (opcional)</label>
       <textarea

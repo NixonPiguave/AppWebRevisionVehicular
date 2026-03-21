@@ -44,6 +44,42 @@ public class CertificadoRtvDTO {
         private String tipo;
     }
 
+    @Data
+    public static class PruebaMecatronicaInfo {
+        private String codigo;
+        private String descripcionPrueba;
+        private String unidad;
+        private String valor;
+        private String limites;
+        private String calificacion;
+        private String ubicacion;
+    }
+
+    @Data
+    public static class VehiculoInfo {
+        private String placa;
+        private String marca;
+        private String modelo;
+        private Integer anio;
+        private String chasis;
+        private String motor;
+        private String vin;
+    }
+
+    @Data
+    public static class LineaInfo {
+        private String codigo;
+        private String descripcion;
+    }
+
+    @Data
+    public static class EquipoUtilizadoInfo {
+        private String nombre;
+        private String modelo;
+        private String serial;
+        private String codigoInterno;
+    }
+
     private EmpresaInfo empresa = new EmpresaInfo();
     private List<String> inspectores = new ArrayList<>();
     private TurnoInfo turno = new TurnoInfo();
@@ -53,4 +89,12 @@ public class CertificadoRtvDTO {
     private Integer totalTipo2 = 0;
     private Integer totalTipo3 = 0;
     private String resultadoFinal = "PENDIENTE";
+    private VehiculoInfo vehiculo = new VehiculoInfo();
+    private List<PruebaMecatronicaInfo> pruebasMecatronicas = new ArrayList<>();
+    private String fechaEmision;
+    private String validoHasta;
+    private Integer kilometraje;
+    private String numeroRevision;
+    private LineaInfo linea = new LineaInfo();
+    private List<EquipoUtilizadoInfo> equiposUtilizados = new ArrayList<>();
 }
