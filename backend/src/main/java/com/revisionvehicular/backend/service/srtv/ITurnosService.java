@@ -1,6 +1,7 @@
 package com.revisionvehicular.backend.service.srtv;
 
 import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
+import com.revisionvehicular.backend.dtos.srtv.TarifaConCalendarizacionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
 
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public interface ITurnosService {
     List<TurnosDTO> findTurnosPagadosPorServicioYLinea(Long servicioId, Long lineaId);
     TurnosDTO actualizarMontoPagado(Long turnoId, BigDecimal montoPagado);
     BigDecimal obtenerTarifaPorTurno(Long turnoId);
+    TarifaConCalendarizacionDTO obtenerTarifaConCalendarizacion(Long turnoId);
     TurnosDTO cambiarEstado(Long turnoId, String nuevoEstado);
     List<MetodoInspeccionDTO> findMetodosInspeccionPendientes(Long turnoId);
 }

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { TurnosService } from '../../../services/administracion/Turnos.service';
+import { TurnosService, TarifaConCalendarizacion } from '../../../services/administracion/Turnos.service';
 import { Turnos } from '../../../models/Turnos.model';
 import { PropietarioService } from '../../../services/gestion_vehicular/propietario.service';
 import { EmpresaService } from '../../../services/administracion/empresa.service';
@@ -26,6 +26,7 @@ export class PagosComponent implements OnInit {
   turnosFiltrados: Turnos[] = [];
   turnoSeleccionado: Turnos | null = null;
   montoPagado: number | null = null;
+  tarifaConCalendarizacion: TarifaConCalendarizacion | null = null;
   cargandoTarifa = false;
   sinTarifa = false;
   servicios: Servicio[] = [];
@@ -147,6 +148,7 @@ export class PagosComponent implements OnInit {
   seleccionarTurno(t: Turnos): void {
     this.turnoSeleccionado = t;
     this.montoPagado = null;
+    this.tarifaConCalendarizacion = null;
     this.sinTarifa = false;
     this.cerrarSelectorTurno();
     this.cargarTarifaDelTurno(t.turnoId!);
@@ -157,13 +159,16 @@ export class PagosComponent implements OnInit {
     this.cargandoTarifa = true;
     this.turnosService.obtenerTarifa(turnoId).subscribe({
       next: (res) => {
-        this.montoPagado = res?.tarifa ?? null;
+        // Usar total (tarifa base + recargo por calendarización)
+        this.montoPagado = res?.total ?? res?.tarifa ?? null;
         this.sinTarifa = this.montoPagado === null;
+        this.tarifaConCalendarizacion = res ?? null;
         this.cargandoTarifa = false;
         this.cdr.detectChanges();
       },
       error: () => {
         this.montoPagado = null;
+        this.tarifaConCalendarizacion = null;
         this.sinTarifa = true;
         this.cargandoTarifa = false;
         this.cdr.detectChanges();
@@ -174,6 +179,7 @@ export class PagosComponent implements OnInit {
   limpiarTurno(): void {
     this.turnoSeleccionado = null;
     this.montoPagado = null;
+    this.tarifaConCalendarizacion = null;
     this.sinTarifa = false;
     this.cdr.detectChanges();
   }
@@ -191,6 +197,12 @@ export class PagosComponent implements OnInit {
   obtenerNombreServicio(servicioId?: number): string {
     if (!servicioId) return '-';
     return this.servicios.find(x => x.idTipoTramite === servicioId)?.nombre ?? String(servicioId);
+  }
+
+  getNombreMes(mes: number): string {
+    if (mes < 1 || mes > 12) return 'N/A';
+    const nombres = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return nombres[mes - 1];
   }
 
   montoValido(): boolean {
@@ -235,6 +247,13 @@ export class PagosComponent implements OnInit {
             marcaNombre = this.obtenerNombreMarcaPorModeloId(modeloId);
           }
 
+          const items: { descripcion: string; valor: number }[] = [
+            { descripcion: nombreServicio, valor: this.tarifaConCalendarizacion?.tarifa ?? montoSnap }
+          ];
+          if (this.tarifaConCalendarizacion && this.tarifaConCalendarizacion.recargo > 0) {
+            items.push({ descripcion: 'Recargo por calendarización', valor: this.tarifaConCalendarizacion.recargo });
+          }
+
           const data: TicketData = {
             turnoId:           turnoSnap.turnoId!,
             tipoProceso:       nombreServicio,
@@ -250,7 +269,7 @@ export class PagosComponent implements OnInit {
             numero:            String(turnoSnap.turnoId).padStart(6, '0'),
             estado:            'PAGADO',
             fecha:             hoy,
-            items:             [{ descripcion: nombreServicio, valor: montoSnap }],
+            items,
             total:             montoSnap,
             ciudad:            'Quevedo'
           };

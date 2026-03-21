@@ -68,6 +68,15 @@
           </div>
         </div>
 
+        <div class="alerta-recargo" *ngIf="tarifaConCalendarizacion && tarifaConCalendarizacion.recargo > 0">
+          <mat-icon>warning</mat-icon>
+          <div>
+            <strong>Recargo por calendarización</strong>
+            <p>El vehículo se encuentra fuera del mes obligatorio según el último dígito de la placa ({{ tarifaConCalendarizacion.ultimoDigitoPlaca }}). Mes asignado: {{ getNombreMes(tarifaConCalendarizacion.mesObligatorio) }}.</p>
+            <p class="desglose">Tarifa base: {{ tarifaConCalendarizacion.tarifa | number:'1.2-2' }} + Recargo: {{ tarifaConCalendarizacion.recargo | number:'1.2-2' }} = Total: {{ tarifaConCalendarizacion.total | number:'1.2-2' }}</p>
+          </div>
+        </div>
+
         <div class="form-actions">
           <button type="button" class="btn btn-success" (click)="registrarPago()" [disabled]="guardando || !montoValido()">
             <mat-icon *ngIf="!guardando">payment</mat-icon>

@@ -2,6 +2,7 @@ package com.revisionvehicular.backend.controllers.srtv;
 
 import com.revisionvehicular.backend.dtos.rtv.MetodoInspeccionDTO;
 import com.revisionvehicular.backend.dtos.srtv.CertificadoRtvDTO;
+import com.revisionvehicular.backend.dtos.srtv.TarifaConCalendarizacionDTO;
 import com.revisionvehicular.backend.dtos.srtv.TurnosDTO;
 import com.revisionvehicular.backend.service.srtv.ICertificadoRtvService;
 import com.revisionvehicular.backend.service.srtv.ITurnosService;
@@ -80,12 +81,12 @@ public class TurnosController {
     }
 
     @GetMapping("/{id}/tarifa")
-    public ResponseEntity<Map<String, BigDecimal>> obtenerTarifa(@PathVariable Long id) {
-        BigDecimal tarifa = service.obtenerTarifaPorTurno(id);
-        if (tarifa == null) {
+    public ResponseEntity<TarifaConCalendarizacionDTO> obtenerTarifa(@PathVariable Long id) {
+        TarifaConCalendarizacionDTO dto = service.obtenerTarifaConCalendarizacion(id);
+        if (dto == null || dto.getTotal() == null) {
             return ResponseEntity.noContent().build();
         }
-        return ResponseEntity.ok(Map.of("tarifa", tarifa));
+        return ResponseEntity.ok(dto);
     }
 
     @PatchMapping("/{id}/pago")

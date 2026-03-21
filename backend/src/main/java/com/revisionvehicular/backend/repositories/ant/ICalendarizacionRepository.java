@@ -6,8 +6,13 @@ import org.springframework.data.jpa.repository.query.Procedure;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface ICalendarizacionRepository extends JpaRepository<CalendarizacionMatriculacion, Long> {
+
+    /** tipo 3 = RTV (Art. 12) */
+    List<CalendarizacionMatriculacion> findByTipoAndEstadoOrderByUltimoDigitoPlacaAsc(Integer tipo, String estado);
 
     @Procedure(procedureName = "sp_insertar_calendarizacion_matriculacion")
     void insertarCalendarizacionMatriculacion(

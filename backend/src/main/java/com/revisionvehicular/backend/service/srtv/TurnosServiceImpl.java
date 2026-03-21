@@ -9,8 +9,10 @@ import com.revisionvehicular.backend.entities.srtv.Turnos;
 import com.revisionvehicular.backend.repositories.rtv.IDetalleInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.IInspeccionRepository;
 import com.revisionvehicular.backend.repositories.rtv.IMetodoInspeccionRepository;
+import com.revisionvehicular.backend.dtos.srtv.TarifaConCalendarizacionDTO;
 import com.revisionvehicular.backend.repositories.rtv.ITarifarioTramiteRepository;
 import com.revisionvehicular.backend.repositories.srtv.ITurnosRepository;
+import com.revisionvehicular.backend.service.rtv.CalendarizacionRtvService;
 import com.revisionvehicular.backend.service.rtv.ILineaService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +38,7 @@ public class TurnosServiceImpl implements ITurnosService {
     private final IMetodoInspeccionRepository metodoInspeccionRepository;
     private final ILineaService lineaService;
     private final AuditoriaService auditoriaService;
+    private final CalendarizacionRtvService calendarizacionRtvService;
 
     @Autowired
     public TurnosServiceImpl(ITurnosRepository repository,
@@ -44,7 +47,8 @@ public class TurnosServiceImpl implements ITurnosService {
                              IInspeccionRepository inspeccionRepository,
                              IMetodoInspeccionRepository metodoInspeccionRepository,
                              ILineaService lineaService,
-                             AuditoriaService auditoriaService) {
+                             AuditoriaService auditoriaService,
+                             CalendarizacionRtvService calendarizacionRtvService) {
         this.repository = repository;
         this.tarifarioRepository = tarifarioRepository;
         this.detalleInspeccionRepository = detalleInspeccionRepository;
@@ -52,6 +56,7 @@ public class TurnosServiceImpl implements ITurnosService {
         this.metodoInspeccionRepository = metodoInspeccionRepository;
         this.lineaService = lineaService;
         this.auditoriaService = auditoriaService;
+        this.calendarizacionRtvService = calendarizacionRtvService;
     }
 
     @Override
@@ -240,6 +245,29 @@ public class TurnosServiceImpl implements ITurnosService {
                 .findByServicio_IdTipoTramiteAndEstadoAndCategoriaIsNull(servicioId, "ACTIVO")
                 .map(TarifarioTramite::getTarifa)
                 .orElse(null);
+    }
+
+    @Override
+    public TarifaConCalendarizacionDTO obtenerTarifaConCalendarizacion(Long turnoId) {
+        Turnos turno = repository.findByIdWithServicioYVehiculoCategoria(turnoId)
+                .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
+
+        BigDecimal tarifaBase = obtenerTarifaPorTurno(turnoId);
+        if (tarifaBase == null) return null;
+
+        String placa = turno.getVehiculo() != null ? turno.getVehiculo().getMatricula() : null;
+        var resultado = calendarizacionRtvService.evaluar(placa, LocalDate.now());
+
+        BigDecimal total = tarifaBase.add(resultado.montoRecargo());
+
+        return new TarifaConCalendarizacionDTO(
+                tarifaBase,
+                resultado.montoRecargo(),
+                total,
+                resultado.estado(),
+                resultado.mesObligatorio(),
+                resultado.ultimoDigito()
+        );
     }
     @Override
     @Transactional

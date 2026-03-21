@@ -8,7 +8,14 @@ export interface CalendarizacionMatriculacion {
   mes: number;
   tipo: number;
   estado: string;
+}
 
+/** Para mostrar en la página de calendarización (desde BD) */
+export interface CalendarizacionRtvDisplay {
+  digito: number;
+  mesObligatorio: number;
+  mesNombre: string;
+  opcionales: string;
 }
 
 @Injectable({
@@ -21,6 +28,10 @@ export class CalendarizacionMService {
 
   listar(): Observable<CalendarizacionMatriculacion[]> {
     return this.http.get<CalendarizacionMatriculacion[]>(this.apiUrl);
+  }
+
+  listarRtvDisplay(): Observable<CalendarizacionRtvDisplay[]> {
+    return this.http.get<CalendarizacionRtvDisplay[]>(`${this.apiUrl}/rtv-display`);
   }
 
   crear(calendarizacionM: CalendarizacionMatriculacion): Observable<CalendarizacionMatriculacion> {

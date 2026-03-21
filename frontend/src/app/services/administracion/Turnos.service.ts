@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Turnos } from '../../models/Turnos.model';
 
+export interface TarifaConCalendarizacion {
+  tarifa: number;
+  recargo: number;
+  total: number;
+  estadoCalendarizacion: 'OPORTUNO' | 'OPCIONAL' | 'CON_RECARGO';
+  mesObligatorio: number;
+  ultimoDigitoPlaca: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -45,9 +54,9 @@ export class TurnosService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  // Consulta la tarifa activa del servicio asignado al turno
-  obtenerTarifa(turnoId: number): Observable<{ tarifa: number }> {
-    return this.http.get<{ tarifa: number }>(`${this.apiUrl}/${turnoId}/tarifa`);
+  /** Tarifa con calendarización (incluye recargo si aplica) */
+  obtenerTarifa(turnoId: number): Observable<TarifaConCalendarizacion> {
+    return this.http.get<TarifaConCalendarizacion>(`${this.apiUrl}/${turnoId}/tarifa`);
   }
 
   // Registra el pago usando PATCH

@@ -1,1 +1,85 @@
-<p>calendarizacion-matriculacion works!</p>
+<div class="calend-container">
+  <header class="header">
+    <h1>Calendarización Matriculación y RTV</h1>
+    <p class="subtitulo">Art. 12 - Mes obligatorio según último dígito de placa. Diciembre: todos con recargo.</p>
+  </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <div class="contenido" *ngIf="!cargando && !error">
+    <!-- Tabla de calendarización (Art. 12) -->
+    <section class="panel-tabla">
+      <h3><mat-icon class="panel-icon">calendar_month</mat-icon> Mes obligatorio por último dígito de placa</h3>
+      <p class="panel-desc">Según normativa, cada dígito tiene asignado un mes. Enero es opcional para todos. Diciembre aplica recargo a todos.</p>
+
+      <div class="tabla-contenedor">
+        <table class="calend-tabla">
+          <thead>
+            <tr>
+              <th>Último dígito placa</th>
+              <th>Mes obligatorio</th>
+              <th>Opcionales (antes del mes)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let fila of tablaCalendarizacion">
+              <td>{{ fila.digito }}</td>
+              <td>{{ fila.mesNombre }}</td>
+              <td>{{ fila.opcionales }}</td>
+            </tr>
+            <tr *ngIf="tablaCalendarizacion.length === 0">
+              <td colspan="3" class="sin-datos">No hay datos. Ejecute el script ant_calendarizacion_rtv_seed.sql</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-opcionales">
+        <h4><mat-icon>check_circle</mat-icon> Meses opcionales (sin recargo)</h4>
+        <ul>
+          <li><strong>Enero:</strong> Opcional para todos los dígitos.</li>
+          <li><strong>Antes del mes asignado:</strong> Cualquier mes anterior al obligatorio es opcional (ej. placa termina en 5 → junio obligatorio; enero a mayo son opcionales).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Cuadrito: Monto recargo -->
+    <section class="panel-recargo">
+      <h3><mat-icon class="panel-icon">attach_money</mat-icon> Recargo por calendarización</h3>
+      <p class="panel-desc">Monto que se cobra cuando el propietario realiza la revisión técnica o matriculación fuera del mes asignado (o en diciembre).</p>
+
+      <div class="recargo-form">
+        <div class="form-grupo">
+          <label for="montoRecargo">Monto recargo (USD)</label>
+          <input
+            type="text"
+            inputmode="decimal"
+            id="montoRecargo"
+            [(ngModel)]="montoRecargoEdit"
+            name="montoRecargo"
+            placeholder="25.00"
+            (keypress)="soloNumerosDecimal($event)"
+          />
+        </div>
+        <button type="button" class="btn btn-primary" (click)="guardarRecargo()" [disabled]="guardando">
+          <mat-icon *ngIf="!guardando">save</mat-icon>
+          {{ guardando ? 'Guardando...' : 'Guardar monto' }}
+        </button>
+      </div>
+
+      <div class="panel-info">
+        <mat-icon>info</mat-icon>
+        <p>Este recargo se aplica automáticamente en el registro de pagos cuando el vehículo está fuera del mes calendarizado.</p>
+      </div>
+    </section>
+  </div>
+</div>

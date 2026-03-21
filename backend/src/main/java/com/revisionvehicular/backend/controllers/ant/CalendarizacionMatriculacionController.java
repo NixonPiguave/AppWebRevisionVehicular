@@ -1,6 +1,7 @@
 package com.revisionvehicular.backend.controllers.ant;
 
 import com.revisionvehicular.backend.dtos.ant.CalendarizacionMatriculacionDTO;
+import com.revisionvehicular.backend.dtos.ant.CalendarizacionRtvDisplayDTO;
 import com.revisionvehicular.backend.service.ant.ICalendarizacionService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,11 @@ public class CalendarizacionMatriculacionController {
     @GetMapping
     public ResponseEntity<List<CalendarizacionMatriculacionDTO>> listar() {
         return ResponseEntity.ok(service.findAll());
+    }
+
+    @GetMapping("/rtv-display")
+    public ResponseEntity<List<CalendarizacionRtvDisplayDTO>> listarRtvDisplay() {
+        return ResponseEntity.ok(service.findCalendRtvParaDisplay());
     }
 
     @GetMapping("/{id}")
