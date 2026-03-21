@@ -215,13 +215,29 @@ public class TurnosServiceImpl implements ITurnosService {
 
     @Override
     public BigDecimal obtenerTarifaPorTurno(Long turnoId) {
-        Turnos turno = repository.findById(turnoId)
+        Turnos turno = repository.findByIdWithServicioYVehiculoCategoria(turnoId)
                 .orElseThrow(() -> new RuntimeException("Turno no encontrado con ID: " + turnoId));
 
         if (turno.getServicio() == null) return null;
 
+        Long servicioId = turno.getServicio().getIdTipoTramite();
+        Long categoriaId = null;
+        if (turno.getVehiculo() != null
+                && turno.getVehiculo().getSubcategoria() != null
+                && turno.getVehiculo().getSubcategoria().getCategoria() != null) {
+            categoriaId = turno.getVehiculo().getSubcategoria().getCategoria().getCategoriaid();
+        }
+
+        if (categoriaId != null) {
+            var porCategoria = tarifarioRepository
+                    .findByServicio_IdTipoTramiteAndEstadoAndCategoria_Categoriaid(servicioId, "ACTIVO", categoriaId);
+            if (porCategoria.isPresent()) {
+                return porCategoria.get().getTarifa();
+            }
+        }
+
         return tarifarioRepository
-                .findByServicio_IdTipoTramiteAndEstado(turno.getServicio().getIdTipoTramite(), "ACTIVO")
+                .findByServicio_IdTipoTramiteAndEstadoAndCategoriaIsNull(servicioId, "ACTIVO")
                 .map(TarifarioTramite::getTarifa)
                 .orElse(null);
     }

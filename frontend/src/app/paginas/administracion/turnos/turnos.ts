@@ -97,10 +97,22 @@ export class TurnosComponent implements OnInit {
   cargarServicios(): void {
     this.servicioService.listar().subscribe({
       next: (data) => {
-        this.servicios = data ?? [];
+        this.servicios = Array.isArray(data) ? data : [];
         this.cdr.detectChanges();
       },
-      error: () => { this.servicios = []; this.cdr.detectChanges(); }
+      error: (err) => {
+        console.error('No se pudieron cargar los tipos de servicio', err);
+        const msg =
+          err?.error?.message ??
+          err?.message ??
+          (typeof err?.error === 'string' ? err.error : null) ??
+          `Error ${err?.status ?? ''} al consultar /api/servicios`.trim();
+        this.notification.error(
+          `No se cargaron los servicios: ${msg}. Revise que el backend esté en marcha y la consola (F12) para más detalle.`
+        );
+        this.servicios = [];
+        this.cdr.detectChanges();
+      }
     });
   }
 

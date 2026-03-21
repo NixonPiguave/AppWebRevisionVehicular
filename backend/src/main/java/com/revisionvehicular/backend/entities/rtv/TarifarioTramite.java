@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.entities.rtv;
 
+import com.revisionvehicular.backend.entities.cv.Categoria;
 import com.revisionvehicular.backend.entities.srtv.Servicio;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.util.List;
 
+/** Tarifas por tipo de trámite; opcionalmente por categoría de vehículo (unicidad parcial en BD). */
 @Entity
 @Table(
         name = "rtv_tarifario_tramite",
@@ -14,10 +16,6 @@ import java.util.List;
                 @UniqueConstraint(
                         name = "rtv_tarifario_tramite_codificacion_key",
                         columnNames = "codificacion"
-                ),
-                @UniqueConstraint(
-                        name = "rtv_tarifario_tramite_tipo_periodo_key",
-                        columnNames = {"id_tipo_tramite", "periodo", "estado"}
                 )
         }
 )
@@ -32,6 +30,11 @@ public class TarifarioTramite {
     @ManyToOne
     @JoinColumn(name = "id_tipo_tramite", nullable = false)
     private Servicio servicio;
+
+    /** Si no es null, esta tarifa aplica solo a esa categoría de vehículo (cv_categoria). */
+    @ManyToOne
+    @JoinColumn(name = "id_categoria")
+    private Categoria categoria;
 
     @Column(name = "codificacion", length = 30, nullable = false, unique = true)
     private String codificacion;

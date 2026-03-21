@@ -100,4 +100,8 @@ public interface ITurnosRepository extends JpaRepository<Turnos, Long> {
 
     @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.vehiculo v LEFT JOIN FETCH v.modeloVehiculo mv LEFT JOIN FETCH mv.marca WHERE t.turnoId = :turnoId")
     java.util.Optional<Turnos> findByIdWithVehiculoCompleto(@Param("turnoId") Long turnoId);
+
+    @Query("SELECT t FROM Turnos t LEFT JOIN FETCH t.servicio s LEFT JOIN FETCH t.vehiculo v "
+            + "LEFT JOIN FETCH v.subcategoria sub LEFT JOIN FETCH sub.categoria cat WHERE t.turnoId = :turnoId")
+    java.util.Optional<Turnos> findByIdWithServicioYVehiculoCategoria(@Param("turnoId") Long turnoId);
 }

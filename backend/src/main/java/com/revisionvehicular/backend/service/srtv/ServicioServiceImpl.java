@@ -4,9 +4,9 @@ import com.revisionvehicular.backend.dtos.srtv.ServicioDTO;
 import com.revisionvehicular.backend.entities.srtv.Servicio;
 import com.revisionvehicular.backend.repositories.srtv.IServicioRepository;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -66,6 +66,7 @@ public class ServicioServiceImpl implements IServicioService {
         return toDTO(servicio);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ServicioDTO> findAll() {
         return repository.findAll()

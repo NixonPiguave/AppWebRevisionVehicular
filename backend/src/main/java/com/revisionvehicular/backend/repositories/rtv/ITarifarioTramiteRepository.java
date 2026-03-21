@@ -9,6 +9,9 @@ import java.util.Optional;
 @Repository
 public interface ITarifarioTramiteRepository extends JpaRepository<TarifarioTramite, Long> {
 
+    Optional<TarifarioTramite> findByServicio_IdTipoTramiteAndEstadoAndCategoria_Categoriaid(
+            Long idTipoTramite, String estado, Long categoriaId);
 
-    Optional<TarifarioTramite> findByServicio_IdTipoTramiteAndEstado(Long idTipoTramite, String estado);
+    Optional<TarifarioTramite> findByServicio_IdTipoTramiteAndEstadoAndCategoriaIsNull(
+            Long idTipoTramite, String estado);
 }
