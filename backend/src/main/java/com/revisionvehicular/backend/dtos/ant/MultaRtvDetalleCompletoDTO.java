@@ -1,17 +1,16 @@
 package com.revisionvehicular.backend.dtos.ant;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class MultaRtvDetalleCompletoDTO {
 
-    private PropietarioVistaDTO propietario;
-    private VehiculoVistaDTO vehiculo;
-    private List<MultaTablaCompletaDTO> multas;
+    private Long vehiculoId;
+    private String placa;
+    private Long propietarioId;
+    private String propietarioDocumento;
+    private String propietarioNombre;
+    private List<MultaRtvDetalleLineaDTO> multas;
 }

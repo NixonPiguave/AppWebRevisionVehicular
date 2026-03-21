@@ -26,6 +26,7 @@ public interface IMultaRepository extends JpaRepository<Multa, Long> {
                                                    @Param("p2") String parteAnual);
 
     @Query("SELECT m FROM Multa m LEFT JOIN FETCH m.estadoMulta LEFT JOIN FETCH m.entidadTransito "
+            + "LEFT JOIN FETCH m.vehiculo LEFT JOIN FETCH m.propietario "
             + "WHERE m.vehiculo.vehiculoid = :vid AND LOWER(m.motivo) LIKE LOWER(CONCAT('%', :p1, '%')) "
             + "AND LOWER(m.motivo) LIKE LOWER(CONCAT('%', :p2, '%')) "
             + "ORDER BY m.fechaEmision DESC")

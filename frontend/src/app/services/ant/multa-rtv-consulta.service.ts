@@ -5,42 +5,14 @@ import { Observable } from 'rxjs';
 export interface MultaRtvResumenFila {
   vehiculoId: number;
   propietarioId: number;
-  propietarioNombre: string;
-  propietarioDocumento: string;
-  vehiculoPlaca: string;
-  vehiculoMarcaModelo: string;
   recargoAcumulado: number;
 }
 
-export interface PropietarioVista {
-  idPropietario: number;
-  documentoIdentidad: string;
-  nombre: string;
-  telefono?: string;
-  correo?: string;
-  direccion?: string;
-  fechaRegistro?: string;
-}
-
-export interface VehiculoVista {
-  vehiculoId: number;
-  matricula: string;
-  chasis?: string;
-  vin?: string;
-  codigoMotor?: string;
-  anioFabricacion?: number;
-  marcaNombre?: string;
-  modeloNombre?: string;
-}
-
-export interface MultaTablaCompleta {
+export interface MultaRtvDetalleLinea {
   idMulta: number;
-  idEntidad?: number;
+  idEntidadTransito?: number;
   entidadNombre?: string;
-  idPropietario?: number;
-  idVehiculo?: number;
   idEstadoMulta?: number;
-  estadoMultaTipo?: string;
   estadoMultaDescripcion?: string;
   numeroCitacion?: string;
   fechaEmision?: string;
@@ -54,24 +26,25 @@ export interface MultaTablaCompleta {
 }
 
 export interface MultaRtvDetalleCompleto {
-  propietario: PropietarioVista | null;
-  vehiculo: VehiculoVista | null;
-  multas: MultaTablaCompleta[];
+  vehiculoId: number;
+  placa?: string;
+  propietarioId?: number;
+  propietarioDocumento?: string;
+  propietarioNombre?: string;
+  multas: MultaRtvDetalleLinea[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class MultaRtvConsultaService {
-  private apiUrl = 'http://localhost:8080/api/multa';
+  private readonly base = 'http://localhost:8080/api/multa/consulta-rtv-anual';
 
   constructor(private http: HttpClient) {}
 
   listarResumen(): Observable<MultaRtvResumenFila[]> {
-    return this.http.get<MultaRtvResumenFila[]>(`${this.apiUrl}/consulta-rtv-anual/resumen`);
+    return this.http.get<MultaRtvResumenFila[]>(`${this.base}/resumen`);
   }
 
-  obtenerDetalle(vehiculoId: number): Observable<MultaRtvDetalleCompleto> {
-    return this.http.get<MultaRtvDetalleCompleto>(
-      `${this.apiUrl}/consulta-rtv-anual/vehiculo/${vehiculoId}`
-    );
+  obtenerDetallePorVehiculo(vehiculoId: number): Observable<MultaRtvDetalleCompleto> {
+    return this.http.get<MultaRtvDetalleCompleto>(`${this.base}/vehiculo/${vehiculoId}`);
   }
 }
