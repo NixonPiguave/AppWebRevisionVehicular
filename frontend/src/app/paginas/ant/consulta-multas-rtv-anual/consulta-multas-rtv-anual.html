@@ -1,0 +1,140 @@
+<div class="page-wrap">
+  <header class="header">
+    <h1>Multas por no presentación a RTV anual</h1>
+    <p class="subtitulo">
+      Listado de multas cuyo motivo indica inasistencia a la revisión técnica vehicular anual.
+      El recargo acumulado es la suma del monto de esas multas por vehículo.
+    </p>
+  </header>
+
+  <div class="mensaje-error" *ngIf="error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+    <button type="button" class="btn-reintentar" (click)="cargar()">Reintentar</button>
+  </div>
+
+  <div class="cargando" *ngIf="cargando && !error">
+    <div class="spinner"></div>
+    <span>Cargando...</span>
+  </div>
+
+  <section class="panel" *ngIf="!cargando && !error">
+    <div class="tabla-contenedor">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Propietario</th>
+            <th>Identificación</th>
+            <th>Vehículo</th>
+            <th>Marca / modelo</th>
+            <th class="num">Recargo acumulado</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of filas">
+            <td>{{ f.propietarioNombre || '—' }}</td>
+            <td>{{ f.propietarioDocumento || '—' }}</td>
+            <td>{{ f.vehiculoPlaca || '—' }}</td>
+            <td>{{ f.vehiculoMarcaModelo || '—' }}</td>
+            <td class="num">{{ f.recargoAcumulado | number:'1.2-2' }}</td>
+            <td>
+              <button type="button" class="btn-detalles" (click)="verDetalles(f)">Ver detalles</button>
+            </td>
+          </tr>
+          <tr *ngIf="filas.length === 0">
+            <td colspan="6" class="sin-datos">No hay multas registradas con el motivo de no presentación a RTV anual.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<div class="modal-overlay" *ngIf="mostrarDetalle" (click)="cerrarDetalle()"></div>
+<div class="modal-panel" *ngIf="mostrarDetalle" (click)="$event.stopPropagation()">
+  <div class="modal-head">
+    <h2>Detalle</h2>
+    <button type="button" class="btn-cerrar" (click)="cerrarDetalle()" aria-label="Cerrar">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="cargando mini" *ngIf="cargandoDetalle">
+      <div class="spinner small"></div>
+      <span>Cargando detalle...</span>
+    </div>
+    <div class="mensaje-error" *ngIf="errorDetalle && !cargandoDetalle">
+      <mat-icon>error_outline</mat-icon>
+      <span>{{ errorDetalle }}</span>
+    </div>
+
+    <ng-container *ngIf="detalle && !cargandoDetalle">
+      <section class="bloque" *ngIf="detalle.propietario">
+        <h3>Propietario</h3>
+        <dl class="grid-dl">
+          <dt>Nombre</dt><dd>{{ detalle.propietario.nombre }}</dd>
+          <dt>Documento</dt><dd>{{ detalle.propietario.documentoIdentidad }}</dd>
+          <dt>Teléfono</dt><dd>{{ detalle.propietario.telefono || '—' }}</dd>
+          <dt>Correo</dt><dd>{{ detalle.propietario.correo || '—' }}</dd>
+          <dt>Dirección</dt><dd>{{ detalle.propietario.direccion || '—' }}</dd>
+          <dt>Fecha registro</dt><dd>{{ detalle.propietario.fechaRegistro || '—' }}</dd>
+        </dl>
+      </section>
+
+      <section class="bloque" *ngIf="detalle.vehiculo">
+        <h3>Vehículo</h3>
+        <dl class="grid-dl">
+          <dt>Placa</dt><dd>{{ detalle.vehiculo.matricula }}</dd>
+          <dt>Marca</dt><dd>{{ detalle.vehiculo.marcaNombre || '—' }}</dd>
+          <dt>Modelo</dt><dd>{{ detalle.vehiculo.modeloNombre || '—' }}</dd>
+          <dt>Chasis</dt><dd>{{ detalle.vehiculo.chasis || '—' }}</dd>
+          <dt>VIN</dt><dd>{{ detalle.vehiculo.vin || '—' }}</dd>
+          <dt>Motor</dt><dd>{{ detalle.vehiculo.codigoMotor || '—' }}</dd>
+          <dt>Año fabricación</dt><dd>{{ detalle.vehiculo.anioFabricacion ?? '—' }}</dd>
+        </dl>
+      </section>
+
+      <section class="bloque">
+        <h3>Detalle de multas</h3>
+        <div class="tabla-contenedor mini-scroll">
+          <table class="data-table dense">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Ciudad</th>
+                <th>Estado reg.</th>
+                <th>Emisión</th>
+                <th>Notificación</th>
+                <th class="num">Monto</th>
+                <th>Motivo</th>
+                <th>Citación</th>
+                <th>País</th>
+                <th>Puntos</th>
+                <th>Entidad</th>
+                <th>Estado multa</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let m of detalle.multas">
+                <td>{{ m.idMulta }}</td>
+                <td>{{ m.ciudad }}</td>
+                <td>{{ m.estado }}</td>
+                <td>{{ m.fechaEmision }}</td>
+                <td>{{ m.fechaNotificacion }}</td>
+                <td class="num">{{ m.monto | number:'1.2-2' }}</td>
+                <td class="cell-motivo">{{ m.motivo }}</td>
+                <td>{{ m.numeroCitacion || '—' }}</td>
+                <td>{{ m.pais }}</td>
+                <td>{{ m.puntos }}</td>
+                <td>{{ m.entidadNombre || m.idEntidad }}</td>
+                <td>{{ m.estadoMultaTipo || m.idEstadoMulta }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </ng-container>
+  </div>
+</div>
