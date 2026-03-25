@@ -715,3 +715,134 @@ body {
   object-fit: contain;
   background: #fafafa;
 }
+
+.restore-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.restore-modal {
+  width: min(680px, 95vw);
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.22);
+  padding: 18px;
+}
+
+.restore-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #8a1f1f;
+}
+
+.restore-modal-header h3 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.restore-modal-text {
+  color: #1f2937;
+  margin-bottom: 6px;
+}
+
+.restore-modal-hint {
+  color: #4b5563;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.restore-file-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.restore-file-row input[type='file'] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.btn-file {
+  border: 1px solid #cfd8dc;
+  background: #f8fafc;
+  color: #1f2937;
+  border-radius: 8px;
+  padding: 8px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.restore-file-name {
+  font-size: 13px;
+  color: #374151;
+}
+
+.restore-error {
+  margin-top: 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #991b1b;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.restore-ok {
+  margin-top: 10px;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #065f46;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.restore-modal-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-logout-modal,
+.btn-restore-modal {
+  border: none;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-logout-modal {
+  background: #f3f4f6;
+  color: #1f2937;
+}
+
+.btn-restore-modal {
+  background: #8a1f1f;
+  color: #fff;
+}
+
+.btn-logout-modal:disabled,
+.btn-restore-modal:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

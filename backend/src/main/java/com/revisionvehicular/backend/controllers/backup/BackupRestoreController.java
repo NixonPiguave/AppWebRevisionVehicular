@@ -4,6 +4,7 @@ import com.revisionvehicular.backend.dtos.backup.BackupLocalFileDTO;
 import com.revisionvehicular.backend.service.backup.IBackupRestoreService;
 import com.revisionvehicular.backend.service.srtv.AuditoriaService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,5 +35,18 @@ public class BackupRestoreController {
         restoreService.restaurar(nombreArchivo);
         auditoriaService.registrar("UPDATE", "Base de datos", "Restauración desde respaldo local: " + nombreArchivo);
         return ResponseEntity.ok(Map.of("mensaje", "Restauración completada correctamente."));
+    }
+
+    @PostMapping("/ejecutar-upload")
+    public ResponseEntity<Map<String, String>> ejecutarRestoreUpload(@RequestParam("file") MultipartFile file) {
+        String nombre = file != null ? file.getOriginalFilename() : null;
+        restoreService.restaurarDesdeArchivoSubido(file);
+        auditoriaService.registrar("UPDATE", "Base de datos", "Restauración desde archivo cargado: " + nombre);
+        return ResponseEntity.ok(Map.of("mensaje", "Restauración completada correctamente desde archivo seleccionado."));
+    }
+
+    @GetMapping("/estado-bd")
+    public ResponseEntity<Map<String, Object>> estadoBd() {
+        return ResponseEntity.ok(restoreService.diagnosticarEstadoBaseDatos());
     }
 }

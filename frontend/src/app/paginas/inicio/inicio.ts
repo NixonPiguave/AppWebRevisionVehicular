@@ -6,6 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { EmpresaService } from '../../services/administracion/empresa.service';
 import { MatIconModule } from '@angular/material/icon';
+import { BackupService, EstadoBdRestore } from '../../services/backup/backup.service';
 
 const PRIMER_CHECK_SESION_MS = 5000;
 const INTERVALO_CHECK_SESION_MS = 15000;
@@ -47,10 +48,18 @@ export class InicioComponent implements OnInit, OnDestroy {
   /** Mensaje informativo (ej. "Has iniciado sesión desde otro dispositivo") que se oculta solo. */
   mensajeInfo = '';
   private mensajeInfoTimeout: ReturnType<typeof setTimeout> | null = null;
+  modalRestoreVisible = false;
+  estadoRestore: EstadoBdRestore | null = null;
+  archivoRestoreSeleccionado: File | null = null;
+  nombreArchivoRestore = '';
+  restaurandoBd = false;
+  errorRestoreBd = '';
+  exitoRestoreBd = '';
 
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
+    private backupService: BackupService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -64,6 +73,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       this.checkSesionSubscription = timer(PRIMER_CHECK_SESION_MS, INTERVALO_CHECK_SESION_MS).pipe(
         switchMap(() => this.authService.checkSession())
       ).subscribe();
+      this.validarEstadoBaseDatos();
     }
     const infoMsg = sessionStorage.getItem('authInfoMessage');
     if (infoMsg) {
@@ -83,6 +93,9 @@ export class InicioComponent implements OnInit, OnDestroy {
     if (this.mensajeInfoTimeout) {
       clearTimeout(this.mensajeInfoTimeout);
       this.mensajeInfoTimeout = null;
+    }
+    if (this.modalRestoreVisible) {
+      document.body.style.overflow = '';
     }
   }
 
@@ -111,6 +124,64 @@ export class InicioComponent implements OnInit, OnDestroy {
       this.mensajeInfoTimeout = null;
     }
     this.cdr.detectChanges();
+  }
+
+  private validarEstadoBaseDatos(): void {
+    this.backupService.estadoBdRestore().subscribe({
+      next: (estado) => {
+        this.estadoRestore = estado;
+        if (estado?.requiereRestauracion) {
+          this.modalRestoreVisible = true;
+          this.errorRestoreBd = '';
+          this.exitoRestoreBd = '';
+          document.body.style.overflow = 'hidden';
+        }
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Si no se pudo verificar, no bloqueamos el flujo normal.
+      }
+    });
+  }
+
+  onSeleccionarArchivoRestore(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files && input.files.length > 0 ? input.files[0] : null;
+    this.archivoRestoreSeleccionado = file;
+    this.nombreArchivoRestore = file?.name ?? '';
+    this.errorRestoreBd = '';
+    this.exitoRestoreBd = '';
+  }
+
+  ejecutarRestoreDesdeModal(): void {
+    if (!this.archivoRestoreSeleccionado) {
+      this.errorRestoreBd = 'Seleccione un archivo .backup para continuar.';
+      return;
+    }
+    if (!this.archivoRestoreSeleccionado.name.toLowerCase().endsWith('.backup')) {
+      this.errorRestoreBd = 'El archivo debe tener extensión .backup.';
+      return;
+    }
+    this.restaurandoBd = true;
+    this.errorRestoreBd = '';
+    this.exitoRestoreBd = '';
+    this.backupService.ejecutarRestoreUpload(this.archivoRestoreSeleccionado).subscribe({
+      next: (res) => {
+        this.exitoRestoreBd = res?.mensaje || 'Restauración completada correctamente.';
+        this.modalRestoreVisible = false;
+        this.archivoRestoreSeleccionado = null;
+        this.nombreArchivoRestore = '';
+        this.restaurandoBd = false;
+        document.body.style.overflow = '';
+        this.mensajeInfo = 'Base de datos restaurada. Cierra sesión y vuelve a ingresar para recargar todos los módulos.';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.errorRestoreBd = err?.error?.message || err?.message || 'No se pudo restaurar la base de datos.';
+        this.restaurandoBd = false;
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   /**

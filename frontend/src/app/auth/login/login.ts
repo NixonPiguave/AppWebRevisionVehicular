@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../services/auth.service';
 import { LoginRequest } from '../../models/login-request.model';
 import { EmpresaService } from '../../services/administracion/empresa.service';
+import { BackupService, EstadoBdRestore } from '../../services/backup/backup.service';
 
 @Component({
   selector: 'app-login',
@@ -23,6 +24,13 @@ export class LoginComponent implements OnInit {
   error = '';
   /** Mensaje cuando la sesión fue cerrada por admin o por inicio en otro dispositivo. */
   mensajeSesionCerrada = '';
+  estadoBdRestore: EstadoBdRestore | null = null;
+  mostrandoRestore = false;
+  archivoRestoreSeleccionado: File | null = null;
+  nombreArchivoRestore = '';
+  restaurandoBd = false;
+  errorRestoreBd = '';
+  exitoRestoreBd = '';
 
   //  Variables para el logo
   empresaLogo: string | null = null;
@@ -33,6 +41,7 @@ export class LoginComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
+    private backupService: BackupService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -44,6 +53,7 @@ export class LoginComponent implements OnInit {
       sessionStorage.removeItem('authMessage');
     }
     this.cargarLogoEmpresa();
+    this.verificarEstadoBdParaRestore();
   }
 
 
@@ -82,8 +92,63 @@ export class LoginComponent implements OnInit {
     this.hidePassword = !this.hidePassword;
   }
 
+  verificarEstadoBdParaRestore(): void {
+    this.backupService.estadoBdRestore().subscribe({
+      next: (estado) => {
+        this.estadoBdRestore = estado;
+        this.mostrandoRestore = !!estado?.requiereRestauracion;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        // Si falla endpoint, no bloqueamos login.
+      }
+    });
+  }
+
+  onSeleccionarArchivoRestore(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files && input.files.length > 0 ? input.files[0] : null;
+    this.archivoRestoreSeleccionado = file;
+    this.nombreArchivoRestore = file?.name ?? '';
+    this.errorRestoreBd = '';
+    this.exitoRestoreBd = '';
+  }
+
+  ejecutarRestoreDesdeLogin(): void {
+    if (!this.archivoRestoreSeleccionado) {
+      this.errorRestoreBd = 'Seleccione un archivo .backup para restaurar.';
+      return;
+    }
+    if (!this.archivoRestoreSeleccionado.name.toLowerCase().endsWith('.backup')) {
+      this.errorRestoreBd = 'El archivo debe tener extensión .backup.';
+      return;
+    }
+    this.restaurandoBd = true;
+    this.errorRestoreBd = '';
+    this.exitoRestoreBd = '';
+    this.backupService.ejecutarRestoreUpload(this.archivoRestoreSeleccionado).subscribe({
+      next: (res) => {
+        this.exitoRestoreBd = res?.mensaje || 'Restauración completada correctamente.';
+        this.restaurandoBd = false;
+        this.archivoRestoreSeleccionado = null;
+        this.nombreArchivoRestore = '';
+        this.verificarEstadoBdParaRestore();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.errorRestoreBd = err?.error?.message || err?.message || 'No se pudo restaurar la base de datos.';
+        this.restaurandoBd = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
 
   login() {
+    if (this.mostrandoRestore) {
+      this.error = 'Primero restaure la base de datos para habilitar el inicio de sesión.';
+      return;
+    }
     this.error = '';
 
     const request: LoginRequest = {

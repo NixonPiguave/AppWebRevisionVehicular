@@ -434,3 +434,41 @@
   </div>
 
 </div>
+
+<!-- Modal obligatorio para restauración de base de datos -->
+<div class="restore-modal-overlay" *ngIf="modalRestoreVisible">
+  <div class="restore-modal">
+    <div class="restore-modal-header">
+      <mat-icon>warning</mat-icon>
+      <h3>Base de datos incompleta detectada</h3>
+    </div>
+    <p class="restore-modal-text">
+      {{ estadoRestore?.razon || 'Se requiere restauración de base de datos para continuar.' }}
+    </p>
+    <p class="restore-modal-hint">
+      Seleccione un archivo <strong>.backup</strong> (FULL, DIFFERENTIAL o INCREMENTAL) desde su equipo.
+    </p>
+
+    <div class="restore-file-row">
+      <input #restoreInput type="file" accept=".backup" (change)="onSeleccionarArchivoRestore($event)" />
+      <button type="button" class="btn-file" (click)="restoreInput.click()">
+        <mat-icon>upload_file</mat-icon>
+        Seleccionar respaldo
+      </button>
+      <span class="restore-file-name" *ngIf="nombreArchivoRestore">{{ nombreArchivoRestore }}</span>
+    </div>
+
+    <div class="restore-error" *ngIf="errorRestoreBd">{{ errorRestoreBd }}</div>
+    <div class="restore-ok" *ngIf="exitoRestoreBd">{{ exitoRestoreBd }}</div>
+
+    <div class="restore-modal-actions">
+      <button type="button" class="btn-logout-modal" (click)="cerrarSesion()" [disabled]="restaurandoBd">
+        Cerrar sesión
+      </button>
+      <button type="button" class="btn-restore-modal" (click)="ejecutarRestoreDesdeModal()" [disabled]="restaurandoBd">
+        <mat-icon>restore</mat-icon>
+        {{ restaurandoBd ? 'Restaurando...' : 'Restaurar ahora' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -18,6 +18,42 @@
         </div>
       }
 
+      @if (mostrandoRestore) {
+        <div class="restore-box-login">
+          <div class="restore-box-title">
+            <mat-icon>warning</mat-icon>
+            <span>Restauración requerida</span>
+          </div>
+          <p class="restore-box-text">
+            {{ estadoBdRestore?.razon || 'La base de datos está vacía o incompleta.' }}
+          </p>
+          <p class="restore-box-hint">Seleccione un respaldo <strong>.backup</strong> (FULL/DIFFERENTIAL/INCREMENTAL).</p>
+
+          <div class="restore-file-row">
+            <input #restoreInput type="file" accept=".backup" (change)="onSeleccionarArchivoRestore($event)" />
+            <button type="button" class="btn-restore-file" (click)="restoreInput.click()">
+              <mat-icon>upload_file</mat-icon>
+              Seleccionar respaldo
+            </button>
+            <span class="restore-file-name" *ngIf="nombreArchivoRestore">{{ nombreArchivoRestore }}</span>
+          </div>
+
+          <div class="error-minimal" *ngIf="errorRestoreBd">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ errorRestoreBd }}</span>
+          </div>
+          <div class="restore-ok" *ngIf="exitoRestoreBd">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ exitoRestoreBd }}</span>
+          </div>
+
+          <button type="button" class="btn-restore-login" (click)="ejecutarRestoreDesdeLogin()" [disabled]="restaurandoBd">
+            <mat-icon>restore</mat-icon>
+            {{ restaurandoBd ? 'Restaurando...' : 'Restaurar base de datos' }}
+          </button>
+        </div>
+      }
+
       <form (ngSubmit)="login()" class="form-minimal" autocomplete="off">
 
         <!-- Campo Usuario -->

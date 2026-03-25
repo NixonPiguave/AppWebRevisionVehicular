@@ -155,6 +155,16 @@ export class BackupService {
   ejecutarRestore(nombreArchivo: string): Observable<{ mensaje: string }> {
     return this.http.post<{ mensaje: string }>(`${this.base}/restore/ejecutar`, { nombreArchivo });
   }
+
+  ejecutarRestoreUpload(file: File): Observable<{ mensaje: string }> {
+    const fd = new FormData();
+    fd.append('file', file);
+    return this.http.post<{ mensaje: string }>(`${this.base}/restore/ejecutar-upload`, fd);
+  }
+
+  estadoBdRestore(): Observable<EstadoBdRestore> {
+    return this.http.get<EstadoBdRestore>(`${this.base}/restore/estado-bd`);
+  }
 }
 
 export interface BackupLocalFile {
@@ -162,6 +172,13 @@ export interface BackupLocalFile {
   tamanoBytes: number;
   tamanoFormateado: string;
   fechaModificacion: string;
+}
+
+export interface EstadoBdRestore {
+  requiereRestauracion: boolean;
+  razon: string;
+  totalTablas?: number;
+  tiposSoportados?: string[];
 }
 
 export interface FolderItem {
