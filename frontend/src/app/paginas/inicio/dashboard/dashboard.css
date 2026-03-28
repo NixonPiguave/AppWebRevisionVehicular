@@ -1,234 +1,626 @@
-.dashboard {
-  padding: 24px;
-  max-width: 1100px;
+/* —— Panel operativo RTV —— */
+.dash {
+  --dash-green: #1b4332;
+  --dash-green-mid: #2d6a4f;
+  --dash-green-soft: #e8f0ec;
+  --dash-ink: #0d1f14;
+  --dash-muted: #5c6b62;
+  --dash-line: #d8e2dc;
+  --dash-radius: 14px;
+  --dash-shadow: 0 4px 24px rgba(13, 31, 20, 0.07);
+
+  max-width: 1400px;
   margin: 0 auto;
-  min-height: 60vh;
+  padding: 36px 32px 64px;
+  min-height: 65vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  color: var(--dash-ink);
 }
 
-.dashboard-header {
-  margin-bottom: 28px;
-}
-
-.dashboard-header h1 {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1a2e1a;
-  margin: 0 0 4px 0;
-}
-
-.dashboard-header .subtitle {
-  font-size: 0.95rem;
-  color: #5a6b5a;
-  margin: 0;
-}
-
-.loading {
+.dash-loading {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 32px;
-  color: #5a6b5a;
-}
-
-.spinner {
-  width: 28px;
-  height: 28px;
-  border: 3px solid #e0e8e0;
-  border-top-color: #2d5a27;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.section {
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(45, 90, 39, 0.08);
-  padding: 20px 24px;
-  margin-bottom: 24px;
-  border: 1px solid #e8efe8;
-}
-
-.section h2 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #1a2e1a;
-  margin: 0 0 16px 0;
-}
-
-.section h2 mat-icon {
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  color: #2d5a27;
-}
-
-.total-card {
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  background: linear-gradient(135deg, #2d5a27 0%, #1a2e1a 100%);
-  color: #f5f9f5;
-  padding: 14px 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-}
-
-.total-card mat-icon {
-  font-size: 28px;
-  width: 28px;
-  height: 28px;
-  opacity: 0.9;
-}
-
-.total-num {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.total-label {
-  font-size: 0.8rem;
-  opacity: 0.9;
-}
-
-.estados-grid {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
-}
-
-.estado-card {
-  border-radius: 8px;
-  padding: 12px 14px;
-  background: #f5f9f5;
-  border: 1px solid #e0eae0;
-}
-
-.estado-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.estado-header mat-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  color: #2d5a27;
-}
-
-.estado-label {
-  flex: 1;
+  padding: 48px 24px;
+  color: var(--dash-muted);
   font-size: 0.95rem;
-  font-weight: 500;
-  color: #1a2e1a;
 }
 
-.estado-num {
+.dash-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--dash-line);
+  border-top-color: var(--dash-green-mid);
+  border-radius: 50%;
+  animation: dashSpin 0.75s linear infinite;
+}
+
+@keyframes dashSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hero */
+.dash-hero-text {
+  max-width: 36rem;
+}
+
+.dash-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 36px;
+  padding-bottom: 36px;
+  border-bottom: 1px solid var(--dash-line);
+}
+
+.dash-eyebrow {
+  font-size: 0.74rem;
   font-weight: 700;
-  color: #2d5a27;
-  font-size: 1.05rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--dash-green-mid);
+  margin: 0 0 10px 0;
 }
 
-.estado-bar-wrap {
-  height: 8px;
-  background: #e0eae0;
-  border-radius: 4px;
-  overflow: hidden;
+.dash-title {
+  margin: 0 0 10px 0;
+  font-size: clamp(1.75rem, 3.2vw, 2.25rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--dash-green);
+  line-height: 1.15;
 }
 
-.estado-bar {
-  height: 100%;
-  background: #2d5a27;
-  border-radius: 4px;
-  transition: width 0.35s ease;
+.dash-date {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--dash-muted);
+  line-height: 1.45;
 }
 
-.estado-card[data-estado="CANCELADO"] .estado-bar,
-.estado-card[data-estado="CANCELADO"] .estado-header mat-icon {
-  background: #8b4545;
-  color: #8b4545;
+.dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 20px;
+  flex: 1;
+  min-width: min(100%, 600px);
 }
 
-.estado-card[data-estado="CONFIRMADO"] .estado-bar {
-  background: #2d7a3e;
-}
-
-.estado-card[data-estado="EN_PROCESO"] .estado-bar {
-  background: #1565c0;
-}
-
-.estado-card[data-estado="EN_PROCESO"] .estado-header mat-icon {
-  color: #1565c0;
-}
-
-.auditoria-list {
+.kpi {
+  background: #fff;
+  border: 1px solid var(--dash-line);
+  border-radius: var(--dash-radius);
+  padding: 22px 22px 20px;
+  box-shadow: var(--dash-shadow);
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 14px;
-  max-height: 280px;
-  overflow-y: auto;
+  min-height: 118px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.auditoria-item {
-  display: grid;
-  grid-template-columns: 80px 1fr 120px 140px;
-  gap: 12px;
-  align-items: center;
-  font-size: 0.85rem;
-  padding: 8px 10px;
-  border-radius: 6px;
-  background: #fafbfa;
-  border: 1px solid #eee;
+.kpi:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(13, 31, 20, 0.1);
 }
 
-.auditoria-accion {
+.kpi-accent {
+  background: linear-gradient(145deg, var(--dash-green) 0%, #0f2918 100%);
+  border: none;
+  color: #f4f9f6;
+}
+
+.kpi-accent .kpi-label,
+.kpi-accent .kpi-hint {
+  color: rgba(244, 249, 246, 0.85);
+}
+
+.kpi-accent .kpi-value {
+  color: #fff;
+}
+
+.kpi-muted {
+  background: var(--dash-green-soft);
+}
+
+.kpi-label {
+  font-size: 0.74rem;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--dash-muted);
+  line-height: 1.35;
 }
 
-.auditoria-accion[data-tipo="INSERT"] { color: #2d7a3e; }
-.auditoria-accion[data-tipo="UPDATE"] { color: #2d5a27; }
-.auditoria-accion[data-tipo="DELETE"] { color: #8b4545; }
-.auditoria-accion[data-tipo="LOGIN"] { color: #1a5a7a; }
-.auditoria-accion[data-tipo="LOGOUT"] { color: #5a5a5a; }
-
-.auditoria-entidad { color: #3a4a3a; }
-.auditoria-usuario { color: #5a6b5a; }
-.auditoria-fecha { color: #7a8a7a; font-size: 0.8rem; }
-
-.empty {
-  color: #7a8a7a;
-  font-size: 0.9rem;
-  margin: 0 0 12px 0;
+.kpi-value {
+  font-size: clamp(1.75rem, 4vw, 2.05rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  color: var(--dash-green);
 }
 
-.link-reporte {
+.kpi-hint {
+  font-size: 0.8rem;
+  color: var(--dash-muted);
+  line-height: 1.4;
+  margin-top: auto;
+}
+
+/* Layout principal */
+.dash-layout {
+  display: grid;
+  grid-template-columns: 1.12fr 0.88fr;
+  gap: 28px;
+  align-items: start;
+}
+
+/* Evita que el panel de turnos comprima el contenido por debajo del ancho útil */
+.dash-panel--turnos {
+  min-width: 0;
+}
+
+@media (max-width: 960px) {
+  .dash-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dash-panel {
+  background: #fff;
+  border-radius: calc(var(--dash-radius) + 2px);
+  border: 1px solid var(--dash-line);
+  box-shadow: var(--dash-shadow);
+  padding: 28px 32px 34px;
+}
+
+.panel-head {
+  margin-bottom: 26px;
+}
+
+.panel-head--row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-title {
+  margin: 0 0 8px 0;
+  font-size: 1.22rem;
+  font-weight: 650;
+  color: var(--dash-green);
+  letter-spacing: -0.02em;
+}
+
+.panel-desc {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--dash-muted);
+  max-width: 52ch;
+  line-height: 1.5;
+}
+
+.dash-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #2d5a27;
-  font-weight: 500;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--dash-green-soft);
+  color: var(--dash-green-mid);
+  font-size: 0.88rem;
+  font-weight: 600;
   text-decoration: none;
+  border: 1px solid var(--dash-line);
+  transition: background 0.15s ease;
+  flex-shrink: 0;
+}
+
+.dash-link:hover {
+  background: #dde8e0;
+}
+
+.dash-link mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.dash-empty {
+  margin: 12px 0;
+  color: var(--dash-muted);
   font-size: 0.9rem;
 }
 
-.link-reporte:hover {
-  text-decoration: underline;
+/* Distribución por estado: dona + leyenda arriba (ancho completo del panel); tabla abajo a ancho completo */
+.distrib-body {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  width: 100%;
+  min-width: 0;
 }
 
-.link-reporte mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+.distrib-visual {
+  display: flex;
+  flex-flow: row wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 28px 48px;
+  padding: 8px 0 4px;
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .distrib-visual {
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
+.donut-wrap {
+  width: min(220px, 72vw);
+  height: min(220px, 72vw);
+  border-radius: 50%;
+  position: relative;
+  box-shadow:
+    0 8px 32px rgba(13, 31, 20, 0.08),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.donut-hole {
+  position: absolute;
+  inset: 26%;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  box-shadow:
+    inset 0 0 0 1px var(--dash-line),
+    0 2px 12px rgba(13, 31, 20, 0.06);
+  padding: 12px;
+}
+
+.donut-total {
+  font-size: clamp(1.65rem, 5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--dash-green);
+  line-height: 1;
+}
+
+.donut-caption {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--dash-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-top: 8px;
+  max-width: 12ch;
+  line-height: 1.35;
+}
+
+.donut-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.donut-legend-row {
+  display: grid;
+  grid-template-columns: 12px 1fr auto auto;
+  gap: 10px 14px;
+  align-items: center;
+  font-size: 0.86rem;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fafcfb;
+  border: 1px solid #eef2ef;
+}
+
+.donut-legend-row--empty {
+  opacity: 0.55;
+}
+
+.donut-legend-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.donut-legend-row[data-estado='GENERADO'] .donut-legend-swatch { background: #40916c; }
+.donut-legend-row[data-estado='PAGADO'] .donut-legend-swatch { background: #2d6a4f; }
+.donut-legend-row[data-estado='EN_PROCESO'] .donut-legend-swatch { background: #1d6fb8; }
+.donut-legend-row[data-estado='CONFIRMADO'] .donut-legend-swatch { background: #52b788; }
+.donut-legend-row[data-estado='FINALIZADO'] .donut-legend-swatch { background: #74c69d; }
+.donut-legend-row[data-estado='CANCELADO'] .donut-legend-swatch { background: #9b4d4d; }
+.donut-legend-row[data-estado='OTROS'] .donut-legend-swatch { background: #6c757d; }
+
+.donut-legend-label {
+  font-weight: 600;
+  color: var(--dash-ink);
+  min-width: 0;
+}
+
+.donut-legend-num {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dash-green-mid);
+}
+
+.donut-legend-pct {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dash-muted);
+  min-width: 2.75rem;
+  text-align: right;
+}
+
+.distrib-table-wrap {
+  width: 100%;
+  min-width: 0;
+}
+
+.distrib-table-title {
+  margin: 0 0 8px 0;
+  font-size: 1.05rem;
+  font-weight: 650;
+  color: var(--dash-green);
+  letter-spacing: -0.02em;
+}
+
+.distrib-table-desc {
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+  color: var(--dash-muted);
+  line-height: 1.5;
+  max-width: 60ch;
+}
+
+.estado-table-scroll {
+  overflow-x: visible;
+  width: 100%;
+  border: 1px solid var(--dash-line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(13, 31, 20, 0.04);
+}
+
+.estado-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.estado-table-col-estado {
+  width: 38%;
+}
+
+.estado-table-col-turnos {
+  width: 14%;
+}
+
+.estado-table-col-parte {
+  width: 48%;
+}
+
+.estado-table thead th {
+  text-align: left;
+  padding: 14px 18px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--dash-muted);
+  background: #f4f8f5;
+  border-bottom: 1px solid var(--dash-line);
+  vertical-align: bottom;
+}
+
+.estado-table-th-parte {
+  white-space: normal;
+  line-height: 1.35;
+  hyphens: auto;
+}
+
+.estado-table tbody td {
+  padding: 14px 18px;
+  border-bottom: 1px solid #eef2ef;
+  vertical-align: middle;
+}
+
+.estado-table tbody td:first-child {
+  overflow-wrap: anywhere;
+}
+
+.estado-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.estado-table-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--dash-green);
+  white-space: nowrap;
+}
+
+.estado-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  color: var(--dash-ink);
+}
+
+.estado-swatch {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.estado-table tbody tr[data-estado='GENERADO'] .estado-swatch { background: #40916c; }
+.estado-table tbody tr[data-estado='PAGADO'] .estado-swatch { background: #2d6a4f; }
+.estado-table tbody tr[data-estado='EN_PROCESO'] .estado-swatch { background: #1d6fb8; }
+.estado-table tbody tr[data-estado='CONFIRMADO'] .estado-swatch { background: #52b788; }
+.estado-table tbody tr[data-estado='FINALIZADO'] .estado-swatch { background: #74c69d; }
+.estado-table tbody tr[data-estado='CANCELADO'] .estado-swatch { background: #9b4d4d; }
+.estado-table tbody tr[data-estado='OTROS'] .estado-swatch { background: #6c757d; }
+
+.estado-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.estado-pct {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--dash-muted);
+  font-size: 0.86rem;
+}
+
+.estado-bar-track {
+  height: 8px;
+  width: 100%;
+  max-width: 100%;
+  background: var(--dash-line);
+  border-radius: 4px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.estado-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: var(--dash-green-mid);
+  transition: width 0.35s ease;
+  min-width: 0;
+}
+
+.estado-table tbody tr[data-estado='GENERADO'] .estado-bar-fill { background: #40916c; }
+.estado-table tbody tr[data-estado='PAGADO'] .estado-bar-fill { background: #2d6a4f; }
+.estado-table tbody tr[data-estado='EN_PROCESO'] .estado-bar-fill { background: #1d6fb8; }
+.estado-table tbody tr[data-estado='CONFIRMADO'] .estado-bar-fill { background: #52b788; }
+.estado-table tbody tr[data-estado='FINALIZADO'] .estado-bar-fill { background: #74c69d; }
+.estado-table tbody tr[data-estado='CANCELADO'] .estado-bar-fill { background: #9b4d4d; }
+.estado-table tbody tr[data-estado='OTROS'] .estado-bar-fill { background: #6c757d; }
+
+/* Timeline auditoría */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: min(520px, 62vh);
+  overflow-y: auto;
+  padding: 8px 12px 8px 4px;
+  margin-top: 8px;
+}
+
+.timeline-row {
+  display: flex;
+  gap: 18px;
+  position: relative;
+  padding: 18px 8px 18px 4px;
+  border-bottom: 1px solid #eef2ef;
+}
+
+.timeline-row:last-child {
+  border-bottom: none;
+}
+
+.timeline-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+  background: var(--dash-line);
+  box-shadow: 0 0 0 4px var(--dash-green-soft);
+}
+
+.timeline-marker[data-tipo='INSERT'],
+.timeline-marker[data-tipo='LOGIN'] {
+  background: #2d6a4f;
+}
+
+.timeline-marker[data-tipo='UPDATE'] {
+  background: #1d6fb8;
+}
+
+.timeline-marker[data-tipo='DELETE'] {
+  background: #9b4d4d;
+}
+
+.timeline-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.timeline-accion {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--dash-green-mid);
+}
+
+.timeline-accion[data-tipo='DELETE'] {
+  color: #9b4d4d;
+}
+.timeline-accion[data-tipo='UPDATE'] {
+  color: #1565a0;
+}
+
+.timeline-time {
+  font-size: 0.8rem;
+  color: var(--dash-muted);
+  white-space: nowrap;
+}
+
+.timeline-meta {
+  margin: 8px 0 0;
+  font-size: 0.92rem;
+  color: var(--dash-muted);
+  line-height: 1.45;
+}
+
+.timeline-user {
+  font-weight: 600;
+  color: var(--dash-ink);
+}
+
+.timeline-sep {
+  margin: 0 4px;
+  opacity: 0.5;
+}
+
+.timeline-entidad {
+  word-break: break-word;
 }

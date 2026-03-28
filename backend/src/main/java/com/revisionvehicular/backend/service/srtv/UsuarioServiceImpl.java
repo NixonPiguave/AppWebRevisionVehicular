@@ -62,11 +62,14 @@ public class UsuarioServiceImpl implements IUsuarioService {
         return dto;
     }
 
+    /** Formato esperado por sp_usuario_*: [{"rol_id":1},{"rol_id":2}] */
     private String construirRolesJson(List<Long> rolesIds) {
         if (rolesIds == null || rolesIds.isEmpty()) {
             return "[]";
         }
-        return rolesIds.toString();
+        return rolesIds.stream()
+                .map(id -> "{\"rol_id\":" + id + "}")
+                .collect(Collectors.joining(",", "[", "]"));
     }
 
     @Override
@@ -132,6 +135,13 @@ public class UsuarioServiceImpl implements IUsuarioService {
         if (!repository.existsById(id)) {
             throw new RuntimeException("Usuario con el id: " + id + " no encontrado");
         }
+        String contrasenaParaActualizar;
+        if (dto.getContrasena() != null && !dto.getContrasena().isBlank()) {
+            contrasenaParaActualizar = passwordEncoder.encode(dto.getContrasena());
+        } else {
+            Usuario usuarioActual = repository.findById(id).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            contrasenaParaActualizar = usuarioActual.getContrasena();
+        }
         String rolesJson = construirRolesJson(dto.getRolesIds());
         repository.actualizarUsuarioConRoles(
                 id,
@@ -140,7 +150,7 @@ public class UsuarioServiceImpl implements IUsuarioService {
                 dto.getNombre(),
                 dto.getApellido(),
                 dto.getUsuario(),
-                dto.getContrasena(),
+                contrasenaParaActualizar,
                 dto.getEmail(),
                 dto.getDocumentoIdentidad(),
                 dto.getEstado(),

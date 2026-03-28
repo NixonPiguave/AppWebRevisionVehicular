@@ -7,14 +7,18 @@ import { AuthService } from '../../services/auth.service';
 import { EmpresaService } from '../../services/administracion/empresa.service';
 import { MatIconModule } from '@angular/material/icon';
 import { BackupService, EstadoBdRestore } from '../../services/backup/backup.service';
+import { ChatInternoPanelComponent } from '../../components/chat-interno-panel/chat-interno-panel';
+import { ChatInternoService } from '../../services/chat-interno.service';
 
 const PRIMER_CHECK_SESION_MS = 5000;
+const PRIMER_CHAT_SIN_LEER_MS = 4000;
+const INTERVALO_CHAT_SIN_LEER_MS = 20000;
 const INTERVALO_CHECK_SESION_MS = 15000;
 
 @Component({
   selector: 'app-inicio',
   standalone: true,
-  imports: [CommonModule, RouterModule, MatIconModule],
+  imports: [CommonModule, RouterModule, MatIconModule, ChatInternoPanelComponent],
   templateUrl: './inicio.html',
   styleUrl: './inicio.css'
 })
@@ -25,6 +29,10 @@ export class InicioComponent implements OnInit, OnDestroy {
   nombreUsuario: string = 'Usuario';
   rolUsuario: string = '';
   menuUsuarioAbierto: boolean = false;
+  /** Panel lateral de chat interno (header). */
+  chatAbierto = false;
+  /** Total de mensajes sin leer (badge en icono de chat). */
+  chatSinLeerTotal = 0;
 
   @ViewChild('userMenu', { static: false }) userMenu?: ElementRef<HTMLElement>;
 
@@ -45,6 +53,8 @@ export class InicioComponent implements OnInit, OnDestroy {
   accesosRapidosOpen = false;
 
   private checkSesionSubscription: Subscription | null = null;
+  private chatSinLeerSub: Subscription | null = null;
+  private chatSinLeerPollSub: Subscription | null = null;
   /** Mensaje informativo (ej. "Has iniciado sesión desde otro dispositivo") que se oculta solo. */
   mensajeInfo = '';
   private mensajeInfoTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -60,6 +70,7 @@ export class InicioComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private empresaService: EmpresaService,
     private backupService: BackupService,
+    private chatInternoService: ChatInternoService,
     private router: Router,
     private cdr: ChangeDetectorRef
   ) {}
@@ -74,6 +85,14 @@ export class InicioComponent implements OnInit, OnDestroy {
         switchMap(() => this.authService.checkSession())
       ).subscribe();
       this.validarEstadoBaseDatos();
+      this.chatInternoService.refrescarSinLeer();
+      this.chatSinLeerSub = this.chatInternoService.sinLeer$.subscribe((r) => {
+        this.chatSinLeerTotal = r?.totalSinLeer ?? 0;
+        this.cdr.markForCheck();
+      });
+      this.chatSinLeerPollSub = timer(PRIMER_CHAT_SIN_LEER_MS, INTERVALO_CHAT_SIN_LEER_MS).subscribe(() => {
+        this.chatInternoService.refrescarSinLeer();
+      });
     }
     const infoMsg = sessionStorage.getItem('authInfoMessage');
     if (infoMsg) {
@@ -90,6 +109,10 @@ export class InicioComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.checkSesionSubscription?.unsubscribe();
     this.checkSesionSubscription = null;
+    this.chatSinLeerSub?.unsubscribe();
+    this.chatSinLeerSub = null;
+    this.chatSinLeerPollSub?.unsubscribe();
+    this.chatSinLeerPollSub = null;
     if (this.mensajeInfoTimeout) {
       clearTimeout(this.mensajeInfoTimeout);
       this.mensajeInfoTimeout = null;
@@ -115,6 +138,11 @@ export class InicioComponent implements OnInit, OnDestroy {
     if (this.authService.isLoggedIn()) {
       this.authService.notifyServerLogoutBeacon();
     }
+  }
+
+  etiquetaChatSinLeer(): string {
+    if (this.chatSinLeerTotal > 99) return '99+';
+    return String(this.chatSinLeerTotal);
   }
 
   cerrarMensajeInfo(): void {
@@ -292,6 +320,10 @@ export class InicioComponent implements OnInit, OnDestroy {
 
   @HostListener('document:keydown.escape')
   onEscapeKey() {
+    if (this.chatAbierto) {
+      this.chatAbierto = false;
+      return;
+    }
     if (this.sidebarOpen) {
       this.closeSidebar();
     }

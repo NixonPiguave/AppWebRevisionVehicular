@@ -60,11 +60,7 @@ public class SesionUsuarioServiceImpl implements ISesionUsuarioService {
     @Override
     @Transactional
     public void cerrarSesion(Long sesionId) {
-        sesionRepository.findById(sesionId).ifPresent(s -> {
-            s.setActivo(false);
-            s.setUltimaActividad(Instant.now());
-            sesionRepository.save(s);
-        });
+        sesionRepository.cerrarSesionDirecto(sesionId);
     }
 
     @Override

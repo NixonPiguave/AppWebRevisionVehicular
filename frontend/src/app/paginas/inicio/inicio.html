@@ -394,6 +394,18 @@
       </div>
 
       <div class="right">
+        <div class="chat-header-btn-wrap">
+          <button
+            type="button"
+            class="btn-chat-header"
+            (click)="chatAbierto = !chatAbierto"
+            [class.active]="chatAbierto"
+            title="Chat con usuarios"
+            aria-label="Abrir chat interno">
+            <mat-icon>chat</mat-icon>
+          </button>
+          <span class="chat-header-badge" *ngIf="chatSinLeerTotal > 0">{{ etiquetaChatSinLeer() }}</span>
+        </div>
         <div class="user-menu" #userMenu>
           <button type="button" class="user-info" (click)="toggleMenuUsuario($event)">
             <mat-icon class="user-icon">person</mat-icon>
@@ -432,6 +444,8 @@
     </main>
 
   </div>
+
+  <app-chat-interno-panel [(visible)]="chatAbierto" />
 
 </div>
 

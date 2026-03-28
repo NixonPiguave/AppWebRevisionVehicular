@@ -1,63 +1,158 @@
-<div class="dashboard">
-  <header class="dashboard-header">
-    <h1>Dashboard</h1>
-    <p class="subtitle">Resumen de turnos y actividad reciente</p>
-  </header>
-
-  <div *ngIf="cargando" class="loading">
-    <div class="spinner"></div>
-    <span>Cargando datos…</span>
+<div class="dash">
+  <div *ngIf="cargando" class="dash-loading">
+    <div class="dash-spinner"></div>
+    <span>Cargando indicadores…</span>
   </div>
 
   <ng-container *ngIf="!cargando">
-    <!-- Tarjetas por estado -->
-    <section class="section turnos-estado">
-      <h2>
-        <mat-icon>assignment</mat-icon>
-        Turnos por estado
-      </h2>
-      <div class="total-card">
-        <mat-icon>event_available</mat-icon>
-        <div>
-          <span class="total-num">{{ totalTurnos }}</span>
-          <span class="total-label">Total turnos</span>
+    <header class="dash-hero">
+      <div class="dash-hero-text">
+        <p class="dash-eyebrow">Revisión técnica vehicular</p>
+        <h1 class="dash-title">Panel operativo</h1>
+        <p class="dash-date">{{ fechaLarga() }}</p>
+      </div>
+      <div class="dash-kpis">
+        <div class="kpi kpi-accent">
+          <span class="kpi-label">Turnos registrados</span>
+          <span class="kpi-value">{{ totalTurnos }}</span>
+          <span class="kpi-hint">Base completa</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">En flujo</span>
+          <span class="kpi-value">{{ turnosEnFlujo() }}</span>
+          <span class="kpi-hint">Generado → confirmado</span>
+        </div>
+        <div class="kpi">
+          <span class="kpi-label">Finalizados</span>
+          <span class="kpi-value">{{ cantidadDe('FINALIZADO') }}</span>
+          <span class="kpi-hint">Trámite cerrado</span>
+        </div>
+        <div class="kpi kpi-muted">
+          <span class="kpi-label">Cancelados / otros</span>
+          <span class="kpi-value">{{ kpiCanceladosOtros() }}</span>
+          <span class="kpi-hint">Incidencias u otros estados</span>
         </div>
       </div>
-      <div class="estados-grid">
-        <div *ngFor="let c of conteos" class="estado-card" [attr.data-estado]="c.estado">
-          <div class="estado-header">
-            <mat-icon>{{ iconoEstado(c.estado) }}</mat-icon>
-            <span class="estado-label">{{ c.label }}</span>
-            <span class="estado-num">{{ c.cantidad }}</span>
-          </div>
-          <div class="estado-bar-wrap">
-            <div class="estado-bar" [style.width.%]="porcentaje(c.cantidad)"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+    </header>
 
-    <!-- Actividad reciente (auditoría) -->
-    <section class="section auditoria">
-      <h2>
-        <mat-icon>history</mat-icon>
-        Actividad reciente
-      </h2>
-      <div class="auditoria-list" *ngIf="recientesAuditoria.length; else sinAuditoria">
-        <div *ngFor="let a of recientesAuditoria" class="auditoria-item">
-          <span class="auditoria-accion" [attr.data-tipo]="a.tipoAccion">{{ a.tipoAccion }}</span>
-          <span class="auditoria-entidad">{{ a.entidad }}</span>
-          <span class="auditoria-usuario">{{ a.nombreCompleto || a.nombreUsuario }}</span>
-          <span class="auditoria-fecha">{{ formatearFecha(a.fecha) }}</span>
+    <div class="dash-layout">
+      <section class="dash-panel dash-panel--turnos" aria-labelledby="turnos-heading">
+        <div class="panel-head">
+          <div>
+            <h2 id="turnos-heading" class="panel-title">Distribución por estado</h2>
+            <p class="panel-desc">Participación de cada estado sobre el total de turnos</p>
+          </div>
         </div>
-      </div>
-      <ng-template #sinAuditoria>
-        <p class="empty">No hay registros de auditoría recientes.</p>
-      </ng-template>
-      <a routerLink="/inicio/administracion/auditoria" class="link-reporte">
-        Ver reporte completo de auditoría
-        <mat-icon>arrow_forward</mat-icon>
-      </a>
-    </section>
+
+        <div class="distrib-body" *ngIf="totalTurnos > 0; else sinTurnos">
+          <div class="distrib-visual">
+            <div
+              class="donut-wrap"
+              [style.background]="donutConicGradient()"
+              role="img"
+              [attr.aria-label]="
+                'Distribución proporcional de ' + totalTurnos + ' turnos entre estados con al menos un registro'
+              ">
+              <div class="donut-hole">
+                <span class="donut-total">{{ totalTurnos }}</span>
+                <span class="donut-caption">turnos en total</span>
+              </div>
+            </div>
+            <ul class="donut-legend" aria-label="Leyenda de estados">
+              <li
+                *ngFor="let c of conteos"
+                class="donut-legend-row"
+                [class.donut-legend-row--empty]="c.cantidad === 0"
+                [attr.data-estado]="c.estado">
+                <span class="donut-legend-swatch" aria-hidden="true"></span>
+                <span class="donut-legend-label">{{ c.label }}</span>
+                <span class="donut-legend-num">{{ c.cantidad }}</span>
+                <span class="donut-legend-pct">{{ porcentajeTexto(c.estado) }}</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="distrib-table-wrap">
+            <h3 class="distrib-table-title">Desglose por estado</h3>
+            <p class="distrib-table-desc">
+              Misma información en formato de tabla: cantidad, porcentaje y barra de participación.
+            </p>
+            <div class="estado-table-scroll">
+              <table
+                class="estado-table"
+                [attr.aria-label]="'Turnos por estado. Total ' + totalTurnos">
+                <colgroup>
+                  <col class="estado-table-col-estado" />
+                  <col class="estado-table-col-turnos" />
+                  <col class="estado-table-col-parte" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th scope="col">Estado</th>
+                    <th scope="col" class="estado-table-num">Turnos</th>
+                    <th scope="col" class="estado-table-th-parte">Parte del total</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let c of conteos" [attr.data-estado]="c.estado">
+                    <td>
+                      <span class="estado-cell">
+                        <span class="estado-swatch" aria-hidden="true"></span>
+                        {{ c.label }}
+                      </span>
+                    </td>
+                    <td class="estado-table-num">{{ c.cantidad }}</td>
+                    <td>
+                      <div class="estado-bar-row">
+                        <span class="estado-pct">{{ porcentajeTexto(c.estado) }}</span>
+                        <div class="estado-bar-track">
+                          <div class="estado-bar-fill" [style.width.%]="porcentajeBarra(c.estado)"></div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <ng-template #sinTurnos>
+          <p class="dash-empty">No hay turnos para mostrar.</p>
+        </ng-template>
+      </section>
+
+      <section class="dash-panel dash-panel--audit" aria-labelledby="audit-heading">
+        <div class="panel-head panel-head--row">
+          <div>
+            <h2 id="audit-heading" class="panel-title">Actividad reciente</h2>
+            <p class="panel-desc">Últimas acciones registradas en el sistema</p>
+          </div>
+          <a routerLink="/inicio/administracion/auditoria" class="dash-link">
+            Ver todo
+            <mat-icon>arrow_forward</mat-icon>
+          </a>
+        </div>
+
+        <div class="timeline" *ngIf="recientesAuditoria.length; else sinAuditoria">
+          <div *ngFor="let a of recientesAuditoria" class="timeline-row">
+            <div class="timeline-marker" [attr.data-tipo]="a.tipoAccion"></div>
+            <div class="timeline-body">
+              <div class="timeline-top">
+                <span class="timeline-accion" [attr.data-tipo]="a.tipoAccion">{{ a.tipoAccion }}</span>
+                <time class="timeline-time">{{ formatearFecha(a.fecha) }}</time>
+              </div>
+              <p class="timeline-meta">
+                <span class="timeline-user">{{ a.nombreCompleto || a.nombreUsuario }}</span>
+                <span class="timeline-sep">·</span>
+                <span class="timeline-entidad">{{ a.entidad || '—' }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <ng-template #sinAuditoria>
+          <p class="dash-empty">No hay registros de auditoría recientes.</p>
+        </ng-template>
+      </section>
+    </div>
   </ng-container>
 </div>

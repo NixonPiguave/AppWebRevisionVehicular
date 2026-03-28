@@ -1,0 +1,159 @@
+<div class="chat-overlay" *ngIf="visible">
+  <div class="chat-backdrop" (click)="cerrar()" aria-hidden="true"></div>
+  <aside class="chat-panel" role="dialog" aria-label="Chat interno" (click)="$event.stopPropagation()">
+    <header class="chat-header">
+      <div class="chat-header-inner">
+        <ng-container *ngIf="vista === 'lista'">
+          <mat-icon class="chat-header-icon">forum</mat-icon>
+          <div>
+            <h2 class="chat-title">Mensajes</h2>
+            <p class="chat-sub">
+              <ng-container *ngIf="sinLeerResumen.totalSinLeer > 0; else subDefault">
+                <span class="highlight-nuevo">{{ sinLeerResumen.totalSinLeer }} nuevo(s)</span>
+                — toca un contacto para leer
+              </ng-container>
+              <ng-template #subDefault>Conversaciones uno a uno con usuarios del sistema</ng-template>
+            </p>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="vista === 'chat' && peerActivo">
+          <button type="button" class="btn-icon" (click)="volverLista()" aria-label="Volver">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
+          <div class="chat-header-peer">
+            <div class="avatar">{{ (peerActivo.nombre || '')[0] || '?' }}{{ (peerActivo.apellido || '')[0] || '' }}</div>
+            <div>
+              <h2 class="chat-title chat-title-sm">{{ peerActivo.nombreCompleto }}</h2>
+              <p class="chat-sub">Chat directo</p>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+      <button type="button" class="btn-icon btn-close" (click)="cerrar()" aria-label="Cerrar chat">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="chat-body" *ngIf="vista === 'lista'">
+      <div class="chat-search">
+        <mat-icon>search</mat-icon>
+        <input
+          type="search"
+          [(ngModel)]="busqueda"
+          (ngModelChange)="onBusquedaInput()"
+          placeholder="Buscar por nombre o apellido..."
+          autocomplete="off"
+        />
+      </div>
+
+      <p class="chat-hint" *ngIf="favoritosPeers.length">
+        <mat-icon>star</mat-icon>
+        Favoritos
+      </p>
+      <ul class="peer-list" *ngIf="favoritosPeers.length">
+        <li *ngFor="let p of favoritosPeers" class="peer-row favorito">
+          <button type="button" class="peer-main" (click)="abrirChat(p)">
+            <span class="avatar sm">{{ (p.nombre || '')[0] || '?' }}{{ (p.apellido || '')[0] || '' }}</span>
+            <div class="peer-text">
+              <span class="peer-name">{{ p.nombreCompleto }}</span>
+              <span class="peer-unread" *ngIf="cantidadSinLeerDe(p.usuarioId) > 0">
+                {{ cantidadSinLeerDe(p.usuarioId) }}
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="btn-fav"
+            (click)="toggleFavorito(p, $event)"
+            [attr.aria-label]="esFavorito(p.usuarioId) ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+          >
+            <mat-icon>{{ esFavorito(p.usuarioId) ? 'star' : 'star_border' }}</mat-icon>
+          </button>
+        </li>
+      </ul>
+
+      <p class="section-label">Todos</p>
+      <div class="loading" *ngIf="cargandoLista">
+        <span class="spinner"></span>
+        Cargando usuarios…
+      </div>
+      <ul class="peer-list" *ngIf="!cargandoLista && peersFiltrados.length">
+        <li *ngFor="let p of peersFiltrados" class="peer-row">
+          <button type="button" class="peer-main" (click)="abrirChat(p)">
+            <span class="avatar sm muted">{{ (p.nombre || '')[0] || '?' }}{{ (p.apellido || '')[0] || '' }}</span>
+            <div class="peer-text">
+              <span class="peer-name">{{ p.nombreCompleto }}</span>
+              <span class="peer-unread" *ngIf="cantidadSinLeerDe(p.usuarioId) > 0">
+                {{ cantidadSinLeerDe(p.usuarioId) }}
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="btn-fav"
+            (click)="toggleFavorito(p, $event)"
+            [attr.aria-label]="esFavorito(p.usuarioId) ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+          >
+            <mat-icon>{{ esFavorito(p.usuarioId) ? 'star' : 'star_border' }}</mat-icon>
+          </button>
+        </li>
+      </ul>
+      <p class="empty" *ngIf="!cargandoLista && !peersFiltrados.length">
+        No hay coincidencias. Pruebe otro nombre.
+      </p>
+    </div>
+
+    <div class="chat-body chat-thread" *ngIf="vista === 'chat'">
+      <div class="loading thread-loading" *ngIf="cargandoMensajes && !mensajes.length">
+        <span class="spinner"></span>
+      </div>
+      <div class="mensajes" #mensajesScroll>
+        <div
+          *ngFor="let m of mensajes"
+          class="bubble-row"
+          [class.mine]="m.enviadoPorMi"
+        >
+          <div class="bubble">
+            <p class="bubble-text">{{ m.contenido }}</p>
+            <div class="bubble-footer">
+              <time class="bubble-time">{{ formatoHora(m.creadoEn) }}</time>
+              <span
+                *ngIf="m.enviadoPorMi"
+                class="ticks"
+                [class.ticks-visto]="m.leidoEn"
+                [title]="m.leidoEn ? 'Visto' : 'Enviado'"
+                [attr.aria-label]="m.leidoEn ? 'Visto' : 'Enviado'">
+                <mat-icon>{{ m.leidoEn ? 'done_all' : 'done' }}</mat-icon>
+              </span>
+            </div>
+          </div>
+        </div>
+        <p class="empty thread-empty" *ngIf="!mensajes.length && !cargandoMensajes">
+          Sin mensajes aún. Escriba abajo para iniciar la conversación.
+        </p>
+      </div>
+      <footer class="composer" *ngIf="peerActivo">
+        <textarea
+          [(ngModel)]="textoEnviar"
+          rows="2"
+          maxlength="2000"
+          placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para salto)"
+          (keydown)="onComposerKeydown($event)"
+        ></textarea>
+        <button
+          type="button"
+          class="btn-send"
+          (click)="enviar()"
+          [disabled]="enviando || !(textoEnviar || '').trim()"
+        >
+          <mat-icon>send</mat-icon>
+        </button>
+      </footer>
+    </div>
+
+    <p class="chat-error" *ngIf="errorMsg">
+      <mat-icon>error_outline</mat-icon>
+      {{ errorMsg }}
+    </p>
+  </aside>
+</div>
