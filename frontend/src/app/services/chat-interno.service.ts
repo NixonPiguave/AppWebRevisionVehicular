@@ -7,9 +7,15 @@ export interface ChatInternoMensaje {
   emisorId: number;
   receptorId: number;
   contenido: string;
+  tipo: string;
+  /** Pie de foto (solo mensajes IMAGEN). */
+  leyenda?: string | null;
   creadoEn: string;
-  /** Si no es null, el destinatario ya abrió/vió el mensaje. */
   leidoEn?: string | null;
+  editadoEn?: string | null;
+  respuestaAMensajeId?: number | null;
+  respuestaVistaPrevia?: string | null;
+  respuestaTipo?: string | null;
   enviadoPorMi: boolean;
 }
 
@@ -23,6 +29,12 @@ export interface ChatInternoSinLeerResumen {
   porEmisor: ChatInternoSinLeerItem[];
 }
 
+export interface EnviarChatOpciones {
+  respuestaAMensajeId?: number | null;
+  tipo?: 'TEXTO' | 'IMAGEN';
+  leyenda?: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ChatInternoService {
   private readonly apiUrl = 'http://localhost:8080/api/chat-interno';
@@ -32,7 +44,6 @@ export class ChatInternoService {
     porEmisor: []
   });
 
-  /** Resumen para badge en header y lista de contactos. */
   readonly sinLeer$ = this.sinLeerSubject.asObservable();
 
   constructor(private http: HttpClient) {}
@@ -41,18 +52,31 @@ export class ChatInternoService {
     return this.http.get<ChatInternoMensaje[]>(`${this.apiUrl}/conversacion/${otroUsuarioId}`);
   }
 
-  enviar(receptorId: number, contenido: string): Observable<ChatInternoMensaje> {
-    return this.http.post<ChatInternoMensaje>(`${this.apiUrl}/enviar`, { receptorId, contenido });
+  enviar(
+    receptorId: number,
+    contenido: string,
+    opciones?: EnviarChatOpciones
+  ): Observable<ChatInternoMensaje> {
+    const body: Record<string, unknown> = { receptorId, contenido, tipo: opciones?.tipo ?? 'TEXTO' };
+    if (opciones?.respuestaAMensajeId != null) {
+      body['respuestaAMensajeId'] = opciones.respuestaAMensajeId;
+    }
+    const leg = opciones?.leyenda?.trim();
+    if (leg) {
+      body['leyenda'] = leg;
+    }
+    return this.http.post<ChatInternoMensaje>(`${this.apiUrl}/enviar`, body);
   }
 
-  /** Actualiza conteos de no leídos (llamar tras abrir conversación o por intervalo). */
+  editarMensaje(mensajeId: number, contenido: string): Observable<ChatInternoMensaje> {
+    return this.http.put<ChatInternoMensaje>(`${this.apiUrl}/mensaje/${mensajeId}`, { contenido });
+  }
+
   refrescarSinLeer(): void {
     this.http
       .get<ChatInternoSinLeerResumen>(`${this.apiUrl}/sin-leer`)
       .pipe(
-        catchError(() =>
-          of<ChatInternoSinLeerResumen>({ totalSinLeer: 0, porEmisor: [] })
-        ),
+        catchError(() => of<ChatInternoSinLeerResumen>({ totalSinLeer: 0, porEmisor: [] })),
         tap((r) =>
           this.sinLeerSubject.next({
             totalSinLeer: r?.totalSinLeer ?? 0,

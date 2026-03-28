@@ -4,6 +4,7 @@ import { InicioComponent } from './paginas/inicio/inicio';
 import { AreasComponent } from './paginas/administracion/areas/areas';
 import { EmpresaComponent } from './paginas/administracion/empresa/empresa';
 import { RolesComponent } from './paginas/administracion/roles/roles';
+import { RolesPostgresComponent } from './paginas/administracion/roles-postgres/roles-postgres';
 import { UsuariosComponent } from './paginas/administracion/usuarios/usuarios';
 import { TurnosComponent } from './paginas/administracion/turnos/turnos';
 import { AmbitoOperacionalComponent } from './paginas/catalogos_vehiculos/ambito-operacional/ambito-operacional';
@@ -74,6 +75,7 @@ export const routes: Routes = [
       // ADMINISTRACIÓN
       { path: 'administracion/usuarios', component: UsuariosComponent },
       { path: 'administracion/roles', component: RolesComponent },
+      { path: 'administracion/roles-postgres', component: RolesPostgresComponent },
       { path: 'administracion/areas', component: AreasComponent },
       { path: 'administracion/empresa', component: EmpresaComponent },
       { path: 'administracion/auditoria', component: AuditoriaComponent },

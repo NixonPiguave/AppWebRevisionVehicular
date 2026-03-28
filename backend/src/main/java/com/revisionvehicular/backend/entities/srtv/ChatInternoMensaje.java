@@ -27,11 +27,28 @@ public class ChatInternoMensaje {
     @JoinColumn(name = "receptor_id", nullable = false)
     private Usuario receptor;
 
-    @Column(nullable = false, length = 2000)
+    /** Mensaje citado (responde a). Misma conversación (validado al guardar). */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "respuesta_a_id")
+    private ChatInternoMensaje respuestaA;
+
+    @Column(nullable = false, length = 2048)
     private String contenido;
+
+    /** TEXTO o IMAGEN (URL de imagen en contenido). */
+    @Column(nullable = false, length = 20)
+    private String tipo = "TEXTO";
+
+    /** Pie de foto / texto junto a la imagen (solo tipo IMAGEN). */
+    @Column(length = 2048)
+    private String leyenda;
 
     @Column(name = "creado_en", nullable = false)
     private LocalDateTime creadoEn;
+
+    /** Última edición del texto (solo aplica a tipo TEXTO). */
+    @Column(name = "editado_en")
+    private LocalDateTime editadoEn;
 
     /** Cuando el receptor abrió/vió el mensaje; null = aún no leído por el destinatario. */
     @Column(name = "leido_en")

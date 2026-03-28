@@ -1,0 +1,289 @@
+<div class="pg-page">
+  <header class="pg-hero">
+    <p class="pg-eyebrow">Administración · Base de datos</p>
+    <h1 class="pg-title">Roles PostgreSQL</h1>
+    <p class="pg-lead">
+      Al crear un rol, el prefijo <code>rol_</code> se añade solo; solo escriba el resto del nombre (se normaliza a
+      minúsculas y sin espacios). También puede ajustar permisos DML existentes. Puede dar CRUD completo en unas tablas y
+      solo lectura (u otro subconjunto) en otras. El backend necesita privilegios
+      <code>CREATEROLE</code> / <code>GRANT</code> / <code>REVOKE</code> según la operación.
+    </p>
+  </header>
+
+  <div class="pg-toast pg-toast--err" *ngIf="error" role="alert">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+  <div class="pg-toast pg-toast--ok" *ngIf="exito" role="status">
+    <mat-icon>check_circle</mat-icon>
+    <span>{{ exito }}</span>
+  </div>
+
+  <div class="pg-segment" role="tablist" aria-label="Tipo de operación" *ngIf="!cargandoLista">
+    <button
+      type="button"
+      role="tab"
+      class="pg-segment__btn"
+      [class.pg-segment__btn--active]="modo === 'crear'"
+      [attr.aria-selected]="modo === 'crear'"
+      (click)="establecerModo('crear')">
+      <mat-icon>person_add</mat-icon>
+      Crear rol nuevo
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="pg-segment__btn"
+      [class.pg-segment__btn--active]="modo === 'editar'"
+      [attr.aria-selected]="modo === 'editar'"
+      (click)="establecerModo('editar')">
+      <mat-icon>tune</mat-icon>
+      Editar permisos de un rol
+    </button>
+  </div>
+
+  <div class="pg-loading-card" *ngIf="cargandoLista">
+    <div class="pg-spinner" aria-hidden="true"></div>
+    <p>Cargando catálogo de tablas…</p>
+  </div>
+
+  <form class="pg-layout" *ngIf="!cargandoLista" (ngSubmit)="enviar()">
+    <div class="pg-main">
+      <section class="pg-card">
+        <h2 class="pg-card__title">
+          <mat-icon class="pg-card__icon">badge</mat-icon>
+          {{ modo === 'crear' ? '1. Nombre del rol' : '1. Elige el rol' }}
+        </h2>
+        <p class="pg-card__desc">
+          {{
+            modo === 'crear'
+              ? 'Escriba solo el nombre del rol: se añade rol_ automáticamente y se quitan espacios y mayúsculas.'
+              : 'Solo se listan roles cuyo nombre empieza por rol_.'
+          }}
+        </p>
+
+        <div class="pg-field" *ngIf="modo === 'crear'">
+          <label class="pg-label" for="sufijoNombreRol">Nombre del rol</label>
+          <div class="pg-input-with-prefix">
+            <span class="pg-input-with-prefix__fix" aria-hidden="true">{{ prefijoRolFijo }}</span>
+            <input
+              id="sufijoNombreRol"
+              name="sufijoNombreRol"
+              type="text"
+              [ngModel]="sufijoNombreRol"
+              (ngModelChange)="sanearSufijoNombreRol($event)"
+              placeholder="contador"
+              autocomplete="off"
+              class="pg-control pg-input-with-prefix__field"
+              [attr.maxlength]="59"
+              spellcheck="false"
+            />
+          </div>
+          <p class="pg-field-note pg-field-note--muted" *ngIf="nombreRolCompletoCrear">
+            Nombre que se enviará: <code>{{ nombreRolCompletoCrear }}</code>
+          </p>
+        </div>
+
+        <div class="pg-field" *ngIf="modo === 'editar'">
+          <label class="pg-label" for="rolExistente">Rol en el servidor</label>
+          <div class="pg-select-wrap">
+            <mat-icon class="pg-select-wrap__icon">arrow_drop_down</mat-icon>
+            <select
+              id="rolExistente"
+              name="rolExistente"
+              [(ngModel)]="nombreRol"
+              (ngModelChange)="onNombreRolEditarChange($event)"
+              class="pg-control pg-control--select">
+              <option value="">Seleccione un rol…</option>
+              <option *ngFor="let r of rolesPrefijo" [value]="r">{{ r }}</option>
+            </select>
+          </div>
+          <p class="pg-field-note" *ngIf="cargandoPrivilegiosRol">
+            <mat-icon class="pg-inline-icon spin">sync</mat-icon>
+            Leyendo permisos actuales…
+          </p>
+          <p class="pg-field-note pg-field-note--muted" *ngIf="!cargandoRoles && rolesPrefijo.length === 0">
+            No hay roles con prefijo <code>rol_</code> en esta base de datos.
+          </p>
+        </div>
+      </section>
+
+      <div class="pg-callout pg-callout--warn" *ngIf="modo === 'editar'">
+        <mat-icon class="pg-callout__icon">info</mat-icon>
+        <div>
+          <strong>Importante al guardar</strong>
+          <p>
+            Primero se revocan privilegios de tablas, secuencias y uso de esquema en los esquemas del catálogo; después se
+            aplican solo las casillas que deje marcadas. Si no marca ningún privilegio en ninguna tabla, el rol queda sin
+            acceso DML a esas tablas (puede conservar <code>CONNECT</code> a la base).
+          </p>
+        </div>
+      </div>
+
+      <section class="pg-card">
+        <h2 class="pg-card__title">
+          <mat-icon class="pg-card__icon">table_chart</mat-icon>
+          {{ modo === 'crear' ? '2. Permisos por tabla' : '2. Ajustar permisos por tabla' }}
+        </h2>
+        <p class="pg-card__desc">
+          Marque S/I/U/D independientemente en cada fila. Solo se envían al servidor las tablas con al menos un permiso. Al
+          crear un rol debe haber al menos una tabla con algún permiso.
+        </p>
+
+        <div class="pg-legend-row">
+          <span class="pg-legend-chip"><span class="pg-legend-letter">S</span> SELECT</span>
+          <span class="pg-legend-chip"><span class="pg-legend-letter">I</span> INSERT</span>
+          <span class="pg-legend-chip"><span class="pg-legend-letter">U</span> UPDATE</span>
+          <span class="pg-legend-chip"><span class="pg-legend-letter">D</span> DELETE</span>
+        </div>
+
+        <div class="pg-picker">
+          <div class="pg-picker__toolbar">
+            <div class="pg-search">
+              <mat-icon>search</mat-icon>
+              <input
+                type="search"
+                [(ngModel)]="filtroTabla"
+                name="filtro"
+                placeholder="Buscar esquema o nombre de tabla…"
+                class="pg-search__input"
+              />
+            </div>
+            <div class="pg-picker__actions pg-picker__actions--wrap">
+              <button type="button" class="pg-btn pg-btn--soft" (click)="aplicarAVisiblesSoloSelect()">
+                Visibles: solo SELECT
+              </button>
+              <button type="button" class="pg-btn pg-btn--soft" (click)="aplicarAVisiblesCrud()">Visibles: CRUD</button>
+              <button type="button" class="pg-btn pg-btn--soft" (click)="limpiarVisibles()">Visibles: limpiar</button>
+            </div>
+          </div>
+          <div class="pg-picker__meta">
+            <span class="pg-badge">{{ conteoTablasConPrivilegio }} tablas con permiso</span>
+            <span class="pg-picker__hint">Las acciones masivas solo afectan las filas que ve con el filtro actual.</span>
+          </div>
+          <div class="pg-table-wrap pg-table-wrap--bordered">
+            <table class="pg-table pg-table--perm">
+              <thead>
+                <tr>
+                  <th class="pg-th-tabla">Tabla</th>
+                  <th class="pg-th-crud" title="SELECT">S</th>
+                  <th class="pg-th-crud" title="INSERT">I</th>
+                  <th class="pg-th-crud" title="UPDATE">U</th>
+                  <th class="pg-th-crud" title="DELETE">D</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let t of tablasFiltradas">
+                  <td>
+                    <span class="pg-row__schema">{{ t.esquema }}</span>
+                    <span class="pg-row__dot">·</span>
+                    <span class="pg-row__table">{{ t.nombreTabla }}</span>
+                  </td>
+                  <td class="pg-td-crud">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="fila(t).privilegioSelect"
+                      [ngModelOptions]="{ standalone: true }"
+                      [attr.aria-label]="'SELECT en ' + etiqueta(t)"
+                      class="pg-crud-check" />
+                  </td>
+                  <td class="pg-td-crud">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="fila(t).privilegioInsert"
+                      [ngModelOptions]="{ standalone: true }"
+                      [attr.aria-label]="'INSERT en ' + etiqueta(t)"
+                      class="pg-crud-check" />
+                  </td>
+                  <td class="pg-td-crud">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="fila(t).privilegioUpdate"
+                      [ngModelOptions]="{ standalone: true }"
+                      [attr.aria-label]="'UPDATE en ' + etiqueta(t)"
+                      class="pg-crud-check" />
+                  </td>
+                  <td class="pg-td-crud">
+                    <input
+                      type="checkbox"
+                      [(ngModel)]="fila(t).privilegioDelete"
+                      [ngModelOptions]="{ standalone: true }"
+                      [attr.aria-label]="'DELETE en ' + etiqueta(t)"
+                      class="pg-crud-check" />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <p class="pg-row-empty" *ngIf="tablasFiltradas.length === 0">Ninguna tabla coincide con la búsqueda.</p>
+          </div>
+        </div>
+      </section>
+
+      <details
+        class="pg-details"
+        *ngIf="modo === 'editar' && detallePrivilegiosActual && !cargandoPrivilegiosRol">
+        <summary class="pg-details__summary">
+          <mat-icon>visibility</mat-icon>
+          Ver estado actual en PostgreSQL (solo lectura)
+          <span class="pg-badge pg-badge--subtle" *ngIf="detallePrivilegiosActual.detallePorTabla.length">{{
+            detallePrivilegiosActual.detallePorTabla.length
+          }}</span>
+        </summary>
+        <div class="pg-details__body">
+          <p class="pg-details__intro">
+            Fuente: <code>information_schema.role_table_grants</code>. Solo aparecen tablas del catálogo con al menos un
+            privilegio DML.
+          </p>
+          <div class="pg-table-wrap" *ngIf="detallePrivilegiosActual.detallePorTabla.length; else sinDetalle">
+            <table class="pg-table">
+              <thead>
+                <tr>
+                  <th>Esquema</th>
+                  <th>Tabla</th>
+                  <th>S</th>
+                  <th>I</th>
+                  <th>U</th>
+                  <th>D</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of detallePrivilegiosActual.detallePorTabla">
+                  <td>{{ row.esquema }}</td>
+                  <td><strong>{{ row.nombreTabla }}</strong></td>
+                  <td><span class="pg-cell-yesno" [class.pg-cell-yesno--yes]="row.privilegioSelect">{{ row.privilegioSelect ? '✓' : '—' }}</span></td>
+                  <td><span class="pg-cell-yesno" [class.pg-cell-yesno--yes]="row.privilegioInsert">{{ row.privilegioInsert ? '✓' : '—' }}</span></td>
+                  <td><span class="pg-cell-yesno" [class.pg-cell-yesno--yes]="row.privilegioUpdate">{{ row.privilegioUpdate ? '✓' : '—' }}</span></td>
+                  <td><span class="pg-cell-yesno" [class.pg-cell-yesno--yes]="row.privilegioDelete">{{ row.privilegioDelete ? '✓' : '—' }}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #sinDetalle>
+            <p class="pg-details__empty">Sin privilegios DML en las tablas del catálogo.</p>
+          </ng-template>
+        </div>
+      </details>
+    </div>
+
+    <footer class="pg-sticky-actions">
+      <div class="pg-sticky-actions__inner">
+        <button type="button" class="pg-btn pg-btn--outline" (click)="cargarTablas(); cargarRolesPrefijo()" [disabled]="enviando || cargandoLista">
+          <mat-icon>refresh</mat-icon>
+          Recargar datos
+        </button>
+        <button type="submit" class="pg-btn pg-btn--primary" [disabled]="enviando">
+          <mat-icon *ngIf="!enviando">{{ modo === 'crear' ? 'add_moderator' : 'save' }}</mat-icon>
+          {{
+            enviando
+              ? modo === 'crear'
+                ? 'Creando…'
+                : 'Guardando…'
+              : modo === 'crear'
+                ? 'Crear rol'
+                : 'Aplicar cambios al rol'
+          }}
+        </button>
+      </div>
+    </footer>
+  </form>
+</div>

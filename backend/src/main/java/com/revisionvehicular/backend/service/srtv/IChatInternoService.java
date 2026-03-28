@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.service.srtv;
 
+import com.revisionvehicular.backend.dtos.srtv.ChatInternoEditarRequest;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoEnviarRequest;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoMensajeDTO;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoSinLeerResumenDTO;
@@ -13,4 +14,6 @@ public interface IChatInternoService {
     List<ChatInternoMensajeDTO> conversacionCon(Long otroUsuarioId);
 
     ChatInternoSinLeerResumenDTO resumenSinLeer();
+
+    ChatInternoMensajeDTO editarMensaje(Long mensajeId, ChatInternoEditarRequest body);
 }

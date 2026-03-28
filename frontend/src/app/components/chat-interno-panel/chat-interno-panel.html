@@ -104,50 +104,186 @@
     </div>
 
     <div class="chat-body chat-thread" *ngIf="vista === 'chat'">
+      <input
+        #inputFoto
+        type="file"
+        accept="image/*"
+        class="chat-hidden-file"
+        (change)="onFotoSeleccionada($event)"
+      />
       <div class="loading thread-loading" *ngIf="cargandoMensajes && !mensajes.length">
         <span class="spinner"></span>
       </div>
-      <div class="mensajes" #mensajesScroll>
-        <div
-          *ngFor="let m of mensajes"
-          class="bubble-row"
-          [class.mine]="m.enviadoPorMi"
-        >
-          <div class="bubble">
-            <p class="bubble-text">{{ m.contenido }}</p>
-            <div class="bubble-footer">
-              <time class="bubble-time">{{ formatoHora(m.creadoEn) }}</time>
-              <span
-                *ngIf="m.enviadoPorMi"
-                class="ticks"
-                [class.ticks-visto]="m.leidoEn"
-                [title]="m.leidoEn ? 'Visto' : 'Enviado'"
-                [attr.aria-label]="m.leidoEn ? 'Visto' : 'Enviado'">
-                <mat-icon>{{ m.leidoEn ? 'done_all' : 'done' }}</mat-icon>
-              </span>
+      <div class="thread-messages-wrap">
+        <div class="mensajes" #mensajesScroll (scroll)="onMensajesScroll()">
+          <div
+            *ngFor="let m of mensajes; let i = index; trackBy: trackByMensajeId"
+            class="bubble-row"
+            [class.mine]="m.enviadoPorMi">
+          <div class="bubble-stack" [class.mine]="m.enviadoPorMi">
+            <div class="bubble-sender" *ngIf="mostrarEtiquetaEmisor(i)">
+              {{ peerActivo?.nombreCompleto }}
+            </div>
+            <div class="bubble-toolbar">
+              <button
+                type="button"
+                class="bubble-tool"
+                (click)="iniciarRespuesta(m, $event)"
+                aria-label="Responder a este mensaje"
+                title="Responder">
+                <mat-icon>reply</mat-icon>
+              </button>
+              <button
+                type="button"
+                class="bubble-tool"
+                *ngIf="m.enviadoPorMi && !esImagen(m)"
+                (click)="iniciarEdicion(m, $event)"
+                aria-label="Editar mensaje"
+                title="Editar">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+            <div class="bubble">
+              <div class="bubble-reply" *ngIf="m.respuestaAMensajeId && m.respuestaVistaPrevia">
+                <span class="bubble-reply-bar" aria-hidden="true"></span>
+                <div>
+                  <span class="bubble-reply-label">En respuesta a</span>
+                  <p class="bubble-reply-text">{{ m.respuestaVistaPrevia }}</p>
+                </div>
+              </div>
+              <ng-container *ngIf="edicionMensajeId === m.mensajeId; else bloqueContenido">
+                <div class="bubble-edit">
+                  <textarea [(ngModel)]="textoEdicion" rows="3" maxlength="2048"></textarea>
+                  <div class="bubble-edit-actions">
+                    <button type="button" class="btn-mini btn-mini-ghost" (click)="cancelarEdicion()">Cancelar</button>
+                    <button type="button" class="btn-mini btn-mini-primary" (click)="guardarEdicion()" [disabled]="enviando">
+                      Guardar
+                    </button>
+                  </div>
+                </div>
+              </ng-container>
+              <ng-template #bloqueContenido>
+                <ng-container *ngIf="esImagen(m)">
+                  <img class="bubble-img" [src]="m.contenido" alt="Imagen enviada" loading="lazy" />
+                  <p class="bubble-caption" *ngIf="m.leyenda">{{ m.leyenda }}</p>
+                </ng-container>
+                <p class="bubble-text" *ngIf="!esImagen(m)">{{ m.contenido }}</p>
+              </ng-template>
+              <div class="bubble-footer">
+                <span class="bubble-edited" *ngIf="m.editadoEn">editado</span>
+                <time class="bubble-time">{{ formatoHora(m.creadoEn) }}</time>
+                <span
+                  *ngIf="m.enviadoPorMi"
+                  class="ticks"
+                  [class.ticks-visto]="m.leidoEn"
+                  [title]="m.leidoEn ? 'Visto' : 'Enviado'"
+                  [attr.aria-label]="m.leidoEn ? 'Visto' : 'Enviado'">
+                  <mat-icon>{{ m.leidoEn ? 'done_all' : 'done' }}</mat-icon>
+                </span>
+              </div>
             </div>
           </div>
         </div>
-        <p class="empty thread-empty" *ngIf="!mensajes.length && !cargandoMensajes">
-          Sin mensajes aún. Escriba abajo para iniciar la conversación.
-        </p>
-      </div>
-      <footer class="composer" *ngIf="peerActivo">
-        <textarea
-          [(ngModel)]="textoEnviar"
-          rows="2"
-          maxlength="2000"
-          placeholder="Escribe un mensaje… (Enter para enviar, Shift+Enter para salto)"
-          (keydown)="onComposerKeydown($event)"
-        ></textarea>
+          <p class="empty thread-empty" *ngIf="!mensajes.length && !cargandoMensajes">
+            Sin mensajes aún. Escriba abajo para iniciar la conversación.
+          </p>
+        </div>
         <button
           type="button"
-          class="btn-send"
-          (click)="enviar()"
-          [disabled]="enviando || !(textoEnviar || '').trim()"
-        >
-          <mat-icon>send</mat-icon>
+          class="fab-ir-abajo"
+          *ngIf="mostrarFabIrAbajo"
+          (click)="irAlUltimoMensaje()"
+          aria-label="Ir al mensaje más reciente"
+          title="Mensajes recientes">
+          <mat-icon>keyboard_arrow_down</mat-icon>
         </button>
+      </div>
+      <footer class="composer" *ngIf="peerActivo">
+        <div class="composer-reply" *ngIf="replyingTo">
+          <div class="composer-reply-text">
+            <mat-icon>reply</mat-icon>
+            <div>
+              <span class="composer-reply-label">Respondiendo a</span>
+              <p>{{ textoVistaMensaje(replyingTo) }}</p>
+            </div>
+          </div>
+          <button type="button" class="btn-icon composer-reply-close" (click)="cancelarRespuesta()" aria-label="Quitar respuesta">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+        <div class="composer-borrador" *ngIf="borradorImagen">
+          <button
+            type="button"
+            class="borrador-preview-trigger"
+            (click)="abrirBorradorPreviewAmpliado()"
+            title="Ver imagen ampliada">
+            <span class="sr-only">Ampliar vista previa del adjunto</span>
+            <div class="borrador-preview-frame">
+              <img
+                class="borrador-preview-img"
+                [src]="borradorImagen.previewUrl"
+                alt="Vista previa del adjunto antes de enviar"
+              />
+            </div>
+          </button>
+          <div class="borrador-fields">
+            <label class="sr-only" for="leyenda-borrador">Texto opcional con la imagen</label>
+            <textarea
+              id="leyenda-borrador"
+              [(ngModel)]="borradorImagen.leyenda"
+              rows="2"
+              maxlength="2048"
+              placeholder="Texto opcional (se envía junto a la imagen)…"
+            ></textarea>
+            <div class="borrador-actions">
+              <button
+                type="button"
+                class="btn-mini btn-mini-ghost"
+                (click)="descartarBorradorImagen()"
+                [disabled]="subiendoFoto">
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="btn-mini btn-mini-primary"
+                (click)="confirmarEnvioBorradorImagen()"
+                [disabled]="subiendoFoto">
+                Enviar imagen
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="composer-row">
+          <button
+            type="button"
+            class="btn-attach"
+            (click)="abrirSelectorFoto()"
+            [disabled]="enviando || subiendoFoto"
+            aria-label="Enviar foto"
+            title="Foto">
+            <mat-icon>image</mat-icon>
+          </button>
+          <textarea
+            [(ngModel)]="textoEnviar"
+            rows="2"
+            maxlength="2048"
+            placeholder="Mensaje… (Enter envía texto; Ctrl+V en imagen abre vista previa antes de enviar)"
+            (keydown)="onComposerKeydown($event)"
+            (paste)="onComposerPaste($event)"
+          ></textarea>
+          <button
+            type="button"
+            class="btn-send"
+            (click)="enviar()"
+            [disabled]="enviando || subiendoFoto || !(textoEnviar || '').trim()"
+          >
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+        <p class="composer-hint" *ngIf="subiendoFoto">
+          <span class="spinner sm-inline"></span>
+          Subiendo imagen…
+        </p>
       </footer>
     </div>
 
@@ -155,5 +291,26 @@
       <mat-icon>error_outline</mat-icon>
       {{ errorMsg }}
     </p>
+    <div
+      class="borrador-lightbox"
+      *ngIf="borradorPreviewAmpliado && borradorImagen"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Vista previa ampliada del adjunto"
+      (click)="cerrarBorradorPreviewAmpliado()">
+      <button
+        type="button"
+        class="borrador-lightbox-close btn-icon"
+        (click)="cerrarBorradorPreviewAmpliado(); $event.stopPropagation()"
+        aria-label="Cerrar vista ampliada">
+        <mat-icon>close</mat-icon>
+      </button>
+      <img
+        class="borrador-lightbox-img"
+        [src]="borradorImagen.previewUrl"
+        alt=""
+        (click)="$event.stopPropagation()"
+      />
+    </div>
   </aside>
 </div>

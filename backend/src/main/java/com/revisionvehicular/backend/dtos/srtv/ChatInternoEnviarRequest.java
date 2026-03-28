@@ -11,6 +11,16 @@ public class ChatInternoEnviarRequest {
     private Long receptorId;
 
     @NotBlank
-    @Size(max = 2000)
+    @Size(max = 2048)
     private String contenido;
+
+    /** Opcional: citar / responder un mensaje de esta conversación. */
+    private Long respuestaAMensajeId;
+
+    /** TEXTO (defecto) o IMAGEN ({@code contenido} = URL, p. ej. Cloudinary). */
+    private String tipo;
+
+    /** Texto opcional que acompaña a la imagen (solo aplica si tipo es IMAGEN). */
+    @Size(max = 2048)
+    private String leyenda;
 }

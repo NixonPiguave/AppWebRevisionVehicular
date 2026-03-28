@@ -327,7 +327,7 @@
       <!-- ========================================
      ADMINISTRACIÓN
      ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas','menu_backup')" class="menu-section">
+      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_roles_postgres','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas','menu_backup')" class="menu-section">
   <span *ngIf="!sidebarCollapsed" class="section-title">
     Administración
   </span>
@@ -350,6 +350,7 @@
           <div class="submenu" [class.open]="administracionOpen && !sidebarCollapsed">
             <a *ngIf="puedeVer('menu_usuarios')" routerLink="/inicio/administracion/usuarios" routerLinkActive="active" class="submenu-item">Usuarios</a>
             <a *ngIf="puedeVer('menu_roles')" routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
+            <a *ngIf="puedeVer('menu_roles_postgres') || puedeVer('menu_roles')" routerLink="/inicio/administracion/roles-postgres" routerLinkActive="active" class="submenu-item">Roles PostgreSQL</a>
             <a *ngIf="puedeVer('menu_areas')" routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
             <a *ngIf="puedeVer('menu_empresa')" routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
             <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>

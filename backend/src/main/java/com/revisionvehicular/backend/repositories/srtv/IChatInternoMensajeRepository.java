@@ -11,7 +11,8 @@ import java.util.List;
 
 public interface IChatInternoMensajeRepository extends JpaRepository<ChatInternoMensaje, Long> {
 
-    @Query("SELECT m FROM ChatInternoMensaje m " +
+    @Query("SELECT DISTINCT m FROM ChatInternoMensaje m " +
+            "LEFT JOIN FETCH m.respuestaA " +
             "WHERE (m.emisor.usuarioId = :usuarioA AND m.receptor.usuarioId = :usuarioB) " +
             "OR (m.emisor.usuarioId = :usuarioB AND m.receptor.usuarioId = :usuarioA) " +
             "ORDER BY m.creadoEn ASC")

@@ -1,5 +1,6 @@
 package com.revisionvehicular.backend.controllers.srtv;
 
+import com.revisionvehicular.backend.dtos.srtv.ChatInternoEditarRequest;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoEnviarRequest;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoMensajeDTO;
 import com.revisionvehicular.backend.dtos.srtv.ChatInternoSinLeerResumenDTO;
@@ -33,5 +34,12 @@ public class ChatInternoController {
     @GetMapping("/sin-leer")
     public ResponseEntity<ChatInternoSinLeerResumenDTO> sinLeer() {
         return ResponseEntity.ok(chatInternoService.resumenSinLeer());
+    }
+
+    @PutMapping("/mensaje/{mensajeId}")
+    public ResponseEntity<ChatInternoMensajeDTO> editarMensaje(
+            @PathVariable Long mensajeId,
+            @Valid @RequestBody ChatInternoEditarRequest body) {
+        return ResponseEntity.ok(chatInternoService.editarMensaje(mensajeId, body));
     }
 }

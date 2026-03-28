@@ -18,6 +18,11 @@ import java.util.stream.Collectors;
 @Service
 public class AuditoriaService {
 
+    /** Límite de la columna {@code accion} en {@code srtv_auditoria} (entidad JPA). */
+    private static final int MAX_ACCION_LENGTH = 500;
+    /** Límite de la columna {@code detalle} en {@code srtv_auditoria} (entidad JPA). */
+    private static final int MAX_DETALLE_LENGTH = 1000;
+
     private final IAuditoriaRepository auditoriaRepository;
     private final IUsuarioRepository usuarioRepository;
     private final IUsuarioRolesRepository usuarioRolesRepository;
@@ -32,13 +37,14 @@ public class AuditoriaService {
 
     /** Registra una acción de auditoría (ej. login/logout) con el usuario explícito. */
     public void registrarAccion(Usuario usuario, String accion) {
+        String texto = accion != null ? accion : "";
         Auditoria auditoria = new Auditoria();
         auditoria.setFecha(LocalDateTime.now());
         auditoria.setUsuario(usuario);
-        auditoria.setAccion(accion);
-        auditoria.setTipoAccion(accion);
+        auditoria.setAccion(truncar(texto, MAX_ACCION_LENGTH));
+        auditoria.setTipoAccion(truncar(texto, 20));
         auditoria.setEntidad(null);
-        auditoria.setDetalle(accion);
+        auditoria.setDetalle(truncar(texto, MAX_DETALLE_LENGTH));
         auditoriaRepository.save(auditoria);
     }
 
@@ -50,15 +56,29 @@ public class AuditoriaService {
         Optional<Usuario> usuarioOpt = obtenerUsuarioActual();
         if (usuarioOpt.isEmpty()) return;
 
-        String accion = tipoAccion + " en " + entidad + ": " + detalle;
+        String detalleSeguro = truncar(detalle != null ? detalle : "", MAX_DETALLE_LENGTH);
+        String accion = truncar(tipoAccion + " en " + entidad + ": " + detalleSeguro, MAX_ACCION_LENGTH);
         Auditoria auditoria = new Auditoria();
         auditoria.setFecha(LocalDateTime.now());
         auditoria.setUsuario(usuarioOpt.get());
         auditoria.setAccion(accion);
-        auditoria.setTipoAccion(tipoAccion);
-        auditoria.setEntidad(entidad);
-        auditoria.setDetalle(detalle);
+        auditoria.setTipoAccion(truncar(tipoAccion, 20));
+        auditoria.setEntidad(truncar(entidad, 100));
+        auditoria.setDetalle(detalleSeguro);
         auditoriaRepository.save(auditoria);
+    }
+
+    private static String truncar(String s, int maxLen) {
+        if (s == null || s.isEmpty() || maxLen <= 0) {
+            return s == null ? "" : s;
+        }
+        if (s.length() <= maxLen) {
+            return s;
+        }
+        if (maxLen <= 1) {
+            return s.substring(0, maxLen);
+        }
+        return s.substring(0, maxLen - 1) + "…";
     }
 
     private Optional<Usuario> obtenerUsuarioActual() {
