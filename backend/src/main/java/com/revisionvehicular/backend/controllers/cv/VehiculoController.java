@@ -55,4 +55,14 @@ public class VehiculoController {
         service.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    public record FotoRequest(
+            @jakarta.validation.constraints.NotBlank
+            @jakarta.validation.constraints.Size(max = 2048)
+            @jakarta.validation.constraints.Pattern(regexp = "^https://[^\\s]+$") String fotoUrl) {}
+
+    @PatchMapping("/{id}/foto")
+    public ResponseEntity<VehiculoDTO> actualizarFoto(@PathVariable Long id, @Valid @RequestBody FotoRequest request) {
+        return ResponseEntity.ok(service.actualizarFoto(id, request.fotoUrl()));
+    }
 }

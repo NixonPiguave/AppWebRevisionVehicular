@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { forkJoin } from 'rxjs';
+import { switchMap, finalize } from 'rxjs/operators';
+import { CloudinaryService } from '../../../services/cloudinary.service';
+import { VehiclePhotoComponent } from '../../../components/vehicle-photo/vehicle-photo';
 
 import {
   VehiculoService,
@@ -36,11 +39,36 @@ import {
 @Component({
   selector: 'app-vehiculo',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, MatIconModule],
+  imports: [CommonModule, FormsModule, RouterModule, MatIconModule, VehiclePhotoComponent],
   templateUrl: './vehiculos.html',
   styleUrl: './vehiculos.css'
 })
 export class VehiculoComponent implements OnInit {
+  subiendoFoto = false;
+
+  subirFoto(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    const id = this.vehiculoDetalle?.id;
+    input.value = '';
+    if (!file || !id || this.subiendoFoto) return;
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 5 * 1024 * 1024) {
+      this.notification.error('Selecciona una imagen JPG, PNG o WebP de hasta 5 MB.');
+      return;
+    }
+    this.subiendoFoto = true;
+    this.cloudinary.uploadImage(file, 'vehiculos').pipe(
+      switchMap(result => this.vehiculoService.guardarFoto(id, result.url)),
+      finalize(() => { this.subiendoFoto = false; this.cdr.markForCheck(); })
+    ).subscribe({
+      next: vehiculo => {
+        this.vehiculos = this.vehiculos.map(v => v.id === id ? vehiculo : v);
+        if (this.vehiculoDetalle?.id === id) this.vehiculoDetalle = vehiculo;
+        this.notification.success('Fotografía del vehículo guardada.');
+      },
+      error: () => this.notification.error('No se pudo guardar la fotografía. Inténtalo nuevamente.')
+    });
+  }
 
   vehiculos: Vehiculo[] = [];
   vista: 'REGISTRO_BASE_UNICA' | 'VEHICULOS' = 'REGISTRO_BASE_UNICA';
@@ -100,6 +128,7 @@ export class VehiculoComponent implements OnInit {
   vehiculoDetalle: Vehiculo | null = null;
 
   constructor(
+    private cloudinary: CloudinaryService,
     private vehiculoService: VehiculoService,
     private propietarioService: PropietarioService,
     private servicioService: ServicioService,

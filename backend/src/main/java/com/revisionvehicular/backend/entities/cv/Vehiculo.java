@@ -18,6 +18,8 @@ public class Vehiculo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehiculoid;
+    @Column(name = "foto_url", length = 2048)
+    private String fotoUrl;
     @ManyToOne
     @JoinColumn(name = "Id_Propietario")
     private Propietario propietario;

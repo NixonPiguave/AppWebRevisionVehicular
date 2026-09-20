@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.spec.json",
+  "include": [
+    "src/app/components/vehicle-inspection-3d/*.spec.ts",
+    "src/app/paginas/inicio/navigation.spec.ts",
+    "src/app/components/vehicle-photo/vehicle-photo.spec.ts",
+    "src/app/paginas/inspeccion_rtv/turnos-pagados/turnos-pagados.spec.ts"
+  ]
+}

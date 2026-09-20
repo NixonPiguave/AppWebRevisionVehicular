@@ -1,0 +1,135 @@
+:host {
+  display: block;
+}
+.part-tooltip {
+  position: absolute;
+  z-index: 3;
+  box-sizing: border-box;
+  width: 248px;
+  max-width: calc(100% - 24px);
+  padding: 13px 15px;
+  border: 1px solid #d7e2d8;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 8px 28px #172d2026;
+  pointer-events: none;
+  color: #1e3125;
+  animation: tooltip-in 140ms ease-out;
+}
+.part-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #64746a;
+  font-size: 10px;
+  line-height: 1.4;
+}
+.part-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #648c40;
+  flex-shrink: 0;
+}
+.part-dot.selected {
+  background: #bd1e31;
+}
+.part-tooltip strong {
+  display: block;
+  margin: 6px 0;
+  font-size: 13px;
+  line-height: 1.3;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.part-action {
+  display: block;
+  padding-top: 7px;
+  border-top: 1px solid #edf1ed;
+  color: #617052;
+  font-size: 10px;
+}
+.canvas-host:focus-visible {
+  outline: 2px solid #648c40;
+  outline-offset: -4px;
+}
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .part-tooltip {
+    animation: none;
+  }
+}
+.viewer-shell {
+  position: relative;
+  height: 460px;
+  overflow: hidden;
+  border: 1px solid #d8e5dc;
+  border-radius: 14px;
+  background: radial-gradient(circle at 50% 18%, #fff 0, #f4f8f5 58%, #e9f0eb 100%);
+}
+.canvas-host {
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+}
+.canvas-host:active {
+  cursor: grabbing;
+}
+.viewer-hint {
+  position: absolute;
+  left: 16px;
+  bottom: 14px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  background: rgba(22, 45, 30, 0.82);
+  color: white;
+  font-size: 12px;
+  pointer-events: none;
+}
+.reset-view {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: 1px solid #b7cabd;
+  border-radius: 7px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #245333;
+  font-size: 12px;
+  cursor: pointer;
+}
+.reset-view:hover {
+  background: #e8f4e8;
+}
+.underside-view {
+  top: 52px;
+}
+.model-status {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 130px;
+  color: #365447;
+  font-size: 12px;
+  pointer-events: none;
+}
+@media (max-width: 600px) {
+  .viewer-shell {
+    height: 380px;
+  }
+  .viewer-hint {
+    max-width: 190px;
+  }
+}

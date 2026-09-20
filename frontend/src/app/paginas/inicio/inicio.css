@@ -5,8 +5,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
-  Helvetica, Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -546,8 +546,9 @@ body {
   background: #121a11;
   border-radius: 8px;
   margin: 0 8px;
-  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-  padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition:
+    max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    padding 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .submenu.open {
@@ -734,9 +735,6 @@ body {
   color: #2d5016;
 }
 
-
-
-
 /* ============================================
    SPINNER PARA CARGA DE ÍCONO
    ============================================ */
@@ -758,7 +756,9 @@ body {
 }
 
 @keyframes spinLogoSmall {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ============================================
@@ -903,4 +903,249 @@ body {
 .btn-restore-modal:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+/* Navigation refreshed with the original forest / olive identity. */
+.sidebar {
+  width: 248px;
+  box-shadow: 2px 0 10px #1424100a;
+  border-right: 1px solid #31452a;
+}
+.main {
+  margin-left: 248px;
+  min-width: 0;
+}
+.menu {
+  padding: 20px 12px;
+}
+.nav-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 20px;
+  border: 1px solid #41503a;
+  border-radius: 8px;
+  color: #b7c6af;
+}
+.nav-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 4px 0;
+  background: transparent;
+  border: 0;
+  color: white;
+  font: inherit;
+  font-size: 12px;
+}
+.nav-search input::placeholder {
+  color: #b7c6af;
+}
+.nav-group {
+  margin-bottom: 8px;
+}
+.nav-group:last-of-type {
+  border-top: 1px solid #3d4a35;
+  padding-top: 14px;
+  margin-top: 24px;
+}
+.nav-group-button {
+  border: 0;
+  background: none;
+  width: 100%;
+  margin: 0;
+  text-align: left;
+  font: inherit;
+  padding: 14px 12px;
+  min-height: 48px;
+}
+.nav-group-button .menu-icon {
+  filter: none;
+  color: inherit;
+}
+.nav-group-button .menu-arrow {
+  margin-left: auto;
+}
+.nav-links {
+  margin: 5px 0 12px 22px;
+  border-left: 1px solid #405133;
+  padding-left: 7px;
+}
+.nav-links .submenu-item {
+  display: block;
+  padding: 11px 12px;
+  margin: 2px 0;
+  line-height: 1.4;
+  color: #ced8c8;
+  white-space: normal;
+  border-radius: 7px;
+  text-decoration: none;
+  font-size: 13px;
+}
+.nav-links .submenu-item:hover {
+  background: #283c20;
+  color: white;
+}
+.nav-links .submenu-item.active {
+  background: #304824;
+  color: #b5e180;
+  font-weight: 600;
+}
+.nav-empty {
+  padding: 12px;
+  color: #bcc9b5;
+  font-size: 13px;
+}
+.sidebar.collapsed .menu {
+  padding-inline: 8px;
+}
+.sidebar.collapsed .nav-group-button {
+  padding: 14px;
+  margin: 0;
+}
+.workflow-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 auto 24px;
+  max-width: 1480px;
+  font-size: 13px;
+}
+.workflow-links > span {
+  color: #7c8876;
+  font-size: 11px;
+  margin-right: 10px;
+}
+.workflow-links a {
+  color: #697562;
+  text-decoration: none;
+  padding: 9px 12px;
+  border-radius: 8px;
+}
+.workflow-links a:hover {
+  background: #edf3e7;
+}
+.workflow-links .current {
+  background: #e9f2df;
+  color: #2d5016;
+  font-weight: 650;
+}
+@media (min-width: 769px) {
+  .content {
+    padding: 28px 32px;
+  }
+}
+@media (max-width: 768px) {
+  .main {
+    margin-left: 0;
+  }
+  .workflow-links > span {
+    display: none;
+  }
+  .workflow-links {
+    gap: 0;
+    margin-bottom: 16px;
+  }
+  .workflow-links a {
+    font-size: 11px;
+    padding: 8px;
+  }
+}
+.start-actions {
+  max-width: 1400px;
+  margin: 0 auto 24px;
+  padding: 12px 24px;
+}
+.start-actions header h2 {
+  color: #25351d;
+  font-size: 24px;
+  margin: 0 0 6px;
+}
+.start-actions header p {
+  color: #76816c;
+  font-size: 14px;
+  margin: 0 0 22px;
+}
+.start-actions > div {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+}
+.start-actions a {
+  display: grid;
+  grid-template-columns: 1fr 24px;
+  gap: 12px;
+  text-decoration: none;
+  background: white;
+  border: 1px solid #dfe5d9;
+  padding: 20px;
+  border-radius: 12px;
+  color: #2d5016;
+}
+.start-actions a > mat-icon:first-child {
+  grid-column: span 2;
+  background: #edf4e6;
+  padding: 10px;
+  border-radius: 10px;
+  box-sizing: content-box;
+}
+.start-actions a > strong {
+  grid-column: span 2;
+  font-size: 16px;
+}
+.start-actions a > span {
+  font-size: 12px;
+  color: #697562;
+}
+.start-actions a:hover {
+  border-color: #8cac6a;
+  background: #fafcf7;
+}
+.config-section {
+  margin: 4px 0;
+}
+.config-section-button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  min-height: 48px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #d0dcc8;
+  text-align: left;
+  padding: 10px 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.config-section-button > span {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.config-section-button > small {
+  font-size: 10px;
+  color: #a9bc9d;
+}
+.config-section-button > mat-icon {
+  flex-shrink: 0;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+.config-section-button:hover,
+.config-section-button.active {
+  background: #283b21;
+  color: #b4da96;
+}
+.config-section-links {
+  margin: 0 0 8px 6px;
+  border-left: 1px solid #435639;
+  padding-left: 6px;
+}
+.config-section-links .submenu-item {
+  font-size: 12px;
+  padding: 10px 8px;
 }

@@ -17,6 +17,8 @@ import { VehiculoService } from '../../../services/gestion_vehicular/vehiculo.se
 import { NotificationService } from '../../../services/notification.service';
 import { AuthService } from '../../../services/auth.service';
 import { forkJoin } from 'rxjs';
+import { VehicleInspection3dComponent, VehicleZone } from '../../../components/vehicle-inspection-3d/vehicle-inspection-3d';
+import { VehiclePhotoComponent } from '../../../components/vehicle-photo/vehicle-photo';
 
 /** Ubicaciones para línea Carros */
 interface UbicacionesRevisadas {
@@ -44,6 +46,7 @@ interface UbicacionesMoto {
 }
 
 interface VehiculoInfo {
+  fotoUrl?: string;
   matricula?:       string;
   chasis?:          string;
   codigoMotor?:     string;
@@ -78,11 +81,21 @@ interface ImprontaRow {
 @Component({
   selector: 'app-registrar-inspeccion',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, MatIconModule, VehicleInspection3dComponent, VehiclePhotoComponent],
   templateUrl: './registrar-inspeccion.html',
   styleUrl: './registrar-inspeccion.css'
 })
 export class RegistrarInspeccionComponent implements OnInit {
+  revisandoResumen = false;
+  readonly etiquetasZona: Partial<Record<VehicleZone, string>> = {
+    delantera: 'Delantera', trasera: 'Trasera', lateralIzquierdo: 'Lateral izquierdo', lateralDerecho: 'Lateral derecho',
+    ruedaDelIzq: 'Rueda delantera izquierda', ruedaDelDer: 'Rueda delantera derecha',
+    ruedaTraIzq: 'Rueda trasera izquierda', ruedaTraDer: 'Rueda trasera derecha',
+    habitaculo: 'Habitáculo', parteInferior: 'Bajos', ruedaDelantera: 'Rueda delantera', ruedaTrasera: 'Rueda trasera', chasis: 'Chasis'
+  };
+  get zonasDisponibles(): VehicleZone[] {
+    return Object.keys(this.esMoto ? this.ubicacionesMoto : this.ubicaciones) as VehicleZone[];
+  }
 
   turnoId: number | null = null;
   vehiculoId: number | null = null;
@@ -123,6 +136,45 @@ export class RegistrarInspeccionComponent implements OnInit {
 
   get esMoto(): boolean {
     return this.lineaIdParam === this.LINEA_MOTOS_ID;
+  }
+
+  get zonasSeleccionadas3d(): VehicleZone[] {
+    const zonas: VehicleZone[] = [];
+    if (this.esMoto) {
+      const map: Record<keyof UbicacionesMoto, VehicleZone> = {
+        delantera: 'delantera', ruedaDelantera: 'ruedaDelantera', lateralIzquierdo: 'lateralIzquierdo',
+        lateralDerecho: 'lateralDerecho', ruedaTrasera: 'ruedaTrasera', trasera: 'trasera', chasis: 'chasis'
+      };
+      (Object.keys(map) as (keyof UbicacionesMoto)[]).forEach(key => { if (this.ubicacionesMoto[key]) zonas.push(map[key]); });
+    } else {
+      const map: Record<keyof UbicacionesRevisadas, VehicleZone> = {
+        delantera: 'delantera', ruedaDelIzq: 'ruedaDelIzq', ruedaDelDer: 'ruedaDelDer',
+        lateralIzquierdo: 'lateralIzquierdo', lateralDerecho: 'lateralDerecho', ruedaTraIzq: 'ruedaTraIzq',
+        ruedaTraDer: 'ruedaTraDer', trasera: 'trasera', habitaculo: 'habitaculo', parteInferior: 'parteInferior'
+      };
+      (Object.keys(map) as (keyof UbicacionesRevisadas)[]).forEach(key => { if (this.ubicaciones[key]) zonas.push(map[key]); });
+    }
+    return zonas;
+  }
+
+  toggleZona3d(zona: VehicleZone): void {
+    if (this.esMoto) {
+      const map: Partial<Record<VehicleZone, keyof UbicacionesMoto>> = {
+        delantera: 'delantera', ruedaDelantera: 'ruedaDelantera', lateralIzquierdo: 'lateralIzquierdo',
+        lateralDerecho: 'lateralDerecho', ruedaTrasera: 'ruedaTrasera', trasera: 'trasera', chasis: 'chasis'
+      };
+      const key = map[zona];
+      if (key) this.ubicacionesMoto[key] = !this.ubicacionesMoto[key];
+    } else {
+      const map: Partial<Record<VehicleZone, keyof UbicacionesRevisadas>> = {
+        delantera: 'delantera', ruedaDelIzq: 'ruedaDelIzq', ruedaDelDer: 'ruedaDelDer',
+        lateralIzquierdo: 'lateralIzquierdo', lateralDerecho: 'lateralDerecho', ruedaTraIzq: 'ruedaTraIzq',
+        ruedaTraDer: 'ruedaTraDer', trasera: 'trasera', habitaculo: 'habitaculo', parteInferior: 'parteInferior'
+      };
+      const key = map[zona];
+      if (key) this.ubicaciones[key] = !this.ubicaciones[key];
+    }
+    this.paginaDefectos = 1;
   }
 
   defectosSeleccionados: Defectos[] = [];
@@ -265,6 +317,7 @@ export class RegistrarInspeccionComponent implements OnInit {
     this.vehiculoService.obtenerPorId(id).subscribe({
       next: (v: any) => {
         this.vehiculoInfo = {
+          fotoUrl:         v.fotoUrl,
           id:              v.id,
           matricula:       v.matricula || v.placa,
           chasis:          v.chasis,
@@ -539,6 +592,11 @@ export class RegistrarInspeccionComponent implements OnInit {
   }
 
   guardarInspeccion(): void {
+    if (this.guardando) return;
+    if (this.kilometraje != null && (!Number.isFinite(this.kilometraje) || this.kilometraje < 0)) {
+      this.notification.error('El kilometraje debe ser un número mayor o igual a cero.');
+      return;
+    }
     if (!this.vehiculoId) {
       this.notification.error('No hay vehículo asociado a esta inspección.');
       return;

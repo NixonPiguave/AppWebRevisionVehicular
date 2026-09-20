@@ -1,110 +1,200 @@
-<div class="turnos-pagados-container">
-  <header class="header">
-    <button class="btn-volver" (click)="volver()">← Volver</button>
-    <h1>Turnos pagados – Iniciar inspección</h1>
-    <p class="subtitulo">Seleccione la línea de inspección (Carros o Motos) para ver los turnos filtrados por categoría de vehículo.</p>
+<div class="inspection-center">
+  <header class="center-heading">
+    <div>
+      <h1>Centro de inspecciones</h1>
+      <p>Selecciona la línea y continúa con las revisiones pendientes.</p>
+    </div>
+    <button
+      class="button secondary"
+      (click)="cargarTurnosPagados()"
+      [disabled]="cargando || !serviciosCargados || !lineaSeleccionada"
+    >
+      <mat-icon>refresh</mat-icon>Actualizar
+    </button>
   </header>
-
-  <!-- Selector de línea (primero) - centrado y destacado -->
-  <section class="selector-linea">
-    <h3 class="selector-titulo">Línea de inspección</h3>
-    <p class="selector-descripcion">Los turnos se filtran según la categoría del vehículo (L = motos, M = carros)</p>
-    <div class="cargando" *ngIf="cargandoLineas">
-      <span>Cargando líneas...</span>
-    </div>
-    <div class="linea-opciones" *ngIf="!cargandoLineas && lineas.length > 0">
-      <button
-        *ngFor="let linea of lineas"
-        type="button"
-        class="btn-linea"
-        [class.seleccionada]="lineaSeleccionada?.id === linea.id"
-        (click)="seleccionarLinea(linea)">
-        <span class="linea-imagen">
-          <img *ngIf="linea.nombre.toLowerCase().includes('moto')" src="/linea-moto.png" alt="Moto" />
-          <img *ngIf="!linea.nombre.toLowerCase().includes('moto')" src="/linea-carro.png" alt="Carro" />
-        </span>
-        <span class="linea-nombre">{{ linea.nombre }}</span>
-      </button>
-    </div>
-    <p class="sin-lineas" *ngIf="!cargandoLineas && lineas.length === 0">
-      No hay líneas registradas. Cree las líneas Carros y Motos en el catálogo de líneas.
-    </p>
+  <section class="line-options" aria-label="Seleccionar línea de inspección">
+    <button
+      *ngFor="let linea of lineas"
+      (click)="seleccionarLinea(linea)"
+      [disabled]="cargando"
+      [class.selected]="lineaSeleccionada?.id === linea.id"
+      [attr.aria-pressed]="lineaSeleccionada?.id === linea.id"
+    >
+      <img
+        [src]="linea.nombre.toLowerCase().includes('moto') ? '/linea-moto.png' : '/linea-carro.png'"
+        alt=""
+      />
+      <span
+        ><strong>{{ linea.nombre }}</strong
+        ><small>{{
+          linea.nombre.toLowerCase().includes('moto')
+            ? 'Revisión de motocicletas'
+            : 'Revisión de vehículos'
+        }}</small></span
+      >
+      <mat-icon>{{
+        lineaSeleccionada?.id === linea.id ? 'radio_button_checked' : 'radio_button_unchecked'
+      }}</mat-icon>
+    </button>
+    <p *ngIf="cargandoLineas" role="status">Cargando líneas…</p>
+    <p *ngIf="!cargandoLineas && !errorLineas && !lineas.length">No hay líneas registradas.</p>
   </section>
-
-  <div class="mensaje-error" *ngIf="error">
-    {{ error }}
-    <button class="btn-reintentar" (click)="cargarTurnosPagados()">Reintentar</button>
+  <div class="notice error" role="alert" *ngIf="errorLineas">
+    {{ errorLineas }}<button (click)="cargarLineas()">Reintentar</button>
   </div>
-
-  <div class="cargando" *ngIf="cargando && !error && lineaSeleccionada">
-    <span>Cargando turnos pagados...</span>
+  <div class="notice error" role="alert" *ngIf="errorServicios">
+    {{ errorServicios }}<button (click)="cargarServicios()">Reintentar</button>
   </div>
-
-  <div class="tabla-container" *ngIf="!cargando && !error && lineaSeleccionada">
-    <table class="tabla-turnos">
-      <thead>
-        <tr>
-          <th>Nº TURNO</th>
-          <th>Propietario</th>
-          <th>Vehículo (Marca/Modelo)</th>
-          <th>Servicio</th>
-          <th>Fecha</th>
-          <th>Estado</th>
-          <th>Acción</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let turno of turnos">
-          <td>TRN-{{ turno.turnoId }}</td>
-          <td>{{ turno.propietarioNombre || ('#' + turno.propietarioId) }}</td>
-          <td>{{ turno.vehiculoDescripcion || ('Vehículo #' + turno.vehiculoId) }}</td>
-          <td>{{ getNombreServicio(turno.servicioId) }}</td>
-          <td>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</td>
-          <td>
-            <span class="badge" [ngClass]="getEstadoBadge(turno.estado)">
-              {{ getEstadoLabel(turno.estado) }}
-            </span>
-          </td>
-          <td class="acciones">
-            <button
-              type="button"
-              class="btn-inspeccion"
-              (click)="abrirModalMetodos(turno)"
-              title="Iniciar inspección">
-              Iniciar inspección
-            </button>
-          </td>
-        </tr>
-        <tr *ngIf="turnos.length === 0">
-          <td colspan="7" class="text-center">No hay turnos en proceso para esta línea (línea {{ lineaSeleccionada.nombre }}: vehículos categoría {{ lineaSeleccionada.nombre.toLowerCase().includes('moto') ? 'L' : 'M' }}).</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- Modal métodos de inspección pendientes -->
-  <div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
-    <div class="modal-contenido" (click)="$event.stopPropagation()">
-      <div class="modal-header">
-        <h2>Seleccione el método de inspección</h2>
-        <button type="button" class="btn-cerrar" (click)="cerrarModal()" aria-label="Cerrar">×</button>
+  <div class="center-grid" [class.with-detail]="mostrarModal">
+    <section class="queue-card" [attr.aria-busy]="cargando">
+      <header class="queue-heading">
+        <h2>
+          <mat-icon>format_list_bulleted</mat-icon>Vehículos pendientes
+          <span class="count">{{ cargando ? '…' : turnos.length }}</span>
+        </h2>
+        <label class="queue-search"
+          ><mat-icon>search</mat-icon
+          ><input
+            [(ngModel)]="busqueda"
+            (ngModelChange)="pagina = 1"
+            placeholder="Buscar placa, turno o propietario…"
+            aria-label="Buscar placa, turno o propietario"
+          /><button
+            *ngIf="busqueda"
+            (click)="busqueda = ''; pagina = 1"
+            aria-label="Limpiar búsqueda"
+          >
+            <mat-icon>close</mat-icon>
+          </button></label
+        >
+      </header>
+      <div class="notice error" role="alert" *ngIf="error">
+        {{ error }}<button (click)="cargarTurnosPagados()">Reintentar</button>
       </div>
-      <p class="modal-subtitulo">Métodos pendientes para este turno (según inspecciones realizadas):</p>
-      <div class="modal-cargando" *ngIf="cargandoMetodos">
-        <span>Cargando métodos...</span>
+      <div class="empty" role="status" *ngIf="cargando || (!serviciosCargados && !errorServicios)">
+        <mat-icon>hourglass_top</mat-icon>
+        <h3>Preparando la cola</h3>
+        <p>Consultando vehículos y revisiones pendientes…</p>
       </div>
-      <div class="modal-mensaje" *ngIf="!cargandoMetodos && metodosPendientes.length === 0">
-        No hay métodos de inspección pendientes. Todas las inspecciones ya fueron realizadas para este vehículo.
+      <div class="table-scroll" *ngIf="!cargando && !error && serviciosCargados">
+        <table>
+          <caption class="sr-only">
+            Turnos en proceso con revisiones pendientes
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Turno</th>
+              <th scope="col">Vehículo</th>
+              <th scope="col">Propietario</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let turno of turnosPagina"
+              [class.active-row]="turnoSeleccionado?.turnoId === turno.turnoId"
+            >
+              <td>
+                <strong>#{{ turno.turnoId }}</strong
+                ><small>{{ turno.fechaInicio | date: 'dd/MM/yyyy' }}</small>
+              </td>
+              <td>
+                <div class="vehicle-cell">
+                  <app-vehicle-photo
+                    [url]="fotoVehiculo(turno)"
+                    [label]="turno.vehiculoDescripcion || 'Vehículo'"
+                    [compact]="true"
+                  /><span>{{ turno.vehiculoDescripcion || 'Vehículo #' + turno.vehiculoId }}</span>
+                </div>
+              </td>
+              <td>{{ turno.propietarioNombre || '#' + turno.propietarioId }}</td>
+              <td>
+                <span class="status"><span aria-hidden="true">●</span> En proceso</span>
+              </td>
+              <td>
+                <button
+                  class="button primary"
+                  (click)="abrirModalMetodos(turno)"
+                  [attr.aria-label]="'Revisar turno ' + turno.turnoId"
+                  [attr.aria-expanded]="turnoSeleccionado?.turnoId === turno.turnoId"
+                  aria-controls="turno-detail"
+                >
+                  Revisar
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="empty" *ngIf="!turnosFiltrados.length">
+          <mat-icon>{{ busqueda ? 'search_off' : 'task_alt' }}</mat-icon>
+          <h3>{{ busqueda ? 'Sin coincidencias' : 'No hay revisiones pendientes' }}</h3>
+          <p>
+            {{
+              busqueda
+                ? 'Prueba con otra placa, turno o propietario.'
+                : 'Los turnos aparecerán cuando estén en proceso y tengan revisiones por realizar.'
+            }}
+          </p>
+        </div>
       </div>
-      <div class="modal-metodos" *ngIf="!cargandoMetodos && metodosPendientes.length > 0">
-        <button
-          *ngFor="let metodo of metodosPendientes"
-          type="button"
-          class="btn-metodo"
-          (click)="seleccionarMetodo(metodo)">
-          {{ metodo.nombre }}
+      <footer class="pagination" *ngIf="!cargando && !error && turnosFiltrados.length">
+        <span
+          >{{ turnosFiltrados.length }} resultados · Página {{ pagina }} de {{ totalPaginas }}</span
+        >
+        <div>
+          <button
+            aria-label="Página anterior"
+            [disabled]="pagina === 1"
+            (click)="pagina = pagina - 1"
+          >
+            <mat-icon>chevron_left</mat-icon></button
+          ><button
+            aria-label="Página siguiente"
+            [disabled]="pagina === totalPaginas"
+            (click)="pagina = pagina + 1"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </footer>
+    </section>
+    <aside
+      id="turno-detail"
+      class="detail-card"
+      *ngIf="mostrarModal && turnoSeleccionado"
+      aria-labelledby="detail-title"
+    >
+      <header>
+        <h2 id="detail-title">Turno #{{ turnoSeleccionado.turnoId }}</h2>
+        <button (click)="cerrarModal()" aria-label="Cerrar detalle">
+          <mat-icon>close</mat-icon>
         </button>
+      </header>
+      <app-vehicle-photo
+        [url]="fotoVehiculo(turnoSeleccionado)"
+        [label]="turnoSeleccionado.vehiculoDescripcion || 'Vehículo'"
+      />
+      <h3>{{ turnoSeleccionado.vehiculoDescripcion }}</h3>
+      <p>{{ turnoSeleccionado.propietarioNombre }}</p>
+      <div class="detail-divider"></div>
+      <h3>Revisiones pendientes</h3>
+      <p role="status" *ngIf="cargandoMetodos">Consultando revisiones…</p>
+      <div class="notice error" role="alert" *ngIf="errorMetodos">
+        {{ errorMetodos }}<button (click)="abrirModalMetodos(turnoSeleccionado)">Reintentar</button>
       </div>
-    </div>
+      <p class="notice" *ngIf="!cargandoMetodos && !errorMetodos && !metodosPendientes.length">
+        Este turno no tiene revisiones pendientes. Actualiza la cola.
+      </p>
+      <button
+        class="method"
+        *ngFor="let metodo of metodosPendientes"
+        (click)="seleccionarMetodo(metodo)"
+      >
+        <mat-icon>fact_check</mat-icon><span>{{ metodo.nombre }}</span
+        ><mat-icon>chevron_right</mat-icon>
+      </button>
+      <p class="detail-help">Elige una revisión para continuar. Al guardarla volverás a la cola.</p>
+    </aside>
   </div>
 </div>

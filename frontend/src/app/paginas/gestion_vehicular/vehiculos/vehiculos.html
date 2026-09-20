@@ -106,7 +106,7 @@
         <tbody>
         <tr *ngFor="let vehiculo of vehiculosPaginados">
           <td>{{ vehiculo.id }}</td>
-          <td>{{ vehiculo.matricula }}</td>
+          <td><app-vehicle-photo [url]="vehiculo.fotoUrl" [label]="vehiculo.matricula" [compact]="true" />{{ vehiculo.matricula }}</td>
           <td>{{ vehiculo.vin }}</td>
           <td>{{ vehiculo.chasis }}</td>
           <td>{{ obtenerNombreModelos(vehiculo.modeloVehiculoId) }}</td>
@@ -123,7 +123,7 @@
               </span>
           </td>
           <td class="td-acciones">
-            <button class="btn-accion btn-ver" (click)="verDetalle(vehiculo)">
+            <button class="btn-accion btn-ver" (click)="verDetalle(vehiculo)" [attr.aria-label]="'Ver ficha de ' + vehiculo.matricula">
               <mat-icon>visibility</mat-icon>
             </button>
           </td>
@@ -437,6 +437,12 @@
     </div>
 
     <div class="modal-body" *ngIf="vehiculoDetalle">
+      <section class="vehicle-photo-editor" aria-label="Fotografía del vehículo">
+        <app-vehicle-photo [url]="vehiculoDetalle.fotoUrl" [label]="vehiculoDetalle.matricula" />
+        <label for="vehicle-photo-file">Fotografía de {{ vehiculoDetalle.matricula }}</label>
+        <input id="vehicle-photo-file" type="file" accept="image/jpeg,image/png,image/webp" (change)="subirFoto($event)" [disabled]="subiendoFoto" />
+        <p role="status">{{ subiendoFoto ? 'Guardando fotografía…' : 'JPG, PNG o WebP · hasta 5 MB. Se guarda al seleccionar el archivo.' }}</p>
+      </section>
       <div class="detalle-grid">
 
         <div class="detalle-item">

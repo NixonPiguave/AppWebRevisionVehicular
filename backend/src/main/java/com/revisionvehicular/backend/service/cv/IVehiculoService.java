@@ -9,6 +9,7 @@ public interface IVehiculoService {
     VehiculoDTO save(VehiculoDTO dto);
 
     VehiculoDTO update(Long id, VehiculoDTO dto);
+    VehiculoDTO actualizarFoto(Long id, String fotoUrl);
 
     void delete(Long id);
 

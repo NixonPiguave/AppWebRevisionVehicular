@@ -6,7 +6,7 @@
       <mat-icon>arrow_back</mat-icon>
       Volver
     </button>
-    <h1>Registro de Inspección - Revisión Visual</h1>
+    <h1>Revisión visual</h1>
     <div class="header-info" *ngIf="vehiculoInfo">
       <span class="badge-vehiculo">{{ vehiculoInfo.matricula || 'Sin placa' }}</span>
       <span class="badge-datos" *ngIf="vehiculoInfo.marca || vehiculoInfo.modelo">
@@ -62,168 +62,38 @@
   </div>
 
   <!-- Contenido principal -->
-  <div class="inspeccion-layout" *ngIf="!cargando && !error">
+  <nav class="inspection-steps" aria-label="Pasos de la revisión visual" *ngIf="!cargando && !error">
+    <button (click)="revisandoResumen = false" [attr.aria-current]="!revisandoResumen ? 'step' : null" [class.current]="!revisandoResumen">1 · Explorar y registrar hallazgos</button>
+    <mat-icon aria-hidden="true">chevron_right</mat-icon>
+    <button (click)="revisandoResumen = true" [attr.aria-current]="revisandoResumen ? 'step' : null" [class.current]="revisandoResumen">2 · Revisar y guardar</button>
+  </nav>
+  <section class="inspection-summary" *ngIf="revisandoResumen && !cargando && !error">
+    <div class="summary-vehicle"><app-vehicle-photo [url]="vehiculoInfo?.fotoUrl" [label]="vehiculoInfo?.matricula || 'Vehículo'" /><div><h2>Resumen de la revisión</h2><p>{{ vehiculoInfo?.matricula }} · Turno #{{ turnoId }}</p><p>Comprueba los hallazgos antes de registrar la inspección.</p></div></div>
+    <h3>Defectos seleccionados ({{ defectosSeleccionados.length }})</h3>
+    <ul><li *ngFor="let defecto of defectosSeleccionados"><strong>{{ defecto.codigo }}</strong> · {{ defecto.descripcion }}<button (click)="toggleDefecto(defecto)" [attr.aria-label]="'Quitar ' + defecto.codigo">Quitar</button></li></ul>
+    <p *ngIf="!defectosSeleccionados.length">No has seleccionado defectos. Regresa a la revisión si necesitas añadirlos.</p>
+    <h3>Zonas seleccionadas</h3><p>{{ getUbicacionesArray().join(' · ') || 'Ninguna' }}</p>
+  </section>
+  <div class="inspeccion-layout" *ngIf="!cargando && !error" [hidden]="revisandoResumen">
 
     <!-- ── Columna izquierda: Vehículo y ubicaciones ── -->
     <section class="panel-vehiculo">
       <div class="vehiculo-container">
-        <h3>Ubicaciones para revisión visual</h3>
-        <p class="subtitulo">Seleccione las zonas inspeccionadas</p>
+        <h3>Explora el vehículo</h3>
+        <p class="subtitulo">Gira el modelo y selecciona una pieza para filtrar los defectos.</p>
 
-        <!-- Diagrama cenital del vehículo -->
-        <div class="vehiculo-svg-wrapper" [class.moto-layout]="esMoto">
-
-          <!-- Carros: auto | Motos: moto-inspeccion.png -->
-          <img
-            class="vehiculo-img"
-            [src]="esMoto ? 'moto-inspeccion.png' : 'autoInspeccion.jpg'"
-            [alt]="esMoto ? 'Vista cenital de moto' : 'Vista cenital del vehículo'"
-            draggable="false"
+        @defer (on viewport) {
+          <app-vehicle-inspection-3d
+            [motorcycle]="esMoto"
+            [selectedZones]="zonasSeleccionadas3d"
+            (zoneToggled)="toggleZona3d($event)"
           />
-
-          <!-- Ubicaciones CARROS -->
-          <div class="ub-checkboxes-overlay" *ngIf="!esMoto">
-            <div class="ub-check ub-delantera" [class.seleccionada]="ubicaciones.delantera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.delantera" (ngModelChange)="paginaDefectos = 1" name="delantera"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Delantera</span>
-              </label>
-            </div>
-            <div class="ub-check ub-rdi" [class.seleccionada]="ubicaciones.ruedaDelIzq">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.ruedaDelIzq" (ngModelChange)="paginaDefectos = 1" name="rdi"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">R. Del. Izq</span>
-              </label>
-            </div>
-            <div class="ub-check ub-rdd" [class.seleccionada]="ubicaciones.ruedaDelDer">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.ruedaDelDer" (ngModelChange)="paginaDefectos = 1" name="rdd"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">R. Del. Der</span>
-              </label>
-            </div>
-            <div class="ub-check ub-lat-izq" [class.seleccionada]="ubicaciones.lateralIzquierdo">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.lateralIzquierdo" (ngModelChange)="paginaDefectos = 1" name="latIzq"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Lateral Izq</span>
-              </label>
-            </div>
-            <div class="ub-check ub-lat-der" [class.seleccionada]="ubicaciones.lateralDerecho">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.lateralDerecho" (ngModelChange)="paginaDefectos = 1" name="latDer"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Lateral Der</span>
-              </label>
-            </div>
-            <div class="ub-check ub-rti" [class.seleccionada]="ubicaciones.ruedaTraIzq">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.ruedaTraIzq" (ngModelChange)="paginaDefectos = 1" name="rti"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">R. Tra. Izq</span>
-              </label>
-            </div>
-            <div class="ub-check ub-rtd" [class.seleccionada]="ubicaciones.ruedaTraDer">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.ruedaTraDer" (ngModelChange)="paginaDefectos = 1" name="rtd"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">R. Tra. Der</span>
-              </label>
-            </div>
-            <div class="ub-check ub-trasera" [class.seleccionada]="ubicaciones.trasera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicaciones.trasera" (ngModelChange)="paginaDefectos = 1" name="trasera"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Trasera</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Ubicaciones MOTOS -->
-          <div class="ub-checkboxes-overlay ub-moto" *ngIf="esMoto">
-            <div class="ub-check ub-moto-delantera" [class.seleccionada]="ubicacionesMoto.delantera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.delantera" (ngModelChange)="paginaDefectos = 1" name="motoDelantera"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Delantera</span>
-              </label>
-            </div>
-            <div class="ub-check ub-moto-rueda-del" [class.seleccionada]="ubicacionesMoto.ruedaDelantera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.ruedaDelantera" (ngModelChange)="paginaDefectos = 1" name="motoRuedaDel"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Rueda Del.</span>
-              </label>
-            </div>
-            <div class="ub-check ub-moto-lat-izq" [class.seleccionada]="ubicacionesMoto.lateralIzquierdo">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.lateralIzquierdo" (ngModelChange)="paginaDefectos = 1" name="motoLatIzq"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Lat. Izq</span>
-              </label>
-            </div>
-            <div class="ub-check ub-moto-lat-der" [class.seleccionada]="ubicacionesMoto.lateralDerecho">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.lateralDerecho" (ngModelChange)="paginaDefectos = 1" name="motoLatDer"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Lat. Der</span>
-              </label>
-            </div>
-            <div class="ub-check ub-moto-rueda-tra" [class.seleccionada]="ubicacionesMoto.ruedaTrasera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.ruedaTrasera" (ngModelChange)="paginaDefectos = 1" name="motoRuedaTra"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Rueda Tra.</span>
-              </label>
-            </div>
-            <div class="ub-check ub-moto-trasera" [class.seleccionada]="ubicacionesMoto.trasera">
-              <label class="ub-label">
-                <input type="checkbox" [(ngModel)]="ubicacionesMoto.trasera" (ngModelChange)="paginaDefectos = 1" name="motoTrasera"/>
-                <span class="checkmark"></span>
-                <span class="ub-text">Trasera</span>
-              </label>
-            </div>
-          </div>
-
-        </div><!-- /vehiculo-svg-wrapper -->
-
-        <!-- Extra: Carros (habitáculo, parte inferior) | Motos (chasis) -->
-        <div class="ubicaciones-extra" *ngIf="!esMoto">
-          <div class="ub-extra" [class.seleccionada]="ubicaciones.habitaculo">
-            <label class="ub-label">
-              <input type="checkbox" [(ngModel)]="ubicaciones.habitaculo" (ngModelChange)="paginaDefectos = 1" name="habitaculo"/>
-              <span class="checkmark"></span>
-              <span class="ub-text">
-                <mat-icon class="ub-icon">weekend</mat-icon>
-                Habitáculo
-              </span>
-            </label>
-          </div>
-          <div class="ub-extra" [class.seleccionada]="ubicaciones.parteInferior">
-            <label class="ub-label">
-              <input type="checkbox" [(ngModel)]="ubicaciones.parteInferior" (ngModelChange)="paginaDefectos = 1" name="parteInferior"/>
-              <span class="checkmark"></span>
-              <span class="ub-text">
-                <mat-icon class="ub-icon">build</mat-icon>
-                Parte Inferior
-              </span>
-            </label>
-          </div>
-        </div>
-        <div class="ubicaciones-extra" *ngIf="esMoto">
-          <div class="ub-extra" [class.seleccionada]="ubicacionesMoto.chasis">
-            <label class="ub-label">
-              <input type="checkbox" [(ngModel)]="ubicacionesMoto.chasis" (ngModelChange)="paginaDefectos = 1" name="motoChasis"/>
-              <span class="checkmark"></span>
-              <span class="ub-text">
-                <mat-icon class="ub-icon">build</mat-icon>
-                Chasis / Parte inferior
-              </span>
-            </label>
-          </div>
-        </div>
+        } @placeholder {
+          <div class="viewer-placeholder" role="status">Preparando visor 3D…</div>
+        } @error {
+          <p role="alert">No se pudo cargar el visor. Puedes seleccionar las zonas desde la lista.</p>
+        }
+        <details class="accessible-zones"><summary>Seleccionar zonas desde una lista</summary><div><button *ngFor="let zona of zonasDisponibles" (click)="toggleZona3d(zona)" [attr.aria-pressed]="zonasSeleccionadas3d.includes(zona)" [class.selected]="zonasSeleccionadas3d.includes(zona)">{{ etiquetasZona[zona] }}</button></div></details>
 
         <p class="ub-contador" *ngIf="totalUbicaciones > 0">
           <mat-icon>check_circle</mat-icon>
@@ -331,7 +201,8 @@
     </div>
     <div class="footer-acciones">
       <button class="btn btn-secondary" (click)="volver()">Cancelar</button>
-      <button class="btn btn-primary" (click)="guardarInspeccion()" [disabled]="guardando">
+      <button class="btn btn-primary" *ngIf="!revisandoResumen" (click)="revisandoResumen = true">Revisar resumen <mat-icon>arrow_forward</mat-icon></button>
+      <button class="btn btn-primary" *ngIf="revisandoResumen" (click)="guardarInspeccion()" [disabled]="guardando">
         <mat-icon *ngIf="!guardando">save</mat-icon>
         {{ guardando ? 'Guardando...' : 'Guardar Inspección' }}
       </button>

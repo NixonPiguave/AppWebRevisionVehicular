@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Vehiculo {
+  fotoUrl?: string | null;
   id: number | null;
   propietarioId: number;
   matricula: string;
@@ -152,6 +153,10 @@ export class VehiculoService {
 
   obtenerPorId(id: number): Observable<Vehiculo> {
     return this.http.get<Vehiculo>(`${this.apiUrl}/${id}`);
+  }
+
+  guardarFoto(id: number, fotoUrl: string): Observable<Vehiculo> {
+    return this.http.patch<Vehiculo>(`${this.apiUrl}/${id}/foto`, { fotoUrl });
   }
 
   crear(vehiculo: Vehiculo): Observable<Vehiculo> {

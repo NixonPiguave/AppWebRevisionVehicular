@@ -1,18 +1,9 @@
 <div class="layout">
-
   <!-- OVERLAY MÓVIL (para cerrar el sidebar tocando fuera) -->
-  <div
-    class="mobile-overlay"
-    [class.show]="sidebarOpen"
-    (click)="closeSidebar()">
-  </div>
+  <div class="mobile-overlay" [class.show]="sidebarOpen" (click)="closeSidebar()"></div>
 
   <!-- SIDEBAR -->
-  <aside
-    class="sidebar"
-    [class.collapsed]="sidebarCollapsed"
-    [class.show]="sidebarOpen">
-
+  <aside class="sidebar" [class.collapsed]="sidebarCollapsed" [class.show]="sidebarOpen">
     <!-- LOGO DINÁMICO -->
     <div class="sidebar-logo">
       <div class="logo-loading" *ngIf="cargandoIcono">
@@ -24,354 +15,104 @@
         [alt]="empresaNombre"
         class="logo"
       />
-      <img
-        *ngIf="!cargandoIcono && !empresaIcono"
-        src="/logo-rtv.png"
-        alt="RTV"
-        class="logo"
-      />
+      <img *ngIf="!cargandoIcono && !empresaIcono" src="/logo-rtv.png" alt="RTV" class="logo" />
       <span *ngIf="!sidebarCollapsed">RTV</span>
     </div>
 
     <!-- MENÚ DE NAVEGACIÓN -->
-    <nav class="menu">
-
-      <!-- Dashboard -->
-      <a *ngIf="puedeVer('menu_dashboard')" class="menu-item" routerLink="/inicio/dashboard" routerLinkActive="active">
-        <mat-icon class="menu-icon">dashboard</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Dashboard</span>
-      </a>
-
-      <a
-        *ngIf="puedeVer('menu_registro_tramite')"
-        class="menu-item"
-        routerLink="/inicio/administracion/turnos"
-        [queryParams]="{ nuevo: 1 }"
-        routerLinkActive="active">
-        <mat-icon class="menu-icon">playlist_add</mat-icon>
-        <span *ngIf="!sidebarCollapsed">Registro de Trámite</span>
-      </a>
-
-      <!-- ========================================
-           GESTIÓN VEHICULAR
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_transferencia_dominio','menu_revisiones','menu_resultados_revision','menu_bloqueo','menu_desbloqueo','menu_baja','menu_improntas')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Gestión Vehicular
-        </span>
-
-        <div *ngIf="puedeVerCualquiera('menu_vehiculos','menu_propietario','menu_revisiones','menu_resultados_revision')" class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleGestionVehicular()"
-            [class.active]="gestionVehicularOpen">
-            <mat-icon class="menu-icon">directions_car</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Gestión Vehicular</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="gestionVehicularOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="gestionVehicularOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_vehiculos')" routerLink="/inicio/gestion_vehicular/vehiculo" routerLinkActive="active" class="submenu-item">Vehículos</a>
-            <a *ngIf="puedeVer('menu_propietario')" routerLink="/inicio/gestion_vehicular/propietario" routerLinkActive="active" class="submenu-item">Propietario</a>
-            <a *ngIf="puedeVer('menu_transferencia_dominio')" routerLink="/inicio/gestion_vehicular/transferencia-dominio" routerLinkActive="active" class="submenu-item">Transferencia de dominio</a>
-            <a *ngIf="puedeVer('menu_revisiones')" class="submenu-item">Revisiones</a>
-            <a *ngIf="puedeVer('menu_resultados_revision')" class="submenu-item">Resultados de Revisión</a>
-          </div>
-        </div>
-
-        <!-- ACCESOS RÁPIDOS A SERVICIOS ANT -->
-        <div *ngIf="puedeVerCualquiera('menu_bloqueo','menu_desbloqueo','menu_baja','menu_improntas')" class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleAccesosRapidos()"
-            [class.active]="accesosRapidosOpen">
-            <mat-icon class="menu-icon">build</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Trámites legales</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="accesosRapidosOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="accesosRapidosOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_bloqueo')" class="submenu-item" (click)="irATramiteRapido(9)">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock</mat-icon>
-              Bloqueo
-            </a>
-            <a *ngIf="puedeVer('menu_desbloqueo')" class="submenu-item" (click)="irATramiteRapido(10)">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">lock_open</mat-icon>
-              Desbloqueo
-            </a>
-            <a *ngIf="puedeVer('menu_improntas')" class="submenu-item" routerLink="/inicio/gestion_vehicular/improntas">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">fingerprint</mat-icon>
-              Improntas
-            </a>
-            <a *ngIf="puedeVer('menu_baja')" class="submenu-item" (click)="irATramiteRapido(12)">
-              <mat-icon style="font-size:14px;vertical-align:middle;margin-right:4px;">remove_circle_outline</mat-icon>
-              Baja
-            </a>
-          </div>
+    <nav class="menu" aria-label="Navegación principal">
+      <label class="nav-search" *ngIf="!sidebarCollapsed">
+        <mat-icon>search</mat-icon>
+        <input
+          aria-label="Buscar en el menú"
+          placeholder="Buscar una opción…"
+          [value]="busquedaMenu"
+          (input)="busquedaMenu = $any($event.target).value"
+        />
+      </label>
+      <div class="nav-group" *ngFor="let group of gruposVisibles; trackBy: trackGroup">
+        <button
+          type="button"
+          class="menu-item nav-group-button"
+          [class.active]="grupoActivo(group)"
+          [attr.aria-expanded]="grupoAbierto === group.label || !!busquedaMenu"
+          [attr.title]="group.label"
+          (click)="abrirGrupo(group)"
+        >
+          <mat-icon class="menu-icon">{{ group.icon }}</mat-icon>
+          <span *ngIf="!sidebarCollapsed">{{ group.label }}</span>
+          <mat-icon class="menu-arrow" *ngIf="!sidebarCollapsed">expand_more</mat-icon>
+        </button>
+        <div
+          class="nav-links"
+          *ngIf="!sidebarCollapsed && (grupoAbierto === group.label || busquedaMenu)"
+        >
+          <ng-container *ngIf="group.label === 'Configuración'; else regularLinks">
+            <div
+              class="config-section"
+              *ngFor="let section of seccionesConfiguracion(group); trackBy: trackSection"
+            >
+              <button
+                type="button"
+                class="config-section-button"
+                [class.active]="seccionActiva(section)"
+                [attr.aria-expanded]="seccionConfigAbierta === section.label || !!busquedaMenu"
+                (click)="abrirSeccion(section.label)"
+              >
+                <span>{{ section.label }}</span
+                ><small>{{ section.items.length }}</small
+                ><mat-icon>{{
+                  seccionConfigAbierta === section.label || busquedaMenu
+                    ? 'expand_less'
+                    : 'expand_more'
+                }}</mat-icon>
+              </button>
+              <div
+                class="config-section-links"
+                *ngIf="seccionConfigAbierta === section.label || busquedaMenu"
+              >
+                <a
+                  *ngFor="let item of section.items; trackBy: trackItem"
+                  [routerLink]="item.route"
+                  routerLinkActive="active"
+                  ariaCurrentWhenActive="page"
+                  class="submenu-item"
+                  (click)="closeSidebar()"
+                  >{{ item.label }}</a
+                >
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #regularLinks>
+            <a
+              *ngFor="let item of group.items; trackBy: trackItem"
+              [routerLink]="item.route"
+              routerLinkActive="active"
+              ariaCurrentWhenActive="page"
+              class="submenu-item"
+              (click)="closeSidebar()"
+              >{{ item.label }}</a
+            >
+          </ng-template>
         </div>
       </div>
-
-      <!-- ========================================
-           OPERACIONES
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_pagos','menu_recepcion','menu_certificados')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Operaciones
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleOperaciones()"
-            [class.active]="operacionesOpen">
-            <mat-icon class="menu-icon">account_balance_wallet</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Operaciones</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="operacionesOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="operacionesOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_pagos')" routerLink="/inicio/operaciones/pagos" routerLinkActive="active" class="submenu-item">Pagos</a>
-            <a *ngIf="puedeVer('menu_recepcion')" routerLink="/inicio/operaciones/recepcion" routerLinkActive="active" class="submenu-item">
-              Recepción
-            </a>
-            <a *ngIf="puedeVer('menu_historial_turnos')" routerLink="/inicio/operaciones/historial-turnos" routerLinkActive="active" class="submenu-item">Historial de Turnos</a>
-            <a *ngIf="puedeVer('menu_certificados')" class="submenu-item">Certificados</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-           CATÁLOGO DE VEHÍCULOS
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_catalogo_marcas','menu_catalogo_modelos','menu_catalogo_tipo_vehiculo','menu_catalogo_clases','menu_catalogo_categorias','menu_catalogo_subcategorias','menu_catalogo_tipo_combustible','menu_catalogo_tipo_matricula','menu_catalogo_traccion','menu_catalogo_ejes','menu_catalogo_capacidad','menu_catalogo_ambito')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Catálogo de Vehículos
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleCatalogoVehiculos()"
-            [class.active]="catalogoVehiculosOpen">
-            <mat-icon class="menu-icon">library_books</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Catálogo de Vehículos</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="catalogoVehiculosOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="catalogoVehiculosOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_catalogo_marcas')" routerLink="/inicio/catalogo-vehiculos/marcas" routerLinkActive="active" class="submenu-item">Marcas</a>
-            <a *ngIf="puedeVer('menu_catalogo_modelos')" routerLink="/inicio/catalogo-vehiculos/modelos" routerLinkActive="active" class="submenu-item">Modelos</a>
-            <a *ngIf="puedeVer('menu_catalogo_tipo_vehiculo')" routerLink="/inicio/catalogo-vehiculos/tipo-vehiculo" routerLinkActive="active" class="submenu-item">Tipos de Vehículo</a>
-            <a *ngIf="puedeVer('menu_catalogo_clases')" routerLink="/inicio/catalogo-vehiculos/clases" routerLinkActive="active" class="submenu-item">Clases</a>
-            <a *ngIf="puedeVer('menu_catalogo_categorias')" routerLink="/inicio/catalogo-vehiculos/categorias" routerLinkActive="active" class="submenu-item">Categorías</a>
-            <a *ngIf="puedeVer('menu_catalogo_subcategorias')" routerLink="/inicio/catalogo-vehiculos/subcategorias" routerLinkActive="active" class="submenu-item">Subcategorías</a>
-            <a *ngIf="puedeVer('menu_catalogo_tipo_combustible')" routerLink="/inicio/catalogo-vehiculos/tipo-combustible" routerLinkActive="active" class="submenu-item">Tipos de Combustible</a>
-            <a *ngIf="puedeVer('menu_catalogo_tipo_matricula')" routerLink="/inicio/catalogo-vehiculos/tipo-matricula" routerLinkActive="active" class="submenu-item">Tipos de Matrícula</a>
-            <a *ngIf="puedeVer('menu_catalogo_traccion')" routerLink="/inicio/catalogo-vehiculos/traccion" routerLinkActive="active" class="submenu-item">Tracción</a>
-            <a *ngIf="puedeVer('menu_catalogo_ejes')" routerLink="/inicio/catalogo-vehiculos/ejes" routerLinkActive="active" class="submenu-item">Ejes</a>
-            <a *ngIf="puedeVer('menu_catalogo_capacidad')" routerLink="/inicio/catalogo-vehiculos/capacidad-carga" routerLinkActive="active" class="submenu-item">Capacidad de Carga</a>
-            <a *ngIf="puedeVer('menu_catalogo_ambito')" routerLink="/inicio/catalogo-vehiculos/ambito-operacional" routerLinkActive="active" class="submenu-item">Ámbito Operacional</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-           INSPECCIÓN RTV
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_inspeccion_turnos_pagados','menu_inspeccion_lineas','menu_inspeccion_metodos','menu_inspeccion_equipos')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Inspección RTV
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleInspeccionRtv()"
-            [class.active]="inspeccionRtvOpen">
-            <mat-icon class="menu-icon">fact_check</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Inspección RTV</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="inspeccionRtvOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="inspeccionRtvOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_inspeccion_turnos_pagados')" routerLink="/inicio/inspeccion-rtv/turnos-pagados" routerLinkActive="active" class="submenu-item">Registrar Inspección</a>
-            <a *ngIf="puedeVer('menu_inspeccion_lineas')" routerLink="/inicio/inspeccion-rtv/lineas-inspeccion" routerLinkActive="active" class="submenu-item">Líneas de Inspección</a>
-            <a *ngIf="puedeVer('menu_inspeccion_metodos')" routerLink="/inicio/inspeccion-rtv/metodo-inspeccion" routerLinkActive="active" class="submenu-item">Métodos de Inspección</a>
-            <a *ngIf="puedeVer('menu_inspeccion_equipos')" routerLink="/inicio/inspeccion-rtv/equipos" routerLinkActive="active" class="submenu-item">Equipos</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-           DEFECTOS DE INSPECCIÓN
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_defectos_familia','menu_defectos_subfamilia','menu_defectos_categoria','menu_defectos_tipos','menu_defectos')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Defectos de Inspección
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleDefectosInspeccion()"
-            [class.active]="defectosInspeccionOpen">
-            <mat-icon class="menu-icon">warning</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Defectos de Inspección</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="defectosInspeccionOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="defectosInspeccionOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_defectos_familia')" routerLink="/inicio/defectos-inspeccion/familia-defecto" routerLinkActive="active" class="submenu-item">Familias de Defectos</a>
-            <a *ngIf="puedeVer('menu_defectos_subfamilia')" routerLink="/inicio/defectos-inspeccion/subfamilia-defecto" routerLinkActive="active" class="submenu-item">Subfamilias de Defectos</a>
-            <a *ngIf="puedeVer('menu_defectos_categoria')" routerLink="/inicio/defectos-inspeccion/categoria-defecto" routerLinkActive="active" class="submenu-item">Categorías de Defectos</a>
-            <a *ngIf="puedeVer('menu_defectos_tipos')" routerLink="/inicio/defectos-inspeccion/tipos-defectos" routerLinkActive="active" class="submenu-item">Tipos de Defectos</a>
-            <a *ngIf="puedeVer('menu_defectos')" routerLink="/inicio/defectos-inspeccion/defectos" routerLinkActive="active" class="submenu-item">Defectos</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-           ANT / TRÁMITES
-           ======================================== -->
-      <div *ngIf="puedeVer('menu_ant')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          ANT / Trámites
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleAntTramites()"
-            [class.active]="antTramitesOpen">
-            <mat-icon class="menu-icon">description</mat-icon>
-            <span *ngIf="!sidebarCollapsed">ANT / Trámites</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="antTramitesOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="antTramitesOpen && !sidebarCollapsed">
-            <a routerLink="/inicio/ant/Calendarizacion-Matriculacion" routerLinkActive="active" class="submenu-item">Calendarización Matriculación</a>
-            <a *ngIf="puedeVer('menu_solicitudes_placas')" routerLink="/inicio/ant/solicitudes-placas" routerLinkActive="active" class="submenu-item">
-              Solicitudes de placas
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-           CONFIGURACIÓN UMBRAL
-           ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_umbral_unidades','menu_umbral_descripcion','menu_umbral','menu_criterio_resultado')" class="menu-section">
-        <span *ngIf="!sidebarCollapsed" class="section-title">
-          Configuración Umbral
-        </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleConfiguracionUmbral()"
-            [class.active]="configuracionUmbralOpen">
-            <mat-icon class="menu-icon">tune</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Configuración Umbral</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="configuracionUmbralOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="configuracionUmbralOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_umbral_unidades')" routerLink="/inicio/configuracion-umbral/unidades-medida" routerLinkActive="active" class="submenu-item">Unidades de Medida</a>
-            <a *ngIf="puedeVer('menu_umbral_descripcion')" routerLink="/inicio/configuracion-umbral/descripcion-umbral" routerLinkActive="active" class="submenu-item">Descripción de Umbral</a>
-            <a *ngIf="puedeVer('menu_umbral')" routerLink="/inicio/configuracion-umbral/umbral" routerLinkActive="active" class="submenu-item">Umbral</a>
-            <a *ngIf="puedeVer('menu_criterio_resultado')" routerLink="/inicio/configuracion-umbral/criterio-resultado" routerLinkActive="active" class="submenu-item">Criterios Aprobación</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ========================================
-     ADMINISTRACIÓN
-     ======================================== -->
-      <div *ngIf="puedeVerCualquiera('menu_usuarios','menu_roles','menu_roles_postgres','menu_areas','menu_empresa','menu_turnos','menu_auditoria','menu_accesos_rol','menu_sesiones_activas','menu_backup')" class="menu-section">
-  <span *ngIf="!sidebarCollapsed" class="section-title">
-    Administración
-  </span>
-
-        <div class="menu-item-expandable">
-          <div
-            class="menu-item"
-            (click)="toggleAdministracion()"
-            [class.active]="administracionOpen">
-            <mat-icon class="menu-icon">group</mat-icon>
-            <span *ngIf="!sidebarCollapsed">Administración</span>
-            <mat-icon
-              *ngIf="!sidebarCollapsed"
-              class="menu-arrow"
-              [class.rotated]="administracionOpen">
-              expand_more
-            </mat-icon>
-          </div>
-
-          <div class="submenu" [class.open]="administracionOpen && !sidebarCollapsed">
-            <a *ngIf="puedeVer('menu_usuarios')" routerLink="/inicio/administracion/usuarios" routerLinkActive="active" class="submenu-item">Usuarios</a>
-            <a *ngIf="puedeVer('menu_roles')" routerLink="/inicio/administracion/roles" routerLinkActive="active" class="submenu-item">Roles</a>
-            <a *ngIf="puedeVer('menu_roles_postgres') || puedeVer('menu_roles')" routerLink="/inicio/administracion/roles-postgres" routerLinkActive="active" class="submenu-item">Roles PostgreSQL</a>
-            <a *ngIf="puedeVer('menu_areas')" routerLink="/inicio/administracion/areas" routerLinkActive="active" class="submenu-item">Áreas</a>
-            <a *ngIf="puedeVer('menu_empresa')" routerLink="/inicio/administracion/empresa" routerLinkActive="active" class="submenu-item">Empresa</a>
-            <a *ngIf="puedeVer('menu_auditoria')" routerLink="/inicio/administracion/auditoria" routerLinkActive="active" class="submenu-item">Auditoría</a>
-            <a *ngIf="puedeVer('menu_accesos_rol')" routerLink="/inicio/administracion/accesos-rol" routerLinkActive="active" class="submenu-item">Accesos por rol</a>
-            <a *ngIf="puedeVer('menu_sesiones_activas')" routerLink="/inicio/administracion/sesiones-activas" routerLinkActive="active" class="submenu-item">Sesiones activas</a>
-            <a *ngIf="puedeVer('menu_backup')" routerLink="/inicio/backup/manager" routerLinkActive="active" class="submenu-item">Respaldos</a>
-          </div>
-        </div>
-      </div>
-
+      <p class="nav-empty" *ngIf="!sidebarCollapsed && !gruposVisibles.length">
+        No hay opciones para esta búsqueda.
+      </p>
     </nav>
   </aside>
 
   <!-- CONTENIDO PRINCIPAL -->
   <div class="main">
-
     <!-- HEADER -->
     <header class="header">
-
       <div class="left">
-        <button class="hamburger" (click)="toggleSidebar()">
+        <button
+          class="hamburger"
+          (click)="toggleSidebar()"
+          aria-label="Abrir o contraer navegación"
+          [attr.aria-expanded]="sidebarOpen || !sidebarCollapsed"
+        >
           <mat-icon>menu</mat-icon>
         </button>
 
@@ -385,12 +126,7 @@
           [alt]="empresaNombre"
           class="logo"
         />
-        <img
-          *ngIf="!cargandoIcono && !empresaIcono"
-          src="/logo-rtv.png"
-          alt="RTV"
-          class="logo"
-        />
+        <img *ngIf="!cargandoIcono && !empresaIcono" src="/logo-rtv.png" alt="RTV" class="logo" />
         <span class="title">Revisión Técnica Vehicular</span>
       </div>
 
@@ -402,10 +138,13 @@
             (click)="chatAbierto = !chatAbierto"
             [class.active]="chatAbierto"
             title="Chat con usuarios"
-            aria-label="Abrir chat interno">
+            aria-label="Abrir chat interno"
+          >
             <mat-icon>chat</mat-icon>
           </button>
-          <span class="chat-header-badge" *ngIf="chatSinLeerTotal > 0">{{ etiquetaChatSinLeer() }}</span>
+          <span class="chat-header-badge" *ngIf="chatSinLeerTotal > 0">{{
+            etiquetaChatSinLeer()
+          }}</span>
         </div>
         <div class="user-menu" #userMenu>
           <button type="button" class="user-info" (click)="toggleMenuUsuario($event)">
@@ -428,26 +167,81 @@
           <span>{{ cerrandoSesion ? 'Cerrando...' : 'Salir' }}</span>
         </button>
       </div>
-
     </header>
 
     <!-- CONTENIDO DINÁMICO -->
     <main class="content">
+      <nav class="workflow-links" aria-label="Flujo de atención" *ngIf="mostrarFlujo">
+        <span>Flujo de atención</span>
+        <a
+          *ngIf="puedeVer('menu_registro_tramite')"
+          routerLink="/inicio/administracion/turnos"
+          routerLinkActive="current"
+          >1 · Registro</a
+        >
+        <a
+          *ngIf="puedeVer('menu_pagos')"
+          routerLink="/inicio/operaciones/pagos"
+          routerLinkActive="current"
+          >2 · Pago</a
+        >
+        <a
+          *ngIf="puedeVer('menu_recepcion')"
+          routerLink="/inicio/operaciones/recepcion"
+          routerLinkActive="current"
+          >3 · Recepción</a
+        >
+        <a
+          *ngIf="puedeVer('menu_inspeccion_turnos_pagados')"
+          routerLink="/inicio/inspeccion-rtv/turnos-pagados"
+          routerLinkActive="current"
+          >4 · Inspección</a
+        >
+        <a
+          *ngIf="puedeVer('menu_historial_turnos')"
+          routerLink="/inicio/operaciones/historial-turnos"
+          routerLinkActive="current"
+          >5 · Historial</a
+        >
+      </nav>
       <!-- Mensaje informativo (ej. sesión desde otro dispositivo) -->
       <div *ngIf="mensajeInfo" class="mensaje-info-banner">
         <mat-icon>info</mat-icon>
         <span>{{ mensajeInfo }}</span>
-        <button type="button" class="cerrar-mensaje" (click)="cerrarMensajeInfo()" aria-label="Cerrar">
+        <button
+          type="button"
+          class="cerrar-mensaje"
+          (click)="cerrarMensajeInfo()"
+          aria-label="Cerrar"
+        >
           <mat-icon>close</mat-icon>
         </button>
       </div>
+      <section
+        class="start-actions"
+        *ngIf="rutaActual === '/inicio/dashboard'"
+        aria-label="Accesos a tareas"
+      >
+        <header>
+          <h2>¿Qué necesitas hacer?</h2>
+          <p>Accede a tus tareas de trabajo.</p>
+        </header>
+        <div>
+          <a
+            *ngFor="let group of accesosInicio; trackBy: trackGroup"
+            [routerLink]="group.items[0].route"
+            ><mat-icon>{{ group.icon }}</mat-icon
+            ><strong>{{ group.label }}</strong
+            ><span>{{ group.items[0].label }}</span
+            ><mat-icon>arrow_forward</mat-icon></a
+          >
+        </div>
+      </section>
       <router-outlet></router-outlet>
     </main>
-
   </div>
 
   <app-chat-interno-panel [(visible)]="chatAbierto" />
-
 </div>
 
 <!-- Modal obligatorio para restauración de base de datos -->
@@ -461,11 +255,17 @@
       {{ estadoRestore?.razon || 'Se requiere restauración de base de datos para continuar.' }}
     </p>
     <p class="restore-modal-hint">
-      Seleccione un archivo <strong>.backup</strong> (FULL, DIFFERENTIAL o INCREMENTAL) desde su equipo.
+      Seleccione un archivo <strong>.backup</strong> (FULL, DIFFERENTIAL o INCREMENTAL) desde su
+      equipo.
     </p>
 
     <div class="restore-file-row">
-      <input #restoreInput type="file" accept=".backup" (change)="onSeleccionarArchivoRestore($event)" />
+      <input
+        #restoreInput
+        type="file"
+        accept=".backup"
+        (change)="onSeleccionarArchivoRestore($event)"
+      />
       <button type="button" class="btn-file" (click)="restoreInput.click()">
         <mat-icon>upload_file</mat-icon>
         Seleccionar respaldo
@@ -477,10 +277,20 @@
     <div class="restore-ok" *ngIf="exitoRestoreBd">{{ exitoRestoreBd }}</div>
 
     <div class="restore-modal-actions">
-      <button type="button" class="btn-logout-modal" (click)="cerrarSesion()" [disabled]="restaurandoBd">
+      <button
+        type="button"
+        class="btn-logout-modal"
+        (click)="cerrarSesion()"
+        [disabled]="restaurandoBd"
+      >
         Cerrar sesión
       </button>
-      <button type="button" class="btn-restore-modal" (click)="ejecutarRestoreDesdeModal()" [disabled]="restaurandoBd">
+      <button
+        type="button"
+        class="btn-restore-modal"
+        (click)="ejecutarRestoreDesdeModal()"
+        [disabled]="restaurandoBd"
+      >
         <mat-icon>restore</mat-icon>
         {{ restaurandoBd ? 'Restaurando...' : 'Restaurar ahora' }}
       </button>

@@ -49,6 +49,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
         Vehiculo vehiculo = repository.findByChasis(dto.getChasis())
                 .orElseThrow(() -> new EntityNotFoundException("Error al crear vehículo"));
         // Campos adicionales (si existen columnas en DB)
+        if (dto.getFotoUrl() != null) vehiculo.setFotoUrl(dto.getFotoUrl());
         if (dto.getPlacaAnterior() != null) vehiculo.setPlacaAnterior(dto.getPlacaAnterior());
         if (dto.getCodigoMotor() != null) vehiculo.setCodigoMotor(dto.getCodigoMotor());
         if (dto.getNumeroMatriculaVehicular() != null) vehiculo.setNumeroMatriculaVehicular(dto.getNumeroMatriculaVehicular());
@@ -89,6 +90,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
         Vehiculo actualizado = repository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Error al recuperar vehículo actualizado"));
         if (dto.getPlacaAnterior() != null) actualizado.setPlacaAnterior(dto.getPlacaAnterior());
+        if (dto.getFotoUrl() != null) actualizado.setFotoUrl(dto.getFotoUrl());
         if (dto.getCodigoMotor() != null) actualizado.setCodigoMotor(dto.getCodigoMotor());
         if (dto.getNumeroMatriculaVehicular() != null) actualizado.setNumeroMatriculaVehicular(dto.getNumeroMatriculaVehicular());
         actualizado = repository.save(actualizado);
@@ -139,6 +141,7 @@ public class VehiculoServiceImpl implements IVehiculoService {
 
         VehiculoDTO dto = new VehiculoDTO();
         dto.setId(vehiculo.getVehiculoid());
+        dto.setFotoUrl(vehiculo.getFotoUrl());
         dto.setMatricula(vehiculo.getMatricula());
         dto.setPlacaAnterior(vehiculo.getPlacaAnterior());
         dto.setCodigoMotor(vehiculo.getCodigoMotor());
@@ -195,5 +198,16 @@ public class VehiculoServiceImpl implements IVehiculoService {
                 : null);
 
         return dto;
+    }
+
+    @Override
+    @Transactional
+    public VehiculoDTO actualizarFoto(Long id, String fotoUrl) {
+        Vehiculo vehiculo = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehículo no encontrado con ID: " + id));
+        vehiculo.setFotoUrl(fotoUrl);
+        Vehiculo guardado = repository.save(vehiculo);
+        auditoriaService.registrar("UPDATE", "Vehiculo", "Actualizó fotografía del vehículo ID: " + id);
+        return toDTO(guardado);
     }
 }

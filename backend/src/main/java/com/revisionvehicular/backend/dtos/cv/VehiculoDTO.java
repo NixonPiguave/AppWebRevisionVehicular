@@ -10,6 +10,9 @@ import lombok.Data;
 @Data
 public class VehiculoDTO {
     private Long id;
+    @Size(max = 2048)
+    @jakarta.validation.constraints.Pattern(regexp = "^https://[^\\s]+$", message = "La fotografía debe ser una URL HTTPS")
+    private String fotoUrl;
 
     @NotNull(message = "Debe seleccionar un propietario")
     private Long propietarioId;

@@ -1,6 +1,22 @@
-import { Component, HostListener, OnInit, OnDestroy, ChangeDetectorRef, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  OnDestroy,
+  ChangeDetectorRef,
+  ElementRef,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import {
+  NAVIGATION,
+  NavigationGroup,
+  NavigationItem,
+  NavigationSection,
+  configurationSection,
+  configurationSections,
+} from './navigation';
 import { Subscription, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
@@ -20,9 +36,107 @@ const INTERVALO_CHECK_SESION_MS = 15000;
   standalone: true,
   imports: [CommonModule, RouterModule, MatIconModule, ChatInternoPanelComponent],
   templateUrl: './inicio.html',
-  styleUrl: './inicio.css'
+  styleUrl: './inicio.css',
 })
 export class InicioComponent implements OnInit, OnDestroy {
+  busquedaMenu = '';
+  seccionConfigAbierta = '';
+  seccionesConfiguracion(group: NavigationGroup): NavigationSection[] {
+    return configurationSections(group.items);
+  }
+  trackSection(_index: number, section: NavigationSection): string {
+    return section.label;
+  }
+  seccionActiva(section: NavigationSection): boolean {
+    return section.items.some((item) => item.route === this.rutaActual);
+  }
+  abrirSeccion(label: string): void {
+    this.seccionConfigAbierta = this.seccionConfigAbierta === label ? '' : label;
+  }
+  trackGroup(_index: number, group: NavigationGroup): string {
+    return group.label;
+  }
+  trackItem(_index: number, item: NavigationItem): string {
+    return item.route;
+  }
+  get mostrarFlujo(): boolean {
+    return /\/operaciones\/|\/administracion\/turnos$|\/inspeccion-rtv\/turnos-pagados$/.test(
+      this.rutaActual,
+    );
+  }
+  get accesosInicio(): NavigationGroup[] {
+    return this.gruposVisibles.filter(
+      (group) => !['Inicio', 'Configuración'].includes(group.label),
+    );
+  }
+  grupoAbierto = 'Inicio';
+  rutaActual = '';
+  private navigationSub?: Subscription;
+
+  get gruposVisibles(): NavigationGroup[] {
+    const normalize = (value: string) =>
+      value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase();
+    const query = normalize(this.busquedaMenu.trim());
+    return NAVIGATION.map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          (!item.permissions.length || this.puedeVerCualquiera(...item.permissions)) &&
+          (!item.parentPermission || this.puedeVer(item.parentPermission)) &&
+          (!query ||
+            normalize(
+              group.label +
+                ' ' +
+                item.label +
+                ' ' +
+                (group.label === 'Configuración' ? configurationSection(item) : ''),
+            ).includes(query)),
+      ),
+    })).filter((group) => group.items.length > 0);
+  }
+
+  grupoActivo(group: NavigationGroup): boolean {
+    return (
+      group.items.some((item) => this.rutaActual === item.route) ||
+      (group.label === 'Inspecciones' &&
+        /inspeccion-rtv\/(registrar|revision-)/.test(this.rutaActual))
+    );
+  }
+
+  abrirGrupo(group: NavigationGroup): void {
+    this.sidebarCollapsed = false;
+    if (group.items.length === 1) {
+      this.router.navigateByUrl(group.items[0].route);
+      this.closeSidebar();
+    }
+    this.grupoAbierto = this.grupoAbierto === group.label ? '' : group.label;
+  }
+
+  get tituloPagina(): string {
+    return (
+      NAVIGATION.flatMap((group) => group.items).find((item) => item.route === this.rutaActual)
+        ?.label ?? 'Revisión del vehículo'
+    );
+  }
+
+  get enInspeccion(): boolean {
+    return /inspeccion-rtv\/(registrar|revision-)/.test(this.rutaActual);
+  }
+
+  private sincronizarNavegacion(): void {
+    this.rutaActual = this.router.url.split('?')[0];
+    this.grupoAbierto = this.gruposVisibles.find((group) => this.grupoActivo(group))?.label ?? '';
+    const configItem = NAVIGATION.find((group) => group.label === 'Configuración')?.items.find(
+      (item) => item.route === this.rutaActual,
+    );
+    if (configItem) this.seccionConfigAbierta = configurationSection(configItem);
+    if (this.enInspeccion && !this.isMobile()) this.sidebarCollapsed = true;
+    this.closeSidebar();
+    this.cdr.markForCheck();
+  }
 
   sidebarCollapsed = false;
   sidebarOpen = false;
@@ -40,17 +154,6 @@ export class InicioComponent implements OnInit, OnDestroy {
   empresaIcono: string | null = null;
   empresaNombre: string = 'RTV';
   cargandoIcono: boolean = true;
-
-  // Estado de expansión para cada sección principal
-  gestionVehicularOpen = false;
-  operacionesOpen = false;
-  catalogoVehiculosOpen = false;
-  inspeccionRtvOpen = false;
-  defectosInspeccionOpen = false;
-  antTramitesOpen = false;
-  configuracionUmbralOpen = false;
-  administracionOpen = false;
-  accesosRapidosOpen = false;
 
   private checkSesionSubscription: Subscription | null = null;
   private chatSinLeerSub: Subscription | null = null;
@@ -72,25 +175,32 @@ export class InicioComponent implements OnInit, OnDestroy {
     private backupService: BackupService,
     private chatInternoService: ChatInternoService,
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit() {
     this.checkScreenSize();
+    this.sincronizarNavegacion();
+    this.navigationSub = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) this.sincronizarNavegacion();
+    });
     this.cargarIconoEmpresa();
     this.nombreUsuario = this.authService.getNombre() ?? this.authService.getUsuario() ?? 'Usuario';
     this.rolUsuario = this.authService.getRol() ?? '';
     if (this.authService.getToken()) {
-      this.checkSesionSubscription = timer(PRIMER_CHECK_SESION_MS, INTERVALO_CHECK_SESION_MS).pipe(
-        switchMap(() => this.authService.checkSession())
-      ).subscribe();
+      this.checkSesionSubscription = timer(PRIMER_CHECK_SESION_MS, INTERVALO_CHECK_SESION_MS)
+        .pipe(switchMap(() => this.authService.checkSession()))
+        .subscribe();
       this.validarEstadoBaseDatos();
       this.chatInternoService.refrescarSinLeer();
       this.chatSinLeerSub = this.chatInternoService.sinLeer$.subscribe((r) => {
         this.chatSinLeerTotal = r?.totalSinLeer ?? 0;
         this.cdr.markForCheck();
       });
-      this.chatSinLeerPollSub = timer(PRIMER_CHAT_SIN_LEER_MS, INTERVALO_CHAT_SIN_LEER_MS).subscribe(() => {
+      this.chatSinLeerPollSub = timer(
+        PRIMER_CHAT_SIN_LEER_MS,
+        INTERVALO_CHAT_SIN_LEER_MS,
+      ).subscribe(() => {
         this.chatInternoService.refrescarSinLeer();
       });
     }
@@ -107,6 +217,7 @@ export class InicioComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.navigationSub?.unsubscribe();
     this.checkSesionSubscription?.unsubscribe();
     this.checkSesionSubscription = null;
     this.chatSinLeerSub?.unsubscribe();
@@ -130,7 +241,8 @@ export class InicioComponent implements OnInit, OnDestroy {
   onWindowPageHide(ev: PageTransitionEvent): void {
     if (ev.persisted) return;
     try {
-      const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+      const nav = performance.getEntriesByType('navigation')[0] as
+        PerformanceNavigationTiming | undefined;
       if (nav?.type === 'reload') return;
     } catch {
       /* ignorar */
@@ -168,7 +280,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       },
       error: () => {
         // Si no se pudo verificar, no bloqueamos el flujo normal.
-      }
+      },
     });
   }
 
@@ -201,14 +313,16 @@ export class InicioComponent implements OnInit, OnDestroy {
         this.nombreArchivoRestore = '';
         this.restaurandoBd = false;
         document.body.style.overflow = '';
-        this.mensajeInfo = 'Base de datos restaurada. Cierra sesión y vuelve a ingresar para recargar todos los módulos.';
+        this.mensajeInfo =
+          'Base de datos restaurada. Cierra sesión y vuelve a ingresar para recargar todos los módulos.';
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorRestoreBd = err?.error?.message || err?.message || 'No se pudo restaurar la base de datos.';
+        this.errorRestoreBd =
+          err?.error?.message || err?.message || 'No se pudo restaurar la base de datos.';
         this.restaurandoBd = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -226,10 +340,10 @@ export class InicioComponent implements OnInit, OnDestroy {
   puedeVerCualquiera(...keys: string[]): boolean {
     const permisos = this.authService.getPermisos();
     if (!permisos || permisos.length === 0) return true;
-    return keys.some(k => permisos.includes(k));
+    return keys.some((k) => permisos.includes(k));
   }
 
-   // Cargar ícono de empresa para sidebar
+  // Cargar ícono de empresa para sidebar
   cargarIconoEmpresa(): void {
     this.empresaService.listarEmpresas().subscribe({
       next: (empresas) => {
@@ -257,7 +371,7 @@ export class InicioComponent implements OnInit, OnDestroy {
         // No es crítico, usar ícono por defecto
         this.cargandoIcono = false;
         this.cdr.detectChanges();
-      }
+      },
     });
   }
 
@@ -267,25 +381,6 @@ export class InicioComponent implements OnInit, OnDestroy {
       document.body.style.overflow = this.sidebarOpen ? 'hidden' : '';
     } else {
       this.sidebarCollapsed = !this.sidebarCollapsed;
-    }
-  }
-
-  toggleAccesosRapidos() {
-    this.closeAllExcept('accesosRapidos');
-    this.accesosRapidosOpen = !this.accesosRapidosOpen;
-  }
-
-  irATramiteRapido(servicioId: number) {
-    const rutasServicios: { [key: number]: string } = {
-      9:  '/inicio/gestion_vehicular/bloqueo-vehiculo',
-      10: '/inicio/gestion_vehicular/desbloqueo-vehiculo',
-      11: '/inicio/gestion_vehicular/registro-observaciones',
-      12: '/inicio/gestion_vehicular/baja-vehiculo',
-    };
-
-    const ruta = rutasServicios[servicioId];
-    if (ruta) {
-      this.router.navigate([ruta]);
     }
   }
 
@@ -348,58 +443,6 @@ export class InicioComponent implements OnInit, OnDestroy {
     this.menuUsuarioAbierto = !this.menuUsuarioAbierto;
   }
 
-  toggleGestionVehicular() {
-    this.closeAllExcept('gestionVehicular');
-    this.gestionVehicularOpen = !this.gestionVehicularOpen;
-  }
-
-  toggleOperaciones() {
-    this.closeAllExcept('operaciones');
-    this.operacionesOpen = !this.operacionesOpen;
-  }
-
-  toggleCatalogoVehiculos() {
-    this.closeAllExcept('catalogoVehiculos');
-    this.catalogoVehiculosOpen = !this.catalogoVehiculosOpen;
-  }
-
-  toggleInspeccionRtv() {
-    this.closeAllExcept('inspeccionRtv');
-    this.inspeccionRtvOpen = !this.inspeccionRtvOpen;
-  }
-
-  toggleDefectosInspeccion() {
-    this.closeAllExcept('defectosInspeccion');
-    this.defectosInspeccionOpen = !this.defectosInspeccionOpen;
-  }
-
-  toggleAntTramites() {
-    this.closeAllExcept('antTramites');
-    this.antTramitesOpen = !this.antTramitesOpen;
-  }
-
-  toggleConfiguracionUmbral() {
-    this.closeAllExcept('configuracionUmbral');
-    this.configuracionUmbralOpen = !this.configuracionUmbralOpen;
-  }
-
-  toggleAdministracion() {
-    this.closeAllExcept('administracion');
-    this.administracionOpen = !this.administracionOpen;
-  }
-
-  private closeAllExcept(sectionName: string) {
-    if (sectionName !== 'gestionVehicular') this.gestionVehicularOpen = false;
-    if (sectionName !== 'operaciones') this.operacionesOpen = false;
-    if (sectionName !== 'catalogoVehiculos') this.catalogoVehiculosOpen = false;
-    if (sectionName !== 'inspeccionRtv') this.inspeccionRtvOpen = false;
-    if (sectionName !== 'defectosInspeccion') this.defectosInspeccionOpen = false;
-    if (sectionName !== 'antTramites') this.antTramitesOpen = false;
-    if (sectionName !== 'configuracionUmbral') this.configuracionUmbralOpen = false;
-    if (sectionName !== 'administracion') this.administracionOpen = false;
-    if (sectionName !== 'accesosRapidos') this.accesosRapidosOpen = false; // ← nueva línea
-  }
-
   cerrandoSesion = false;
 
   cerrarSesion(): void {
@@ -413,7 +456,7 @@ export class InicioComponent implements OnInit, OnDestroy {
       error: () => {
         this.cerrandoSesion = false;
         this.limpiarYRedirigir();
-      }
+      },
     });
   }
 

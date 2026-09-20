@@ -1,0 +1,30 @@
+<div class="viewer-shell">
+  <div
+    #canvasHost
+    class="canvas-host"
+    tabindex="0"
+    (keydown.escape)="clearHover()"
+    aria-label="Modelo 3D. Arrastra para girar, pasa el cursor para identificar piezas y pulsa Escape para ocultar el detalle. También puedes seleccionar zonas desde la lista inferior."
+  ></div>
+  @if (hoveredPart; as part) {
+    <div class="part-tooltip" role="tooltip" [style.left.px]="part.x" [style.top.px]="part.y">
+      <span class="part-eyebrow"
+        ><span class="part-dot" [class.selected]="part.selected"></span>{{ part.location }}</span
+      >
+      <strong>{{ part.label }}</strong>
+      <span class="part-action">{{
+        part.selected ? 'Zona seleccionada · clic para quitar' : 'Clic para seleccionar esta zona'
+      }}</span>
+    </div>
+  }
+  <div class="model-status" role="status">{{ status }}</div>
+  <div class="viewer-hint">
+    Arrastra para rotar · rueda para acercar · toca una parte para marcarla
+  </div>
+  <button type="button" class="reset-view" (click)="resetView()" aria-label="Restablecer vista">
+    ↺ Vista inicial
+  </button>
+  <button type="button" class="reset-view underside-view" (click)="showUnderside()">
+    Ver bajos
+  </button>
+</div>

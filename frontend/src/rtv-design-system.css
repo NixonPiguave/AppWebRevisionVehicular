@@ -1,0 +1,269 @@
+/* Shared visual foundation. Feature styles retain their layouts and semantic states. */
+:root {
+  --rtv-primary: #2d5016;
+  --rtv-primary-hover: #233f11;
+  --rtv-sidebar: #1a2419;
+  --rtv-text: #243027;
+  --rtv-muted: #697367;
+  --rtv-border: #dfe5dc;
+  --rtv-surface: #ffffff;
+  --rtv-background: #f7f9f6;
+  --rtv-tint: #edf4e6;
+  --rtv-radius: 12px;
+  --rtv-shadow: 0 4px 18px #1a241908;
+}
+.viewer-placeholder { min-height: 460px; display: grid; place-items: center; border-radius: var(--rtv-radius); background: var(--rtv-tint); color: var(--rtv-muted); }
+html,
+body {
+  margin: 0;
+  font-family: Inter, 'Segoe UI', sans-serif;
+  color: var(--rtv-text);
+  background: var(--rtv-background);
+}
+app-login .login-form-panel {
+  background: var(--rtv-background);
+}
+app-login .form-wrapper {
+  background: white;
+  border: 1px solid var(--rtv-border);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: var(--rtv-shadow);
+}
+app-login .input-group-minimal input {
+  min-height: 46px;
+  border-color: var(--rtv-border);
+}
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+:where(button, a, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #678846 !important;
+  outline-offset: 3px;
+}
+button:disabled {
+  cursor: not-allowed;
+}
+.layout .main .content {
+  background: var(--rtv-background);
+}
+.layout .main .content h1 {
+  font-size: clamp(24px, 2vw, 30px);
+  letter-spacing: -0.65px;
+  line-height: 1.25;
+  color: var(--rtv-text);
+}
+.layout .main .content h2 {
+  letter-spacing: -0.35px;
+  line-height: 1.35;
+}
+.layout .main .content :is(.btn-agregar, .btn-guardar, .btn-primary, .btn-inspeccion) {
+  background: var(--rtv-primary);
+  border-radius: 9px;
+  min-height: 42px;
+  box-shadow: none;
+}
+.layout
+  .content
+  :is(.btn-agregar, .btn-guardar, .btn-primary, .btn-inspeccion):hover:not(:disabled) {
+  background: var(--rtv-primary-hover);
+}
+.layout .main .content :is(.btn-cancelar, .btn-secondary, .btn-volver) {
+  border: 1px solid var(--rtv-border);
+  border-radius: 9px;
+  min-height: 40px;
+  background: white;
+  color: var(--rtv-text);
+}
+.layout .main .content :is(.form-input, .form-select, .input-filtro, .input-busqueda, .select-registros) {
+  border-color: var(--rtv-border);
+  border-radius: 8px;
+  min-height: 42px;
+  background: var(--rtv-surface);
+  box-sizing: border-box;
+}
+.layout .main .content :is(.tabla-contenedor, .tabla-container, .table-container, .table-wrapper) {
+  background: white;
+  border: 1px solid var(--rtv-border);
+  border-radius: var(--rtv-radius);
+  box-shadow: var(--rtv-shadow);
+}
+.layout .main .content table {
+  border-spacing: 0;
+}
+.layout .main .content table th {
+  background: #f0f3ed;
+  color: #4c5d45;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0.1px;
+  padding: 15px 16px;
+}
+.layout .main .content table td {
+  border-color: #e9ede5;
+  padding: 15px 16px;
+  line-height: 1.5;
+}
+.layout .main .content table tbody tr:hover {
+  background: #f5f9f0;
+}
+.layout .main .content :is(.panel, .card, .dash-panel, .panel-vehiculo, .panel-defectos) {
+  border-color: var(--rtv-border);
+  border-radius: var(--rtv-radius);
+  box-shadow: var(--rtv-shadow);
+}
+.layout .main .content :is(.modal-contenido, .modal-content) {
+  border-radius: 14px;
+  border: 1px solid var(--rtv-border);
+  box-shadow: 0 24px 80px #1626102b;
+}
+.layout .main .content :is(.modal-header, .modal-footer) {
+  border-color: var(--rtv-border);
+}
+.layout .main .content .modal-footer {
+  background: #f7f9f5;
+}
+.layout .main .content .btn-accion {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 8px;
+}
+.vehicle-photo-editor {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid var(--rtv-border);
+  border-radius: var(--rtv-radius);
+}
+.vehicle-photo-editor p {
+  font-size: 12px;
+  color: var(--rtv-muted);
+  margin: 0;
+}
+.inspection-steps {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.inspection-steps button {
+  border: 1px solid var(--rtv-border);
+  border-radius: 9px;
+  background: white;
+  padding: 12px 16px;
+  cursor: pointer;
+  color: var(--rtv-muted);
+  font: inherit;
+  font-size: 14px;
+}
+.inspection-steps .current {
+  color: var(--rtv-primary);
+  background: var(--rtv-tint);
+  border-color: #aac191;
+  font-weight: 600;
+}
+.inspection-summary {
+  background: white;
+  border: 1px solid var(--rtv-border);
+  border-radius: 12px;
+  padding: 24px;
+}
+.summary-vehicle {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+.summary-vehicle app-vehicle-photo {
+  width: 190px;
+  flex-shrink: 0;
+}
+.inspection-summary li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rtv-border);
+  line-height: 1.5;
+}
+.inspection-summary li button {
+  margin-left: 16px;
+  border: 0;
+  background: #f5f1ea;
+  color: #795035;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.accessible-zones {
+  margin-top: 18px;
+  color: var(--rtv-muted);
+  font-size: 13px;
+}
+.accessible-zones summary {
+  cursor: pointer;
+  padding: 10px 0;
+}
+.accessible-zones > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 10px;
+}
+.accessible-zones button {
+  padding: 9px 12px;
+  background: white;
+  border: 1px solid var(--rtv-border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.accessible-zones button.selected {
+  background: var(--rtv-tint);
+  color: var(--rtv-primary);
+  border-color: #83a369;
+}
+.inspeccion-layout[hidden] {
+  display: none !important;
+}
+@media (max-width: 600px) {
+  .summary-vehicle {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .summary-vehicle app-vehicle-photo {
+    width: 100%;
+  }
+}
+.layout .main .content :is(.estado-badge, .badge) {
+  letter-spacing: 0;
+}
+@media (max-width: 768px) {
+  .layout .main .content :is(.form-row, .form-grid) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .layout .main .content :is(.input-filtro, .input-busqueda-wrapper) {
+    max-width: 100%;
+  }
+  .layout .main .content :is(.tabla-contenedor, .tabla-container, .table-container, .table-wrapper) {
+    overflow-x: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
